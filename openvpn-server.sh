@@ -56,7 +56,7 @@ installDependent() {
 }
 
 configureOpenVPN() {
-    mkdir -p "${OPENVPN_KEY_DIR}"
+    mkdir -p "${OPENVPN_KEY_DIR}/certs"
     chmod 0755 "${OPENVPN_KEY_DIR}"
 
     # 生成openssl server/ca扩展文件
@@ -86,12 +86,12 @@ EOF
     chmod 0400 "${OPENVPN_KEY_DIR}/openssl-server.ext" "${OPENVPN_KEY_DIR}/openssl-ca.ext" "${OPENVPN_KEY_DIR}/openssl-client.ext"
 
     # 生成CA密钥和证书
-    openssl req -nodes -newkey rsa:${OPENVPN_RSA_BITS} -keyout "${OPENVPN_KEY_DIR}/ca.key" -out "${OPENVPN_KEY_DIR}/ca.csr" -subj "/CN=Jancsitech/"
+    openssl req -nodes -newkey rsa:${OPENVPN_RSA_BITS} -keyout "${OPENVPN_KEY_DIR}/ca.key" -out "${OPENVPN_KEY_DIR}/ca.csr" -subj "/CN=awasome-openvpn/"
     chmod 0400 "${OPENVPN_KEY_DIR}/ca.key"
     openssl x509 -req -in "${OPENVPN_KEY_DIR}/ca.csr" -out "${OPENVPN_KEY_DIR}/ca.crt" -signkey "${OPENVPN_KEY_DIR}/ca.key" -days 3650 -extfile "${OPENVPN_KEY_DIR}/openssl-ca.ext"
 
     # 生成服务器密钥和证书
-    openssl req -nodes -newkey rsa:${OPENVPN_RSA_BITS} -keyout "${OPENVPN_KEY_DIR}/server.key" -out "${OPENVPN_KEY_DIR}/server.csr" -subj "/CN=Jancsitech/"
+    openssl req -nodes -newkey rsa:${OPENVPN_RSA_BITS} -keyout "${OPENVPN_KEY_DIR}/server.key" -out "${OPENVPN_KEY_DIR}/server.csr" -subj "/CN=awasome-openvpn/"
     chmod 0400 "${OPENVPN_KEY_DIR}/server.key"
     openssl x509 -req -in "${OPENVPN_KEY_DIR}/server.csr" -out "${OPENVPN_KEY_DIR}/server.crt" -CA "${OPENVPN_KEY_DIR}/ca.crt" -CAkey "${OPENVPN_KEY_DIR}/ca.key" -days 3650 -CAcreateserial -extfile "${OPENVPN_KEY_DIR}/openssl-server.ext"
 
@@ -151,33 +151,9 @@ EOF
     chmod 0744 "${OPENVPN_KEY_DIR}/ca.conf"
 
     # 创建初始证书吊销列表序列号
-    if [ ! -f "${OPENVPN_KEY_DIR}/crl_number" ]; then
-        echo "00" > "${OPENVPN_KEY_DIR}/crl_number"
+    if [ ! -f "${OPENVPN_KEY_DIR}/crlnumber" ]; then
+        echo "00" > "${OPENVPN_KEY_DIR}/crlnumber"
     fi
-
-    # 安装吊销脚本
-    cat <<EOF > "${OPENVPN_KEY_DIR}/revoke.sh"
-#!/bin/bash
-# Revoke a certificate
-
-OPENVPN_KEY_DIR="${OPENVPN_KEY_DIR}"
-
-if [ -z "\$1" ]; then
-    echo "Usage: \$0 <certificate name>"
-    exit 1
-fi
-
-CERT_NAME="\$1"
-
-cd \${OPENVPN_KEY_DIR}
-source ca.conf
-
-openssl ca -config ca.conf -revoke certs/\${CERT_NAME}.crt -keyfile private/ca.key -cert ca.crt
-openssl ca -config ca.conf -gencrl -keyfile private/ca.key -cert ca.crt -out crl.pem
-
-echo "Certificate \${CERT_NAME} has been revoked."
-EOF
-    chmod 0744 "${OPENVPN_KEY_DIR}/revoke.sh"
 
     # 创建证书吊销列表数据库
     if [ ! -f "${OPENVPN_KEY_DIR}/index.txt" ]; then
@@ -186,9 +162,7 @@ EOF
     fi
 
     # 设置证书吊销列表
-    if [ ! -f "${OPENVPN_KEY_DIR}/ca-crl.pem" ]; then
-        sh "${OPENVPN_KEY_DIR}/revoke.sh"
-    fi
+    openssl ca -config "${OPENVPN_KEY_DIR}/ca.conf" -gencrl -keyfile "${OPENVPN_KEY_DIR}/ca.key" -cert "${OPENVPN_KEY_DIR}/ca.crt" -out "${OPENVPN_KEY_DIR}/crl.pem"
 
     # 安装crl-cron脚本
     cat <<EOF > "${OPENVPN_BASE_DIR}/crl-cron.sh"
@@ -229,7 +203,6 @@ key ${OPENVPN_KEY_DIR}/server.key
 dh ${OPENVPN_KEY_DIR}/dh.pem
 server 10.8.0.0 255.255.255.0
 ifconfig-pool-persist ipp.txt
-push "redirect-gateway def1 bypass-dhcp"
 push "dhcp-option DNS 8.8.8.8"
 push "dhcp-option DNS 8.8.4.4"
 keepalive 10 120
@@ -244,6 +217,7 @@ persist-tun
 status openvpn-status.log
 verb 3
 script-security 2
+crl-verify ${OPENVPN_KEY_DIR}/crl.pem
 EOF
 
     systemctl start openvpn@server
@@ -322,18 +296,78 @@ delOpenVPNUser() {
     local user=$1
     cd "${OPENVPN_KEY_DIR}" || exit
 
+    # 确保证书文件存在
+    if [ ! -f "${OPENVPN_KEY_DIR}/${user}.crt" ]; then
+        colorEcho ${red} "Error: Certificate file ${OPENVPN_KEY_DIR}/${user}.crt does not exist"
+        return 1
+    fi
+
+    # 确保 crlnumber 文件存在
+    if [ ! -f "${OPENVPN_KEY_DIR}/crlnumber" ]; then
+        echo "01" > "${OPENVPN_KEY_DIR}/crlnumber"
+    fi
+
+    # 吊销证书并更新 CRL
+    openssl ca -config "${OPENVPN_KEY_DIR}/ca.conf" -revoke "${OPENVPN_KEY_DIR}/${user}.crt" -keyfile "${OPENVPN_KEY_DIR}/ca.key" -cert "${OPENVPN_KEY_DIR}/ca.crt"
+    if [ $? -ne 0 ]; then
+        colorEcho ${red} "Error: Failed to revoke certificate ${OPENVPN_KEY_DIR}/${user}.crt"
+        return 1
+    fi
+
+    openssl ca -config "${OPENVPN_KEY_DIR}/ca.conf" -gencrl -keyfile "${OPENVPN_KEY_DIR}/ca.key" -cert "${OPENVPN_KEY_DIR}/ca.crt" -out "${OPENVPN_KEY_DIR}/crl.pem"
+    if [ $? -ne 0 ]; then
+        colorEcho ${red} "Error: Failed to generate CRL"
+        return 1
+    fi
+
+    # 删除证书文件
     rm -f ${user}.crt ${user}.csr ${user}.key
     rm -f /etc/openvpn/client/${user}.ovpn
+
+    # 发送 SIGHUP 信号给 OpenVPN 进程以重新加载配置和 CRL 文件
+    pkill -SIGHUP openvpn
 
     colorEcho ${green} "User ${user} deleted successfully!"
 }
 
+viewConfig() {
+    read -rp "请输入要查看配置的用户名: " username
+    if [ -f "/etc/openvpn/client/${username}.ovpn" ]; then
+        cat "/etc/openvpn/client/${username}.ovpn"
+    else
+        colorEcho ${red} "Error: Client configuration file for user ${username} does not exist"
+    fi
+}
+
+restartService() {
+    systemctl restart openvpn@server
+    colorEcho ${green} "OpenVPN service restarted successfully!"
+}
+
+stopService() {
+    systemctl stop openvpn@server
+    colorEcho ${green} "OpenVPN service stopped successfully!"
+}
+
 removeOpenVPN() {
-    # 移除OpenVPN
-    apt-get remove --purge -y openvpn || yum remove -y openvpn || dnf remove -y openvpn
+    # 停止所有 OpenVPN 服务
+    systemctl stop openvpn@server
+    systemctl disable openvpn@server
+
+    # 移除 OpenVPN
+    if [[ ${package_manager} == 'apt-get' ]]; then
+        apt-get remove --purge -y openvpn
+    elif [[ ${package_manager} == 'yum' || ${package_manager} == 'dnf' ]]; then
+        yum remove -y openvpn || dnf remove -y openvpn
+    fi
+
+    # 删除 OpenVPN 配置文件
     rm -rf /etc/openvpn
+
+    # 重新加载 systemd 守护进程
     systemctl daemon-reload
-    colorEcho ${green} "uninstall success!"
+
+    colorEcho ${green} "OpenVPN uninstalled successfully!"
 }
 
 main() {
@@ -343,8 +377,11 @@ main() {
         echo "2) 新增用户"
         echo "3) 删除用户"
         echo "4) 卸载 OpenVPN"
-        echo "5) 退出"
-        read -rp "输入选项 [1-5]: " option
+        echo "5) 查看客户端配置"
+        echo "6) 重启服务"
+        echo "7) 停止服务"
+        echo "8) 退出"
+        read -rp "输入选项 [1-8]: " option
         case $option in
         1)
             echo "正在安装 OpenVPN..."
@@ -365,6 +402,18 @@ main() {
             removeOpenVPN
             ;;
         5)
+            echo "查看客户端配置文件..."
+            viewConfig
+            ;;
+        6)
+            echo "重启 OpenVPN 服务..."
+            restartService
+            ;;
+        7)
+            echo "停止 OpenVPN 服务..."
+            stopService
+            ;;
+        8)
             echo "退出"
             exit 0
             ;;
