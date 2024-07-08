@@ -1,19 +1,11 @@
 #!/bin/bash
 
-# 定义操作变量, 0为否, 1为是
-help=0
-remove=0
-update=0
-add_user=0
-del_user=0
-username=""
-
-[[ -e /var/lib/openvpn-manager ]] && update=1
-
-# CentOS 临时取消别名
-[[ -f /etc/redhat-release && -z $(echo $SHELL | grep zsh) ]] && unalias -a
-
-[[ -z $(echo $SHELL | grep zsh) ]] && shell_way="bash" || shell_way="zsh"
+# 定义变量
+OPENVPN_KEY_DIR="/etc/openvpn/keys"
+OPENVPN_BASE_DIR="/etc/openvpn"
+OPENVPN_RSA_BITS=2048
+OPENVPN_USE_PREGNERATED_DH_PARAMS=false
+CI_BUILD=false
 
 ####### color code ########
 red="31m"
@@ -25,38 +17,6 @@ fuchsia="35m"
 colorEcho() {
     color=$1
     echo -e "\033[${color}${@:2}\033[0m"
-}
-
-####### get params #########
-while [[ $# > 0 ]]; do
-    key="$1"
-    case $key in
-    --remove)
-        remove=1
-        ;;
-    -h | --help)
-        help=1
-        ;;
-    *)
-        # unknown option
-        ;;
-    esac
-    shift # past argument or value
-done
-#############################
-
-help() {
-    echo "bash $0 [-h|--help]"
-    echo "  -h, --help           Show help"
-    return 0
-}
-
-removeOpenVPN() {
-    # 移除OpenVPN
-    apt-get remove --purge -y openvpn || yum remove -y openvpn || dnf remove -y openvpn
-    rm -rf /etc/openvpn
-    systemctl daemon-reload
-    colorEcho ${green} "uninstall success!"
 }
 
 checkSys() {
@@ -90,47 +50,193 @@ installDependent() {
         ${package_manager} install epel-release -y
         ${package_manager} install openvpn openssl wget -y
     else
-        ${package_manager} update
+        ${package_manager} update -y
         ${package_manager} install openvpn openssl wget -y
     fi
 }
 
 configureOpenVPN() {
-    mkdir -p /etc/openvpn/server
-    cd /etc/openvpn/server || exit
+    mkdir -p "${OPENVPN_KEY_DIR}"
+    chmod 0755 "${OPENVPN_KEY_DIR}"
 
-    # 生成 CA 证书和密钥
-    openssl genpkey -algorithm RSA -out ca.key
-    openssl req -x509 -new -key ca.key -sha256 -out ca.crt -days 3650 -subj "/C=US/ST=California/L=San Francisco/O=MyCompany/OU=IT/CN=myvpn.com"
+    # 生成openssl server/ca扩展文件
+    cat <<EOF > "${OPENVPN_KEY_DIR}/openssl-server.ext"
+basicConstraints = CA:FALSE
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid,issuer:always
+extendedKeyUsage = serverAuth
+keyUsage = digitalSignature,keyEncipherment
+EOF
 
-    # 生成服务器证书和密钥
-    openssl genpkey -algorithm RSA -out server.key
-    openssl req -new -key server.key -out server.csr -subj "/C=US/ST=California/L=San Francisco/O=MyCompany/OU=IT/CN=myvpn.com"
-    openssl x509 -req -in server.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out server.crt -days 3650 -sha256
+    cat <<EOF > "${OPENVPN_KEY_DIR}/openssl-ca.ext"
+basicConstraints = CA:TRUE
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid:always,issuer:always
+keyUsage = cRLSign, keyCertSign
+EOF
 
-    # 生成 Diffie-Hellman 参数
-    openssl dhparam -out dh.pem 2048
+    cat <<EOF > "${OPENVPN_KEY_DIR}/openssl-client.ext"
+basicConstraints = CA:FALSE
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid,issuer:always
+extendedKeyUsage = clientAuth
+keyUsage = digitalSignature
+EOF
 
-    # 生成 ta.key
-    openvpn --genkey secret ta.key
+    chmod 0400 "${OPENVPN_KEY_DIR}/openssl-server.ext" "${OPENVPN_KEY_DIR}/openssl-ca.ext" "${OPENVPN_KEY_DIR}/openssl-client.ext"
 
-    # 手动创建 OpenVPN 服务器配置文件
-    cat <<EOF > /etc/openvpn/server/server.conf
+    # 生成CA密钥和证书
+    openssl req -nodes -newkey rsa:${OPENVPN_RSA_BITS} -keyout "${OPENVPN_KEY_DIR}/ca.key" -out "${OPENVPN_KEY_DIR}/ca.csr" -subj "/CN=Jancsitech/"
+    chmod 0400 "${OPENVPN_KEY_DIR}/ca.key"
+    openssl x509 -req -in "${OPENVPN_KEY_DIR}/ca.csr" -out "${OPENVPN_KEY_DIR}/ca.crt" -signkey "${OPENVPN_KEY_DIR}/ca.key" -days 3650 -extfile "${OPENVPN_KEY_DIR}/openssl-ca.ext"
+
+    # 生成服务器密钥和证书
+    openssl req -nodes -newkey rsa:${OPENVPN_RSA_BITS} -keyout "${OPENVPN_KEY_DIR}/server.key" -out "${OPENVPN_KEY_DIR}/server.csr" -subj "/CN=Jancsitech/"
+    chmod 0400 "${OPENVPN_KEY_DIR}/server.key"
+    openssl x509 -req -in "${OPENVPN_KEY_DIR}/server.csr" -out "${OPENVPN_KEY_DIR}/server.crt" -CA "${OPENVPN_KEY_DIR}/ca.crt" -CAkey "${OPENVPN_KEY_DIR}/ca.key" -days 3650 -CAcreateserial -extfile "${OPENVPN_KEY_DIR}/openssl-server.ext"
+
+    # 生成tls-auth密钥
+    openvpn --genkey --secret "${OPENVPN_KEY_DIR}/ta.key"
+    chmod 0400 "${OPENVPN_KEY_DIR}/ta.key"
+
+    # 生成DH参数
+    if [ "${OPENVPN_USE_PREGNERATED_DH_PARAMS}" = true ]; then
+        cp dh.pem "${OPENVPN_KEY_DIR}/dh.pem"
+        chmod 0400 "${OPENVPN_KEY_DIR}/dh.pem"
+    else
+        openssl dhparam -out "${OPENVPN_KEY_DIR}/dh.pem" ${OPENVPN_RSA_BITS}
+    fi
+
+    # 安装ca.conf配置文件
+    cat <<EOF > "${OPENVPN_KEY_DIR}/ca.conf"
+# OpenVPN CA configuration
+[ ca ]
+default_ca = CA_default
+
+[ CA_default ]
+dir = ${OPENVPN_KEY_DIR}
+certs = \$dir/certs
+new_certs_dir = \$dir/newcerts
+database = \$dir/index.txt
+serial = \$dir/serial
+RANDFILE = \$dir/private/.rand
+
+private_key = \$dir/private/ca.key
+certificate = \$dir/ca.crt
+
+crlnumber = \$dir/crlnumber
+crl = \$dir/crl.pem
+crl_extensions = crl_ext
+default_crl_days = 30
+
+default_md = sha256
+
+name_opt = ca_default
+cert_opt = ca_default
+default_days = 365
+preserve = no
+policy = policy_strict
+
+[ policy_strict ]
+countryName = match
+stateOrProvinceName = match
+organizationName = match
+organizationalUnitName = optional
+commonName = supplied
+emailAddress = optional
+
+[ crl_ext ]
+# CRL extension (optional)
+EOF
+    chmod 0744 "${OPENVPN_KEY_DIR}/ca.conf"
+
+    # 创建初始证书吊销列表序列号
+    if [ ! -f "${OPENVPN_KEY_DIR}/crl_number" ]; then
+        echo "00" > "${OPENVPN_KEY_DIR}/crl_number"
+    fi
+
+    # 安装吊销脚本
+    cat <<EOF > "${OPENVPN_KEY_DIR}/revoke.sh"
+#!/bin/bash
+# Revoke a certificate
+
+OPENVPN_KEY_DIR="${OPENVPN_KEY_DIR}"
+
+if [ -z "\$1" ]; then
+    echo "Usage: \$0 <certificate name>"
+    exit 1
+fi
+
+CERT_NAME="\$1"
+
+cd \${OPENVPN_KEY_DIR}
+source ca.conf
+
+openssl ca -config ca.conf -revoke certs/\${CERT_NAME}.crt -keyfile private/ca.key -cert ca.crt
+openssl ca -config ca.conf -gencrl -keyfile private/ca.key -cert ca.crt -out crl.pem
+
+echo "Certificate \${CERT_NAME} has been revoked."
+EOF
+    chmod 0744 "${OPENVPN_KEY_DIR}/revoke.sh"
+
+    # 创建证书吊销列表数据库
+    if [ ! -f "${OPENVPN_KEY_DIR}/index.txt" ]; then
+        touch "${OPENVPN_KEY_DIR}/index.txt"
+        chmod 0644 "${OPENVPN_KEY_DIR}/index.txt"
+    fi
+
+    # 设置证书吊销列表
+    if [ ! -f "${OPENVPN_KEY_DIR}/ca-crl.pem" ]; then
+        sh "${OPENVPN_KEY_DIR}/revoke.sh"
+    fi
+
+    # 安装crl-cron脚本
+    cat <<EOF > "${OPENVPN_BASE_DIR}/crl-cron.sh"
+#!/bin/bash
+# Check if CRL needs to be renewed
+
+OPENVPN_KEY_DIR="${OPENVPN_KEY_DIR}"
+
+cd \${OPENVPN_KEY_DIR}
+source ca.conf
+
+openssl ca -config ca.conf -gencrl -keyfile private/ca.key -cert ca.crt -out crl.pem
+
+echo "CRL has been renewed."
+EOF
+    chmod 0744 "${OPENVPN_BASE_DIR}/crl-cron.sh"
+
+    # 检查crontab
+    if ! command -v crontab &> /dev/null; then
+        if [ -f /etc/redhat-release ]; then
+            yum install -y cronie
+        fi
+    fi
+
+    # 添加cron任务每周检查CRL是否需要更新
+    if [ "${CI_BUILD}" = false ]; then
+        (crontab -l 2>/dev/null; echo "0 0 * * 6 sh ${OPENVPN_BASE_DIR}/crl-cron.sh") | crontab -
+    fi
+
+    # 创建OpenVPN服务器配置文件
+    cat <<EOF > /etc/openvpn/server.conf
 port 1194
 proto tcp
 dev tun
-ca /etc/openvpn/server/ca.crt
-cert /etc/openvpn/server/server.crt
-key /etc/openvpn/server/server.key
-dh /etc/openvpn/server/dh.pem
+ca ${OPENVPN_KEY_DIR}/ca.crt
+cert ${OPENVPN_KEY_DIR}/server.crt
+key ${OPENVPN_KEY_DIR}/server.key
+dh ${OPENVPN_KEY_DIR}/dh.pem
 server 10.8.0.0 255.255.255.0
 ifconfig-pool-persist ipp.txt
 push "redirect-gateway def1 bypass-dhcp"
 push "dhcp-option DNS 8.8.8.8"
 push "dhcp-option DNS 8.8.4.4"
 keepalive 10 120
-tls-auth /etc/openvpn/server/ta.key 0
-cipher AES-256-CBC
+tls-auth ${OPENVPN_KEY_DIR}/ta.key 0
+auth SHA256
+cipher AES-256-GCM
+proto tcp
 user nobody
 group nogroup
 persist-key
@@ -158,19 +264,20 @@ EOF
 generateClientConfig() {
     local user=$1
     local server_ip=$(hostname -I | awk '{print $1}')
-    cd /etc/openvpn/server || exit
+    mkdir -p /etc/openvpn/client
+    cd "${OPENVPN_KEY_DIR}" || exit
 
     # 生成客户端证书和密钥
     openssl genpkey -algorithm RSA -out ${user}.key
     openssl req -new -key ${user}.key -out ${user}.csr -subj "/C=US/ST=California/L=San Francisco/O=MyCompany/OU=IT/CN=${user}"
-    openssl x509 -req -in ${user}.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out ${user}.crt -days 3650 -sha256
+    openssl x509 -req -in ${user}.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out ${user}.crt -days 3650 -sha256 -extfile "${OPENVPN_KEY_DIR}/openssl-client.ext"
 
     # 生成客户端配置文件
     cat <<EOF > /etc/openvpn/client/${user}.ovpn
 client
 tls-client
 auth SHA256
-cipher AES-256-CBC
+cipher AES-256-GCM
 remote-cert-tls server
 tls-version-min 1.2
 
@@ -190,16 +297,16 @@ route-delay 2
 
 key-direction 1
 <ca>
-$(cat /etc/openvpn/server/ca.crt)
+$(cat ${OPENVPN_KEY_DIR}/ca.crt)
 </ca>
 <tls-auth>
-$(cat /etc/openvpn/server/ta.key)
+$(cat ${OPENVPN_KEY_DIR}/ta.key)
 </tls-auth>
 <cert>
-$(cat /etc/openvpn/server/${user}.crt)
+$(cat ${OPENVPN_KEY_DIR}/${user}.crt)
 </cert>
 <key>
-$(cat /etc/openvpn/server/${user}.key)
+$(cat ${OPENVPN_KEY_DIR}/${user}.key)
 </key>
 EOF
 
@@ -213,12 +320,20 @@ addOpenVPNUser() {
 
 delOpenVPNUser() {
     local user=$1
-    cd /etc/openvpn/server || exit
+    cd "${OPENVPN_KEY_DIR}" || exit
 
     rm -f ${user}.crt ${user}.csr ${user}.key
     rm -f /etc/openvpn/client/${user}.ovpn
 
     colorEcho ${green} "User ${user} deleted successfully!"
+}
+
+removeOpenVPN() {
+    # 移除OpenVPN
+    apt-get remove --purge -y openvpn || yum remove -y openvpn || dnf remove -y openvpn
+    rm -rf /etc/openvpn
+    systemctl daemon-reload
+    colorEcho ${green} "uninstall success!"
 }
 
 main() {
@@ -227,8 +342,9 @@ main() {
         echo "1) 安装 OpenVPN"
         echo "2) 新增用户"
         echo "3) 删除用户"
-        echo "4) 退出"
-        read -rp "输入选项 [1-4]: " option
+        echo "4) 卸载 OpenVPN"
+        echo "5) 退出"
+        read -rp "输入选项 [1-5]: " option
         case $option in
         1)
             echo "正在安装 OpenVPN..."
@@ -245,6 +361,10 @@ main() {
             delOpenVPNUser "${username}"
             ;;
         4)
+            echo "正在卸载 OpenVPN..."
+            removeOpenVPN
+            ;;
+        5)
             echo "退出"
             exit 0
             ;;
