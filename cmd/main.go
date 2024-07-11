@@ -1,10 +1,14 @@
+
 package cmd
 
 import (
 	"fmt"
 	"github.com/spf13/cobra"
-	"openvpn-admin-go/util"
 	"os"
+	
+	"openvpn-admin-go/util"
+	"openvpn-admin-go/constants"
+	"openvpn-admin-go/common"
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -25,7 +29,7 @@ func Execute() {
 }
 
 func check() {
-	if !util.IsExists("/etc/openvpn/server.conf") {
+	if !util.IsExists(constants.OpenVPNConfigPath) {
 		fmt.Println("本机未安装openvpn, 正在自动安装...")
 	}
 }
@@ -41,6 +45,10 @@ exit:
 		switch util.LoopInput("请选择: ", menuList, false) {
 		case 1:
 			fmt.Println("openvpn管理")
+		case 2:
+			fmt.Println(common.GetConfig().Port)
+		case 3:
+			common.UpdatePort(1198)
 		default:
 			break exit
 		}
