@@ -1,0 +1,10 @@
+.idea
+/docker-data
+.vscode
+*/.DS_Store
+*.exe
+.idea
+.history
+
+# go sum
+go.sum
