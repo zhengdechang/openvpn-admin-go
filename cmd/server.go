@@ -2,9 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 	"net"
-	"openvpn-admin-go/openvpn"
 	"os"
 	"os/exec"
 	"strconv"
@@ -12,71 +10,160 @@ import (
 	"time"
 
 	"github.com/manifoldco/promptui"
+	"github.com/spf13/cobra"
+	"openvpn-admin-go/config"
 )
 
-func ServerMenu() {
-	for {
-		prompt := promptui.Select{
-			Label: "请选择服务器操作",
-			Items: []string{
-				"重启服务",
-				"停止服务",
-				"更新配置",
-				"查看配置",
-				"返回主菜单",
-			},
-			Size: 5,
-			Templates: &promptui.SelectTemplates{
-				Label:    "{{ . }}",
-				Active:   "➤ {{ . | cyan }}",
-				Inactive: "  {{ . | white }}",
-				Selected: "{{ . | green }}",
-			},
-			Keys: &promptui.SelectKeys{
-				Prev:     promptui.Key{Code: promptui.KeyPrev, Display: "↑"},
-				Next:     promptui.Key{Code: promptui.KeyNext, Display: "↓"},
-				PageUp:   promptui.Key{Code: promptui.KeyBackward, Display: "←"},
-				PageDown: promptui.Key{Code: promptui.KeyForward, Display: "→"},
-			},
-		}
+var serverCmd = &cobra.Command{
+	Use:   "server",
+	Short: "管理 OpenVPN 服务器",
+	Run: func(cmd *cobra.Command, args []string) {
+		ServerMenu()
+	},
+}
 
+func init() {
+	rootCmd.AddCommand(serverCmd)
+}
+
+func ServerMenu() {
+	// 加载配置
+	cfg, err := config.LoadConfig()
+	if err != nil {
+		fmt.Printf("加载配置失败: %v\n", err)
+		return
+	}
+
+	menuItems := []string{
+		"启动服务器",
+		"停止服务器",
+		"重启服务器",
+		"查看服务器状态",
+		"修改服务器端口",
+		"更新服务器配置",
+		"返回主菜单",
+	}
+
+	prompt := promptui.Select{
+		Label: "请选择操作",
+		Items: menuItems,
+		Size:  len(menuItems),
+		Templates: &promptui.SelectTemplates{
+			Label:    "{{ . }}",
+			Active:   "➤ {{ . | cyan }}",
+			Inactive: "  {{ . | white }}",
+			Selected: "{{ . | green }}",
+		},
+		HideSelected: true,
+	}
+
+	for {
 		_, result, err := prompt.Run()
 		if err != nil {
-			if err == promptui.ErrInterrupt {
+			if strings.Contains(err.Error(), "^C") {
 				fmt.Println("\n程序已退出")
 				os.Exit(0)
 			}
 			fmt.Printf("选择失败: %v\n", err)
-			continue
+			return
 		}
 
 		switch result {
-		case "重启服务":
-			fmt.Println("正在重启 OpenVPN 服务...")
-			if err := RestartService(); err != nil {
-				log.Printf("重启服务失败: %v\n", err)
-			} else {
-				fmt.Println("服务重启成功")
-			}
-		case "停止服务":
-			fmt.Println("正在停止 OpenVPN 服务...")
-			if err := StopService(); err != nil {
-				log.Printf("停止服务失败: %v\n", err)
-			} else {
-				fmt.Println("服务已停止")
-			}
-		case "更新配置":
+		case "启动服务器":
+			startServer(cfg)
+		case "停止服务器":
+			stopServer()
+		case "重启服务器":
+			restartServer(cfg)
+		case "查看服务器状态":
+			checkServerStatus()
+		case "修改服务器端口":
+			updatePort(cfg)
+		case "更新服务器配置":
 			if err := UpdateConfig(); err != nil {
-				log.Printf("更新配置失败: %v\n", err)
+				fmt.Printf("更新配置失败: %v\n", err)
 			}
-		case "查看配置":
-			config := openvpn.GetServerConfigTemplate()
-			fmt.Println("当前服务器配置:")
-			fmt.Println(config)
 		case "返回主菜单":
 			return
 		}
 	}
+}
+
+func startServer(cfg *config.Config) {
+	// 生成服务器配置文件
+	configContent := cfg.GenerateServerConfig()
+	configPath := "/etc/openvpn/server.conf"
+
+	// 写入配置文件
+	if err := os.WriteFile(configPath, []byte(configContent), 0644); err != nil {
+		fmt.Printf("写入配置文件失败: %v\n", err)
+		return
+	}
+
+	// 启动 OpenVPN 服务
+	cmd := exec.Command("systemctl", "start", "openvpn@server")
+	if err := cmd.Run(); err != nil {
+		fmt.Printf("启动服务器失败: %v\n", err)
+		return
+	}
+	fmt.Println("服务器已启动")
+}
+
+func stopServer() {
+	cmd := exec.Command("systemctl", "stop", "openvpn@server")
+	if err := cmd.Run(); err != nil {
+		fmt.Printf("停止服务器失败: %v\n", err)
+		return
+	}
+	fmt.Println("服务器已停止")
+}
+
+func restartServer(cfg *config.Config) {
+	stopServer()
+	startServer(cfg)
+}
+
+func checkServerStatus() {
+	cmd := exec.Command("systemctl", "status", "openvpn@server")
+	output, err := cmd.Output()
+	if err != nil {
+		fmt.Printf("获取服务器状态失败: %v\n", err)
+		return
+	}
+	fmt.Println(string(output))
+}
+
+func updatePort(cfg *config.Config) {
+	prompt := promptui.Prompt{
+		Label: "请输入新的端口号",
+		Validate: func(input string) error {
+			port, err := strconv.Atoi(input)
+			if err != nil {
+				return fmt.Errorf("请输入有效的端口号")
+			}
+			if port < 1 || port > 65535 {
+				return fmt.Errorf("端口号必须在 1-65535 之间")
+			}
+			return nil
+		},
+	}
+
+	newPort, err := prompt.Run()
+	if err != nil {
+		if strings.Contains(err.Error(), "^C") {
+			fmt.Println("\n操作已取消")
+			return
+		}
+		fmt.Printf("输入失败: %v\n", err)
+		return
+	}
+
+	// 更新配置
+	cfg.OpenVPNPort, _ = strconv.Atoi(newPort)
+	
+	// 重启服务器以应用新配置
+	restartServer(cfg)
+	fmt.Printf("端口已更新为 %s\n", newPort)
 }
 
 func UpdateConfig() error {
@@ -107,9 +194,16 @@ func UpdateConfig() error {
 		return fmt.Errorf("选择失败: %v", err)
 	}
 
+	// 加载配置
+	cfg, err := config.LoadConfig()
+	if err != nil {
+		return fmt.Errorf("加载配置失败: %v", err)
+	}
+
 	switch result {
 	case "修改端口":
-		return updatePort(configPath)
+		updatePort(cfg)
+		return nil
 	case "修改服务器IP和子网掩码":
 		return updateServerIP(configPath)
 	case "修改OpenVPN路由":
@@ -118,59 +212,6 @@ func UpdateConfig() error {
 		return nil
 	}
 
-	return nil
-}
-
-func updatePort(configPath string) error {
-	// 读取当前配置
-	configContent, err := os.ReadFile(configPath)
-	if err != nil {
-		return fmt.Errorf("读取配置文件失败: %v", err)
-	}
-
-	// 获取当前端口
-	currentPort := "1194" // 默认端口
-	lines := strings.Split(string(configContent), "\n")
-	for _, line := range lines {
-		if strings.HasPrefix(line, "port ") {
-			currentPort = strings.TrimSpace(strings.TrimPrefix(line, "port "))
-			break
-		}
-	}
-
-	// 提示输入新端口
-	fmt.Printf("当前端口: %s\n", currentPort)
-	fmt.Print("请输入新端口: ")
-	var newPort string
-	fmt.Scanln(&newPort)
-
-	// 验证端口号
-	if newPort == "" {
-		return fmt.Errorf("端口号不能为空")
-	}
-	port, err := strconv.Atoi(newPort)
-	if err != nil {
-		return fmt.Errorf("请输入有效的端口号")
-	}
-	if port < 1 || port > 65535 {
-		return fmt.Errorf("端口号必须在1-65535之间")
-	}
-
-	// 更新配置文件
-	lines = strings.Split(string(configContent), "\n")
-	for i, line := range lines {
-		if strings.HasPrefix(line, "port ") {
-			lines[i] = "port " + newPort
-			break
-		}
-	}
-
-	// 写入新配置
-	if err := os.WriteFile(configPath, []byte(strings.Join(lines, "\n")), 0644); err != nil {
-		return fmt.Errorf("写入配置文件失败: %v", err)
-	}
-
-	fmt.Println("端口已更新为:", newPort)
 	return nil
 }
 

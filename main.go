@@ -57,5 +57,5 @@ func main() {
 	fmt.Println("环境检查通过")
 	
 	// 启动主菜单
-	cmd.MainMenu()
+	cmd.Execute()
 }
