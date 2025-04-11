@@ -1,9 +1,12 @@
 package config
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strconv"
+	"openvpn-admin-go/utils"
 )
 
 // Config 存储所有配置
@@ -46,15 +49,20 @@ func LoadConfig() (*Config, error) {
 
 // GenerateServerConfig 生成 OpenVPN 服务器配置
 func (c *Config) GenerateServerConfig() string {
+	configDir, err := utils.FindOpenVPNConfigDir()
+	if err != nil {
+		return ""
+	}
+
 	return fmt.Sprintf(`port %d
-proto %s
+proto tcp
 dev tun
-ca ca.crt
-cert server.crt
-key server.key
-dh dh.pem
+ca %s
+cert %s
+key %s
+dh %s
 server %s %s
-ifconfig-pool-persist ipp.txt
+ifconfig-pool-persist %s
 push "redirect-gateway def1 bypass-dhcp"
 push "dhcp-option DNS %s"
 push "dhcp-option DOMAIN %s"
@@ -65,9 +73,19 @@ user nobody
 group nogroup
 persist-key
 persist-tun
-status openvpn-status.log
-verb 3
-`, c.OpenVPNPort, c.OpenVPNProto, c.OpenVPNServerNetwork, c.OpenVPNServerNetmask, c.DNSServerIP, c.DNSServerDomain)
+status %s
+verb 3`,
+		c.OpenVPNPort,
+		filepath.Join(configDir, "ca.crt"),
+		filepath.Join(configDir, "server.crt"),
+		filepath.Join(configDir, "server.key"),
+		filepath.Join(configDir, "dh.pem"),
+		c.OpenVPNServerNetwork,
+		c.OpenVPNServerNetmask,
+		filepath.Join(configDir, "ipp.txt"),
+		c.DNSServerIP,
+		c.DNSServerDomain,
+		filepath.Join(configDir, "openvpn-status.log"))
 }
 
 // getEnv 获取环境变量，如果不存在则返回默认值
@@ -86,4 +104,25 @@ func getEnvBool(key string, defaultValue bool) bool {
 		}
 	}
 	return defaultValue
+}
+
+// 添加配置保存实现
+func SaveConfig(cfg *Config) error {
+	// 将配置保存到/etc/openvpn/config.json
+	data, err := json.MarshalIndent(cfg, "", "  ")
+	if err != nil {
+		return fmt.Errorf("序列化配置失败: %v", err)
+	}
+	
+	if err := os.WriteFile("/etc/openvpn/config.json", data, 0644); err != nil {
+		return fmt.Errorf("写入配置文件失败: %v", err)
+	}
+	
+	// 重新生成OpenVPN服务配置
+	configContent := cfg.GenerateServerConfig()
+	if err := os.WriteFile("/etc/openvpn/server.conf", []byte(configContent), 0644); err != nil {
+		return fmt.Errorf("生成服务配置失败: %v", err)
+	}
+	
+	return nil
 } 

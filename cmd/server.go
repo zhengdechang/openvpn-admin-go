@@ -5,6 +5,7 @@ import (
 	"net"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -12,6 +13,7 @@ import (
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
 	"openvpn-admin-go/config"
+	"openvpn-admin-go/utils"
 )
 
 var serverCmd = &cobra.Command{
@@ -25,6 +27,9 @@ var serverCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(serverCmd)
 }
+
+// 统一使用标准服务名称
+const serviceName = "openvpn-server@server.service"
 
 func ServerMenu() {
 	// 加载配置
@@ -89,10 +94,44 @@ func ServerMenu() {
 	}
 }
 
+// 添加查找 OpenVPN 配置目录的函数
+func findOpenVPNConfigDir() (string, error) {
+	possiblePaths := []string{
+		"/etc/openvpn",
+		"/etc/openvpn/server",
+	}
+
+	for _, path := range possiblePaths {
+		if _, err := os.Stat(path); err == nil {
+			// 检查必要的文件是否存在
+			files := []string{"ca.crt", "server.crt", "server.key", "dh.pem"}
+			allExist := true
+			for _, file := range files {
+				if _, err := os.Stat(filepath.Join(path, file)); err != nil {
+					allExist = false
+					break
+				}
+			}
+			if allExist {
+				return path, nil
+			}
+		}
+	}
+
+	return "", fmt.Errorf("未找到有效的 OpenVPN 配置目录")
+}
+
 func startServer(cfg *config.Config) {
-	// 生成服务器配置文件
+	// 查找 OpenVPN 配置目录
+	configDir, err := utils.FindOpenVPNConfigDir()
+	if err != nil {
+		fmt.Printf("查找配置目录失败: %v\n", err)
+		return
+	}
+
+	// 生成配置文件
 	configContent := cfg.GenerateServerConfig()
-	configPath := "/etc/openvpn/server.conf"
+	configPath := filepath.Join(configDir, "server.conf")
 
 	// 写入配置文件
 	if err := os.WriteFile(configPath, []byte(configContent), 0644); err != nil {
@@ -100,34 +139,35 @@ func startServer(cfg *config.Config) {
 		return
 	}
 
-	// 启动 OpenVPN 服务
-	cmd := exec.Command("systemctl", "start", "openvpn@server")
-	if err := cmd.Run(); err != nil {
-		fmt.Printf("启动服务器失败: %v\n", err)
+	// 启动服务
+	cmd := exec.Command("sudo", "systemctl", "start", "openvpn-server@server.service")
+	if output, err := cmd.CombinedOutput(); err != nil {
+		fmt.Printf("启动失败: %v\n输出: %s\n", err, string(output))
 		return
 	}
-	fmt.Println("服务器已启动")
+	fmt.Println("✅ 服务已启动")
 }
 
 func stopServer() {
-	cmd := exec.Command("systemctl", "stop", "openvpn@server")
-	if err := cmd.Run(); err != nil {
-		fmt.Printf("停止服务器失败: %v\n", err)
+	cmd := exec.Command("sudo", "systemctl", "stop", "openvpn-server@server.service")
+	if output, err := cmd.CombinedOutput(); err != nil {
+		fmt.Printf("停止失败: %v\n输出: %s\n", err, string(output))
 		return
 	}
-	fmt.Println("服务器已停止")
+	fmt.Println("✅ 服务已停止")
 }
 
 func restartServer(cfg *config.Config) {
 	stopServer()
+	time.Sleep(1 * time.Second)
 	startServer(cfg)
 }
 
 func checkServerStatus() {
-	cmd := exec.Command("systemctl", "status", "openvpn@server")
-	output, err := cmd.Output()
+	cmd := exec.Command("sudo", "systemctl", "status", "openvpn-server@server.service")
+	output, err := cmd.CombinedOutput()
 	if err != nil {
-		fmt.Printf("获取服务器状态失败: %v\n", err)
+		fmt.Printf("获取状态失败: %v\n输出: %s\n", err, string(output))
 		return
 	}
 	fmt.Println(string(output))
@@ -161,7 +201,19 @@ func updatePort(cfg *config.Config) {
 	// 更新配置
 	cfg.OpenVPNPort, _ = strconv.Atoi(newPort)
 	
-	// 重启服务器以应用新配置
+	// 保存配置后需要重新生成服务配置
+	if err := config.SaveConfig(cfg); err != nil {
+		fmt.Printf("保存配置失败: %v\n", err)
+		return
+	}
+	
+	// 添加配置重载
+	reloadCmd := exec.Command("sudo", "systemctl", "daemon-reload")
+	if output, err := reloadCmd.CombinedOutput(); err != nil {
+		fmt.Printf("配置重载失败: %v\n输出: %s\n", err, string(output))
+		return
+	}
+	
 	restartServer(cfg)
 	fmt.Printf("端口已更新为 %s\n", newPort)
 }
