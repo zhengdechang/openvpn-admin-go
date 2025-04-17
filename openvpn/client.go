@@ -154,14 +154,15 @@ func CreateClient(username string) error {
 	// 生成配置文件
 	config := fmt.Sprintf(`client
 dev tun
-proto udp
+proto tcp6
 remote %s 1194
 resolv-retry infinite
 nobind
 persist-key
 persist-tun
 remote-cert-tls server
-cipher AES-256-CBC
+auth SHA256
+cipher AES-256-GCM
 verb 3
 `, getServerIP())
 

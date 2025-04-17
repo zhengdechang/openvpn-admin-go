@@ -55,15 +55,15 @@ func (c *Config) GenerateServerConfig() string {
 	}
 
 	return fmt.Sprintf(`port %d
-proto tcp
+proto tcp6
 dev tun
 ca %s
 cert %s
 key %s
 dh %s
+client-to-client
 server %s %s
 ifconfig-pool-persist %s
-push "redirect-gateway def1 bypass-dhcp"
 push "dhcp-option DNS %s"
 push "dhcp-option DOMAIN %s"
 keepalive 10 120
