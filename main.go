@@ -7,9 +7,80 @@ import (
 	"os/signal"
 	"syscall"
 	"openvpn-admin-go/cmd"
+	"bufio"
+	"strings"
 )
 
+// loadEnv 从.env文件加载环境变量
+func loadEnv() error {
+	file, err := os.Open(".env")
+	if err != nil {
+		return fmt.Errorf("无法打开.env文件: %v", err)
+	}
+	defer file.Close()
+
+	requiredVars := map[string]bool{
+		"OPENVPN_PORT":            true,
+		"OPENVPN_PROTO":           true,
+		"OPENVPN_SERVER_NETWORK":  true,
+		"OPENVPN_SERVER_NETMASK":  true,
+		"OPENVPN_SERVER_HOSTNAME": true,
+		"OPENVPN_SERVER_IP":       true,
+		"DNS_SERVER_IP":           true,
+		"DNS_SERVER_DOMAIN":       true,
+	}
+
+	loadedVars := make(map[string]bool)
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := scanner.Text()
+		// 跳过注释和空行
+		if strings.HasPrefix(line, "#") || len(strings.TrimSpace(line)) == 0 {
+			continue
+		}
+
+		parts := strings.SplitN(line, "=", 2)
+		if len(parts) != 2 {
+			continue
+		}
+
+		key := strings.TrimSpace(parts[0])
+		value := strings.TrimSpace(parts[1])
+
+		// 设置环境变量
+		if err := os.Setenv(key, value); err != nil {
+			return fmt.Errorf("设置环境变量失败 %s: %v", key, err)
+		}
+
+		loadedVars[key] = true
+	}
+
+	if err := scanner.Err(); err != nil {
+		return fmt.Errorf("读取.env文件失败: %v", err)
+	}
+
+	// 检查必需的环境变量是否都已加载
+	var missingVars []string
+	for varName := range requiredVars {
+		if !loadedVars[varName] {
+			missingVars = append(missingVars, varName)
+		}
+	}
+
+	if len(missingVars) > 0 {
+		return fmt.Errorf("缺少必需的环境变量: %s", strings.Join(missingVars, ", "))
+	}
+
+	return nil
+}
+
 func main() {
+	// 加载环境变量
+	if err := loadEnv(); err != nil {
+		log.Fatalf("错误: 加载环境变量失败: %v\n请确保.env文件存在且包含所有必需的配置项。", err)
+	}
+
 	// 设置Ctrl+C信号处理
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)

@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"math/rand"
 	"net"
 	"os"
 	"os/exec"
@@ -44,7 +45,6 @@ func ServerMenu() {
 		"停止服务器",
 		"重启服务器",
 		"查看服务器状态",
-		"修改服务器端口",
 		"更新服务器配置",
 		"返回主菜单",
 	}
@@ -82,8 +82,6 @@ func ServerMenu() {
 			restartServer(cfg)
 		case "查看服务器状态":
 			checkServerStatus()
-		case "修改服务器端口":
-			updatePort(cfg)
 		case "更新服务器配置":
 			if err := UpdateConfig(); err != nil {
 				fmt.Printf("更新配置失败: %v\n", err)
@@ -174,28 +172,52 @@ func checkServerStatus() {
 }
 
 func updatePort(cfg *config.Config) {
-	prompt := promptui.Prompt{
-		Label: "请输入新的端口号",
-		Validate: func(input string) error {
-			port, err := strconv.Atoi(input)
-			if err != nil {
-				return fmt.Errorf("请输入有效的端口号")
-			}
-			if port < 1 || port > 65535 {
-				return fmt.Errorf("端口号必须在 1-65535 之间")
-			}
-			return nil
-		},
+	// 读取当前配置文件
+	configPath := "/etc/openvpn/server.conf"
+	configContent, err := os.ReadFile(configPath)
+	if err != nil {
+		fmt.Printf("读取配置文件失败: %v\n", err)
+		return
 	}
 
-	newPort, err := prompt.Run()
-	if err != nil {
-		if strings.Contains(err.Error(), "^C") {
-			fmt.Println("\n操作已取消")
+	// 获取当前端口
+	currentPort := "1194" // 默认端口
+	lines := strings.Split(string(configContent), "\n")
+	for _, line := range lines {
+		if strings.HasPrefix(line, "port ") {
+			parts := strings.Fields(line)
+			if len(parts) >= 2 {
+				currentPort = parts[1]
+			}
+			break
+		}
+	}
+
+	// 生成随机端口 (1024-65535)
+	rand.Seed(time.Now().UnixNano())
+	randomPort := rand.Intn(64511) + 1024
+
+	fmt.Printf("当前端口: %s\n", currentPort)
+	fmt.Printf("随机端口: %d\n", randomPort)
+	fmt.Print("请输入新的端口号 (直接按回车使用随机端口): ")
+
+	var input string
+	fmt.Scanln(&input)
+
+	var newPort string
+	if input == "" {
+		newPort = strconv.Itoa(randomPort)
+	} else {
+		port, err := strconv.Atoi(input)
+		if err != nil {
+			fmt.Printf("输入失败: %v\n", err)
 			return
 		}
-		fmt.Printf("输入失败: %v\n", err)
-		return
+		if port < 1 || port > 65535 {
+			fmt.Printf("端口号必须在 1-65535 之间\n")
+			return
+		}
+		newPort = input
 	}
 
 	// 更新配置
@@ -218,56 +240,50 @@ func updatePort(cfg *config.Config) {
 	fmt.Printf("端口已更新为 %s\n", newPort)
 }
 
-func UpdateConfig() error {
-	// 读取当前配置文件
-	configPath := "/etc/openvpn/server.conf"
-	configContent, err := os.ReadFile(configPath)
-	if err != nil {
-		return fmt.Errorf("读取配置文件失败: %v", err)
-	}
-
-	// 显示当前配置
-	fmt.Println("\n当前配置:")
-	fmt.Println(string(configContent))
-
-	// 选择要修改的配置项
-	prompt := promptui.Select{
-		Label: "请选择要修改的配置项",
-		Items: []string{
-			"修改端口",
-			"修改服务器IP和子网掩码",
-			"修改OpenVPN路由",
-			"返回",
+func updateServerIP(cfg *config.Config) error {
+	prompt := promptui.Prompt{
+		Label: "请输入新的服务器地址",
+		Validate: func(input string) error {
+			if len(strings.TrimSpace(input)) == 0 {
+				return fmt.Errorf("服务器地址不能为空")
+			}
+			return nil
 		},
 	}
 
-	_, result, err := prompt.Run()
+	newIP, err := prompt.Run()
 	if err != nil {
-		return fmt.Errorf("选择失败: %v", err)
+		if strings.Contains(err.Error(), "^C") {
+			fmt.Println("\n操作已取消")
+			return nil
+		}
+		fmt.Printf("输入失败: %v\n", err)
+		return err
 	}
 
-	// 加载配置
-	cfg, err := config.LoadConfig()
-	if err != nil {
-		return fmt.Errorf("加载配置失败: %v", err)
+	// 更新配置
+	cfg.OpenVPNServerHostname = newIP
+	
+	// 保存配置后需要重新生成服务配置
+	if err := config.SaveConfig(cfg); err != nil {
+		fmt.Printf("保存配置失败: %v\n", err)
+		return err
 	}
-
-	switch result {
-	case "修改端口":
-		updatePort(cfg)
-		return nil
-	case "修改服务器IP和子网掩码":
-		return updateServerIP(configPath)
-	case "修改OpenVPN路由":
-		return updateRoute(configPath)
-	case "返回":
-		return nil
+	
+	// 添加配置重载
+	reloadCmd := exec.Command("sudo", "systemctl", "daemon-reload")
+	if output, err := reloadCmd.CombinedOutput(); err != nil {
+		fmt.Printf("配置重载失败: %v\n输出: %s\n", err, string(output))
+		return err
 	}
-
+	
+	restartServer(cfg)
+	fmt.Printf("服务器地址已更新为 %s\n", newIP)
 	return nil
 }
 
-func updateServerIP(configPath string) error {
+// updateServerIPAndMask 修改服务器IP和子网掩码
+func updateServerIPAndMask(configPath string) error {
 	// 读取当前配置
 	configContent, err := os.ReadFile(configPath)
 	if err != nil {
@@ -341,6 +357,90 @@ func updateServerIP(configPath string) error {
 	}
 
 	fmt.Printf("服务器IP和子网掩码已更新为: %s %s\n", ip, maskStr)
+	return nil
+}
+
+// generateTLSKey 生成tls-auth密钥
+func generateTLSKey(cfg *config.Config) error {
+	// 检查密钥文件是否已存在
+	if _, err := os.Stat(cfg.OpenVPNTLSKeyPath); err == nil {
+		fmt.Printf("TLS密钥文件已存在: %s\n", cfg.OpenVPNTLSKeyPath)
+		return nil
+	}
+
+	// 生成tls-auth密钥
+	cmd := exec.Command("openvpn", "--genkey", "secret", cfg.OpenVPNTLSKeyPath)
+	if output, err := cmd.CombinedOutput(); err != nil {
+		return fmt.Errorf("生成TLS密钥失败: %v\n输出: %s", err, string(output))
+	}
+
+	// 设置适当的权限
+	if err := os.Chmod(cfg.OpenVPNTLSKeyPath, 0600); err != nil {
+		return fmt.Errorf("设置TLS密钥文件权限失败: %v", err)
+	}
+
+	fmt.Printf("TLS密钥已生成: %s\n", cfg.OpenVPNTLSKeyPath)
+	return nil
+}
+
+func UpdateConfig() error {
+	// 读取当前配置文件
+	configPath := "/etc/openvpn/server.conf"
+	configContent, err := os.ReadFile(configPath)
+	if err != nil {
+		return fmt.Errorf("读取配置文件失败: %v", err)
+	}
+
+	// 显示当前配置
+	fmt.Println("\n当前配置:")
+	fmt.Println(string(configContent))
+
+	// 选择要修改的配置项
+	prompt := promptui.Select{
+		Label: "请选择要修改的配置项",
+		Items: []string{
+			"修改端口",
+			"修改服务器地址",
+			"修改服务器IP和子网掩码",
+			"修改OpenVPN路由",
+			"生成TLS密钥",
+			"返回",
+		},
+	}
+
+	_, result, err := prompt.Run()
+	if err != nil {
+		return fmt.Errorf("选择失败: %v", err)
+	}
+
+	// 加载配置
+	cfg, err := config.LoadConfig()
+	if err != nil {
+		return fmt.Errorf("加载配置失败: %v", err)
+	}
+
+	switch result {
+	case "修改端口":
+		updatePort(cfg)
+		return nil
+	case "修改服务器地址":
+		updateServerIP(cfg)
+		return nil
+	case "修改服务器IP和子网掩码":
+		return updateServerIPAndMask(configPath)
+	case "修改OpenVPN路由":
+		return updateRoute(configPath)
+	case "生成TLS密钥":
+		if err := generateTLSKey(cfg); err != nil {
+			return fmt.Errorf("生成TLS密钥失败: %v", err)
+		}
+		// 重启服务以应用新配置
+		restartServer(cfg)
+		return nil
+	case "返回":
+		return nil
+	}
+
 	return nil
 }
 

@@ -4,8 +4,11 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"time"
+
+	"openvpn-admin-go/config"
 )
 
 // CreateClient 创建新的OpenVPN客户端
@@ -25,46 +28,30 @@ func CreateClient(username string) error {
 		fmt.Println("证书目录创建成功")
 	}
 
+	// 检查并生成TLS密钥
+	tlsKeyPath := "/etc/openvpn/server/ta.key"
+	if _, err := os.Stat(tlsKeyPath); os.IsNotExist(err) {
+		fmt.Printf("正在生成TLS密钥: %s\n", tlsKeyPath)
+		cmd := exec.Command("sudo", "openvpn", "--genkey", "secret", tlsKeyPath)
+		output, err := cmd.CombinedOutput()
+		if err != nil {
+			return fmt.Errorf("生成TLS密钥失败: %v, 输出: %s", err, string(output))
+		}
+		fmt.Println("TLS密钥生成成功")
+	}
+
 	// 检查CA证书和密钥是否存在
-	caCertPath := "/etc/openvpn/ca.crt"
-	caKeyPath := "/etc/openvpn/ca.key"
-	serverCaCertPath := "/etc/openvpn/server/ca.crt"
-	serverCaKeyPath := "/etc/openvpn/server/ca.key"
+	caCertPath := "/etc/openvpn/server/ca.crt"
+	caKeyPath := "/etc/openvpn/server/ca.key"
 	
 	fmt.Printf("检查CA证书: %s\n", caCertPath)
 	fmt.Printf("检查CA密钥: %s\n", caKeyPath)
 	
-	// 检查主目录下的文件
-	caCertExists := false
-	caKeyExists := false
-	
-	if _, err := os.Stat(caCertPath); err == nil {
-		caCertExists = true
+	if _, err := os.Stat(caCertPath); os.IsNotExist(err) {
+		return fmt.Errorf("CA证书不存在: %s", caCertPath)
 	}
-	if _, err := os.Stat(caKeyPath); err == nil {
-		caKeyExists = true
-	}
-	
-	// 如果主目录下没有，检查server目录
-	if !caCertExists || !caKeyExists {
-		fmt.Printf("检查server目录下的CA证书: %s\n", serverCaCertPath)
-		fmt.Printf("检查server目录下的CA密钥: %s\n", serverCaKeyPath)
-		
-		if _, err := os.Stat(serverCaCertPath); err == nil {
-			caCertPath = serverCaCertPath
-			caCertExists = true
-		}
-		if _, err := os.Stat(serverCaKeyPath); err == nil {
-			caKeyPath = serverCaKeyPath
-			caKeyExists = true
-		}
-	}
-	
-	if !caCertExists {
-		return fmt.Errorf("CA证书不存在: %s 或 %s", "/etc/openvpn/ca.crt", "/etc/openvpn/server/ca.crt")
-	}
-	if !caKeyExists {
-		return fmt.Errorf("CA密钥不存在: %s 或 %s", "/etc/openvpn/ca.key", "/etc/openvpn/server/ca.key")
+	if _, err := os.Stat(caKeyPath); os.IsNotExist(err) {
+		return fmt.Errorf("CA密钥不存在: %s", caKeyPath)
 	}
 	
 	fmt.Printf("使用CA证书: %s\n", caCertPath)
@@ -101,10 +88,10 @@ func CreateClient(username string) error {
 	}
 	fmt.Println("证书签名成功")
 
-	// 复制CA证书
-	caPath := certDir + "/ca.crt"
-	fmt.Printf("正在复制CA证书到: %s\n", caPath)
-	cmd = exec.Command("sudo", "cp", caCertPath, caPath)
+	// 复制CA证书到客户端目录
+	clientCaPath := certDir + "/ca.crt"
+	fmt.Printf("正在复制CA证书到: %s\n", clientCaPath)
+	cmd = exec.Command("sudo", "cp", caCertPath, clientCaPath)
 	output, err = cmd.CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("复制CA证书失败: %v, 输出: %s", err, string(output))
@@ -120,74 +107,22 @@ func CreateClient(username string) error {
 	fmt.Printf("正在为客户端 %s 生成配置文件...\n", username)
 	ovpnPath := certDir + "/" + username + ".ovpn"
 	
-	// 读取文件内容
-	fmt.Println("正在读取证书文件内容...")
-	caContent := readFile(caPath)
-	crtContent := readFile(crtPath)
-	keyContent := readFile(keyPath)
-	
-	if caContent == "" || crtContent == "" || keyContent == "" {
-		return fmt.Errorf("读取证书文件失败")
-	}
-	fmt.Println("证书文件内容读取成功")
-	
-	// 读取服务器配置文件获取路由信息
-	serverConfig := readFile("/etc/openvpn/server.conf")
-	var routes []string
-	if serverConfig != "" {
-		lines := strings.Split(serverConfig, "\n")
-		for _, line := range lines {
-			if strings.HasPrefix(line, "push \"route ") {
-				// 提取路由信息
-				route := strings.TrimPrefix(line, "push \"route ")
-				route = strings.TrimSuffix(route, "\"")
-				routes = append(routes, route)
-			}
-		}
+	// 加载配置
+	cfg, err := config.LoadConfig()
+	if err != nil {
+		return fmt.Errorf("加载配置失败: %v", err)
 	}
 	
-	// 如果没有找到路由配置，使用默认路由
-	if len(routes) == 0 {
-		routes = []string{"10.8.0.0 255.255.255.0"}
+	// 生成客户端配置
+	clientConfig, err := GenerateClientConfig(username, cfg)
+	if err != nil {
+		return fmt.Errorf("生成客户端配置失败: %v", err)
 	}
-	
-	// 生成配置文件
-	config := fmt.Sprintf(`client
-dev tun
-proto tcp6
-remote %s 1194
-resolv-retry infinite
-nobind
-persist-key
-persist-tun
-remote-cert-tls server
-auth SHA256
-cipher AES-256-GCM
-verb 3
-`, getServerIP())
-
-	// 添加路由配置
-	for _, route := range routes {
-		config += fmt.Sprintf("route %s\n", route)
-	}
-
-	// 添加证书和密钥
-	config += fmt.Sprintf(`
-<ca>
-%s
-</ca>
-<cert>
-%s
-</cert>
-<key>
-%s
-</key>
-`, caContent, crtContent, keyContent)
 
 	// 使用sudo写入配置文件
 	tempFile := "/tmp/" + username + ".ovpn"
 	fmt.Printf("创建临时配置文件: %s\n", tempFile)
-	if err := os.WriteFile(tempFile, []byte(config), 0644); err != nil {
+	if err := os.WriteFile(tempFile, []byte(clientConfig), 0644); err != nil {
 		return fmt.Errorf("创建临时配置文件失败: %v", err)
 	}
 	
@@ -208,6 +143,15 @@ verb 3
 
 	fmt.Printf("客户端 %s 的证书和配置文件已生成并复制到 %s 目录\n", username, certDir)
 	return nil
+}
+
+// readFile 读取文件内容
+func readFile(path string) string {
+	content, err := os.ReadFile(path)
+	if err != nil {
+		return ""
+	}
+	return string(content)
 }
 
 // DeleteClient 删除OpenVPN客户端
@@ -243,65 +187,72 @@ func ResumeClient(username string) error {
 
 // GetClientStatus 获取OpenVPN客户端状态
 func GetClientStatus(username string) (*ClientStatus, error) {
-	// TODO: 实现获取客户端状态的功能
-	return &ClientStatus{
+	// 检查客户端配置文件是否存在
+	certDir := "/etc/openvpn/client"
+	ovpnPath := certDir + "/" + username + ".ovpn"
+	
+	// 获取文件信息
+	fileInfo, err := os.Stat(ovpnPath)
+	if os.IsNotExist(err) {
+		return nil, fmt.Errorf("客户端 %s 不存在", username)
+	}
+	if err != nil {
+		return nil, fmt.Errorf("获取客户端信息失败: %v", err)
+	}
+
+	// 创建状态对象，使用文件创建时间作为客户端创建时间
+	status := &ClientStatus{
 		Username:    username,
-		ConnectedAt: time.Now(),
+		ConnectedAt: fileInfo.ModTime(), // 使用文件修改时间作为创建时间
 		IsPaused:    false,
-	}, nil
+	}
+
+	// 检查OpenVPN状态日志获取连接状态
+	statusLog := "/var/log/openvpn/status.log"
+	if logContent, err := os.ReadFile(statusLog); err == nil {
+		lines := strings.Split(string(logContent), "\n")
+		for _, line := range lines {
+			// 查找客户端连接信息
+			if strings.Contains(line, username) {
+				fields := strings.Fields(line)
+				if len(fields) >= 2 {
+					// 解析连接时间
+					if t, err := time.Parse("2006-01-02 15:04:05", fields[1]); err == nil {
+						status.ConnectedAt = t
+					}
+				}
+			}
+		}
+	}
+
+	return status, nil
 }
 
 // GetAllClientStatuses 获取所有OpenVPN客户端状态
 func GetAllClientStatuses() ([]ClientStatus, error) {
 	certDir := "/etc/openvpn/client"
-	
-	// 检查目录是否存在
-	if _, err := os.Stat(certDir); os.IsNotExist(err) {
-		return nil, fmt.Errorf("客户端目录不存在: %s", certDir)
-	}
-	
-	// 读取目录中的所有文件
+	var statuses []ClientStatus
+
+	// 读取客户端目录
 	files, err := os.ReadDir(certDir)
 	if err != nil {
 		return nil, fmt.Errorf("读取客户端目录失败: %v", err)
 	}
-	
-	var clients []ClientStatus
-	
-	// 遍历所有文件，查找.ovpn文件
+
+	// 遍历所有.ovpn文件
 	for _, file := range files {
-		if !file.IsDir() && strings.HasSuffix(file.Name(), ".ovpn") {
-			// 从文件名中提取用户名（去掉.ovpn后缀）
+		if strings.HasSuffix(file.Name(), ".ovpn") {
 			username := strings.TrimSuffix(file.Name(), ".ovpn")
-			
-			// 检查对应的证书文件是否存在
-			crtPath := certDir + "/" + username + ".crt"
-			keyPath := certDir + "/" + username + ".key"
-			
-			// 检查证书和密钥文件是否存在
-			_, crtErr := os.Stat(crtPath)
-			_, keyErr := os.Stat(keyPath)
-			
-			if crtErr == nil && keyErr == nil {
-				// 获取证书的创建时间
-				info, err := os.Stat(crtPath)
-				if err != nil {
-					continue
-				}
-				
-				clients = append(clients, ClientStatus{
-					Username:    username,
-					ConnectedAt: info.ModTime(),
-					IsPaused:    false,
-				})
+			if status, err := GetClientStatus(username); err == nil {
+				statuses = append(statuses, *status)
 			}
 		}
 	}
-	
-	return clients, nil
+
+	return statuses, nil
 }
 
-// ClientStatus 表示OpenVPN客户端的状态
+// ClientStatus 客户端状态
 type ClientStatus struct {
 	Username      string
 	ConnectedAt   time.Time
@@ -309,53 +260,87 @@ type ClientStatus struct {
 	IsPaused      bool
 }
 
-func copyFile(src, dst string) error {
-	input, err := os.ReadFile(src)
+// GenerateClientConfig 生成客户端配置文件内容
+func GenerateClientConfig(username string, cfg *config.Config) (string, error) {
+	// 读取服务器配置以获取端口和协议
+	serverConfig, err := os.ReadFile("/etc/openvpn/server.conf")
 	if err != nil {
-		return err
+		return "", fmt.Errorf("读取服务器配置失败: %v", err)
 	}
 
-	err = os.WriteFile(dst, input, 0644)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func readFile(path string) string {
-	fmt.Printf("正在读取文件: %s\n", path)
-	cmd := exec.Command("sudo", "cat", path)
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		fmt.Printf("读取文件 %s 失败: %v, 输出: %s\n", path, err, string(output))
-		return ""
-	}
-	fmt.Printf("成功读取文件: %s, 内容长度: %d\n", path, len(output))
-	return string(output)
-}
-
-func getServerIP() string {
-	// 读取服务器配置文件获取IP
-	fmt.Println("正在获取服务器IP...")
-	config := readFile("/etc/openvpn/server.conf")
-	if config == "" {
-		fmt.Println("无法读取服务器配置文件，使用默认IP")
-		return "your-server-ip" // 默认值
-	}
-
-	lines := strings.Split(config, "\n")
+	// 解析端口和协议
+	var port, proto string
+	lines := strings.Split(string(serverConfig), "\n")
 	for _, line := range lines {
-		if strings.HasPrefix(line, "server ") {
-			parts := strings.Fields(line)
-			if len(parts) >= 2 {
-				ip := parts[1]
-				fmt.Printf("找到服务器IP: %s\n", ip)
-				return ip
-			}
+		if strings.HasPrefix(line, "port ") {
+			port = strings.TrimSpace(strings.TrimPrefix(line, "port "))
+		}
+		if strings.HasPrefix(line, "proto ") {
+			proto = strings.TrimSpace(strings.TrimPrefix(line, "proto "))
 		}
 	}
 
-	fmt.Println("未找到服务器IP配置，使用默认IP")
-	return "your-server-ip" // 默认值
-} 
+	// 读取客户端证书和密钥
+	certPath := filepath.Join("/etc/openvpn/client", username+".crt")
+	keyPath := filepath.Join("/etc/openvpn/client", username+".key")
+	
+	cert, err := os.ReadFile(certPath)
+	if err != nil {
+		return "", fmt.Errorf("读取客户端证书失败: %v", err)
+	}
+	
+	key, err := os.ReadFile(keyPath)
+	if err != nil {
+		return "", fmt.Errorf("读取客户端密钥失败: %v", err)
+	}
+
+	// 读取CA证书
+	caCert, err := os.ReadFile("/etc/openvpn/server/ca.crt")
+	if err != nil {
+		return "", fmt.Errorf("读取CA证书失败: %v", err)
+	}
+
+	// 读取TLS密钥
+	tlsKey, err := os.ReadFile(cfg.OpenVPNTLSKeyPath)
+	if err != nil {
+		return "", fmt.Errorf("读取TLS密钥失败: %v", err)
+	}
+
+	// 生成客户端配置
+	config := fmt.Sprintf(`client
+dev tun
+proto %s
+remote %s %s
+resolv-retry 5
+nobind
+persist-key
+persist-tun
+remote-cert-tls server
+cipher AES-256-GCM
+auth SHA256
+key-direction 1
+tls-client
+<ca>
+%s
+</ca>
+<cert>
+%s
+</cert>
+<key>
+%s
+</key>
+<tls-auth>
+%s
+</tls-auth>
+`, 
+		proto,
+		cfg.OpenVPNServerHostname,
+		port,
+		caCert,
+		cert,
+		key,
+		tlsKey,
+	)
+
+	return config, nil
+}
