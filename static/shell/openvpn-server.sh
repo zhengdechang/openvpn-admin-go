@@ -259,7 +259,7 @@ proto tcp
 remote ${server_ip} 1194
 dev tun
 
-resolv-retry infinite
+resolv-retry 5
 nobind
 keepalive 10 120
 persist-key
