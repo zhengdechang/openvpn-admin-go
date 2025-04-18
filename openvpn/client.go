@@ -283,7 +283,13 @@ func GenerateClientConfig(username string, cfg *config.Config) (string, error) {
 			port = strings.TrimSpace(strings.TrimPrefix(line, "port "))
 		}
 		if strings.HasPrefix(line, "proto ") {
-			proto = strings.TrimSpace(strings.TrimPrefix(line, "proto "))
+			serverProto := strings.TrimSpace(strings.TrimPrefix(line, "proto "))
+			// 转换协议：tcp6 -> tcp, udp -> udp
+			if serverProto == "tcp6" {
+				proto = "tcp"
+			} else {
+				proto = serverProto
+			}
 		}
 	}
 
