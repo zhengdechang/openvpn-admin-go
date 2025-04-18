@@ -61,11 +61,12 @@ push "dhcp-option DNS %s"`,
 	// 添加其他通用配置
 	config += `
 keepalive 10 120
-cipher AES-256-CBC
+cipher AES-256-GCM
 comp-lzo
 user nobody
 group nogroup
 persist-key
+auth SHA256
 persist-tun
 status openvpn-status.log
 verb 3`
