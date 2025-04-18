@@ -323,10 +323,13 @@ nobind
 persist-key
 persist-tun
 remote-cert-tls server
-cipher AES-256-GCM
+data-ciphers AES-256-GCM:AES-128-GCM
 auth SHA256
 key-direction 1
 tls-client
+tls-version-min %s
+tls-cipher TLS-ECDHE-ECDSA-WITH-AES-256-GCM-SHA384:TLS-ECDHE-RSA-WITH-AES-256-GCM-SHA384:TLS-ECDHE-ECDSA-WITH-AES-128-GCM-SHA256:TLS-ECDHE-RSA-WITH-AES-128-GCM-SHA256
+auth-nocache
 <ca>
 %s
 </ca>
@@ -343,6 +346,7 @@ tls-client
 		proto,
 		cfg.OpenVPNServerHostname,
 		port,
+		cfg.OpenVPNTLSVersion,
 		caCert,
 		cert,
 		key,

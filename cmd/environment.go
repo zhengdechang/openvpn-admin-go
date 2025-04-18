@@ -41,97 +41,103 @@ func CheckCertFiles() error {
 	return nil
 }
 
-func generateCertificates(serverDir string) error {
-	// 确保目录存在
+func generateCertificates() error {
+	// 检查证书文件是否已存在
+	certFiles := []string{
+		"/etc/openvpn/server/ca.crt",
+		"/etc/openvpn/server/ca.key",
+		"/etc/openvpn/server/server.crt",
+		"/etc/openvpn/server/server.key",
+		"/etc/openvpn/server/dh.pem",
+		"/etc/openvpn/server/ta.key", // 添加TLS密钥检查
+	}
+
+	allExist := true
+	for _, file := range certFiles {
+		if _, err := os.Stat(file); os.IsNotExist(err) {
+			allExist = false
+			break
+		}
+	}
+
+	if allExist {
+		fmt.Println("证书文件已存在，跳过生成")
+		return nil
+	}
+
+	// 创建服务器目录
+	serverDir := "/etc/openvpn/server"
 	if err := os.MkdirAll(serverDir, 0755); err != nil {
-		return fmt.Errorf("创建证书目录失败: %v", err)
+		return fmt.Errorf("创建服务器目录失败: %v", err)
 	}
 
-	// 获取当前工作目录
-	currentDir, err := os.Getwd()
-	if err != nil {
-		return fmt.Errorf("获取当前工作目录失败: %v", err)
+	// 复制扩展文件
+	extFiles := []string{
+		"openssl-ca.ext",
+		"openssl-server.ext",
+		"openssl-client.ext",
 	}
 
-	// 复制扩展文件到服务器目录
-	fmt.Println("正在复制扩展文件到服务器目录...")
-	extFiles := []string{"openssl-ca.ext", "openssl-server.ext", "openssl-client.ext"}
-	for _, extFile := range extFiles {
-		srcPath := filepath.Join(currentDir, "file", extFile)
-		dstPath := filepath.Join(serverDir, extFile)
-		
-		// 检查源文件是否存在
-		if _, err := os.Stat(srcPath); os.IsNotExist(err) {
-			return fmt.Errorf("扩展文件 %s 不存在于 %s", extFile, srcPath)
+	for _, file := range extFiles {
+		src := filepath.Join("config", file)
+		dst := filepath.Join(serverDir, file)
+		if err := copyFile(src, dst); err != nil {
+			return fmt.Errorf("复制扩展文件 %s 失败: %v", file, err)
 		}
-		
-		if err := copyFile(srcPath, dstPath); err != nil {
-			return fmt.Errorf("复制扩展文件 %s 失败: %v", extFile, err)
-		}
-		
-		// 验证文件是否成功复制
-		if _, err := os.Stat(dstPath); os.IsNotExist(err) {
-			return fmt.Errorf("扩展文件 %s 复制失败，目标文件不存在", extFile)
-		}
-		
-		fmt.Printf("成功复制扩展文件: %s\n", extFile)
+		fmt.Printf("已复制扩展文件: %s\n", file)
 	}
 
-	// 生成 DH 参数
-	fmt.Println("正在生成 DH 参数（这可能需要几分钟）...")
-	dhPath := filepath.Join(serverDir, "dh.pem")
-	cmd := exec.Command("openssl", "dhparam", "-out", dhPath, "2048")
-	if output, err := cmd.CombinedOutput(); err != nil {
-		return fmt.Errorf("生成 DH 参数失败: %v\n输出: %s", err, string(output))
+	// 生成DH参数
+	fmt.Println("正在生成DH参数...")
+	cmd := exec.Command("openssl", "dhparam", "-out", "/etc/openvpn/server/dh.pem", "2048")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("生成DH参数失败: %v", err)
 	}
-	os.Chmod(dhPath, 0600)
+	fmt.Println("DH参数生成成功")
 
-	// 生成 CA 私钥和证书
-	fmt.Println("正在生成 CA 证书...")
-	caKey := filepath.Join(serverDir, "ca.key")
-	caCrt := filepath.Join(serverDir, "ca.crt")
-	
-	cmd = exec.Command("openssl", "genrsa", "-out", caKey, "2048")
-	if output, err := cmd.CombinedOutput(); err != nil {
-		return fmt.Errorf("生成 CA 私钥失败: %v\n输出: %s", err, string(output))
+	// 生成CA证书
+	fmt.Println("正在生成CA证书...")
+	cmd = exec.Command("openssl", "req", "-x509", "-newkey", "rsa:2048", "-keyout", "/etc/openvpn/server/ca.key", "-out", "/etc/openvpn/server/ca.crt", "-days", "3650", "-nodes", "-subj", "/CN=OpenVPN-CA")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("生成CA证书失败: %v", err)
 	}
-	os.Chmod(caKey, 0600)
+	fmt.Println("CA证书生成成功")
 
-	cmd = exec.Command("openssl", "req", "-new", "-x509", "-days", "3650", "-key", caKey, "-out", caCrt, "-subj", "/CN=OpenVPN-CA")
-	if output, err := cmd.CombinedOutput(); err != nil {
-		return fmt.Errorf("生成 CA 证书失败: %v\n输出: %s", err, string(output))
-	}
-	os.Chmod(caCrt, 0644)
-
-	// 生成服务器私钥和证书
+	// 生成服务器证书
 	fmt.Println("正在生成服务器证书...")
-	serverKey := filepath.Join(serverDir, "server.key")
-	serverCsr := filepath.Join(serverDir, "server.csr")
-	serverCrt := filepath.Join(serverDir, "server.crt")
-
-	cmd = exec.Command("openssl", "genrsa", "-out", serverKey, "2048")
-	if output, err := cmd.CombinedOutput(); err != nil {
-		return fmt.Errorf("生成服务器私钥失败: %v\n输出: %s", err, string(output))
-	}
-	os.Chmod(serverKey, 0600)
-
-	cmd = exec.Command("openssl", "req", "-new", "-key", serverKey, "-out", serverCsr, "-subj", "/CN=OpenVPN-Server")
-	if output, err := cmd.CombinedOutput(); err != nil {
-		return fmt.Errorf("生成服务器证书请求失败: %v\n输出: %s", err, string(output))
+	cmd = exec.Command("openssl", "req", "-newkey", "rsa:2048", "-keyout", "/etc/openvpn/server/server.key", "-out", "/etc/openvpn/server/server.csr", "-nodes", "-subj", "/CN=OpenVPN-Server")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("生成服务器证书请求失败: %v", err)
 	}
 
-	serverExtFile := filepath.Join(serverDir, "openssl-server.ext")
-	cmd = exec.Command("openssl", "x509", "-req", "-days", "3650", "-in", serverCsr, "-CA", caCrt, "-CAkey", caKey, "-CAcreateserial", "-out", serverCrt, "-extfile", serverExtFile)
-	if output, err := cmd.CombinedOutput(); err != nil {
-		return fmt.Errorf("签名服务器证书失败: %v\n输出: %s", err, string(output))
+	cmd = exec.Command("openssl", "x509", "-req", "-in", "/etc/openvpn/server/server.csr", "-CA", "/etc/openvpn/server/ca.crt", "-CAkey", "/etc/openvpn/server/ca.key", "-CAcreateserial", "-out", "/etc/openvpn/server/server.crt", "-days", "3650", "-extfile", "/etc/openvpn/server/openssl-server.ext")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("签名服务器证书失败: %v", err)
 	}
-	os.Chmod(serverCrt, 0644)
+	fmt.Println("服务器证书生成成功")
+
+	// 生成TLS密钥
+	fmt.Println("正在生成TLS密钥...")
+	cmd = exec.Command("openvpn", "--genkey", "secret", "/etc/openvpn/server/ta.key")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("生成TLS密钥失败: %v", err)
+	}
+	fmt.Println("TLS密钥生成成功")
 
 	// 清理临时文件
-	os.Remove(serverCsr)
-	os.Remove(filepath.Join(serverDir, "ca.srl"))
+	os.Remove("/etc/openvpn/server/server.csr")
+	os.Remove("/etc/openvpn/server/ca.srl")
 
-	fmt.Println("证书生成完成")
 	return nil
 }
 
@@ -205,7 +211,7 @@ func InstallEnvironment() error {
 
 	// 生成证书
 	fmt.Println("正在生成证书...")
-	if err := generateCertificates(serverDir); err != nil {
+	if err := generateCertificates(); err != nil {
 		return fmt.Errorf("生成证书失败: %v", err)
 	}
 	
