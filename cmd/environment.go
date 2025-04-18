@@ -71,6 +71,12 @@ func generateCertificates() error {
 		return fmt.Errorf("创建服务器目录失败: %v", err)
 	}
 
+	// 获取当前工作目录
+	currentDir, err := os.Getwd()
+	if err != nil {
+		return fmt.Errorf("获取当前工作目录失败: %v", err)
+	}
+
 	// 复制扩展文件
 	extFiles := []string{
 		"openssl-ca.ext",
@@ -79,7 +85,7 @@ func generateCertificates() error {
 	}
 
 	for _, file := range extFiles {
-		src := filepath.Join("config", file)
+		src := filepath.Join(currentDir, "file", file)
 		dst := filepath.Join(serverDir, file)
 		if err := copyFile(src, dst); err != nil {
 			return fmt.Errorf("复制扩展文件 %s 失败: %v", file, err)
@@ -156,7 +162,7 @@ func copyFile(src, dst string) error {
 	return nil
 }
 
-func generateOpenVPNConfig(serverDir string) error {
+func generateOpenVPNConfig() error {
 	// 加载配置
 	cfg, err := config.LoadConfig()
 	if err != nil {
@@ -217,7 +223,7 @@ func InstallEnvironment() error {
 	
 	// 生成Openvpn配置文件
 	fmt.Println("正在生成Openvpn配置文件...")
-	if err := generateOpenVPNConfig(serverDir); err != nil {
+	if err := generateOpenVPNConfig(); err != nil {
 		return fmt.Errorf("生成OpenVPN配置文件失败: %v", err)
 	}
 
