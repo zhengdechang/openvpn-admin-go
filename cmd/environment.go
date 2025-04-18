@@ -160,7 +160,7 @@ func generateOpenVPNConfig(serverDir string) error {
 	// 生成OpenVPN服务端配置文件内容
 	configContent := cfg.GenerateServerConfig()
 
-	// 写入配置文件
+	// 写入配置文件到 /etc/openvpn 目录
 	configPath := filepath.Join("/etc/openvpn", "server.conf")
 	if err := os.WriteFile(configPath, []byte(configContent), 0644); err != nil {
 		return fmt.Errorf("生成OpenVPN配置文件失败: %v", err)
