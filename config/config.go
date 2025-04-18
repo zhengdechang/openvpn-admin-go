@@ -110,7 +110,7 @@ push "dhcp-option DNS %s"
 push "dhcp-option DOMAIN %s"
 keepalive 10 120
 topology subnet
-data-ciphers AES-256-GCM:AES-128-GCM
+cipher AES-256-CBC
 auth SHA256
 tls-server
 tls-version-min %s

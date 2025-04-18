@@ -61,7 +61,7 @@ push "dhcp-option DNS %s"`,
 	// 添加其他通用配置
 	config += `
 keepalive 10 120
-cipher AES-256-GCM
+cipher AES-256-CBC
 comp-lzo
 user nobody
 group nogroup

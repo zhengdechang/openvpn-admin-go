@@ -323,7 +323,7 @@ nobind
 persist-key
 persist-tun
 remote-cert-tls server
-cipher AES-256-GCM
+cipher AES-256-CBC
 auth SHA256
 key-direction 1
 tls-client
