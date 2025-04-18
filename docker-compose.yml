@@ -1,0 +1,11 @@
+version: '3'
+
+services:
+  openvpn-admin:
+    build: .
+    container_name: openvpn-admin
+    volumes:
+      - ./.env:/etc/openvpn-admin/.env
+    ports:
+      - "8080:8080"
+    restart: unless-stopped 
