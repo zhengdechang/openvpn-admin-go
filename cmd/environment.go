@@ -204,9 +204,15 @@ func InstallEnvironment() error {
 
 	// 创建配置目录
 	fmt.Println("正在创建配置目录...")
+	openvpnDir := "/etc/openvpn"
+	if err := os.MkdirAll(openvpnDir, 0755); err != nil {
+		return fmt.Errorf("创建 OpenVPN 配置目录失败: %v", err)
+	}
+
+	// 创建服务器证书目录
 	serverDir := "/etc/openvpn/server"
 	if err := os.MkdirAll(serverDir, 0755); err != nil {
-		return fmt.Errorf("创建 OpenVPN 服务器目录失败: %v", err)
+		return fmt.Errorf("创建 OpenVPN 服务器证书目录失败: %v", err)
 	}
 
 	// 创建客户端配置目录
@@ -227,8 +233,48 @@ func InstallEnvironment() error {
 		return fmt.Errorf("生成OpenVPN配置文件失败: %v", err)
 	}
 
+	// 停止所有正在运行的 OpenVPN 进程
+	fmt.Println("正在停止所有 OpenVPN 进程...")
+	cmd = exec.Command("systemctl", "stop", "openvpn")
+	cmd.Run() // 忽略错误，因为服务可能没有运行
+	cmd = exec.Command("systemctl", "stop", "openvpn-server@server")
+	cmd.Run() // 忽略错误，因为服务可能没有运行
+	cmd = exec.Command("pkill", "openvpn")
+	cmd.Run() // 忽略错误，因为可能没有进程在运行
+
+	// 等待进程完全停止
+	time.Sleep(2 * time.Second)
+
 	// 启动 OpenVPN 服务
 	fmt.Println("正在启动 OpenVPN 服务...")
+	cmd = exec.Command("systemctl", "daemon-reload")
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("重新加载服务配置失败: %v", err)
+	}
+
+	// 创建自定义服务单元
+	serviceContent := `[Unit]
+Description=OpenVPN service
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/etc/openvpn
+ExecStart=/usr/sbin/openvpn --config server.conf
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+`
+	if err := os.WriteFile("/etc/systemd/system/openvpn.service", []byte(serviceContent), 0644); err != nil {
+		return fmt.Errorf("创建服务单元文件失败: %v", err)
+	}
+
+	cmd = exec.Command("systemctl", "daemon-reload")
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("重新加载服务配置失败: %v", err)
+	}
+
 	cmd = exec.Command("systemctl", "enable", "openvpn")
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("设置 OpenVPN 服务开机自启失败: %v", err)

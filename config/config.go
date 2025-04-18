@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"path/filepath"
 	"strconv"
 	"strings"
 )
@@ -70,8 +69,6 @@ func LoadConfig() (*Config, error) {
 
 // GenerateServerConfig 生成 OpenVPN 服务器配置
 func (c *Config) GenerateServerConfig() string {
-	configDir := "/etc/openvpn/server"
-
 	// 确保TLS相关配置有值
 	if c.OpenVPNTLSVersion == "" {
 		c.OpenVPNTLSVersion = "1.2"
@@ -102,12 +99,12 @@ func (c *Config) GenerateServerConfig() string {
 	config := fmt.Sprintf(`port %d
 proto %s
 dev tun
-ca %s
-cert %s
-key %s
-dh %s
+ca /etc/openvpn/server/ca.crt
+cert /etc/openvpn/server/server.crt
+key /etc/openvpn/server/server.key
+dh /etc/openvpn/server/dh.pem
 server %s %s
-%sifconfig-pool-persist ipp.txt
+%sifconfig-pool-persist /etc/openvpn/server/ipp.txt
 %s
 push "dhcp-option DNS %s"
 push "dhcp-option DOMAIN %s"
@@ -118,7 +115,7 @@ auth SHA256
 tls-server
 tls-version-min %s
 tls-cipher TLS-ECDHE-ECDSA-WITH-AES-256-GCM-SHA384:TLS-ECDHE-RSA-WITH-AES-256-GCM-SHA384:TLS-ECDHE-ECDSA-WITH-AES-128-GCM-SHA256:TLS-ECDHE-RSA-WITH-AES-128-GCM-SHA256
-tls-auth %s 0
+tls-auth /etc/openvpn/server/ta.key 0
 key-direction 0
 user nobody
 group nogroup
@@ -129,10 +126,6 @@ verb 3
 %s`, 
 		c.OpenVPNPort,
 		c.OpenVPNProto,
-		filepath.Join(configDir, "ca.crt"),
-		filepath.Join(configDir, "server.crt"),
-		filepath.Join(configDir, "server.key"),
-		filepath.Join(configDir, "dh.pem"),
 		c.OpenVPNServerNetwork,
 		c.OpenVPNServerNetmask,
 		clientToClientConfig,
@@ -140,7 +133,6 @@ verb 3
 		c.DNSServerIP,
 		c.DNSServerDomain,
 		c.OpenVPNTLSVersion,
-		filepath.Join(configDir, "ta.key"),
 		protoConfig,
 	)
 
@@ -183,12 +175,6 @@ func SaveConfig(cfg *Config) error {
 	
 	if err := os.WriteFile("/etc/openvpn/config.json", data, 0644); err != nil {
 		return fmt.Errorf("写入配置文件失败: %v", err)
-	}
-	
-	// 重新生成OpenVPN服务配置
-	configContent := cfg.GenerateServerConfig()
-	if err := os.WriteFile("/etc/openvpn/server.conf", []byte(configContent), 0644); err != nil {
-		return fmt.Errorf("生成服务配置失败: %v", err)
 	}
 	
 	return nil
