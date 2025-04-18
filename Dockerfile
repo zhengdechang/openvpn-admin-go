@@ -15,21 +15,22 @@ COPY . .
 # Build the application
 RUN CGO_ENABLED=1 GOOS=linux go build -o openvpn
 
-FROM alpine:latest
+FROM ubuntu:22.04
 
 # Install runtime dependencies
-RUN apk add --no-cache ca-certificates tzdata
+RUN apt-get update && apt-get install -y \
+    ca-certificates \
+    tzdata \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create app directory
+WORKDIR /openvpn-admin
 
 # Copy the binary from builder
-COPY --from=builder /app/openvpn /usr/local/bin/openvpn
-
-# Create necessary directories
-RUN mkdir -p /etc/openvpn-admin
+COPY --from=builder /app/openvpn /openvpn-admin/openvpn
 
 # Copy configuration files
-COPY --from=builder /app/.env /etc/openvpn-admin/.env
-
-WORKDIR /etc/openvpn-admin
+COPY --from=builder /app/.env /openvpn-admin/.env
 
 # Set the entrypoint
-ENTRYPOINT ["openvpn"] 
+ENTRYPOINT ["/openvpn-admin/openvpn"] 

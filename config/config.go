@@ -59,7 +59,7 @@ func LoadConfig() (*Config, error) {
 	cfg.OpenVPNClientConfigDir = getEnv("OPENVPN_CLIENT_CONFIG_DIR", "/etc/openvpn/client")
 	cfg.OpenVPNTLSVersion = getEnv("OPENVPN_TLS_VERSION", "1.2")
 	cfg.OpenVPNTLSKey = getEnv("OPENVPN_TLS_KEY", "ta.key")
-	cfg.OpenVPNTLSKeyPath = getEnv("OPENVPN_TLS_KEY_PATH", "/etc/openvpn/ta.key")
+	cfg.OpenVPNTLSKeyPath = getEnv("OPENVPN_TLS_KEY_PATH", "/etc/openvpn/server/ta.key")
 
 	// 加载 DNS 配置
 	cfg.DNSServerIP = getEnv("DNS_SERVER_IP", "10.10.99.44")
@@ -194,19 +194,3 @@ func SaveConfig(cfg *Config) error {
 	return nil
 }
 
-func DefaultConfig() *Config {
-	return &Config{
-		OpenVPNPort:            1194,
-		OpenVPNProto:           "tcp6",
-		OpenVPNServerHostname:  "vpn.example.com",
-		OpenVPNServerNetwork:   "10.8.0.0",
-		OpenVPNServerNetmask:   "255.255.255.0",
-		OpenVPNServerIP:        "172.16.10.10",
-		OpenVPNRoutes:          []string{"10.10.100.0 255.255.255.0", "10.10.98.0 255.255.255.0"},
-		OpenVPNClientConfigDir: "/etc/openvpn/client",
-		OpenVPNTLSVersion:      "1.2",
-		OpenVPNTLSKey:          "ta.key",
-		OpenVPNTLSKeyPath:      "/etc/openvpn/ta.key",
-		OpenVPNClientToClient:  false,
-	}
-} 
