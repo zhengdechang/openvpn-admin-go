@@ -47,12 +47,42 @@ func generateCertificates(serverDir string) error {
 		return fmt.Errorf("创建证书目录失败: %v", err)
 	}
 
+	// 获取当前工作目录
+	currentDir, err := os.Getwd()
+	if err != nil {
+		return fmt.Errorf("获取当前工作目录失败: %v", err)
+	}
+
+	// 复制扩展文件到服务器目录
+	fmt.Println("正在复制扩展文件到服务器目录...")
+	extFiles := []string{"openssl-ca.ext", "openssl-server.ext", "openssl-client.ext"}
+	for _, extFile := range extFiles {
+		srcPath := filepath.Join(currentDir, "file", extFile)
+		dstPath := filepath.Join(serverDir, extFile)
+		
+		// 检查源文件是否存在
+		if _, err := os.Stat(srcPath); os.IsNotExist(err) {
+			return fmt.Errorf("扩展文件 %s 不存在于 %s", extFile, srcPath)
+		}
+		
+		if err := copyFile(srcPath, dstPath); err != nil {
+			return fmt.Errorf("复制扩展文件 %s 失败: %v", extFile, err)
+		}
+		
+		// 验证文件是否成功复制
+		if _, err := os.Stat(dstPath); os.IsNotExist(err) {
+			return fmt.Errorf("扩展文件 %s 复制失败，目标文件不存在", extFile)
+		}
+		
+		fmt.Printf("成功复制扩展文件: %s\n", extFile)
+	}
+
 	// 生成 DH 参数
 	fmt.Println("正在生成 DH 参数（这可能需要几分钟）...")
 	dhPath := filepath.Join(serverDir, "dh.pem")
 	cmd := exec.Command("openssl", "dhparam", "-out", dhPath, "2048")
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("生成 DH 参数失败: %v", err)
+	if output, err := cmd.CombinedOutput(); err != nil {
+		return fmt.Errorf("生成 DH 参数失败: %v\n输出: %s", err, string(output))
 	}
 	os.Chmod(dhPath, 0600)
 
@@ -62,14 +92,14 @@ func generateCertificates(serverDir string) error {
 	caCrt := filepath.Join(serverDir, "ca.crt")
 	
 	cmd = exec.Command("openssl", "genrsa", "-out", caKey, "2048")
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("生成 CA 私钥失败: %v", err)
+	if output, err := cmd.CombinedOutput(); err != nil {
+		return fmt.Errorf("生成 CA 私钥失败: %v\n输出: %s", err, string(output))
 	}
 	os.Chmod(caKey, 0600)
 
 	cmd = exec.Command("openssl", "req", "-new", "-x509", "-days", "3650", "-key", caKey, "-out", caCrt, "-subj", "/CN=OpenVPN-CA")
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("生成 CA 证书失败: %v", err)
+	if output, err := cmd.CombinedOutput(); err != nil {
+		return fmt.Errorf("生成 CA 证书失败: %v\n输出: %s", err, string(output))
 	}
 	os.Chmod(caCrt, 0644)
 
@@ -80,19 +110,20 @@ func generateCertificates(serverDir string) error {
 	serverCrt := filepath.Join(serverDir, "server.crt")
 
 	cmd = exec.Command("openssl", "genrsa", "-out", serverKey, "2048")
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("生成服务器私钥失败: %v", err)
+	if output, err := cmd.CombinedOutput(); err != nil {
+		return fmt.Errorf("生成服务器私钥失败: %v\n输出: %s", err, string(output))
 	}
 	os.Chmod(serverKey, 0600)
 
 	cmd = exec.Command("openssl", "req", "-new", "-key", serverKey, "-out", serverCsr, "-subj", "/CN=OpenVPN-Server")
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("生成服务器证书请求失败: %v", err)
+	if output, err := cmd.CombinedOutput(); err != nil {
+		return fmt.Errorf("生成服务器证书请求失败: %v\n输出: %s", err, string(output))
 	}
 
-	cmd = exec.Command("openssl", "x509", "-req", "-days", "3650", "-in", serverCsr, "-CA", caCrt, "-CAkey", caKey, "-CAcreateserial", "-out", serverCrt)
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("签名服务器证书失败: %v", err)
+	serverExtFile := filepath.Join(serverDir, "openssl-server.ext")
+	cmd = exec.Command("openssl", "x509", "-req", "-days", "3650", "-in", serverCsr, "-CA", caCrt, "-CAkey", caKey, "-CAcreateserial", "-out", serverCrt, "-extfile", serverExtFile)
+	if output, err := cmd.CombinedOutput(); err != nil {
+		return fmt.Errorf("签名服务器证书失败: %v\n输出: %s", err, string(output))
 	}
 	os.Chmod(serverCrt, 0644)
 
@@ -101,6 +132,21 @@ func generateCertificates(serverDir string) error {
 	os.Remove(filepath.Join(serverDir, "ca.srl"))
 
 	fmt.Println("证书生成完成")
+	return nil
+}
+
+// copyFile 复制文件
+func copyFile(src, dst string) error {
+	input, err := os.ReadFile(src)
+	if err != nil {
+		return err
+	}
+
+	err = os.WriteFile(dst, input, 0644)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 

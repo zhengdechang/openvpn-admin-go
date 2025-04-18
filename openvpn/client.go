@@ -58,6 +58,13 @@ func CreateClient(username string) error {
 	fmt.Printf("使用CA密钥: %s\n", caKeyPath)
 	fmt.Println("CA证书和密钥检查通过")
 
+	// 检查客户端扩展文件
+	clientExtFile := "/etc/openvpn/server/openssl-client.ext"
+	if _, err := os.Stat(clientExtFile); os.IsNotExist(err) {
+		return fmt.Errorf("客户端扩展文件不存在: %s", clientExtFile)
+	}
+	fmt.Printf("使用客户端扩展文件: %s\n", clientExtFile)
+
 	// 生成客户端私钥
 	fmt.Printf("正在为客户端 %s 生成私钥...\n", username)
 	keyPath := certDir + "/" + username + ".key"
@@ -81,7 +88,7 @@ func CreateClient(username string) error {
 	// 使用CA证书签名
 	fmt.Printf("正在为客户端 %s 签名证书...\n", username)
 	crtPath := certDir + "/" + username + ".crt"
-	cmd = exec.Command("sudo", "openssl", "x509", "-req", "-in", csrPath, "-CA", caCertPath, "-CAkey", caKeyPath, "-CAcreateserial", "-out", crtPath, "-days", "3650")
+	cmd = exec.Command("sudo", "openssl", "x509", "-req", "-in", csrPath, "-CA", caCertPath, "-CAkey", caKeyPath, "-CAcreateserial", "-out", crtPath, "-days", "3650", "-extfile", clientExtFile)
 	output, err = cmd.CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("签名证书失败: %v, 输出: %s", err, string(output))
