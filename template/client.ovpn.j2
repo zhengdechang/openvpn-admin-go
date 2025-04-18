@@ -1,0 +1,28 @@
+client
+dev tun
+proto {{ .openvpn_proto }}
+remote {{ .openvpn_server_hostname }} {{ .openvpn_port }}
+resolv-retry 5
+nobind
+persist-key
+persist-tun
+remote-cert-tls server
+cipher AES-256-CBC
+auth SHA256
+key-direction 1
+tls-client
+tls-version-min {{ .openvpn_tls_version }}
+tls-cipher TLS-ECDHE-ECDSA-WITH-AES-256-GCM-SHA384:TLS-ECDHE-RSA-WITH-AES-256-GCM-SHA384:TLS-ECDHE-ECDSA-WITH-AES-128-GCM-SHA256:TLS-ECDHE-RSA-WITH-AES-128-GCM-SHA256
+auth-nocache
+<ca>
+{{ .ca_cert }}
+</ca>
+<cert>
+{{ .client_cert }}
+</cert>
+<key>
+{{ .client_key }}
+</key>
+<tls-auth>
+{{ .tls_auth_key }}
+</tls-auth> 

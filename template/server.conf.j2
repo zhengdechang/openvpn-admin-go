@@ -1,0 +1,39 @@
+port {{ .openvpn_port }}
+proto {{ .openvpn_proto }}
+dev tun
+ca {{ .ca_cert_path }}
+cert {{ .server_cert_path }}
+key {{ .server_key_path }}
+dh {{ .dh_path }}
+server {{ .openvpn_server_network }} {{ .openvpn_server_netmask }}
+{{if .openvpn_client_to_client}}
+client-to-client
+{{end}}
+ifconfig-pool-persist {{ .ipp_path }}
+{{range .openvpn_routes}}
+push "route {{ . }}"
+{{end}}
+{{if .dns_server_ip}}
+push "dhcp-option DNS {{ .dns_server_ip }}"
+{{end}}
+{{if .dns_server_domain}}
+push "dhcp-option DOMAIN {{ .dns_server_domain }}"
+{{end}}
+keepalive 10 120
+topology subnet
+cipher AES-256-CBC
+auth SHA256
+tls-server
+tls-version-min {{ .openvpn_tls_version }}
+tls-cipher TLS-ECDHE-ECDSA-WITH-AES-256-GCM-SHA384:TLS-ECDHE-RSA-WITH-AES-256-GCM-SHA384:TLS-ECDHE-ECDSA-WITH-AES-128-GCM-SHA256:TLS-ECDHE-RSA-WITH-AES-128-GCM-SHA256
+tls-auth {{ .tls_key_path }} 0
+key-direction 0
+user nobody
+group nogroup
+persist-key
+persist-tun
+status {{ .status_log_path }}
+verb 3
+{{if or (eq .openvpn_proto "udp") (eq .openvpn_proto "udp6")}}
+explicit-exit-notify 1
+{{end}} 

@@ -6,7 +6,9 @@ import (
 	"os/exec"
 	"path/filepath"
 	"time"
-	"openvpn-admin-go/config"
+
+	"openvpn-admin-go/constants"
+	"openvpn-admin-go/openvpn"
 )
 
 func CheckCertFiles() error {
@@ -19,8 +21,8 @@ func CheckCertFiles() error {
 		"dh.pem",
 	}
 
-	// 检查 /etc/openvpn/server 目录下的证书文件
-	serverDir := "/etc/openvpn/server"
+	// 检查服务器目录下的证书文件
+	serverDir := filepath.Dir(constants.ServerConfigPath)
 	missingFiles := []string{}
 	for _, file := range certFiles {
 		fullPath := filepath.Join(serverDir, file)
@@ -41,108 +43,72 @@ func CheckCertFiles() error {
 	return nil
 }
 
-func generateCertificates() error {
-	// 检查证书文件是否已存在
-	certFiles := []string{
-		"/etc/openvpn/server/ca.crt",
-		"/etc/openvpn/server/ca.key",
-		"/etc/openvpn/server/server.crt",
-		"/etc/openvpn/server/server.key",
-		"/etc/openvpn/server/dh.pem",
-		"/etc/openvpn/server/ta.key", // 添加TLS密钥检查
+func checkCertificates() error {
+	// 检查 /etc/openvpn/server 目录下的证书文件
+	serverDir := filepath.Dir(constants.ServerConfigPath)
+	if _, err := os.Stat(serverDir); os.IsNotExist(err) {
+		return fmt.Errorf("OpenVPN服务器目录不存在: %s", serverDir)
 	}
 
-	allExist := true
-	for _, file := range certFiles {
+	// 检查必要的证书文件
+	requiredFiles := []string{
+		constants.ServerCACertPath,
+		constants.ServerCAKeyPath,
+		constants.ServerCertPath,
+		constants.ServerKeyPath,
+		constants.ServerDHPath,
+		constants.ServerTLSKeyPath,
+	}
+
+	for _, file := range requiredFiles {
 		if _, err := os.Stat(file); os.IsNotExist(err) {
-			allExist = false
-			break
+			return fmt.Errorf("证书文件不存在: %s", file)
 		}
 	}
 
-	if allExist {
-		fmt.Println("证书文件已存在，跳过生成")
-		return nil
-	}
+	return nil
+}
 
+func generateCertificates() error {
 	// 创建服务器目录
-	serverDir := "/etc/openvpn/server"
+	serverDir := filepath.Dir(constants.ServerConfigPath)
 	if err := os.MkdirAll(serverDir, 0755); err != nil {
 		return fmt.Errorf("创建服务器目录失败: %v", err)
 	}
 
-	// 获取当前工作目录
-	currentDir, err := os.Getwd()
-	if err != nil {
-		return fmt.Errorf("获取当前工作目录失败: %v", err)
-	}
-
-	// 复制扩展文件
-	extFiles := []string{
-		"openssl-ca.ext",
-		"openssl-server.ext",
-		"openssl-client.ext",
-	}
-
-	for _, file := range extFiles {
-		src := filepath.Join(currentDir, "file", file)
-		dst := filepath.Join(serverDir, file)
-		if err := copyFile(src, dst); err != nil {
-			return fmt.Errorf("复制扩展文件 %s 失败: %v", file, err)
-		}
-		fmt.Printf("已复制扩展文件: %s\n", file)
-	}
-
 	// 生成DH参数
-	fmt.Println("正在生成DH参数...")
-	cmd := exec.Command("openssl", "dhparam", "-out", "/etc/openvpn/server/dh.pem", "2048")
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("生成DH参数失败: %v", err)
+	cmd := exec.Command("openssl", "dhparam", "-out", constants.ServerDHPath, "2048")
+	if output, err := cmd.CombinedOutput(); err != nil {
+		return fmt.Errorf("生成DH参数失败: %v\n输出: %s", err, string(output))
 	}
-	fmt.Println("DH参数生成成功")
 
 	// 生成CA证书
-	fmt.Println("正在生成CA证书...")
-	cmd = exec.Command("openssl", "req", "-x509", "-newkey", "rsa:2048", "-keyout", "/etc/openvpn/server/ca.key", "-out", "/etc/openvpn/server/ca.crt", "-days", "3650", "-nodes", "-subj", "/CN=OpenVPN-CA")
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("生成CA证书失败: %v", err)
+	cmd = exec.Command("openssl", "req", "-x509", "-newkey", "rsa:2048", "-keyout", constants.ServerCAKeyPath, "-out", constants.ServerCACertPath, "-days", "3650", "-nodes", "-subj", "/CN=OpenVPN-CA")
+	if output, err := cmd.CombinedOutput(); err != nil {
+		return fmt.Errorf("生成CA证书失败: %v\n输出: %s", err, string(output))
 	}
-	fmt.Println("CA证书生成成功")
 
 	// 生成服务器证书
-	fmt.Println("正在生成服务器证书...")
-	cmd = exec.Command("openssl", "req", "-newkey", "rsa:2048", "-keyout", "/etc/openvpn/server/server.key", "-out", "/etc/openvpn/server/server.csr", "-nodes", "-subj", "/CN=OpenVPN-Server")
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("生成服务器证书请求失败: %v", err)
+	cmd = exec.Command("openssl", "req", "-newkey", "rsa:2048", "-keyout", constants.ServerKeyPath, "-out", filepath.Join(serverDir, "server.csr"), "-nodes", "-subj", "/CN=OpenVPN-Server")
+	if output, err := cmd.CombinedOutput(); err != nil {
+		return fmt.Errorf("生成服务器证书请求失败: %v\n输出: %s", err, string(output))
 	}
 
-	cmd = exec.Command("openssl", "x509", "-req", "-in", "/etc/openvpn/server/server.csr", "-CA", "/etc/openvpn/server/ca.crt", "-CAkey", "/etc/openvpn/server/ca.key", "-CAcreateserial", "-out", "/etc/openvpn/server/server.crt", "-days", "3650", "-extfile", "/etc/openvpn/server/openssl-server.ext")
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("签名服务器证书失败: %v", err)
+	// 签名服务器证书
+	cmd = exec.Command("openssl", "x509", "-req", "-in", filepath.Join(serverDir, "server.csr"), "-CA", constants.ServerCACertPath, "-CAkey", constants.ServerCAKeyPath, "-CAcreateserial", "-out", constants.ServerCertPath, "-days", "3650", "-extfile", filepath.Join(serverDir, "openssl-server.ext"))
+	if output, err := cmd.CombinedOutput(); err != nil {
+		return fmt.Errorf("签名服务器证书失败: %v\n输出: %s", err, string(output))
 	}
-	fmt.Println("服务器证书生成成功")
 
 	// 生成TLS密钥
-	fmt.Println("正在生成TLS密钥...")
-	cmd = exec.Command("openvpn", "--genkey", "secret", "/etc/openvpn/server/ta.key")
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("生成TLS密钥失败: %v", err)
+	cmd = exec.Command("openvpn", "--genkey", "secret", constants.ServerTLSKeyPath)
+	if output, err := cmd.CombinedOutput(); err != nil {
+		return fmt.Errorf("生成TLS密钥失败: %v\n输出: %s", err, string(output))
 	}
-	fmt.Println("TLS密钥生成成功")
 
 	// 清理临时文件
-	os.Remove("/etc/openvpn/server/server.csr")
-	os.Remove("/etc/openvpn/server/ca.srl")
+	os.Remove(filepath.Join(serverDir, "server.csr"))
+	os.Remove(filepath.Join(serverDir, "ca.srl"))
 
 	return nil
 }
@@ -164,21 +130,75 @@ func copyFile(src, dst string) error {
 
 func generateOpenVPNConfig() error {
 	// 加载配置
-	cfg, err := config.LoadConfig()
+	cfg, err := openvpn.LoadConfig()
 	if err != nil {
 		return fmt.Errorf("加载配置失败: %v", err)
 	}
 
 	// 生成OpenVPN服务端配置文件内容
-	configContent := cfg.GenerateServerConfig()
+	configContent, err := cfg.GenerateServerConfig()
+	if err != nil {
+		return fmt.Errorf("生成服务器配置失败: %v", err)
+	}
 
-	// 写入配置文件到 /etc/openvpn/server 目录
-	configPath := filepath.Join("/etc/openvpn/server", "server.conf")
-	if err := os.WriteFile(configPath, []byte(configContent), 0644); err != nil {
+	// 写入配置文件到服务器目录
+	if err := os.WriteFile(constants.ServerConfigPath, []byte(configContent), 0644); err != nil {
 		return fmt.Errorf("生成OpenVPN配置文件失败: %v", err)
 	}
 
 	fmt.Println("OpenVPN配置文件生成完成")
+	return nil
+}
+
+// WriteConfig 写入配置文件到服务器目录
+func WriteConfig(config string) error {
+	// 写入配置文件到服务器目录
+	configPath := constants.ServerConfigPath
+	if err := os.WriteFile(configPath, []byte(config), 0644); err != nil {
+		return fmt.Errorf("写入配置文件失败: %v", err)
+	}
+	return nil
+}
+
+func checkOpenVPNDirectory() error {
+	// 检查OpenVPN目录
+	openvpnDir := filepath.Dir(constants.ServerConfigPath)
+	if _, err := os.Stat(openvpnDir); os.IsNotExist(err) {
+		return fmt.Errorf("OpenVPN目录不存在: %s", openvpnDir)
+	}
+
+	// 检查服务器目录
+	serverDir := filepath.Dir(constants.ServerConfigPath)
+	if _, err := os.Stat(serverDir); os.IsNotExist(err) {
+		return fmt.Errorf("OpenVPN服务器目录不存在: %s", serverDir)
+	}
+
+	// 检查客户端目录
+	if _, err := os.Stat(constants.ClientConfigDir); os.IsNotExist(err) {
+		return fmt.Errorf("OpenVPN客户端目录不存在: %s", constants.ClientConfigDir)
+	}
+
+	return nil
+}
+
+func createOpenVPNDirectory() error {
+	// 创建OpenVPN目录
+	openvpnDir := filepath.Dir(constants.ServerConfigPath)
+	if err := os.MkdirAll(openvpnDir, 0755); err != nil {
+		return fmt.Errorf("创建OpenVPN目录失败: %v", err)
+	}
+
+	// 创建服务器目录
+	serverDir := filepath.Dir(constants.ServerConfigPath)
+	if err := os.MkdirAll(serverDir, 0755); err != nil {
+		return fmt.Errorf("创建OpenVPN服务器目录失败: %v", err)
+	}
+
+	// 创建客户端目录
+	if err := os.MkdirAll(constants.ClientConfigDir, 0755); err != nil {
+		return fmt.Errorf("创建OpenVPN客户端目录失败: %v", err)
+	}
+
 	return nil
 }
 
@@ -204,20 +224,19 @@ func InstallEnvironment() error {
 
 	// 创建配置目录
 	fmt.Println("正在创建配置目录...")
-	openvpnDir := "/etc/openvpn"
+	openvpnDir := filepath.Dir(constants.ServerConfigPath)
 	if err := os.MkdirAll(openvpnDir, 0755); err != nil {
 		return fmt.Errorf("创建 OpenVPN 配置目录失败: %v", err)
 	}
 
 	// 创建服务器证书目录
-	serverDir := "/etc/openvpn/server"
+	serverDir := filepath.Dir(constants.ServerConfigPath)
 	if err := os.MkdirAll(serverDir, 0755); err != nil {
 		return fmt.Errorf("创建 OpenVPN 服务器证书目录失败: %v", err)
 	}
 
 	// 创建客户端配置目录
-	clientDir := "/etc/openvpn/client"
-	if err := os.MkdirAll(clientDir, 0755); err != nil {
+	if err := os.MkdirAll(constants.ClientConfigDir, 0755); err != nil {
 		return fmt.Errorf("创建 OpenVPN 客户端目录失败: %v", err)
 	}
 
@@ -243,12 +262,12 @@ func InstallEnvironment() error {
 
 	// 启动 OpenVPN 服务
 	fmt.Println("正在启动 OpenVPN 服务...")
-	cmd = exec.Command("systemctl", "enable", "openvpn")
+	cmd = exec.Command("systemctl", "enable", constants.ServiceName)
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("设置 OpenVPN 服务开机自启失败: %v", err)
 	}
 
-	cmd = exec.Command("systemctl", "start", "openvpn")
+	cmd = exec.Command("systemctl", "start", constants.ServiceName)
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("启动 OpenVPN 服务失败: %v", err)
 	}
@@ -273,13 +292,26 @@ func CheckEnvironment() error {
 	}
 
 	// 检查OpenVPN配置目录是否存在
-	if _, err := os.Stat("/etc/openvpn"); os.IsNotExist(err) {
-		return fmt.Errorf("OpenVPN配置目录不存在，请先安装OpenVPN")
+	if err := checkOpenVPNDirectory(); err != nil {
+		return err
 	}
 
 	// 检查证书文件
-	if err := CheckCertFiles(); err != nil {
+	if err := checkCertificates(); err != nil {
 		return err
+	}
+
+	// 检查服务端配置文件是否存在
+	if _, err := os.Stat(constants.ServerConfigPath); os.IsNotExist(err) {
+		return fmt.Errorf("服务端配置文件不存在: %s", constants.ServerConfigPath)
+	}
+
+	// 检查CA证书和密钥文件是否存在
+	if _, err := os.Stat(constants.ServerCACertPath); os.IsNotExist(err) {
+		return fmt.Errorf("CA证书文件不存在: %s", constants.ServerCACertPath)
+	}
+	if _, err := os.Stat(constants.ServerCAKeyPath); os.IsNotExist(err) {
+		return fmt.Errorf("CA密钥文件不存在: %s", constants.ServerCAKeyPath)
 	}
 
 	return nil

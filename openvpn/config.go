@@ -1,11 +1,14 @@
-package config
+package openvpn
 
 import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
+
+	"openvpn-admin-go/constants"
 )
 
 // Config 存储所有配置
@@ -55,88 +58,29 @@ func LoadConfig() (*Config, error) {
 		cfg.OpenVPNRoutes = []string{}
 	}
 	
-	cfg.OpenVPNClientConfigDir = getEnv("OPENVPN_CLIENT_CONFIG_DIR", "/etc/openvpn/client")
+	cfg.OpenVPNClientConfigDir = getEnv("OPENVPN_CLIENT_CONFIG_DIR", constants.ClientConfigDir)
 	cfg.OpenVPNTLSVersion = getEnv("OPENVPN_TLS_VERSION", "1.2")
 	cfg.OpenVPNTLSKey = getEnv("OPENVPN_TLS_KEY", "ta.key")
-	cfg.OpenVPNTLSKeyPath = getEnv("OPENVPN_TLS_KEY_PATH", "/etc/openvpn/server/ta.key")
+	cfg.OpenVPNTLSKeyPath = getEnv("OPENVPN_TLS_KEY_PATH", constants.ServerTLSKeyPath)
 
-	// 加载 DNS 配置
-	cfg.DNSServerIP = getEnv("DNS_SERVER_IP", "10.10.99.44")
-	cfg.DNSServerDomain = getEnv("DNS_SERVER_DOMAIN", "corp.jancsitech.net")
+	// 只在环境变量存在时设置 DNS 配置
+	if dnsIP, exists := os.LookupEnv("DNS_SERVER_IP"); exists {
+		cfg.DNSServerIP = dnsIP
+	}
+	if dnsDomain, exists := os.LookupEnv("DNS_SERVER_DOMAIN"); exists {
+		cfg.DNSServerDomain = dnsDomain
+	}
 
 	return cfg, nil
 }
 
 // GenerateServerConfig 生成 OpenVPN 服务器配置
-func (c *Config) GenerateServerConfig() string {
-	// 确保TLS相关配置有值
-	if c.OpenVPNTLSVersion == "" {
-		c.OpenVPNTLSVersion = "1.2"
+func (c *Config) GenerateServerConfig() (string, error) {
+	config, err := RenderServerConfig(c)
+	if err != nil {
+		return "", fmt.Errorf("生成服务器配置失败: %v", err)
 	}
-	if c.OpenVPNTLSKeyPath == "" {
-		c.OpenVPNTLSKeyPath = "/etc/openvpn/server/ta.key"
-	}
-
-	// 构建路由配置
-	var routeConfigs []string
-	for _, route := range c.OpenVPNRoutes {
-		routeConfigs = append(routeConfigs, fmt.Sprintf(`push "route %s"`, route))
-	}
-
-	// 构建客户端到客户端配置
-	var clientToClientConfig string
-	if c.OpenVPNClientToClient {
-		clientToClientConfig = "client-to-client\n"
-	}
-
-	// 构建协议相关配置
-	var protoConfig string
-	if c.OpenVPNProto == "udp" || c.OpenVPNProto == "udp6" {
-		protoConfig = "explicit-exit-notify 1\n"
-	}
-
-	// 合并所有配置
-	config := fmt.Sprintf(`port %d
-proto %s
-dev tun
-ca /etc/openvpn/server/ca.crt
-cert /etc/openvpn/server/server.crt
-key /etc/openvpn/server/server.key
-dh /etc/openvpn/server/dh.pem
-server %s %s
-%sifconfig-pool-persist /etc/openvpn/server/ipp.txt
-%s
-push "dhcp-option DNS %s"
-push "dhcp-option DOMAIN %s"
-keepalive 10 120
-topology subnet
-cipher AES-256-CBC
-auth SHA256
-tls-server
-tls-version-min %s
-tls-cipher TLS-ECDHE-ECDSA-WITH-AES-256-GCM-SHA384:TLS-ECDHE-RSA-WITH-AES-256-GCM-SHA384:TLS-ECDHE-ECDSA-WITH-AES-128-GCM-SHA256:TLS-ECDHE-RSA-WITH-AES-128-GCM-SHA256
-tls-auth /etc/openvpn/server/ta.key 0
-key-direction 0
-user nobody
-group nogroup
-persist-key
-persist-tun
-status /var/log/openvpn/status.log
-verb 3
-%s`, 
-		c.OpenVPNPort,
-		c.OpenVPNProto,
-		c.OpenVPNServerNetwork,
-		c.OpenVPNServerNetmask,
-		clientToClientConfig,
-		strings.Join(routeConfigs, "\n"),
-		c.DNSServerIP,
-		c.DNSServerDomain,
-		c.OpenVPNTLSVersion,
-		protoConfig,
-	)
-
-	return config
+	return config, nil
 }
 
 // getEnv 获取环境变量，如果不存在则返回默认值
@@ -165,18 +109,18 @@ func getEnvList(key string, defaultValue []string) []string {
 	return defaultValue
 }
 
-// 添加配置保存实现
+// SaveConfig 保存配置到文件
 func SaveConfig(cfg *Config) error {
-	// 将配置保存到/etc/openvpn/config.json
+	// 将配置保存到配置文件
 	data, err := json.MarshalIndent(cfg, "", "  ")
 	if err != nil {
 		return fmt.Errorf("序列化配置失败: %v", err)
 	}
 	
-	if err := os.WriteFile("/etc/openvpn/config.json", data, 0644); err != nil {
+	configPath := filepath.Join(filepath.Dir(constants.ServerConfigPath), "config.json")
+	if err := os.WriteFile(configPath, data, 0644); err != nil {
 		return fmt.Errorf("写入配置文件失败: %v", err)
 	}
 	
 	return nil
-}
-
+} 

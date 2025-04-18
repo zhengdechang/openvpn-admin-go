@@ -3,75 +3,89 @@ package openvpn
 import (
 	"fmt"
 	"os"
-	"openvpn-admin-go/utils"
+	"os/exec"
+	"path/filepath"
+
+	"openvpn-admin-go/constants"
 )
 
-// GetServerConfigTemplate 获取服务器配置模板
-func GetServerConfigTemplate() string {
-	// 从环境变量读取配置
-	port := utils.GetEnvOrDefault("OPENVPN_PORT", "1194")
-	proto := utils.GetEnvOrDefault("OPENVPN_PROTO", "udp")
-	serverNetwork := utils.GetEnvOrDefault("OPENVPN_SERVER_NETWORK", "10.8.0.0")
-	serverNetmask := utils.GetEnvOrDefault("OPENVPN_SERVER_NETMASK", "255.255.255.0")
-	serverHostname := utils.GetEnvOrDefault("OPENVPN_SERVER_HOSTNAME", "")
-	serverIP := utils.GetEnvOrDefault("OPENVPN_SERVER_IP", "")
-	dnsServer := utils.GetEnvOrDefault("DNS_SERVER_IP", "8.8.8.8")
-	dnsDomain := utils.GetEnvOrDefault("DNS_SERVER_DOMAIN", "")
-	useCRL := utils.GetEnvOrDefault("OPENVPN_USE_CRL", "false")
-	syncCerts := utils.GetEnvOrDefault("OPENVPN_SYNC_CERTS", "false")
+// GetServerConfigTemplate 获取服务端配置模板
+func GetServerConfigTemplate() (string, error) {
+	// 从环境变量加载配置
+	cfg, err := LoadConfig()
+	if err != nil {
+		return "", fmt.Errorf("加载配置失败: %v", err)
+	}
+	return cfg.GenerateServerConfig()
+}
 
-	config := fmt.Sprintf(`port %s
-proto %s
-dev tun
-ca ca.crt
-cert server.crt
-key server.key
-dh dh.pem
-server %s %s
-ifconfig-pool-persist ipp.txt
-push "redirect-gateway def1 bypass-dhcp"
-push "dhcp-option DNS %s"`, 
-		port, proto, serverNetwork, serverNetmask, dnsServer)
-
-	// 如果配置了DNS域名，添加域名推送
-	if dnsDomain != "" {
-		config += fmt.Sprintf("\npush \"dhcp-option DOMAIN %s\"", dnsDomain)
+// UpdateServerConfig 更新服务器配置
+func UpdateServerConfig() error {
+	// 加载配置
+	cfg, err := LoadConfig()
+	if err != nil {
+		return fmt.Errorf("加载配置失败: %v", err)
 	}
 
-	// 如果配置了服务器主机名，添加推送
-	if serverHostname != "" {
-		config += fmt.Sprintf("\npush \"dhcp-option DOMAIN-SEARCH %s\"", serverHostname)
+	// 生成服务器配置文件
+	config, err := cfg.GenerateServerConfig()
+	if err != nil {
+		return fmt.Errorf("生成服务器配置失败: %v", err)
 	}
 
-	// 如果配置了服务器IP，添加推送
-	if serverIP != "" {
-		config += fmt.Sprintf("\npush \"dhcp-option DNS %s\"", serverIP)
+	// 写入配置文件
+	if err := os.WriteFile(constants.ServerConfigPath, []byte(config), 0644); err != nil {
+		return fmt.Errorf("写入配置文件失败: %v", err)
 	}
 
-	// 如果启用了CRL
-	if useCRL == "true" {
-		config += "\ncrl-verify crl.pem"
+	// 检查证书文件是否存在
+	if _, err := os.Stat(constants.ServerCACertPath); os.IsNotExist(err) {
+		return fmt.Errorf("CA证书文件不存在: %s", constants.ServerCACertPath)
+	}
+	if _, err := os.Stat(constants.ServerCertPath); os.IsNotExist(err) {
+		return fmt.Errorf("服务器证书文件不存在: %s", constants.ServerCertPath)
+	}
+	if _, err := os.Stat(constants.ServerKeyPath); os.IsNotExist(err) {
+		return fmt.Errorf("服务器密钥文件不存在: %s", constants.ServerKeyPath)
+	}
+	if _, err := os.Stat(constants.ServerDHPath); os.IsNotExist(err) {
+		return fmt.Errorf("DH参数文件不存在: %s", constants.ServerDHPath)
+	}
+	if _, err := os.Stat(constants.ServerTLSKeyPath); os.IsNotExist(err) {
+		return fmt.Errorf("TLS密钥文件不存在: %s", constants.ServerTLSKeyPath)
 	}
 
-	// 如果启用了证书同步
-	if syncCerts == "true" {
-		config += "\nclient-cert-not-required"
+	// 创建ipp.txt文件
+	if err := os.WriteFile(constants.ServerIPPPath, []byte{}, 0644); err != nil {
+		return fmt.Errorf("创建ipp.txt文件失败: %v", err)
 	}
 
-	// 添加其他通用配置
-	config += `
-keepalive 10 120
-cipher AES-256-CBC
-comp-lzo
-user nobody
-group nogroup
-persist-key
-auth SHA256
-persist-tun
-status openvpn-status.log
-verb 3`
+	// 创建日志目录
+	logDir := filepath.Dir(constants.ServerStatusLogPath)
+	if err := os.MkdirAll(logDir, 0755); err != nil {
+		return fmt.Errorf("创建日志目录失败: %v", err)
+	}
 
-	return config
+	// 创建状态日志文件
+	if err := os.WriteFile(constants.ServerStatusLogPath, []byte{}, 0644); err != nil {
+		return fmt.Errorf("创建状态日志文件失败: %v", err)
+	}
+
+	// 重启OpenVPN服务
+	if err := exec.Command("systemctl", "restart", constants.ServiceName).Run(); err != nil {
+		return fmt.Errorf("重启OpenVPN服务失败: %v", err)
+	}
+
+	return nil
+}
+
+// RestartServer 重启OpenVPN服务
+func RestartServer() error {
+	cmd := exec.Command("systemctl", "restart", constants.ServiceName)
+	if output, err := cmd.CombinedOutput(); err != nil {
+		return fmt.Errorf("重启服务失败: %v\n输出: %s", err, string(output))
+	}
+	return nil
 }
 
 // getEnvOrDefault 从环境变量获取值，如果不存在则返回默认值

@@ -6,14 +6,14 @@ import (
 	"net"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
-	"openvpn-admin-go/config"
+	"openvpn-admin-go/constants"
+	"openvpn-admin-go/openvpn"
 )
 
 var serverCmd = &cobra.Command{
@@ -33,7 +33,7 @@ const serviceName = "openvpn-server@server.service"
 
 func ServerMenu() {
 	// 加载配置
-	cfg, err := config.LoadConfig()
+	cfg, err := openvpn.LoadConfig()
 	if err != nil {
 		fmt.Printf("加载配置失败: %v\n", err)
 		return
@@ -91,19 +91,23 @@ func ServerMenu() {
 	}
 }
 
-func startServer(cfg *config.Config) {
+func startServer(cfg *openvpn.Config) {
 	// 生成配置文件
-	configContent := cfg.GenerateServerConfig()
-	configPath := filepath.Join("/etc/openvpn/server", "server.conf")
+	configContent, err := cfg.GenerateServerConfig()
+	if err != nil {
+		fmt.Printf("生成配置文件失败: %v\n", err)
+		return
+	}
+	configPath := constants.ServerConfigPath
 	fmt.Println(configPath)
 	// 写入配置文件
-	if err := os.WriteFile(configPath, []byte(configContent), 0644); err != nil {
+	if err := WriteConfig(configContent); err != nil {
 		fmt.Printf("写入配置文件失败: %v\n", err)
 		return
 	}
 
 	// 启动服务
-	cmd := exec.Command("sudo", "systemctl", "start", "openvpn-server@server.service")
+	cmd := exec.Command("sudo", "systemctl", "start", constants.ServiceName)
 	if output, err := cmd.CombinedOutput(); err != nil {
 		fmt.Printf("启动失败: %v\n输出: %s\n", err, string(output))
 		return
@@ -112,7 +116,7 @@ func startServer(cfg *config.Config) {
 }
 
 func stopServer() {
-	cmd := exec.Command("sudo", "systemctl", "stop", "openvpn-server@server.service")
+	cmd := exec.Command("sudo", "systemctl", "stop", constants.ServiceName)
 	if output, err := cmd.CombinedOutput(); err != nil {
 		fmt.Printf("停止失败: %v\n输出: %s\n", err, string(output))
 		return
@@ -120,14 +124,14 @@ func stopServer() {
 	fmt.Println("✅ 服务已停止")
 }
 
-func restartServer(cfg *config.Config) {
+func restartServer(cfg *openvpn.Config) {
 	stopServer()
 	time.Sleep(1 * time.Second)
 	startServer(cfg)
 }
 
 func checkServerStatus() {
-	cmd := exec.Command("sudo", "systemctl", "status", "openvpn-server@server.service")
+	cmd := exec.Command("sudo", "systemctl", "status", constants.ServiceName)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		fmt.Printf("获取状态失败: %v\n输出: %s\n", err, string(output))
@@ -136,9 +140,9 @@ func checkServerStatus() {
 	fmt.Println(string(output))
 }
 
-func updatePort(cfg *config.Config) {
+func updatePort(cfg *openvpn.Config) {
 	// 读取当前配置文件
-	configPath := "/etc/openvpn/server/server.conf"
+	configPath := constants.ServerConfigPath
 	configContent, err := os.ReadFile(configPath)
 	if err != nil {
 		fmt.Printf("读取配置文件失败: %v\n", err)
@@ -189,7 +193,7 @@ func updatePort(cfg *config.Config) {
 	cfg.OpenVPNPort, _ = strconv.Atoi(newPort)
 	
 	// 保存配置后需要重新生成服务配置
-	if err := config.SaveConfig(cfg); err != nil {
+	if err := openvpn.SaveConfig(cfg); err != nil {
 		fmt.Printf("保存配置失败: %v\n", err)
 		return
 	}
@@ -205,7 +209,7 @@ func updatePort(cfg *config.Config) {
 	fmt.Printf("端口已更新为 %s\n", newPort)
 }
 
-func updateServerIP(cfg *config.Config) error {
+func updateServerIP(cfg *openvpn.Config) error {
 	prompt := promptui.Prompt{
 		Label: "请输入新的服务器地址",
 		Validate: func(input string) error {
@@ -230,7 +234,7 @@ func updateServerIP(cfg *config.Config) error {
 	cfg.OpenVPNServerHostname = newIP
 	
 	// 保存配置后需要重新生成服务配置
-	if err := config.SaveConfig(cfg); err != nil {
+	if err := openvpn.SaveConfig(cfg); err != nil {
 		fmt.Printf("保存配置失败: %v\n", err)
 		return err
 	}
@@ -248,9 +252,9 @@ func updateServerIP(cfg *config.Config) error {
 }
 
 // updateServerIPAndMask 修改服务器IP和子网掩码
-func updateServerIPAndMask(configPath string) error {
+func updateServerIPAndMask() error {
 	// 读取当前配置
-	configContent, err := os.ReadFile(configPath)
+	configContent, err := os.ReadFile(constants.ServerConfigPath)
 	if err != nil {
 		return fmt.Errorf("读取配置文件失败: %v", err)
 	}
@@ -317,7 +321,7 @@ func updateServerIPAndMask(configPath string) error {
 	}
 
 	// 写入新配置
-	if err := os.WriteFile(configPath, []byte(strings.Join(lines, "\n")), 0644); err != nil {
+	if err := os.WriteFile(constants.ServerConfigPath, []byte(strings.Join(lines, "\n")), 0644); err != nil {
 		return fmt.Errorf("写入配置文件失败: %v", err)
 	}
 
@@ -326,32 +330,32 @@ func updateServerIPAndMask(configPath string) error {
 }
 
 // generateTLSKey 生成tls-auth密钥
-func generateTLSKey(cfg *config.Config) error {
+func generateTLSKey(cfg *openvpn.Config) error {
 	// 检查密钥文件是否已存在
-	if _, err := os.Stat(cfg.OpenVPNTLSKeyPath); err == nil {
-		fmt.Printf("TLS密钥文件已存在: %s\n", cfg.OpenVPNTLSKeyPath)
+	if _, err := os.Stat(constants.ServerTLSKeyPath); err == nil {
+		fmt.Printf("TLS密钥文件已存在: %s\n", constants.ServerTLSKeyPath)
 		return nil
 	}
 
 	// 生成tls-auth密钥
-	cmd := exec.Command("openvpn", "--genkey", "secret", cfg.OpenVPNTLSKeyPath)
+	cmd := exec.Command("openvpn", "--genkey", "secret", constants.ServerTLSKeyPath)
 	if output, err := cmd.CombinedOutput(); err != nil {
 		return fmt.Errorf("生成TLS密钥失败: %v\n输出: %s", err, string(output))
 	}
 
 	// 设置适当的权限
-	if err := os.Chmod(cfg.OpenVPNTLSKeyPath, 0600); err != nil {
+	if err := os.Chmod(constants.ServerTLSKeyPath, 0600); err != nil {
 		return fmt.Errorf("设置TLS密钥文件权限失败: %v", err)
 	}
 
-	fmt.Printf("TLS密钥已生成: %s\n", cfg.OpenVPNTLSKeyPath)
+	fmt.Printf("TLS密钥已生成: %s\n", constants.ServerTLSKeyPath)
 	return nil
 }
 
+// 更新服务器配置
 func UpdateConfig() error {
 	// 读取当前配置文件
-	configPath := "/etc/openvpn/server/server.conf"
-	configContent, err := os.ReadFile(configPath)
+	configContent, err := os.ReadFile(constants.ServerConfigPath)
 	if err != nil {
 		return fmt.Errorf("读取配置文件失败: %v", err)
 	}
@@ -379,7 +383,7 @@ func UpdateConfig() error {
 	}
 
 	// 加载配置
-	cfg, err := config.LoadConfig()
+	cfg, err := openvpn.LoadConfig()
 	if err != nil {
 		return fmt.Errorf("加载配置失败: %v", err)
 	}
@@ -392,9 +396,9 @@ func UpdateConfig() error {
 		updateServerIP(cfg)
 		return nil
 	case "修改服务器IP和子网掩码":
-		return updateServerIPAndMask(configPath)
+		return updateServerIPAndMask()
 	case "修改OpenVPN路由":
-		return updateRoute(configPath)
+		return updateRoute()
 	case "生成TLS密钥":
 		if err := generateTLSKey(cfg); err != nil {
 			return fmt.Errorf("生成TLS密钥失败: %v", err)
@@ -409,9 +413,9 @@ func UpdateConfig() error {
 	return nil
 }
 
-func updateRoute(configPath string) error {
+func updateRoute() error {
 	// 读取当前配置
-	configContent, err := os.ReadFile(configPath)
+	configContent, err := os.ReadFile(constants.ServerConfigPath)
 	if err != nil {
 		return fmt.Errorf("读取配置文件失败: %v", err)
 	}
@@ -442,9 +446,9 @@ func updateRoute(configPath string) error {
 
 	switch result {
 	case "添加路由":
-		return addRoute(configPath, lines)
+		return addRoute(lines)
 	case "删除路由":
-		return deleteRoute(configPath, lines)
+		return deleteRoute(lines)
 	case "返回":
 		return nil
 	}
@@ -452,7 +456,7 @@ func updateRoute(configPath string) error {
 	return nil
 }
 
-func addRoute(configPath string, lines []string) error {
+func addRoute(lines []string) error {
 	// 提示输入新路由
 	fmt.Print("请输入要添加的路由 (格式: 10.10.100.0/23,10.10.98.0/23): ")
 	var input string
@@ -505,7 +509,7 @@ func addRoute(configPath string, lines []string) error {
 	lines = append(lines, newRoutes...)
 
 	// 写入新配置
-	if err := os.WriteFile(configPath, []byte(strings.Join(lines, "\n")), 0644); err != nil {
+	if err := os.WriteFile(constants.ServerConfigPath, []byte(strings.Join(lines, "\n")), 0644); err != nil {
 		return fmt.Errorf("写入配置文件失败: %v", err)
 	}
 
@@ -516,7 +520,7 @@ func addRoute(configPath string, lines []string) error {
 	return nil
 }
 
-func deleteRoute(configPath string, lines []string) error {
+func deleteRoute(lines []string) error {
 	// 收集所有路由
 	var routes []string
 	for _, line := range lines {
@@ -556,7 +560,7 @@ func deleteRoute(configPath string, lines []string) error {
 	}
 
 	// 写入新配置
-	if err := os.WriteFile(configPath, []byte(strings.Join(newLines, "\n")), 0644); err != nil {
+	if err := os.WriteFile(constants.ServerConfigPath, []byte(strings.Join(newLines, "\n")), 0644); err != nil {
 		return fmt.Errorf("写入配置文件失败: %v", err)
 	}
 
@@ -564,11 +568,40 @@ func deleteRoute(configPath string, lines []string) error {
 	return nil
 }
 
+// 读取配置文件
+func readConfig() (string, error) {
+	// 读取配置文件
+	config, err := os.ReadFile(constants.ServerConfigPath)
+	if err != nil {
+		return "", fmt.Errorf("读取配置文件失败: %v", err)
+	}
+	return string(config), nil
+}
+
+// 检查配置文件是否存在
+func checkConfig() error {
+	// 检查配置文件是否存在
+	if _, err := os.Stat(constants.ServerConfigPath); os.IsNotExist(err) {
+		return fmt.Errorf("配置文件不存在: %s", constants.ServerConfigPath)
+	}
+	return nil
+}
+
+// 重启OpenVPN服务
+func restartService() error {
+	// 重启OpenVPN服务
+	cmd := exec.Command("systemctl", "restart", constants.ServiceName)
+	if output, err := cmd.CombinedOutput(); err != nil {
+		return fmt.Errorf("重启服务失败: %v\n输出: %s", err, string(output))
+	}
+	return nil
+}
+
 func RestartService() error {
 	fmt.Println("正在检查 OpenVPN 所需文件...")
 
 	// 检查配置文件
-	configFile := "/etc/openvpn/server/server.conf"
+	configFile := constants.ServerConfigPath
 	if _, err := os.Stat(configFile); os.IsNotExist(err) {
 		return fmt.Errorf("配置文件不存在: %s\n请确保配置文件已正确生成", configFile)
 	}
@@ -584,27 +617,27 @@ func RestartService() error {
 	}
 
 	// 先停止服务
-	cmd := exec.Command("systemctl", "stop", "openvpn")
+	cmd := exec.Command("systemctl", "stop", constants.ServiceName)
 	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("停止服务失败: %v\n请检查服务状态: systemctl status openvpn", err)
+		return fmt.Errorf("停止服务失败: %v\n请检查服务状态: systemctl status %s", err, constants.ServiceName)
 	}
 
 	// 等待服务完全停止
 	time.Sleep(2 * time.Second)
 
 	// 启动服务
-	cmd = exec.Command("systemctl", "start", "openvpn")
+	cmd = exec.Command("systemctl", "start", constants.ServiceName)
 	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("启动服务失败: %v\n请检查服务状态: systemctl status openvpn", err)
+		return fmt.Errorf("启动服务失败: %v\n请检查服务状态: systemctl status %s", err, constants.ServiceName)
 	}
 
 	// 等待服务启动
 	time.Sleep(2 * time.Second)
 
 	// 检查服务状态
-	cmd = exec.Command("systemctl", "is-active", "openvpn")
+	cmd = exec.Command("systemctl", "is-active", constants.ServiceName)
 	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("服务未正常运行: %v\n请检查服务日志: journalctl -u openvpn", err)
+		return fmt.Errorf("服务未正常运行: %v\n请检查服务日志: journalctl -u %s", err, constants.ServiceName)
 	}
 
 	fmt.Println("服务重启成功")
@@ -613,22 +646,22 @@ func RestartService() error {
 
 func StopService() error {
 	// 检查服务状态
-	cmd := exec.Command("systemctl", "is-active", "openvpn")
+	cmd := exec.Command("systemctl", "is-active", constants.ServiceName)
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("服务未运行")
 	}
 
 	// 停止服务
-	cmd = exec.Command("systemctl", "stop", "openvpn")
+	cmd = exec.Command("systemctl", "stop", constants.ServiceName)
 	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("停止服务失败: %v\n请检查服务状态: systemctl status openvpn", err)
+		return fmt.Errorf("停止服务失败: %v\n请检查服务状态: systemctl status %s", err, constants.ServiceName)
 	}
 
 	// 等待服务完全停止
 	time.Sleep(2 * time.Second)
 
 	// 验证服务已停止
-	cmd = exec.Command("systemctl", "is-active", "openvpn")
+	cmd = exec.Command("systemctl", "is-active", constants.ServiceName)
 	if err := cmd.Run(); err == nil {
 		return fmt.Errorf("服务仍在运行")
 	}

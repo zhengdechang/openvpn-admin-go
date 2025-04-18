@@ -9,7 +9,7 @@ import (
 
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
-	"openvpn-admin-go/config"
+	"openvpn-admin-go/openvpn"
 )
 
 var rootCmd = &cobra.Command{
@@ -26,7 +26,7 @@ var rootCmd = &cobra.Command{
 		}()
 
 		// 加载配置
-		cfg, err := config.LoadConfig()
+		cfg, err := openvpn.LoadConfig()
 		if err != nil {
 			fmt.Printf("加载配置失败: %v\n", err)
 			return
@@ -37,7 +37,7 @@ var rootCmd = &cobra.Command{
 	},
 }
 
-func MainMenu(cfg *config.Config) {
+func MainMenu(cfg *openvpn.Config) {
 	menuItems := []string{
 		"服务器管理",
 		"客户端管理",
