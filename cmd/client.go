@@ -199,7 +199,7 @@ func getUsername() (string, error) {
 
 func getServerIP() string {
 	// 读取服务器配置文件获取IP
-	config, err := os.ReadFile("/etc/openvpn/server.conf")
+	config, err := os.ReadFile("/etc/openvpn/server/server.conf")
 	if err != nil {
 		return "your-server-ip" // 默认值
 	}

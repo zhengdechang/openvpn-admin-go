@@ -270,7 +270,7 @@ type ClientStatus struct {
 // GenerateClientConfig 生成客户端配置文件内容
 func GenerateClientConfig(username string, cfg *config.Config) (string, error) {
 	// 读取服务器配置以获取端口和协议
-	serverConfig, err := os.ReadFile("/etc/openvpn/server.conf")
+	serverConfig, err := os.ReadFile("/etc/openvpn/server/server.conf")
 	if err != nil {
 		return "", fmt.Errorf("读取服务器配置失败: %v", err)
 	}

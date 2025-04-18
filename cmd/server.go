@@ -14,7 +14,6 @@ import (
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
 	"openvpn-admin-go/config"
-	"openvpn-admin-go/utils"
 )
 
 var serverCmd = &cobra.Command{
@@ -92,45 +91,11 @@ func ServerMenu() {
 	}
 }
 
-// 添加查找 OpenVPN 配置目录的函数
-func findOpenVPNConfigDir() (string, error) {
-	possiblePaths := []string{
-		"/etc/openvpn",
-		"/etc/openvpn/server",
-	}
-
-	for _, path := range possiblePaths {
-		if _, err := os.Stat(path); err == nil {
-			// 检查必要的文件是否存在
-			files := []string{"ca.crt", "server.crt", "server.key", "dh.pem"}
-			allExist := true
-			for _, file := range files {
-				if _, err := os.Stat(filepath.Join(path, file)); err != nil {
-					allExist = false
-					break
-				}
-			}
-			if allExist {
-				return path, nil
-			}
-		}
-	}
-
-	return "", fmt.Errorf("未找到有效的 OpenVPN 配置目录")
-}
-
 func startServer(cfg *config.Config) {
-	// 查找 OpenVPN 配置目录
-	configDir, err := utils.FindOpenVPNConfigDir()
-	if err != nil {
-		fmt.Printf("查找配置目录失败: %v\n", err)
-		return
-	}
-
 	// 生成配置文件
 	configContent := cfg.GenerateServerConfig()
-	configPath := filepath.Join(configDir, "server.conf")
-
+	configPath := filepath.Join("/etc/openvpn/server", "server.conf")
+	fmt.Println(configPath)
 	// 写入配置文件
 	if err := os.WriteFile(configPath, []byte(configContent), 0644); err != nil {
 		fmt.Printf("写入配置文件失败: %v\n", err)
@@ -173,7 +138,7 @@ func checkServerStatus() {
 
 func updatePort(cfg *config.Config) {
 	// 读取当前配置文件
-	configPath := "/etc/openvpn/server.conf"
+	configPath := "/etc/openvpn/server/server.conf"
 	configContent, err := os.ReadFile(configPath)
 	if err != nil {
 		fmt.Printf("读取配置文件失败: %v\n", err)
@@ -385,7 +350,7 @@ func generateTLSKey(cfg *config.Config) error {
 
 func UpdateConfig() error {
 	// 读取当前配置文件
-	configPath := "/etc/openvpn/server.conf"
+	configPath := "/etc/openvpn/server/server.conf"
 	configContent, err := os.ReadFile(configPath)
 	if err != nil {
 		return fmt.Errorf("读取配置文件失败: %v", err)
@@ -603,7 +568,7 @@ func RestartService() error {
 	fmt.Println("正在检查 OpenVPN 所需文件...")
 
 	// 检查配置文件
-	configFile := "/etc/openvpn/server.conf"
+	configFile := "/etc/openvpn/server/server.conf"
 	if _, err := os.Stat(configFile); os.IsNotExist(err) {
 		return fmt.Errorf("配置文件不存在: %s\n请确保配置文件已正确生成", configFile)
 	}
