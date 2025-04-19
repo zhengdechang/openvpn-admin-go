@@ -31,37 +31,107 @@ type Config struct {
 	DNSServerDomain        string   `json:"dns_server_domain"`
 }
 
-// LoadConfig 从环境变量加载配置
+// LoadConfig 从服务端配置文件加载配置
 func LoadConfig() (*Config, error) {
 	cfg := &Config{}
 	var err error
 
-	// 加载 OpenVPN 配置
-	cfg.OpenVPNPort, err = strconv.Atoi(getEnv("OPENVPN_PORT", "4500"))
-	if err != nil {
-		return nil, fmt.Errorf("invalid OPENVPN_PORT: %v", err)
+	// 检查配置文件是否存在，如果不存在则创建
+	if _, err := os.Stat(constants.ServerConfigPath); os.IsNotExist(err) {
+		// 创建配置文件目录
+		configDir := filepath.Dir(constants.ServerConfigPath)
+		if err := os.MkdirAll(configDir, 0755); err != nil {
+			return nil, fmt.Errorf("创建配置目录失败: %v", err)
+		}
+
+		// 设置默认配置
+		cfg.OpenVPNPort = 4500
+		cfg.OpenVPNProto = "tcp6"
+		cfg.OpenVPNServerNetwork = "10.8.0.0"
+		cfg.OpenVPNServerNetmask = "255.255.255.0"
+		cfg.OpenVPNServerHostname = getEnv("OPENVPN_SERVER_HOSTNAME", "network.jancsitech.net")
+		cfg.OpenVPNServerIP = getEnv("OPENVPN_SERVER_IP", "172.16.10.10")
+		cfg.OpenVPNClientToClient = getEnvBool("OPENVPN_CLIENT_TO_CLIENT", false)
+		cfg.OpenVPNClientConfigDir = getEnv("OPENVPN_CLIENT_CONFIG_DIR", constants.ClientConfigDir)
+		cfg.OpenVPNTLSVersion = getEnv("OPENVPN_TLS_VERSION", "1.2")
+		cfg.OpenVPNTLSKey = getEnv("OPENVPN_TLS_KEY", "ta.key")
+		cfg.OpenVPNTLSKeyPath = getEnv("OPENVPN_TLS_KEY_PATH", constants.ServerTLSKeyPath)
+
+		// 生成默认配置文件
+		configContent, err := cfg.GenerateServerConfig()
+		if err != nil {
+			return nil, fmt.Errorf("生成默认配置文件失败: %v", err)
+		}
+
+		// 写入配置文件
+		if err := os.WriteFile(constants.ServerConfigPath, []byte(configContent), 0644); err != nil {
+			return nil, fmt.Errorf("写入配置文件失败: %v", err)
+		}
+
+		return cfg, nil
 	}
 
-	cfg.OpenVPNProto = getEnv("OPENVPN_PROTO", "tcp6")
-	cfg.OpenVPNSyncCerts = getEnvBool("OPENVPN_SYNC_CERTS", true)
-	cfg.OpenVPNUseCRL = getEnvBool("OPENVPN_USE_CRL", true)
+	// 读取服务端配置文件
+	configContent, err := os.ReadFile(constants.ServerConfigPath)
+	if err != nil {
+		return nil, fmt.Errorf("读取服务端配置文件失败: %v", err)
+	}
+
+	// 解析配置文件
+	lines := strings.Split(string(configContent), "\n")
+	for _, line := range lines {
+		fields := strings.Fields(line)
+		if len(fields) < 2 {
+			continue
+		}
+		switch fields[0] {
+		case "port":
+			cfg.OpenVPNPort, err = strconv.Atoi(fields[1])
+			if err != nil {
+				return nil, fmt.Errorf("解析端口失败: %v", err)
+			}
+		case "proto":
+			cfg.OpenVPNProto = fields[1]
+		case "server":
+			if len(fields) >= 3 {
+				cfg.OpenVPNServerNetwork = fields[1]
+				cfg.OpenVPNServerNetmask = fields[2]
+			}
+		case "push":
+			if strings.HasPrefix(fields[1], "route") {
+				route := strings.Join(fields[2:], " ")
+				cfg.OpenVPNRoutes = append(cfg.OpenVPNRoutes, route)
+			}
+		}
+	}
+
+	// 设置默认值
+	if cfg.OpenVPNPort == 0 {
+		cfg.OpenVPNPort = 4500
+	}
+	if cfg.OpenVPNProto == "" {
+		cfg.OpenVPNProto = "tcp6"
+	}
+	if cfg.OpenVPNServerNetwork == "" {
+		cfg.OpenVPNServerNetwork = "10.8.0.0"
+	}
+	if cfg.OpenVPNServerNetmask == "" {
+		cfg.OpenVPNServerNetmask = "255.255.255.0"
+	}
+
+	// 从环境变量加载其他配置
 	cfg.OpenVPNServerHostname = getEnv("OPENVPN_SERVER_HOSTNAME", "network.jancsitech.net")
-	cfg.OpenVPNServerNetwork = getEnv("OPENVPN_SERVER_NETWORK", "10.8.0.0")
-	cfg.OpenVPNServerNetmask = getEnv("OPENVPN_SERVER_NETMASK", "255.255.255.0")
 	cfg.OpenVPNServerIP = getEnv("OPENVPN_SERVER_IP", "172.16.10.10")
 	cfg.OpenVPNClientToClient = getEnvBool("OPENVPN_CLIENT_TO_CLIENT", false)
-	
-	// 只在环境变量存在时设置路由
-	if routes, exists := os.LookupEnv("OPENVPN_ROUTES"); exists {
-		cfg.OpenVPNRoutes = strings.Split(routes, ",")
-	} else {
-		cfg.OpenVPNRoutes = []string{}
-	}
-	
 	cfg.OpenVPNClientConfigDir = getEnv("OPENVPN_CLIENT_CONFIG_DIR", constants.ClientConfigDir)
 	cfg.OpenVPNTLSVersion = getEnv("OPENVPN_TLS_VERSION", "1.2")
 	cfg.OpenVPNTLSKey = getEnv("OPENVPN_TLS_KEY", "ta.key")
 	cfg.OpenVPNTLSKeyPath = getEnv("OPENVPN_TLS_KEY_PATH", constants.ServerTLSKeyPath)
+
+	// 加载路由配置
+	if routes, exists := os.LookupEnv("OPENVPN_ROUTES"); exists {
+		cfg.OpenVPNRoutes = strings.Split(routes, ",")
+	}
 
 	// 只在环境变量存在时设置 DNS 配置
 	if dnsIP, exists := os.LookupEnv("DNS_SERVER_IP"); exists {

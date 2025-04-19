@@ -88,8 +88,20 @@ func RenderClientConfig(username string, cfg *Config) (string, error) {
 		return "", fmt.Errorf("读取TLS密钥失败: %v", err)
 	}
 
+	// 确保proto值正确传递
+	proto := cfg.OpenVPNProto
+	if proto == "tcp6" {
+		proto = "tcp"
+	} else if proto == "udp6" {
+		proto = "udp"
+	} else if proto == "udp" {
+		proto = "udp"
+	} else {
+		proto = "tcp"
+	}
+
 	data := map[string]interface{}{
-		"openvpn_proto":           cfg.OpenVPNProto,
+		"openvpn_proto":           proto,
 		"openvpn_port":            cfg.OpenVPNPort,
 		"openvpn_server_hostname": cfg.OpenVPNServerHostname,
 		"openvpn_tls_version":     cfg.OpenVPNTLSVersion,

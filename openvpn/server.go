@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 
 	"openvpn-admin-go/constants"
 )
@@ -36,6 +37,25 @@ func UpdateServerConfig() error {
 	// 写入配置文件
 	if err := os.WriteFile(constants.ServerConfigPath, []byte(config), 0644); err != nil {
 		return fmt.Errorf("写入配置文件失败: %v", err)
+	}
+
+	// 更新所有客户端配置
+	files, err := os.ReadDir(constants.ClientConfigDir)
+	if err != nil {
+		return fmt.Errorf("读取客户端目录失败: %v", err)
+	}
+
+	for _, file := range files {
+		if strings.HasSuffix(file.Name(), ".ovpn") {
+			username := strings.TrimSuffix(file.Name(), ".ovpn")
+			clientConfig, err := GenerateClientConfig(username, cfg)
+			if err != nil {
+				return fmt.Errorf("生成客户端 %s 配置失败: %v", username, err)
+			}
+			if err := os.WriteFile(filepath.Join(constants.ClientConfigDir, file.Name()), []byte(clientConfig), 0644); err != nil {
+				return fmt.Errorf("更新客户端 %s 配置失败: %v", username, err)
+			}
+		}
 	}
 
 	// 检查证书文件是否存在

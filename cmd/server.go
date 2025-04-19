@@ -124,10 +124,23 @@ func stopServer() {
 	fmt.Println("✅ 服务已停止")
 }
 
-func restartServer(cfg *openvpn.Config) {
-	stopServer()
-	time.Sleep(1 * time.Second)
-	startServer(cfg)
+func restartServer(cfg *openvpn.Config) error {
+	// 停止服务
+	cmd := exec.Command("systemctl", "stop", constants.ServiceName)
+	if output, err := cmd.CombinedOutput(); err != nil {
+		return fmt.Errorf("停止服务失败: %v\n输出: %s", err, string(output))
+	}
+
+	// 等待服务完全停止
+	time.Sleep(2 * time.Second)
+
+	// 启动服务
+	cmd = exec.Command("systemctl", "start", constants.ServiceName)
+	if output, err := cmd.CombinedOutput(); err != nil {
+		return fmt.Errorf("启动服务失败: %v\n输出: %s", err, string(output))
+	}
+
+	return nil
 }
 
 func checkServerStatus() {
@@ -140,13 +153,12 @@ func checkServerStatus() {
 	fmt.Println(string(output))
 }
 
-func updatePort(cfg *openvpn.Config) {
+func updatePort(cfg *openvpn.Config) error {
 	// 读取当前配置文件
 	configPath := constants.ServerConfigPath
 	configContent, err := os.ReadFile(configPath)
 	if err != nil {
-		fmt.Printf("读取配置文件失败: %v\n", err)
-		return
+		return fmt.Errorf("读取配置文件失败: %v", err)
 	}
 
 	// 获取当前端口
@@ -179,12 +191,10 @@ func updatePort(cfg *openvpn.Config) {
 	} else {
 		port, err := strconv.Atoi(input)
 		if err != nil {
-			fmt.Printf("输入失败: %v\n", err)
-			return
+			return fmt.Errorf("输入失败: %v", err)
 		}
 		if port < 1 || port > 65535 {
-			fmt.Printf("端口号必须在 1-65535 之间\n")
-			return
+			return fmt.Errorf("端口号必须在 1-65535 之间")
 		}
 		newPort = input
 	}
@@ -194,19 +204,33 @@ func updatePort(cfg *openvpn.Config) {
 	
 	// 保存配置后需要重新生成服务配置
 	if err := openvpn.SaveConfig(cfg); err != nil {
-		fmt.Printf("保存配置失败: %v\n", err)
-		return
+		return fmt.Errorf("保存配置失败: %v", err)
+	}
+	
+	// 生成新的服务端配置
+	config, err := cfg.GenerateServerConfig()
+	if err != nil {
+		return fmt.Errorf("生成服务端配置失败: %v", err)
+	}
+
+	// 写入新的配置文件
+	if err := os.WriteFile(configPath, []byte(config), 0644); err != nil {
+		return fmt.Errorf("写入配置文件失败: %v", err)
 	}
 	
 	// 添加配置重载
 	reloadCmd := exec.Command("sudo", "systemctl", "daemon-reload")
 	if output, err := reloadCmd.CombinedOutput(); err != nil {
-		fmt.Printf("配置重载失败: %v\n输出: %s\n", err, string(output))
-		return
+		return fmt.Errorf("配置重载失败: %v\n输出: %s", err, string(output))
 	}
 	
-	restartServer(cfg)
+	// 重启服务
+	if err := restartServer(cfg); err != nil {
+		return fmt.Errorf("重启服务失败: %v", err)
+	}
+	
 	fmt.Printf("端口已更新为 %s\n", newPort)
+	return nil
 }
 
 func updateServerIP(cfg *openvpn.Config) error {
@@ -246,7 +270,9 @@ func updateServerIP(cfg *openvpn.Config) error {
 		return err
 	}
 	
-	restartServer(cfg)
+	if err := restartServer(cfg); err != nil {
+		return fmt.Errorf("重启服务失败: %v", err)
+	}
 	fmt.Printf("服务器地址已更新为 %s\n", newIP)
 	return nil
 }
@@ -390,22 +416,34 @@ func UpdateConfig() error {
 
 	switch result {
 	case "修改端口":
-		updatePort(cfg)
-		return nil
+		if err := updatePort(cfg); err != nil {
+			return fmt.Errorf("修改端口失败: %v", err)
+		}
+		return openvpn.UpdateServerConfig()
 	case "修改服务器地址":
-		updateServerIP(cfg)
-		return nil
+		if err := updateServerIP(cfg); err != nil {
+			return fmt.Errorf("修改服务器地址失败: %v", err)
+		}
+		return openvpn.UpdateServerConfig()
 	case "修改服务器IP和子网掩码":
-		return updateServerIPAndMask()
+		if err := updateServerIPAndMask(); err != nil {
+			return fmt.Errorf("修改服务器IP和子网掩码失败: %v", err)
+		}
+		return openvpn.UpdateServerConfig()
 	case "修改OpenVPN路由":
-		return updateRoute()
+		if err := updateRoute(); err != nil {
+			return fmt.Errorf("修改OpenVPN路由失败: %v", err)
+		}
+		return openvpn.UpdateServerConfig()
 	case "生成TLS密钥":
 		if err := generateTLSKey(cfg); err != nil {
 			return fmt.Errorf("生成TLS密钥失败: %v", err)
 		}
 		// 重启服务以应用新配置
-		restartServer(cfg)
-		return nil
+		if err := restartServer(cfg); err != nil {
+			return fmt.Errorf("重启服务失败: %v", err)
+		}
+		return openvpn.UpdateServerConfig()
 	case "返回":
 		return nil
 	}
