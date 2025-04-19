@@ -7,13 +7,15 @@ nobind
 persist-key
 persist-tun
 remote-cert-tls server
-cipher AES-256-CBC
+data-ciphers AES-256-GCM:AES-128-GCM:CHACHA20-POLY1305:AES-256-CBC
 auth SHA256
 key-direction 1
 tls-client
 tls-version-min {{ .openvpn_tls_version }}
-tls-cipher TLS-ECDHE-ECDSA-WITH-AES-256-GCM-SHA384:TLS-ECDHE-RSA-WITH-AES-256-GCM-SHA384:TLS-ECDHE-ECDSA-WITH-AES-128-GCM-SHA256:TLS-ECDHE-RSA-WITH-AES-128-GCM-SHA256
 auth-nocache
+{{range .openvpn_routes}}
+push "route {{ . }}"
+{{end}}
 <ca>
 {{ .ca_cert }}
 </ca>

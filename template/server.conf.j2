@@ -21,7 +21,7 @@ push "dhcp-option DOMAIN {{ .dns_server_domain }}"
 {{end}}
 keepalive 10 120
 topology subnet
-cipher AES-256-CBC
+data-ciphers AES-256-GCM:AES-128-GCM:CHACHA20-POLY1305:AES-256-CBC
 auth SHA256
 tls-server
 tls-version-min {{ .openvpn_tls_version }}

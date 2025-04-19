@@ -105,6 +105,7 @@ func RenderClientConfig(username string, cfg *Config) (string, error) {
 		"openvpn_port":            cfg.OpenVPNPort,
 		"openvpn_server_hostname": cfg.OpenVPNServerHostname,
 		"openvpn_tls_version":     cfg.OpenVPNTLSVersion,
+		"openvpn_routes":          cfg.OpenVPNRoutes,
 		"ca_cert":                 string(caCert),
 		"client_cert":             string(clientCert),
 		"client_key":              string(clientKey),
