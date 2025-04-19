@@ -76,6 +76,21 @@ func generateCertificates() error {
 		return fmt.Errorf("创建服务器目录失败: %v", err)
 	}
 
+	// 获取当前工作目录
+	currentDir, err := os.Getwd()
+	if err != nil {
+		return fmt.Errorf("获取当前工作目录失败: %v", err)
+	}
+
+	for _, file := range constants.OpenSSLExtFiles {
+		src := filepath.Join(currentDir, "file", file)
+		dst := filepath.Join(serverDir, file)
+		if err := copyFile(src, dst); err != nil {
+			return fmt.Errorf("复制扩展文件 %s 失败: %v", file, err)
+		}
+		fmt.Printf("已复制扩展文件: %s\n", file)
+	}
+
 	// 生成DH参数
 	cmd := exec.Command("openssl", "dhparam", "-out", constants.ServerDHPath, "2048")
 	if output, err := cmd.CombinedOutput(); err != nil {

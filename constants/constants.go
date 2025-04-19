@@ -27,7 +27,16 @@ const (
 
 	// 客户端配置目录
 	ClientConfigDir = "/etc/openvpn/client"
+
 )
+
+// openssl 扩展文件
+var OpenSSLExtFiles = []string{
+	"openssl-ca.ext",
+	"openssl-server.ext",
+	"openssl-client.ext",
+}
+
 
 // GetClientConfigPath 获取客户端配置文件路径
 func GetClientConfigPath(username string) string {
