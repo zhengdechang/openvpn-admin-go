@@ -1,0 +1,27 @@
+# 获取服务器列表
+curl -X GET http://localhost:8080/api/server/list
+
+# 获取服务器状态
+curl -X GET http://localhost:8080/api/server/status
+
+# 获取服务器配置模板
+curl -X GET http://localhost:8080/api/server/config/template
+
+# 更新服务器配置
+curl -X PUT http://localhost:8080/api/server/config \
+  -H "Content-Type: application/json" \
+  -d '{"config": "port 1194\nproto udp\ndev tun\n"}'
+
+# 更新服务器设置
+curl -X PUT http://localhost:8080/api/server/update \
+  -H "Content-Type: application/json" \
+  -d '{"port": 1194, "protocol": "udp", "network": "10.8.0.0", "netmask": "255.255.255.0"}'
+
+# 启动服务器
+curl -X POST http://localhost:8080/api/server/start
+
+# 重启服务器
+curl -X POST http://localhost:8080/api/server/restart
+
+# 停止服务器
+curl -X POST http://localhost:8080/api/server/stop 

@@ -9,6 +9,9 @@ import (
 	"openvpn-admin-go/cmd"
 	"bufio"
 	"strings"
+
+	"github.com/gin-gonic/gin"
+	"openvpn-admin-go/router"
 )
 
 // loadEnv 从.env文件加载环境变量
@@ -125,6 +128,24 @@ func main() {
 
 	fmt.Println("环境检查通过")
 	
+	// 启动 Web 服务器
+	r := gin.Default()
+
+	// 注册路由
+	api := r.Group("/api")
+	{
+		router.SetupServerRoutes(api)
+		router.SetupClientRoutes(api)
+	}
+
+	// 在 goroutine 中启动 Web 服务器
+	go func() {
+		fmt.Println("Web 服务器启动在 :8080 端口")
+		if err := r.Run(":8080"); err != nil {
+			log.Fatal("Failed to start server:", err)
+		}
+	}()
+
 	// 启动主菜单
 	cmd.Execute()
 }
