@@ -2,66 +2,151 @@ package controller
 
 import (
 	"net/http"
-	"openvpn-admin-go/openvpn"
 
 	"github.com/gin-gonic/gin"
+	"openvpn-admin-go/openvpn"
 )
 
 type ClientController struct{}
 
-// GenerateClientConfig 生成客户端配置文件
-func (c *ClientController) GenerateClientConfig(ctx *gin.Context) {
-	username := ctx.Param("username")
-	if username == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "用户名不能为空"})
-		return
-	}
-
-	configPath, err := openvpn.GenerateClientConfig(username)
+// GetClientList 获取客户端列表
+func (c *ClientController) GetClientList(ctx *gin.Context) {
+	statuses, err := openvpn.GetAllClientStatuses()
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-
-	ctx.File(configPath)
+	ctx.JSON(http.StatusOK, statuses)
 }
 
-// DeleteClient 删除客户端并吊销证书
-func (c *ClientController) DeleteClient(ctx *gin.Context) {
-	username := ctx.Param("username")
-	if username == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "用户名不能为空"})
+// AddClient 添加客户端
+func (c *ClientController) AddClient(ctx *gin.Context) {
+	var client struct {
+		Username string `json:"username" binding:"required"`
+	}
+	if err := ctx.ShouldBindJSON(&client); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
-	if err := openvpn.RevokeClientCert(username); err != nil {
+	if err := openvpn.CreateClient(client.Username); err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+	ctx.JSON(http.StatusOK, gin.H{"message": "Client added successfully"})
+}
 
-	ctx.JSON(http.StatusOK, gin.H{"message": "用户删除成功，证书已吊销"})
+// UpdateClient 更新客户端
+func (c *ClientController) UpdateClient(ctx *gin.Context) {
+	var client struct {
+		Username string `json:"username" binding:"required"`
+	}
+	if err := ctx.ShouldBindJSON(&client); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	// 更新客户端实际上就是重新生成证书和配置
+	if err := openvpn.CreateClient(client.Username); err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"message": "Client updated successfully"})
+}
+
+// DeleteClient 删除客户端
+func (c *ClientController) DeleteClient(ctx *gin.Context) {
+	username := ctx.Param("username")
+	if username == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Username is required"})
+		return
+	}
+	if err := openvpn.DeleteClient(username); err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"message": "Client deleted successfully"})
+}
+
+// GetClientConfig 获取客户端配置
+func (c *ClientController) GetClientConfig(ctx *gin.Context) {
+	username := ctx.Param("username")
+	if username == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Username is required"})
+		return
+	}
+	// 加载配置
+	cfg, err := openvpn.LoadConfig()
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	// 生成客户端配置
+	config, err := openvpn.GenerateClientConfig(username, cfg)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"config": config})
+}
+
+// RevokeClient 吊销客户端证书
+func (c *ClientController) RevokeClient(ctx *gin.Context) {
+	var client struct {
+		Username string `json:"username" binding:"required"`
+	}
+	if err := ctx.ShouldBindJSON(&client); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	if err := openvpn.DeleteClient(client.Username); err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"message": "Client certificate revoked successfully"})
+}
+
+// RenewClient 续期客户端证书
+func (c *ClientController) RenewClient(ctx *gin.Context) {
+	var client struct {
+		Username string `json:"username" binding:"required"`
+	}
+	if err := ctx.ShouldBindJSON(&client); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	// 续期证书实际上就是重新生成证书和配置
+	if err := openvpn.CreateClient(client.Username); err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"message": "Client certificate renewed successfully"})
 }
 
 // GetClientStatus 获取客户端状态
 func (c *ClientController) GetClientStatus(ctx *gin.Context) {
 	username := ctx.Param("username")
 	if username == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "用户名不能为空"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Username is required"})
 		return
 	}
-
-	status := openvpn.GetClientStatus(username)
+	status, err := openvpn.GetClientStatus(username)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 	if status == nil {
-		ctx.JSON(http.StatusNotFound, gin.H{"error": "用户不存在"})
+		ctx.JSON(http.StatusNotFound, gin.H{"error": "Client not found"})
 		return
 	}
-
 	ctx.JSON(http.StatusOK, status)
 }
 
 // GetAllClientStatuses 获取所有客户端状态
 func (c *ClientController) GetAllClientStatuses(ctx *gin.Context) {
-	statuses := openvpn.GetAllClientStatuses()
+	statuses, err := openvpn.GetAllClientStatuses()
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 	ctx.JSON(http.StatusOK, statuses)
 }
 
@@ -69,30 +154,26 @@ func (c *ClientController) GetAllClientStatuses(ctx *gin.Context) {
 func (c *ClientController) PauseClient(ctx *gin.Context) {
 	username := ctx.Param("username")
 	if username == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "用户名不能为空"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Username is required"})
 		return
 	}
-
 	if err := openvpn.PauseClient(username); err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-
-	ctx.JSON(http.StatusOK, gin.H{"message": "客户端已暂停"})
+	ctx.JSON(http.StatusOK, gin.H{"message": "Client paused successfully"})
 }
 
 // ResumeClient 恢复客户端连接
 func (c *ClientController) ResumeClient(ctx *gin.Context) {
 	username := ctx.Param("username")
 	if username == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "用户名不能为空"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Username is required"})
 		return
 	}
-
 	if err := openvpn.ResumeClient(username); err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-
-	ctx.JSON(http.StatusOK, gin.H{"message": "客户端已恢复"})
+	ctx.JSON(http.StatusOK, gin.H{"message": "Client resumed successfully"})
 } 

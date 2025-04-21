@@ -6,15 +6,19 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// SetupServerRoutes 设置服务端路由
+// SetupServerRoutes 设置服务器相关路由
 func SetupServerRoutes(r *gin.RouterGroup) {
-	serverController := &controller.ServerController{}
-
-	// 服务端相关路由
-	serverGroup := r.Group("/server")
+	serverCtrl := &controller.ServerController{}
+	server := r.Group("/server")
 	{
-		serverGroup.GET("/config/template", serverController.GetServerConfigTemplate)
-		serverGroup.PUT("/config", serverController.UpdateServerConfig)
-		serverGroup.POST("/restart", serverController.RestartServer)
+		server.PUT("/update", serverCtrl.UpdateServer)
+		server.DELETE("/delete", serverCtrl.DeleteServer)
+		server.GET("/status", serverCtrl.GetServerStatus)
+		server.POST("/start", serverCtrl.StartServer)
+		server.POST("/stop", serverCtrl.StopServer)
+		server.POST("/restart", serverCtrl.RestartServer)
+		server.GET("/config/template", serverCtrl.GetServerConfigTemplate)
+		server.PUT("/config", serverCtrl.UpdateServerConfig)
+		server.PUT("/port", serverCtrl.UpdatePort)
 	}
 } 

@@ -14,6 +14,7 @@ import (
 	"github.com/spf13/cobra"
 	"openvpn-admin-go/constants"
 	"openvpn-admin-go/openvpn"
+	"openvpn-admin-go/openvpn/server"
 )
 
 var serverCmd = &cobra.Command{
@@ -208,25 +209,8 @@ func updatePort(cfg *openvpn.Config) error {
 	}
 	
 	// 生成新的服务端配置
-	config, err := cfg.GenerateServerConfig()
-	if err != nil {
-		return fmt.Errorf("生成服务端配置失败: %v", err)
-	}
-
-	// 写入新的配置文件
-	if err := os.WriteFile(configPath, []byte(config), 0644); err != nil {
-		return fmt.Errorf("写入配置文件失败: %v", err)
-	}
-	
-	// 添加配置重载
-	reloadCmd := exec.Command("sudo", "systemctl", "daemon-reload")
-	if output, err := reloadCmd.CombinedOutput(); err != nil {
-		return fmt.Errorf("配置重载失败: %v\n输出: %s", err, string(output))
-	}
-	
-	// 重启服务
-	if err := restartServer(cfg); err != nil {
-		return fmt.Errorf("重启服务失败: %v", err)
+	if err := server.UpdatePort(cfg.OpenVPNPort); err != nil {
+		return fmt.Errorf("更新端口失败: %v", err)
 	}
 	
 	fmt.Printf("端口已更新为 %s\n", newPort)
@@ -270,7 +254,7 @@ func updateServerIP(cfg *openvpn.Config) error {
 		return err
 	}
 	
-	if err := restartServer(cfg); err != nil {
+	if err := openvpn.RestartServer(); err != nil {
 		return fmt.Errorf("重启服务失败: %v", err)
 	}
 	fmt.Printf("服务器地址已更新为 %s\n", newIP)

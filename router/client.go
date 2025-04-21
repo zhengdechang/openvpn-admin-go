@@ -6,18 +6,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// SetupClientRoutes 设置客户端路由
+// SetupClientRoutes 设置客户端相关路由
 func SetupClientRoutes(r *gin.RouterGroup) {
-	clientController := &controller.ClientController{}
-
-	// 客户端相关路由
-	clientGroup := r.Group("/client")
+	clientCtrl := &controller.ClientController{}
+	client := r.Group("/client")
 	{
-		clientGroup.GET("/:username/config", clientController.GenerateClientConfig)
-		clientGroup.DELETE("/:username", clientController.DeleteClient)
-		clientGroup.GET("/:username/status", clientController.GetClientStatus)
-		clientGroup.GET("/status", clientController.GetAllClientStatuses)
-		clientGroup.POST("/:username/pause", clientController.PauseClient)
-		clientGroup.POST("/:username/resume", clientController.ResumeClient)
+		client.GET("/list", clientCtrl.GetClientList)
+		client.POST("/add", clientCtrl.AddClient)
+		client.PUT("/update", clientCtrl.UpdateClient)
+		client.DELETE("/delete/:username", clientCtrl.DeleteClient)
+		client.GET("/config/:username", clientCtrl.GetClientConfig)
+		client.POST("/revoke", clientCtrl.RevokeClient)
+		client.POST("/renew", clientCtrl.RenewClient)
 	}
 } 
