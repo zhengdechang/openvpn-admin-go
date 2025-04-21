@@ -398,9 +398,15 @@ func UpdateConfig() error {
 			"修改服务器地址",
 			"修改服务器IP和子网掩码",
 			"修改OpenVPN路由",
-			"生成TLS密钥",
 			"返回",
 		},
+		Templates: &promptui.SelectTemplates{
+			Label:    "{{ . }}",
+			Active:   "➤ {{ . | cyan }}",
+			Inactive: "  {{ . | white }}",
+			Selected: "{{ . | green }}",
+		},
+		HideSelected: true,
 	}
 
 	_, result, err := prompt.Run()
@@ -433,15 +439,6 @@ func UpdateConfig() error {
 	case "修改OpenVPN路由":
 		if err := updateRoute(); err != nil {
 			return fmt.Errorf("修改OpenVPN路由失败: %v", err)
-		}
-		return openvpn.UpdateServerConfig()
-	case "生成TLS密钥":
-		if err := generateTLSKey(cfg); err != nil {
-			return fmt.Errorf("生成TLS密钥失败: %v", err)
-		}
-		// 重启服务以应用新配置
-		if err := restartServer(cfg); err != nil {
-			return fmt.Errorf("重启服务失败: %v", err)
 		}
 		return openvpn.UpdateServerConfig()
 	case "返回":

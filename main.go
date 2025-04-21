@@ -13,7 +13,7 @@ import (
 
 // loadEnv 从.env文件加载环境变量
 func loadEnv() error {
-	file, err := os.Open(".env")
+	file, err := os.Open(".env") 
 	if err != nil {
 		return fmt.Errorf("无法打开.env文件: %v", err)
 	}
