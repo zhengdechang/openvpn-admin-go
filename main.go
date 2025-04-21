@@ -26,8 +26,6 @@ func loadEnv() error {
 		"OPENVPN_SERVER_NETMASK":  true,
 		"OPENVPN_SERVER_HOSTNAME": true,
 		"OPENVPN_SERVER_IP":       true,
-		"DNS_SERVER_IP":           true,
-		"DNS_SERVER_DOMAIN":       true,
 	}
 
 	loadedVars := make(map[string]bool)

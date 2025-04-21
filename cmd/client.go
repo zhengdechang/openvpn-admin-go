@@ -3,11 +3,13 @@ package cmd
 import (
 	"fmt"
 	"log"
-	"openvpn-admin-go/openvpn"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/manifoldco/promptui"
+	"openvpn-admin-go/constants"
+	"openvpn-admin-go/openvpn"
 )
 
 func ClientMenu() {
@@ -199,7 +201,7 @@ func getUsername() (string, error) {
 
 func getServerIP() string {
 	// 读取服务器配置文件获取IP
-	config, err := os.ReadFile("/etc/openvpn/server/server.conf")
+	config, err := os.ReadFile(constants.ServerConfigPath)
 	if err != nil {
 		return "your-server-ip" // 默认值
 	}
@@ -223,4 +225,85 @@ func readFile(path string) string {
 		return ""
 	}
 	return string(content)
+}
+
+// 读取服务器配置
+func readServerConfig() (string, error) {
+	// 检查服务端配置文件是否存在
+	if _, err := os.Stat(constants.ServerConfigPath); os.IsNotExist(err) {
+		return "", fmt.Errorf("服务端配置文件不存在: %s", constants.ServerConfigPath)
+	}
+
+	// 读取服务器配置
+	config, err := os.ReadFile(constants.ServerConfigPath)
+	if err != nil {
+		return "", fmt.Errorf("读取服务器配置失败: %v", err)
+	}
+	return string(config), nil
+}
+
+// 检查客户端配置目录
+func checkClientConfigDir() error {
+	// 检查客户端配置目录
+	if _, err := os.Stat(constants.ClientConfigDir); os.IsNotExist(err) {
+		return fmt.Errorf("客户端配置目录不存在: %s", constants.ClientConfigDir)
+	}
+	return nil
+}
+
+// 创建客户端配置目录
+func createClientConfigDir() error {
+	// 创建客户端配置目录
+	if err := os.MkdirAll(constants.ClientConfigDir, 0755); err != nil {
+		return fmt.Errorf("创建客户端配置目录失败: %v", err)
+	}
+	return nil
+}
+
+// 写入客户端配置文件
+func writeClientConfig(username, config string) error {
+	// 检查客户端配置目录
+	if err := checkClientConfigDir(); err != nil {
+		return err
+	}
+
+	// 写入客户端配置文件
+	configPath := filepath.Join(constants.ClientConfigDir, username+".ovpn")
+	if err := os.WriteFile(configPath, []byte(config), 0644); err != nil {
+		return fmt.Errorf("写入客户端配置文件失败: %v", err)
+	}
+	return nil
+}
+
+// 删除客户端配置文件
+func deleteClientConfig(username string) error {
+	// 删除客户端配置文件
+	configPath := filepath.Join(constants.ClientConfigDir, username+".ovpn")
+	if err := os.Remove(configPath); err != nil && !os.IsNotExist(err) {
+		return fmt.Errorf("删除客户端配置文件失败: %v", err)
+	}
+	return nil
+}
+
+// 检查客户端配置文件是否存在
+func checkClientConfig(username string) error {
+	// 检查客户端配置文件是否存在
+	configPath := filepath.Join(constants.ClientConfigDir, username+".ovpn")
+	if _, err := os.Stat(configPath); os.IsNotExist(err) {
+		return fmt.Errorf("客户端配置文件不存在: %s", configPath)
+	}
+
+	// 检查客户端证书文件是否存在
+	clientCertPath := filepath.Join(constants.ClientConfigDir, username+".crt")
+	if _, err := os.Stat(clientCertPath); os.IsNotExist(err) {
+		return fmt.Errorf("客户端证书文件不存在: %s", clientCertPath)
+	}
+
+	// 检查客户端密钥文件是否存在
+	clientKeyPath := filepath.Join(constants.ClientConfigDir, username+".key")
+	if _, err := os.Stat(clientKeyPath); os.IsNotExist(err) {
+		return fmt.Errorf("客户端密钥文件不存在: %s", clientKeyPath)
+	}
+
+	return nil
 }
