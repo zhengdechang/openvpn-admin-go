@@ -11,6 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"openvpn-admin-go/constants"
 	"openvpn-admin-go/openvpn"
+	"openvpn-admin-go/openvpn/server"
 )
 
 type ServerController struct{}
@@ -64,23 +65,6 @@ func GetServerStatus() (*ServerStatus, error) {
 	}
 
 	return status, nil
-}
-
-// GetServerList 获取服务器列表
-func (c *ServerController) GetServerList(ctx *gin.Context) {
-	// 目前只支持单个服务器实例
-	status, err := GetServerStatus()
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-	ctx.JSON(http.StatusOK, []interface{}{status})
-}
-
-// AddServer 添加服务器
-func (c *ServerController) AddServer(ctx *gin.Context) {
-	// 目前只支持单个服务器实例
-	ctx.JSON(http.StatusBadRequest, gin.H{"error": "目前只支持单个服务器实例"})
 }
 
 // UpdateServer 更新服务器
@@ -173,4 +157,23 @@ func (c *ServerController) UpdateServerConfig(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusOK, gin.H{"message": "Server config updated successfully"})
+}
+
+// UpdatePort 更新服务器端口
+func (c *ServerController) UpdatePort(ctx *gin.Context) {
+	var port struct {
+		Port int `json:"port" binding:"required"`
+	}
+	if err := ctx.ShouldBindJSON(&port); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// 更新端口
+	if err := server.UpdatePort(port.Port); err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"message": "Port updated successfully"})
 } 

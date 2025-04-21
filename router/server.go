@@ -11,8 +11,6 @@ func SetupServerRoutes(r *gin.RouterGroup) {
 	serverCtrl := &controller.ServerController{}
 	server := r.Group("/server")
 	{
-		server.GET("/list", serverCtrl.GetServerList)
-		server.POST("/add", serverCtrl.AddServer)
 		server.PUT("/update", serverCtrl.UpdateServer)
 		server.DELETE("/delete", serverCtrl.DeleteServer)
 		server.GET("/status", serverCtrl.GetServerStatus)
@@ -21,5 +19,6 @@ func SetupServerRoutes(r *gin.RouterGroup) {
 		server.POST("/restart", serverCtrl.RestartServer)
 		server.GET("/config/template", serverCtrl.GetServerConfigTemplate)
 		server.PUT("/config", serverCtrl.UpdateServerConfig)
+		server.PUT("/port", serverCtrl.UpdatePort)
 	}
 } 
