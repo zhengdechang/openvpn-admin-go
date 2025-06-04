@@ -16,7 +16,7 @@ export default function DepartmentsPage() {
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ name: "", headId: "" });
+  const [form, setForm] = useState({ name: "", headId: "", parentId: "" });
 
   const fetchData = async () => {
     setLoading(true);
@@ -32,6 +32,25 @@ export default function DepartmentsPage() {
   };
 
   useEffect(() => { fetchData(); }, []);
+  // 构建部门树
+  const buildTree = (list: Department[]): Department[] => {
+    const map = new Map<string, Department & { children: Department[] }>();
+    list.forEach(item => {
+      map.set(item.id, { ...item, children: [] });
+    });
+    const roots: (Department & { children: Department[] })[] = [];
+    map.forEach(item => {
+      if (item.parentId) {
+        const parent = map.get(item.parentId);
+        parent?.children.push(item);
+      } else {
+        roots.push(item);
+      }
+    });
+    return roots;
+  };
+  const tree = buildTree(depts);
+
 
   const handleCreate = async () => {
     if (!form.name) {
@@ -60,6 +79,20 @@ export default function DepartmentsPage() {
     }
   };
 
+  // 递归渲染树形列表
+  const renderRows = (nodes: (Department & { children: Department[] })[], level: number = 0): React.ReactNode[] =>
+    nodes.flatMap(node => [
+      <TableRow key={node.id}>
+        <TableCell style={{ paddingLeft: level * 20 }}>
+          {node.name}
+        </TableCell>
+        <TableCell>{node.head?.name || '-'}</TableCell>
+        <TableCell>
+          <Button size="sm" variant="destructive" onClick={() => handleDelete(node.id)}>删除</Button>
+        </TableCell>
+      </TableRow>,
+      ...renderRows(node.children, level + 1)
+    ]);
   return (
     <MainLayout className="p-4">
       <div className="flex justify-between items-center mb-4">
@@ -78,6 +111,16 @@ export default function DepartmentsPage() {
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
               />
+              <select
+                className="border px-2 w-full py-1"
+                value={form.parentId}
+                onChange={(e) => setForm({ ...form, parentId: e.target.value })}
+              >
+                <option value="">-- 选择上级部门 --</option>
+                {depts.map((d) => (
+                  <option key={d.id} value={d.id}>{d.name}</option>
+                ))}
+              </select>
               <select
                 className="border px-2 w-full py-1"
                 value={form.headId}
@@ -115,15 +158,7 @@ export default function DepartmentsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {depts.map((d) => (
-                  <TableRow key={d.id}>
-                    <TableCell>{d.name}</TableCell>
-                    <TableCell>{d.head?.name || '-'}</TableCell>
-                    <TableCell>
-                      <Button size="sm" variant="destructive" onClick={() => handleDelete(d.id)}>删除</Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {renderRows(tree)}
               </TableBody>
             </Table>
           )}

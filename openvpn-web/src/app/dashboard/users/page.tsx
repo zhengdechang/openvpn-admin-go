@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useAuth } from "@/lib/auth-context";
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogClose } from "@/components/ui/dialog";
 import MainLayout from "@/components/layout/main-layout";
-import { userManagementAPI, departmentAPI } from "@/services/api";
+import { userManagementAPI, departmentAPI, openvpnAPI } from "@/services/api";
 import { AdminUser, Department, UserRole } from "@/types/types";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
@@ -12,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 
 export default function UsersPage() {
+  const { user: currentUser } = useAuth();
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [depts, setDepts] = useState<Department[]>([]);
   const [loading, setLoading] = useState(true);
@@ -32,6 +34,29 @@ export default function UsersPage() {
   };
 
   useEffect(() => { fetchAll(); }, []);
+  // 普通用户仅查看自己
+  const visibleUsers = currentUser?.role === UserRole.USER
+    ? users.filter(u => u.id === currentUser.id)
+    : users;
+  // 下载配置
+  const handleDownload = async (id: string, os: string) => {
+    try {
+      const { config } = await openvpnAPI.getClientConfig(id, os);
+      const blob = new Blob([config], { type: 'application/x-openvpn-profile' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const ext = os === 'linux' ? 'conf' : 'ovpn';
+      a.download = `${id}.${ext}`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast.success('下载成功');
+    } catch {
+      toast.error('下载失败');
+    }
+  };
 
   const handleCreate = async () => {
     if (!form.name || !form.email || !form.password) {
@@ -136,14 +161,26 @@ export default function UsersPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {users.map((u) => (
+                {visibleUsers.map((u) => (
                   <TableRow key={u.id}>
                     <TableCell>{u.name}</TableCell>
                     <TableCell>{u.email}</TableCell>
                     <TableCell>{u.role}</TableCell>
                     <TableCell>{depts.find((d) => d.id === u.departmentId)?.name || '-'}</TableCell>
-                    <TableCell>
-                      <Button size="sm" variant="destructive" onClick={() => handleDelete(u.id)}>删除</Button>
+                    <TableCell className="space-x-2">
+                      <select
+                        className="border px-2 py-1"
+                        defaultValue=""
+                        onChange={(e) => handleDownload(u.id, e.target.value)}
+                      >
+                        <option value="" disabled>下载配置</option>
+                        <option value="windows">Windows</option>
+                        <option value="macos">macOS</option>
+                        <option value="linux">Linux</option>
+                      </select>
+                      {currentUser?.role !== UserRole.USER && (
+                        <Button size="sm" variant="destructive" onClick={() => handleDelete(u.id)}>删除</Button>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))}

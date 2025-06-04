@@ -112,8 +112,10 @@ func GetMe(c *gin.Context) {
 
 // UpdateMe 更新当前用户信息
 type updateMeRequest struct {
-	Name  *string `json:"name"`
-	Email *string `json:"email" binding:"omitempty,email"`
+type updateMeRequest struct {
+   Name            *string `json:"name"`
+   Email           *string `json:"email" binding:"omitempty,email"`
+   Password        *string `json:"password" binding:"omitempty,min=6"`
 }
 
 func UpdateMe(c *gin.Context) {
@@ -130,10 +132,20 @@ func UpdateMe(c *gin.Context) {
 	if req.Email != nil {
 		updates["email"] = *req.Email
 	}
-	if len(updates) == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"success": false, "error": "no data to update"})
-		return
-	}
+   // 处理密码更新
+   if req.Password != nil {
+       // 使用新密码进行更新
+       hashed, err := common.HashPassword(*req.Password)
+       if err != nil {
+           c.JSON(http.StatusInternalServerError, gin.H{"success": false, "error": "hash password failed"})
+           return
+       }
+       updates["password_hash"] = hashed
+   }
+   if len(updates) == 0 {
+       c.JSON(http.StatusBadRequest, gin.H{"success": false, "error": "no data to update"})
+       return
+   }
 	if err := database.DB.Model(&model.User{}).Where("id = ?", claims.UserID).Updates(updates).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "error": err.Error()})
 		return

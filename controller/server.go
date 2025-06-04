@@ -69,11 +69,9 @@ type ServerStatus struct {
 // GetServerStatus 获取服务器状态
 func GetServerStatus() (*ServerStatus, error) {
 	// 检查服务是否运行
-	cmd := exec.Command("systemctl", "is-active", constants.ServiceName)
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		return nil, fmt.Errorf("检查服务状态失败: %v", err)
-	}
+   // 检查服务是否运行，忽略非零退出码，获取服务状态字符串
+   cmd := exec.Command("systemctl", "is-active", constants.ServiceName)
+   output, _ := cmd.CombinedOutput()
 
 	status := &ServerStatus{
 		Name:        "server",

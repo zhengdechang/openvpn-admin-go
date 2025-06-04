@@ -2,12 +2,12 @@ package controller
 
 import (
    "net/http"
-
    "github.com/gin-gonic/gin"
    "openvpn-admin-go/common"
    "openvpn-admin-go/database"
    "openvpn-admin-go/middleware"
    "openvpn-admin-go/model"
+   "openvpn-admin-go/openvpn"
 )
 
 // AdminUserController 管理用户
@@ -52,6 +52,11 @@ func (c *AdminUserController) CreateUser(ctx *gin.Context) {
    }
    if err := database.DB.Create(&user).Error; err != nil {
        ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+       return
+   }
+   // 同步创建 OpenVPN 客户端配置
+   if err := openvpn.CreateClient(user.ID); err != nil {
+       ctx.JSON(http.StatusInternalServerError, gin.H{"error": "创建 OpenVPN 客户端失败: " + err.Error()})
        return
    }
    ctx.JSON(http.StatusOK, gin.H{"data": gin.H{

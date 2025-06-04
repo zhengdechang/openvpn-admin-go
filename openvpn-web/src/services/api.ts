@@ -175,7 +175,7 @@ export const userAPI = {
   },
 
   // 更新用户信息
-  updateMe: async (userData: Partial<User>): Promise<ApiResponse<User>> => {
+  updateMe: async (userData: { name?: string; email?: string; password?: string }): Promise<ApiResponse<User>> => {
     try {
       const response = await api.patch("/api/user/me", userData);
       return response.data;

@@ -15,6 +15,12 @@ type Department struct {
    HeadID    string    `gorm:"size:36" json:"headId,omitempty"`
    // Head 部门负责人信息
    Head      *User     `gorm:"foreignKey:HeadID" json:"head,omitempty"`
+   // ParentID 上级部门ID
+   ParentID  string       `gorm:"size:36" json:"parentId,omitempty"`
+   // Parent 上级部门信息
+   Parent    *Department  `gorm:"foreignKey:ParentID" json:"parent,omitempty"`
+   // Children 子部门列表
+   Children  []Department `gorm:"foreignKey:ParentID" json:"children,omitempty"`
    CreatedAt time.Time
    UpdatedAt time.Time
    Users     []User    `gorm:"foreignKey:DepartmentID" json:"-"`
