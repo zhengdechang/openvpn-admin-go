@@ -8,6 +8,7 @@ import { LOCALE_COOKIE_NAME } from './config'
 
 const loadLangResources = (lang: string) => ({
   translation: {
+    home: require(`./${lang}/home`).default,
     common: require(`./${lang}/common`).default,
     layout: require(`./${lang}/layout`).default,
     login: require(`./${lang}/login`).default,

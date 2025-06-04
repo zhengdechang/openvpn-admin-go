@@ -7,9 +7,9 @@ import { useAuth } from "@/lib/auth-context";
 import { UserRole } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
-import { setLocaleOnClient, getLocaleOnClient } from "../../../i18n";
-import { LanguagesSupported } from "../../../i18n/language";
-import type { Locale } from "../../../i18n";
+import { setLocaleOnClient, getLocaleOnClient } from "@/i18n";
+import { LanguagesSupported } from "@/i18n/language";
+import type { Locale } from "@/i18n";
 
 export default function Navbar() {
   const { user, loading, logout } = useAuth();

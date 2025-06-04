@@ -4,10 +4,12 @@ import React, { useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth-context";
+import { useTranslation } from "react-i18next";
 import MainLayout from "@/components/layout/main-layout";
 
 export default function Home() {
   const { user, loading, refreshToken } = useAuth();
+  const { t } = useTranslation('home');
 
   useEffect(() => {
     refreshToken();
@@ -20,16 +22,16 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <div className="text-center max-w-3xl mx-auto">
             <h1 className="text-4xl md:text-5xl font-bold mb-4 text-primary">
-              OpenVPN 管理系统
+              {t('title')}
             </h1>
             <div className="h-1 w-24 bg-accent mx-auto my-6"></div>
             <p className="text-lg text-gray-700 mb-10">
-              基于 OpenVPN 的集中式管理平台，支持用户证书、服务器控制、日志查询。
+              {t('subtitle')}
             </p>
             {!user ? (
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-4">
                 <Button asChild size="lg" className="w-full sm:w-auto">
-                  <Link href="/auth/login">Get Started</Link>
+                  <Link href="/auth/login">{t('getStarted')}</Link>
                 </Button>
                 <Button
                   asChild
@@ -37,13 +39,13 @@ export default function Home() {
                   size="lg"
                   className="w-full sm:w-auto"
                 >
-                  <Link href="/auth/register">Sign Up</Link>
+                  <Link href="/auth/register">{t('signUp')}</Link>
                 </Button>
               </div>
             ) : (
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-4">
                 <Button asChild size="lg" className="w-full sm:w-auto">
-                  <Link href="/dashboard">Go to Dashboard</Link>
+                  <Link href="/dashboard">{t('goDashboard')}</Link>
                 </Button>
               </div>
             )}
