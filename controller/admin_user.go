@@ -73,8 +73,11 @@ func (c *AdminUserController) ListUsers(ctx *gin.Context) {
    claims := ctx.MustGet("claims").(*middleware.Claims)
    var users []model.User
    db := database.DB
+   // 部门负责人仅查看本部门用户；普通用户仅查看自身
    if claims.Role == string(model.RoleManager) {
        db = db.Where("department_id = ?", claims.DeptID)
+   } else if claims.Role == string(model.RoleUser) {
+       db = db.Where("id = ?", claims.UserID)
    }
    if err := db.Find(&users).Error; err != nil {
        ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

@@ -88,14 +88,9 @@ export default function Navbar() {
           </Link>
 
           <nav className="flex items-center space-x-6">
+            {/* Authenticated user links: User management, departments, server, logs */}
             {user && (
               <>
-                <Link
-                  href="/dashboard/clients"
-                  className={`text-gray-600 hover:text-primary ${isActive("/dashboard/clients") ? "font-medium text-primary" : ""}`}
-                >
-                  {t("dashboard.clients.title")}
-                </Link>
                 {(user.role === UserRole.MANAGER || user.role === UserRole.ADMIN || user.role === UserRole.SUPERADMIN) && (
                   <Link
                     href="/dashboard/users"
@@ -128,6 +123,23 @@ export default function Navbar() {
                     </Link>
                   </>
                 )}
+              </>
+            )}
+            {/* Unauthenticated: show login/register */}
+            {!loading && !user && (
+              <>
+                <Link
+                  href="/auth/login"
+                  className="text-gray-600 hover:text-primary"
+                >
+                  {t("layout.login")}
+                </Link>
+                <Link
+                  href="/auth/register"
+                  className="text-gray-600 hover:text-primary"
+                >
+                  {t("layout.register")}
+                </Link>
               </>
             )}
             {/* Language Switch */}

@@ -9,7 +9,7 @@ import (
 
 // Department 部门模型
 type Department struct {
-   ID        string    `gorm:"primaryKey;size:36"`
+   ID        string    `gorm:"primaryKey;size:36" json:"id"`
    Name      string    `gorm:"size:100;uniqueIndex;not null" json:"name"`
    // HeadID 部门负责人用户ID
    HeadID    string    `gorm:"size:36" json:"headId,omitempty"`
@@ -21,8 +21,8 @@ type Department struct {
    Parent    *Department  `gorm:"foreignKey:ParentID" json:"parent,omitempty"`
    // Children 子部门列表
    Children  []Department `gorm:"foreignKey:ParentID" json:"children,omitempty"`
-   CreatedAt time.Time
-   UpdatedAt time.Time
+   CreatedAt time.Time `json:"createdAt"`
+   UpdatedAt time.Time `json:"updatedAt"`
    Users     []User    `gorm:"foreignKey:DepartmentID" json:"-"`
 }
 

@@ -91,7 +91,7 @@ export default function UsersPage() {
     <MainLayout className="p-4">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">用户管理</h1>
-        {(currentUser?.role === UserRole.ADMIN || currentUser?.role === UserRole.MANAGER) && (
+        {(currentUser?.role === UserRole.ADMIN || currentUser?.role === UserRole.MANAGER || currentUser?.role === UserRole.SUPERADMIN) && (
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button>新增用户</Button>
@@ -124,7 +124,13 @@ export default function UsersPage() {
                   onChange={(e) => setForm({ ...form, role: e.target.value as UserRole })}
                 >
                   <option value={UserRole.USER}>User</option>
-                  <option value={UserRole.ADMIN}>Admin</option>
+                  {(currentUser?.role === UserRole.ADMIN || currentUser?.role === UserRole.SUPERADMIN) && (
+                    <> 
+                      <option value={UserRole.MANAGER}>Manager</option>
+                      <option value={UserRole.ADMIN}>Admin</option>
+                      <option value={UserRole.SUPERADMIN}>Superadmin</option>
+                    </>
+                  )}
                 </select>
                 <select
                   className="border px-2"
@@ -183,7 +189,7 @@ export default function UsersPage() {
                         <option value="macos">macOS</option>
                         <option value="linux">Linux</option>
                       </select>
-                      {(currentUser?.role === UserRole.ADMIN || currentUser?.role === UserRole.MANAGER) && (
+                      {(currentUser?.role === UserRole.ADMIN || currentUser?.role === UserRole.MANAGER || currentUser?.role === UserRole.SUPERADMIN) && (
                         <Button size="sm" variant="destructive" onClick={() => handleDelete(u.id)}>删除</Button>
                       )}
                     </TableCell>

@@ -318,12 +318,15 @@ export const departmentAPI = {
     const response = await api.get<Department[]>("/api/departments");
     return response.data;
   },
-  create: async (data: { name: string; headId?: string }): Promise<any> => {
+  create: async (data: { name: string; headId?: string; parentId?: string }): Promise<any> => {
     const response = await api.post("/api/departments", data);
     return response.data;
   },
-  update: async (id: string, name: string): Promise<any> => {
-    const response = await api.put(`/api/departments/${id}`, { name });
+  update: async (
+    id: string,
+    data: { name: string; headId?: string; parentId?: string }
+  ): Promise<any> => {
+    const response = await api.put(`/api/departments/${id}`, data);
     return response.data;
   },
   delete: async (id: string): Promise<any> => {
