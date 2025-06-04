@@ -1,24 +1,25 @@
 package main
 
 import (
-   "fmt"
-   "log"
-   "os"
-   "os/signal"
-   "syscall"
-   "bufio"
-   "strings"
+	"bufio"
+	"fmt"
+	"log"
+	"os"
+	"os/signal"
+	"strings"
+	"syscall"
 
-   "github.com/gin-gonic/gin"
-   "openvpn-admin-go/cmd"
-   "openvpn-admin-go/database"
-   "openvpn-admin-go/model"
-   "openvpn-admin-go/router"
+	"openvpn-admin-go/cmd"
+	"openvpn-admin-go/database"
+	"openvpn-admin-go/model"
+	"openvpn-admin-go/router"
+
+	"github.com/gin-gonic/gin"
 )
 
 // loadEnv 从.env文件加载环境变量
 func loadEnv() error {
-	file, err := os.Open(".env") 
+	file, err := os.Open(".env")
 	if err != nil {
 		return fmt.Errorf("无法打开.env文件: %v", err)
 	}
@@ -94,7 +95,7 @@ func main() {
 	}()
 
 	fmt.Println("OpenVPN 管理工具启动中...")
-	
+
 	// 获取当前工作目录
 	dir, err := os.Getwd()
 	if err != nil {
@@ -129,31 +130,31 @@ func main() {
 	}
 
 	fmt.Println("环境检查通过")
-	
-   // 初始化数据库
-   if err := database.Init(); err != nil {
-       log.Fatalf("数据库初始化失败: %v", err)
-   }
-   if err := database.Migrate(&model.User{}, &model.Department{}); err != nil {
-       log.Fatalf("数据库迁移失败: %v", err)
-   }
-   // 启动 Web 服务器
-   r := gin.Default()
+
+	// 初始化数据库
+	if err := database.Init(); err != nil {
+		log.Fatalf("数据库初始化失败: %v", err)
+	}
+	if err := database.Migrate(&model.User{}, &model.Department{}); err != nil {
+		log.Fatalf("数据库迁移失败: %v", err)
+	}
+	// 启动 Web 服务器
+	r := gin.Default()
 
 	// 注册路由
-   api := r.Group("/api")
-   {
-       router.SetupUserRoutes(api)
-       router.SetupManageRoutes(api)
-       router.SetupServerRoutes(api)
-       router.SetupClientRoutes(api)
-       router.SetupLogRoutes(api)
-   }
+	api := r.Group("/api")
+	{
+		router.SetupUserRoutes(api)
+		router.SetupManageRoutes(api)
+		router.SetupServerRoutes(api)
+		router.SetupClientRoutes(api)
+		router.SetupLogRoutes(api)
+	}
 
 	// 在 goroutine 中启动 Web 服务器
 	go func() {
-		fmt.Println("Web 服务器启动在 :8080 端口")
-		if err := r.Run(":8080"); err != nil {
+		fmt.Println("Web 服务器启动在 :8085 端口")
+		if err := r.Run(":8085"); err != nil {
 			log.Fatal("Failed to start server:", err)
 		}
 	}()

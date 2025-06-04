@@ -10,7 +10,9 @@ import {
   RegisterCredentials,
   OpenVPNClient,
   ServerStatus,
-} from "../types/types";
+  AdminUser,
+  Department,
+} from "@/types";
 import Cookies from "js-cookie";
 import { useUserStore } from "@/store";
 
@@ -61,14 +63,18 @@ export const userAPI = {
   },
 
   // 用户注册
-  register: async (credentials: RegisterCredentials): Promise<ApiResponse<Object>> => {
+  register: async (
+    credentials: RegisterCredentials
+  ): Promise<ApiResponse<Object>> => {
     try {
       const response = await api.post("/api/user/register", credentials);
       return response.data;
     } catch (error: any) {
       return {
         success: false,
-        error: error.response ? error.response.data.error : "Registration failed",
+        error: error.response
+          ? error.response.data.error
+          : "Registration failed",
       };
     }
   },
@@ -80,7 +86,9 @@ export const userAPI = {
     } catch (error: any) {
       return {
         success: false,
-        error: error.response ? error.response.data.error : "Email verification failed",
+        error: error.response
+          ? error.response.data.error
+          : "Email verification failed",
       };
     }
   },
@@ -92,7 +100,9 @@ export const userAPI = {
     } catch (error: any) {
       return {
         success: false,
-        error: error.response ? error.response.data.error : "Password reset failed",
+        error: error.response
+          ? error.response.data.error
+          : "Password reset failed",
       };
     }
   },
@@ -111,13 +121,17 @@ export const userAPI = {
     } catch (error: any) {
       return {
         success: false,
-        error: error.response ? error.response.data.error : "Password reset failed",
+        error: error.response
+          ? error.response.data.error
+          : "Password reset failed",
       };
     }
   },
 
   // 用户登录
-  login: async (credentials: LoginCredentials): Promise<ApiResponse<{ user: User; token: string }>> => {
+  login: async (
+    credentials: LoginCredentials
+  ): Promise<ApiResponse<{ user: User; token: string }>> => {
     try {
       const response = await api.post("/api/user/login", credentials);
       if (response.data.success && response.data.data.token) {
@@ -207,17 +221,17 @@ export const userAPI = {
 export const openvpnAPI = {
   // 获取客户端列表
   getClientList: async (): Promise<OpenVPNClient[]> => {
-    const response = await api.get<OpenVPNClient[]>('/api/client/list');
+    const response = await api.get<OpenVPNClient[]>("/api/client/list");
     return response.data;
   },
   // 添加客户端
   addClient: async (username: string): Promise<any> => {
-    const response = await api.post('/api/client/add', { username });
+    const response = await api.post("/api/client/add", { username });
     return response.data;
   },
   // 更新客户端
   updateClient: async (username: string): Promise<any> => {
-    const response = await api.put('/api/client/update', { username });
+    const response = await api.put("/api/client/update", { username });
     return response.data;
   },
   // 删除客户端
@@ -227,32 +241,36 @@ export const openvpnAPI = {
   },
   // 获取客户端配置
   getClientConfig: async (username: string): Promise<{ config: string }> => {
-    const response = await api.get<{ config: string }>(`/api/client/config/${username}`);
+    const response = await api.get<{ config: string }>(
+      `/api/client/config/${username}`
+    );
     return response.data;
   },
   // 吊销客户端证书
   revokeClient: async (username: string): Promise<any> => {
-    const response = await api.post('/api/client/revoke', { username });
+    const response = await api.post("/api/client/revoke", { username });
     return response.data;
   },
   // 续期客户端证书
   renewClient: async (username: string): Promise<any> => {
-    const response = await api.post('/api/client/renew', { username });
+    const response = await api.post("/api/client/renew", { username });
     return response.data;
   },
   // 获取服务器状态
   getServerStatus: async (): Promise<ServerStatus> => {
-    const response = await api.get<ServerStatus>('/api/server/status');
+    const response = await api.get<ServerStatus>("/api/server/status");
     return response.data;
   },
   // 获取服务器日志
   getServerLogs: async (): Promise<string> => {
-    const response = await api.get<{ logs: string }>('/api/logs/server');
+    const response = await api.get<{ logs: string }>("/api/logs/server");
     return response.data.logs;
   },
   // 获取指定客户端日志
   getClientLogs: async (username: string): Promise<string[]> => {
-    const response = await api.get<{ logs: string[] }>(`/api/logs/client/${username}`);
+    const response = await api.get<{ logs: string[] }>(
+      `/api/logs/client/${username}`
+    );
     return response.data.logs;
   },
 };
@@ -260,31 +278,33 @@ export const openvpnAPI = {
 // 服务器管理 API
 export const serverAPI = {
   getStatus: async (): Promise<ServerStatus> => {
-    const response = await api.get<ServerStatus>('/api/server/status');
+    const response = await api.get<ServerStatus>("/api/server/status");
     return response.data;
   },
   start: async (): Promise<any> => {
-    const response = await api.post('/api/server/start');
+    const response = await api.post("/api/server/start");
     return response.data;
   },
   stop: async (): Promise<any> => {
-    const response = await api.post('/api/server/stop');
+    const response = await api.post("/api/server/stop");
     return response.data;
   },
   restart: async (): Promise<any> => {
-    const response = await api.post('/api/server/restart');
+    const response = await api.post("/api/server/restart");
     return response.data;
   },
   getConfigTemplate: async (): Promise<{ template: string }> => {
-    const response = await api.get<{ template: string }>('/api/server/config/template');
+    const response = await api.get<{ template: string }>(
+      "/api/server/config/template"
+    );
     return response.data;
   },
   updateConfig: async (config: string): Promise<any> => {
-    const response = await api.put('/api/server/config', { config });
+    const response = await api.put("/api/server/config", { config });
     return response.data;
   },
   updatePort: async (port: number): Promise<any> => {
-    const response = await api.put('/api/server/port', { port });
+    const response = await api.put("/api/server/port", { port });
     return response.data;
   },
 };
@@ -292,11 +312,11 @@ export const serverAPI = {
 // 部门管理 API
 export const departmentAPI = {
   list: async (): Promise<Department[]> => {
-    const response = await api.get<Department[]>('/api/departments');
+    const response = await api.get<Department[]>("/api/departments");
     return response.data;
   },
   create: async (name: string): Promise<any> => {
-    const response = await api.post('/api/departments', { name });
+    const response = await api.post("/api/departments", { name });
     return response.data;
   },
   update: async (id: string, name: string): Promise<any> => {
@@ -312,14 +332,19 @@ export const departmentAPI = {
 // 用户管理 API
 export const userManagementAPI = {
   list: async (): Promise<AdminUser[]> => {
-    const response = await api.get<AdminUser[]>('/api/users');
+    const response = await api.get<AdminUser[]>("/api/users");
     return response.data;
   },
-  create: async (user: Partial<AdminUser> & { password: string }): Promise<any> => {
-    const response = await api.post('/api/users', user);
+  create: async (
+    user: Partial<AdminUser> & { password: string }
+  ): Promise<any> => {
+    const response = await api.post("/api/users", user);
     return response.data;
   },
-  update: async (id: string, updates: Partial<AdminUser> & { password?: string }): Promise<any> => {
+  update: async (
+    id: string,
+    updates: Partial<AdminUser> & { password?: string }
+  ): Promise<any> => {
     const response = await api.put(`/api/users/${id}`, updates);
     return response.data;
   },
@@ -327,7 +352,6 @@ export const userManagementAPI = {
     const response = await api.delete(`/api/users/${id}`);
     return response.data;
   },
-};
 };
 
 // 标签API
