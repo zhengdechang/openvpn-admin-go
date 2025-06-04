@@ -183,7 +183,7 @@ export default function UsersPage() {
                         <option value="macos">macOS</option>
                         <option value="linux">Linux</option>
                       </select>
-                      {currentUser?.role !== UserRole.USER && (
+                      {(currentUser?.role === UserRole.ADMIN || currentUser?.role === UserRole.MANAGER) && (
                         <Button size="sm" variant="destructive" onClick={() => handleDelete(u.id)}>删除</Button>
                       )}
                     </TableCell>

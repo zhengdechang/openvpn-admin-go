@@ -224,9 +224,11 @@ export const openvpnAPI = {
     const response = await api.get<OpenVPNClient[]>("/api/client/list");
     return response.data;
   },
-  // 添加客户端
-  addClient: async (username: string): Promise<any> => {
-    const response = await api.post("/api/client/add", { username });
+  // 添加客户端，支持指定部门
+  addClient: async (username: string, departmentId?: string): Promise<any> => {
+    const payload: any = { username };
+    if (departmentId) payload.departmentId = departmentId;
+    const response = await api.post("/api/client/add", payload);
     return response.data;
   },
   // 更新客户端
