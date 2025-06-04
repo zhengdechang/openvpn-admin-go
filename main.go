@@ -10,9 +10,10 @@ import (
 	"syscall"
 
 	"openvpn-admin-go/cmd"
-	"openvpn-admin-go/database"
-	"openvpn-admin-go/model"
-	"openvpn-admin-go/router"
+   "openvpn-admin-go/database"
+   "openvpn-admin-go/model"
+   "openvpn-admin-go/common"
+   "openvpn-admin-go/router"
 
 	"github.com/gin-gonic/gin"
 )
@@ -135,9 +136,31 @@ func main() {
 	if err := database.Init(); err != nil {
 		log.Fatalf("数据库初始化失败: %v", err)
 	}
-	if err := database.Migrate(&model.User{}, &model.Department{}); err != nil {
-		log.Fatalf("数据库迁移失败: %v", err)
-	}
+   if err := database.Migrate(&model.User{}, &model.Department{}); err != nil {
+       log.Fatalf("数据库迁移失败: %v", err)
+   }
+   // Seed default superadmin user if not exists
+   func() {
+       var existing model.User
+       if err := database.DB.Where("email = ?", "superadmin@gmail.com").First(&existing).Error; err != nil {
+           hash, err := common.HashPassword("superadmin")
+           if err != nil {
+               log.Printf("默认超级管理员密码哈希失败: %v", err)
+               return
+           }
+           super := model.User{
+               Name:         "Super Admin",
+               Email:        "superadmin@gmail.com",
+               PasswordHash: hash,
+               Role:         model.RoleSuperAdmin,
+           }
+           if err := database.DB.Create(&super).Error; err != nil {
+               log.Printf("创建默认超级管理员失败: %v", err)
+           } else {
+               log.Println("已创建默认超级管理员: superadmin@gmail.com / superadmin")
+           }
+       }
+   }()
 	// 启动 Web 服务器
 	r := gin.Default()
 

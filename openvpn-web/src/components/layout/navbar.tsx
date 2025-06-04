@@ -105,6 +105,38 @@ export default function Navbar() {
             >
               {t("layout.dashboard")}
             </Link>
+            <Link
+              href="/dashboard/clients"
+              className={`text-gray-600 hover:text-primary ${
+                isActive("/dashboard/clients") ? "font-medium text-primary" : ""
+              }`}
+            >
+              {t("dashboard.clients.title")}
+            </Link>
+            <Link
+              href="/dashboard/users"
+              className={`text-gray-600 hover:text-primary ${
+                isActive("/dashboard/users") ? "font-medium text-primary" : ""
+              }`}
+            >
+              {t("dashboard.users.title")}
+            </Link>
+            <Link
+              href="/dashboard/server"
+              className={`text-gray-600 hover:text-primary ${
+                isActive("/dashboard/server") ? "font-medium text-primary" : ""
+              }`}
+            >
+              {t("dashboard.server.title")}
+            </Link>
+            <Link
+              href="/dashboard/logs"
+              className={`text-gray-600 hover:text-primary ${
+                isActive("/dashboard/logs") ? "font-medium text-primary" : ""
+              }`}
+            >
+              {t("dashboard.logs.titleServer")}
+            </Link>
 
             {/* Language Switch */}
             <div className="relative" ref={langDropdownRef}>
@@ -129,7 +161,7 @@ export default function Navbar() {
                 </svg>
               </button>
 
-              {isLangOpen && (
+            {isLangOpen && (
                 <div className="absolute right-0 mt-1 pt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
                   {LanguagesSupported.map((locale) => (
                     <button
@@ -148,8 +180,19 @@ export default function Navbar() {
               )}
             </div>
 
-            {!loading &&
-              (user ? (
+            {/* Login/Register for unauthenticated users */}
+            {!loading && !user && (
+              <>
+                <Link href="/auth/login" className="text-gray-600 hover:text-primary">
+                  {t("layout.login")}
+                </Link>
+                <Link href="/auth/register" className="text-gray-600 hover:text-primary">
+                  {t("layout.register")}
+                </Link>
+              </>
+            )}
+            {/* User menu for authenticated users */}
+            {!loading && user && (
                 <div className="flex items-center space-x-4">
                   <div
                     className="relative"
