@@ -5,7 +5,7 @@
  */
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { User } from "@/lib/types";
+import { User } from "@/types/types";
 import Cookies from "js-cookie";
 
 // Zustand Store 的类型

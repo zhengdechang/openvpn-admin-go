@@ -2,8 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 import MainLayout from "@/components/layout/main-layout";
-import { openvpnAPI } from "@/lib/api";
-import { ServerStatus } from "@/lib/types";
+import { openvpnAPI } from "@/services/api";
+import { ServerStatus } from "@/types/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 
@@ -41,7 +41,9 @@ export default function ServerPage() {
               <p>运行时长: {status.uptime}</p>
               <p>当前连接: {status.connected}</p>
               <p>历史总数: {status.total}</p>
-              <p>最后更新时间: {new Date(status.lastUpdated).toLocaleString()}</p>
+              <p>
+                最后更新时间: {new Date(status.lastUpdated).toLocaleString()}
+              </p>
             </div>
           ) : (
             <p>暂无数据</p>

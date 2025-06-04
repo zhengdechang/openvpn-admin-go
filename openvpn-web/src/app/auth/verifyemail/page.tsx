@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { showToast } from "@/lib/toast-utils";
-import { userAPI } from "@/lib/api"; // 假设有一个 API 请求封装
+import { userAPI } from "@/services/api"; // 假设有一个 API 请求封装
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";

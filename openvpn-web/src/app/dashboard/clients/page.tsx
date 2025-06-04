@@ -4,8 +4,8 @@ import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useRouter } from "next/navigation";
 import MainLayout from "@/components/layout/main-layout";
-import { OpenVPNClient } from "@/lib/types";
-import { openvpnAPI } from "@/lib/api";
+import { OpenVPNClient } from "@/types/types";
+import { openvpnAPI } from "@/services/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -45,7 +45,9 @@ export default function ClientsPage() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [currentClient, setCurrentClient] = useState<OpenVPNClient | null>(null);
+  const [currentClient, setCurrentClient] = useState<OpenVPNClient | null>(
+    null
+  );
   const [formData, setFormData] = useState<Partial<OpenVPNClient>>({
     name: "",
     email: "",
@@ -91,7 +93,10 @@ export default function ClientsPage() {
 
   // 处理状态选择变化
   const handleStatusChange = (value: string) => {
-    setFormData((prev) => ({ ...prev, status: value as OpenVPNClient["status"] }));
+    setFormData((prev) => ({
+      ...prev,
+      status: value as OpenVPNClient["status"],
+    }));
   };
 
   // 打开添加客户端对话框
@@ -245,7 +250,9 @@ export default function ClientsPage() {
                 <TableBody>
                   {filteredClients.map((client) => (
                     <TableRow key={client.id}>
-                      <TableCell className="font-medium">{client.name}</TableCell>
+                      <TableCell className="font-medium">
+                        {client.name}
+                      </TableCell>
                       <TableCell>{client.email}</TableCell>
                       <TableCell>
                         <span
@@ -368,7 +375,9 @@ export default function ClientsPage() {
               >
                 {t("dashboard.form.cancel")}
               </Button>
-              <Button onClick={handleAddClient}>{t("dashboard.form.save")}</Button>
+              <Button onClick={handleAddClient}>
+                {t("dashboard.form.save")}
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -452,7 +461,9 @@ export default function ClientsPage() {
               >
                 {t("dashboard.form.cancel")}
               </Button>
-              <Button onClick={handleEditClient}>{t("dashboard.form.save")}</Button>
+              <Button onClick={handleEditClient}>
+                {t("dashboard.form.save")}
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -473,10 +484,7 @@ export default function ClientsPage() {
               >
                 {t("dashboard.deleteConfirm.cancel")}
               </Button>
-              <Button
-                variant="destructive"
-                onClick={handleDeleteClient}
-              >
+              <Button variant="destructive" onClick={handleDeleteClient}>
                 {t("dashboard.deleteConfirm.confirm")}
               </Button>
             </DialogFooter>
@@ -485,4 +493,4 @@ export default function ClientsPage() {
       </div>
     </MainLayout>
   );
-} 
+}

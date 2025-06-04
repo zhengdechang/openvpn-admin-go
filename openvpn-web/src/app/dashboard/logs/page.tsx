@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import MainLayout from "@/components/layout/main-layout";
-import { openvpnAPI } from "@/lib/api";
+import { openvpnAPI } from "@/services/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -51,7 +51,9 @@ export default function LogsPage() {
           {loadingServer ? (
             <p>加载中...</p>
           ) : (
-            <pre className="whitespace-pre-wrap">{serverLogs || "暂无日志"}</pre>
+            <pre className="whitespace-pre-wrap">
+              {serverLogs || "暂无日志"}
+            </pre>
           )}
         </CardContent>
       </Card>
@@ -70,7 +72,9 @@ export default function LogsPage() {
             <Button onClick={handleFetchClientLogs}>查询</Button>
           </div>
           {clientLogs && (
-            <pre className="whitespace-pre-wrap">{clientLogs.join("\n") || "暂无日志"}</pre>
+            <pre className="whitespace-pre-wrap">
+              {clientLogs.join("\n") || "暂无日志"}
+            </pre>
           )}
         </CardContent>
       </Card>

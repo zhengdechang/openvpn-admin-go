@@ -1,8 +1,8 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { User, LoginCredentials, RegisterCredentials } from "./types";
-import { userAPI } from "./api";
+import { User, LoginCredentials, RegisterCredentials } from "../types/types";
+import { userAPI } from "../services/api";
 import { useRouter } from "next/navigation";
 import { useUserStore } from "@/store";
 import { showToast } from "@/lib/toast-utils";
@@ -90,8 +90,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const user = await fetchUser();
         return user;
       } else {
-        showToast.error(response.error || "Login failed. Please check your credentials");
-        setError(response.error || "Login failed. Please check your credentials");
+        showToast.error(
+          response.error || "Login failed. Please check your credentials"
+        );
+        setError(
+          response.error || "Login failed. Please check your credentials"
+        );
         return;
       }
     } catch (error) {
@@ -102,7 +106,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const register = async (credentials: RegisterCredentials): Promise<boolean> => {
+  const register = async (
+    credentials: RegisterCredentials
+  ): Promise<boolean> => {
     setLoading(true);
     setError(null);
     try {
@@ -113,7 +119,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return false;
       }
       if (response.data && response.message) {
-        showToast.success(response.message || "Registration successful. Please verify your email");
+        showToast.success(
+          response.message ||
+            "Registration successful. Please verify your email"
+        );
         return true;
       }
       return false;

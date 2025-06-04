@@ -10,7 +10,7 @@ import {
   RegisterCredentials,
   OpenVPNClient,
   ServerStatus,
-} from "./types";
+} from "../types/types";
 import Cookies from "js-cookie";
 import { useUserStore } from "@/store";
 
