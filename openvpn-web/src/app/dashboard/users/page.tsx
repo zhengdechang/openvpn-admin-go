@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogClose } from "@/components/ui/dialog";
 import MainLayout from "@/components/layout/main-layout";
 import { userManagementAPI, departmentAPI } from "@/services/api";
-import type { AdminUser, Department } from "@/types/types";
+import { AdminUser, Department, UserRole } from "@/types/types";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,7 @@ export default function UsersPage() {
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [depts, setDepts] = useState<Department[]>([]);
   const [loading, setLoading] = useState(true);
-  const [form, setForm] = useState({ name: "", email: "", password: "", role: "user", departmentId: "" });
+  const [form, setForm] = useState({ name: "", email: "", password: "", role: UserRole.USER, departmentId: "" });
   const [open, setOpen] = useState(false);
 
   const fetchAll = async () => {
@@ -41,7 +41,7 @@ export default function UsersPage() {
     try {
       await userManagementAPI.create(form);
       toast.success("创建成功");
-      setForm({ name: "", email: "", password: "", role: "user", departmentId: "" });
+      setForm({ name: "", email: "", password: "", role: UserRole.USER, departmentId: "" });
       fetchAll();
     } catch {
       toast.error("创建失败");
@@ -69,7 +69,7 @@ export default function UsersPage() {
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>新增用户</n              </DialogTitle>
+              <DialogTitle>新增用户</DialogTitle>
             </DialogHeader>
             <div className="space-y-2 pt-2">
               <Input
@@ -92,12 +92,10 @@ export default function UsersPage() {
                 <select
                   className="border px-2"
                   value={form.role}
-                  onChange={(e) => setForm({ ...form, role: e.target.value })}
+                  onChange={(e) => setForm({ ...form, role: e.target.value as UserRole })}
                 >
-                  <option value="user">User</option>
-                  <option value="manager">Manager</option>
-                  <option value="admin">Admin</option>
-                  <option value="superadmin">SuperAdmin</option>
+                  <option value={UserRole.USER}>User</option>
+                  <option value={UserRole.ADMIN}>Admin</option>
                 </select>
                 <select
                   className="border px-2"
