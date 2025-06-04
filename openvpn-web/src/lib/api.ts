@@ -8,6 +8,8 @@ import {
   AddPolicyRequest,
   LoginCredentials,
   RegisterCredentials,
+  OpenVPNClient,
+  ServerStatus,
 } from "./types";
 import Cookies from "js-cookie";
 import { useUserStore } from "@/store";
@@ -199,6 +201,133 @@ export const userAPI = {
       };
     }
   },
+};
+
+// OpenVPN 客户端管理 API
+export const openvpnAPI = {
+  // 获取客户端列表
+  getClientList: async (): Promise<OpenVPNClient[]> => {
+    const response = await api.get<OpenVPNClient[]>('/api/client/list');
+    return response.data;
+  },
+  // 添加客户端
+  addClient: async (username: string): Promise<any> => {
+    const response = await api.post('/api/client/add', { username });
+    return response.data;
+  },
+  // 更新客户端
+  updateClient: async (username: string): Promise<any> => {
+    const response = await api.put('/api/client/update', { username });
+    return response.data;
+  },
+  // 删除客户端
+  deleteClient: async (username: string): Promise<any> => {
+    const response = await api.delete(`/api/client/delete/${username}`);
+    return response.data;
+  },
+  // 获取客户端配置
+  getClientConfig: async (username: string): Promise<{ config: string }> => {
+    const response = await api.get<{ config: string }>(`/api/client/config/${username}`);
+    return response.data;
+  },
+  // 吊销客户端证书
+  revokeClient: async (username: string): Promise<any> => {
+    const response = await api.post('/api/client/revoke', { username });
+    return response.data;
+  },
+  // 续期客户端证书
+  renewClient: async (username: string): Promise<any> => {
+    const response = await api.post('/api/client/renew', { username });
+    return response.data;
+  },
+  // 获取服务器状态
+  getServerStatus: async (): Promise<ServerStatus> => {
+    const response = await api.get<ServerStatus>('/api/server/status');
+    return response.data;
+  },
+  // 获取服务器日志
+  getServerLogs: async (): Promise<string> => {
+    const response = await api.get<{ logs: string }>('/api/logs/server');
+    return response.data.logs;
+  },
+  // 获取指定客户端日志
+  getClientLogs: async (username: string): Promise<string[]> => {
+    const response = await api.get<{ logs: string[] }>(`/api/logs/client/${username}`);
+    return response.data.logs;
+  },
+};
+
+// 服务器管理 API
+export const serverAPI = {
+  getStatus: async (): Promise<ServerStatus> => {
+    const response = await api.get<ServerStatus>('/api/server/status');
+    return response.data;
+  },
+  start: async (): Promise<any> => {
+    const response = await api.post('/api/server/start');
+    return response.data;
+  },
+  stop: async (): Promise<any> => {
+    const response = await api.post('/api/server/stop');
+    return response.data;
+  },
+  restart: async (): Promise<any> => {
+    const response = await api.post('/api/server/restart');
+    return response.data;
+  },
+  getConfigTemplate: async (): Promise<{ template: string }> => {
+    const response = await api.get<{ template: string }>('/api/server/config/template');
+    return response.data;
+  },
+  updateConfig: async (config: string): Promise<any> => {
+    const response = await api.put('/api/server/config', { config });
+    return response.data;
+  },
+  updatePort: async (port: number): Promise<any> => {
+    const response = await api.put('/api/server/port', { port });
+    return response.data;
+  },
+};
+
+// 部门管理 API
+export const departmentAPI = {
+  list: async (): Promise<Department[]> => {
+    const response = await api.get<Department[]>('/api/departments');
+    return response.data;
+  },
+  create: async (name: string): Promise<any> => {
+    const response = await api.post('/api/departments', { name });
+    return response.data;
+  },
+  update: async (id: string, name: string): Promise<any> => {
+    const response = await api.put(`/api/departments/${id}`, { name });
+    return response.data;
+  },
+  delete: async (id: string): Promise<any> => {
+    const response = await api.delete(`/api/departments/${id}`);
+    return response.data;
+  },
+};
+
+// 用户管理 API
+export const userManagementAPI = {
+  list: async (): Promise<AdminUser[]> => {
+    const response = await api.get<AdminUser[]>('/api/users');
+    return response.data;
+  },
+  create: async (user: Partial<AdminUser> & { password: string }): Promise<any> => {
+    const response = await api.post('/api/users', user);
+    return response.data;
+  },
+  update: async (id: string, updates: Partial<AdminUser> & { password?: string }): Promise<any> => {
+    const response = await api.put(`/api/users/${id}`, updates);
+    return response.data;
+  },
+  delete: async (id: string): Promise<any> => {
+    const response = await api.delete(`/api/users/${id}`);
+    return response.data;
+  },
+};
 };
 
 // 标签API

@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import { useRouter } from "next/navigation";
 import MainLayout from "@/components/layout/main-layout";
 import { OpenVPNClient } from "@/lib/types";
-import { mockOpenVPNClients } from "@/lib/mock-data";
+import { openvpnAPI } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -55,9 +55,16 @@ export default function ClientsPage() {
 
   // 加载客户端数据
   useEffect(() => {
-    // 在实际应用中，这里应该从API获取数据
-    setClients(mockOpenVPNClients);
-    setFilteredClients(mockOpenVPNClients);
+    const fetchClients = async () => {
+      try {
+        const data = await openvpnAPI.getClientList();
+        setClients(data);
+        setFilteredClients(data);
+      } catch (error) {
+        toast.error("加载客户端列表失败");
+      }
+    };
+    fetchClients();
   }, []);
 
   // 搜索过滤

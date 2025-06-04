@@ -170,3 +170,30 @@ export interface OpenVPNClient {
   ipAddress?: string;
   notes?: string;
 }
+
+// 部门类型
+export interface Department {
+  id: string;
+  name: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// 管理用户类型
+export interface AdminUser {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRole;
+  departmentId?: string;
+}
+
+// 服务器状态
+export interface ServerStatus {
+  name: string;
+  status: string;
+  uptime: string;
+  connected: number;
+  total: number;
+  lastUpdated: string;
+}

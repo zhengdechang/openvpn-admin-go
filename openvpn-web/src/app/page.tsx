@@ -20,12 +20,11 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <div className="text-center max-w-3xl mx-auto">
             <h1 className="text-4xl md:text-5xl font-bold mb-4 text-primary">
-              Next.js Template
+              OpenVPN 管理系统
             </h1>
             <div className="h-1 w-24 bg-accent mx-auto my-6"></div>
             <p className="text-lg text-gray-700 mb-10">
-              A modern Next.js template with authentication, UI components, and Docker support.
-              Built with TypeScript, Tailwind CSS, and modern best practices.
+              基于 OpenVPN 的集中式管理平台，支持用户证书、服务器控制、日志查询。
             </p>
             {!user ? (
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-4">

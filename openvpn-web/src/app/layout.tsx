@@ -8,8 +8,8 @@ import { Toaster } from 'sonner';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Next.js Template',
-  description: 'A modern Next.js template with authentication and UI components',
+  title: 'OpenVPN 管理系统',
+  description: '基于 OpenVPN 的集中式管理平台，支持权限控制和日志查询',
 };
 
 export default function RootLayout({
