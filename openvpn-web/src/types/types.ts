@@ -6,6 +6,7 @@
 // User role enum
 export enum UserRole {
   ADMIN = "admin",
+  MANAGER = "manager",
   USER = "user",
   SUPERADMIN = "superadmin",
 }

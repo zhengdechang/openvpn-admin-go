@@ -88,88 +88,91 @@ export default function Navbar() {
           </Link>
 
           <nav className="flex items-center space-x-6">
-            <Link
-              href="/"
-              className={`text-gray-600 hover:text-primary ${isActive("/") ? "font-medium text-primary" : ""}`}
-            >
-              {t("layout.home")}
-            </Link>
-            <Link
-              href="/dashboard/clients"
-              className={`text-gray-600 hover:text-primary ${isActive("/dashboard/clients") ? "font-medium text-primary" : ""}`}
-            >
-              {t("dashboard.clients.title")}
-            </Link>
-            <Link
-              href="/dashboard/users"
-              className={`text-gray-600 hover:text-primary ${isActive("/dashboard/users") ? "font-medium text-primary" : ""}`}
-            >
-              {t("dashboard.users.title")}
-            </Link>
-            <Link
-              href="/dashboard/server"
-              className={`text-gray-600 hover:text-primary ${isActive("/dashboard/server") ? "font-medium text-primary" : ""}`}
-            >
-              {t("dashboard.server.title")}
-            </Link>
-            <Link
-              href="/dashboard/logs"
-              className={`text-gray-600 hover:text-primary ${isActive("/dashboard/logs") ? "font-medium text-primary" : ""}`}
-            >
-              {t("dashboard.logs.titleServer")}
-            </Link>
-            {(user?.role === UserRole.ADMIN || user?.role === UserRole.SUPERADMIN) && (
-              <Link
-                href="/dashboard/departments"
-                className={`text-gray-600 hover:text-primary ${isActive("/dashboard/departments") ? "font-medium text-primary" : ""}`}
-              >
-                {t("dashboard.departments.title") || '部门管理'}
-              </Link>
-            )}
-
-            {/* Language Switch */}
-            <div className="relative" ref={langDropdownRef}>
-              <button
-                className="flex items-center space-x-1 text-gray-600 hover:text-primary"
-                onClick={() => setIsLangOpen(!isLangOpen)}
-              >
-                <span>{t("layout.language")}</span>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-4 w-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
+            {!loading && !user ? (
+              <div className="flex items-center space-x-4">
+                <Link
+                  href="/auth/login"
+                  className={`text-gray-600 hover:text-primary ${isActive("/auth/login") ? "font-medium text-primary" : ""}`}
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg>
-              </button>
-
-            {isLangOpen && (
-                <div className="absolute right-0 mt-1 pt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
-                  {LanguagesSupported.map((locale) => (
-                    <button
-                      key={locale}
-                      onClick={() => handleLanguageChange(locale)}
-                      className={`block w-full text-left px-4 py-2 text-sm ${
-                        currentLocale === locale
-                          ? "text-primary font-medium"
-                          : "text-gray-700 hover:bg-gray-100"
-                      }`}
+                  {t("layout.login")}
+                </Link>
+                <Button asChild size="sm">
+                  <Link href="/auth/register">{t("layout.register")}</Link>
+                </Button>
+              </div>
+            ) : (
+              <>
+                {(user?.role === UserRole.USER || user?.role === UserRole.MANAGER || user?.role === UserRole.ADMIN) && (
+                  <Link
+                    href="/dashboard/users"
+                    className={`text-gray-600 hover:text-primary ${isActive("/dashboard/users") ? "font-medium text-primary" : ""}`}
+                  >
+                    {t("dashboard.users.title")}
+                  </Link>
+                )}
+                {user?.role === UserRole.ADMIN && (
+                  <Link
+                    href="/dashboard/departments"
+                    className={`text-gray-600 hover:text-primary ${isActive("/dashboard/departments") ? "font-medium text-primary" : ""}`}
+                  >
+                    {t("dashboard.departments.title") || '部门管理'}
+                  </Link>
+                )}
+                {user?.role === UserRole.SUPERADMIN && (
+                  <>
+                    <Link
+                      href="/dashboard/server"
+                      className={`text-gray-600 hover:text-primary ${isActive("/dashboard/server") ? "font-medium text-primary" : ""}`}
                     >
-                      {locale === "en-US" ? "English" : "简体中文"}
-                    </button>
-                  ))}
+                      {t("dashboard.server.title")}
+                    </Link>
+                    <Link
+                      href="/dashboard/logs"
+                      className={`text-gray-600 hover:text-primary ${isActive("/dashboard/logs") ? "font-medium text-primary" : ""}`}
+                    >
+                      {t("dashboard.logs.titleServer")}
+                    </Link>
+                  </>
+                )}
+                <div className="relative" ref={langDropdownRef}>
+                  <button
+                    className="flex items-center space-x-1 text-gray-600 hover:text-primary"
+                    onClick={() => setIsLangOpen(!isLangOpen)}
+                  >
+                    <span>{t("layout.language")}</span>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 9l-7 7-7-7"
+                      />
+                    </svg>
+                  </button>
+                  {isLangOpen && (
+                    <div className="absolute right-0 mt-1 pt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
+                      {LanguagesSupported.map((locale) => (
+                        <button
+                          key={locale}
+                          onClick={() => handleLanguageChange(locale)}
+                          className={`block w-full text-left px-4 py-2 text-sm ${
+                            currentLocale === locale
+                              ? "text-primary font-medium"
+                              : "text-gray-700 hover:bg-gray-100"
+                          }`}
+                        >
+                          {locale === "en-US" ? "English" : "简体中文"}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-            {/* User menu for authenticated users */}
-            {!loading && user ? 
                 <div className="flex items-center space-x-4">
                   <div
                     className="relative"
@@ -178,8 +181,8 @@ export default function Navbar() {
                   >
                     <button className="flex items-center space-x-1 text-gray-600 hover:text-primary">
                       <span>
-                        {user.name || "User"}
-                        {user.role === UserRole.ADMIN && " (Admin)"}
+                        {user?.name || "User"}
+                        {user?.role === UserRole.ADMIN && " (Admin)"}
                       </span>
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -196,7 +199,6 @@ export default function Navbar() {
                         />
                       </svg>
                     </button>
-
                     {isOpen && (
                       <div className="absolute right-0 mt-0 pt-2 w-48 bg-white rounded-md shadow-lg py-1">
                         <Link
@@ -221,21 +223,8 @@ export default function Navbar() {
                     )}
                   </div>
                 </div>
-               : 
-                <div className="flex items-center space-x-4">
-                  <Link
-                    href="/auth/login"
-                    className={`text-gray-600 hover:text-primary ${
-                      isActive("/auth/login") ? "font-medium text-primary" : ""
-                    }`}
-                  >
-                    {t("layout.login")}
-                  </Link>
-                  <Button asChild size="sm">
-                    <Link href="/auth/register">{t("layout.register")}</Link>
-                  </Button>
-                </div>
-              }
+              </>
+            )}
           </nav>
         </div>
       </div>

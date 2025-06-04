@@ -34,10 +34,13 @@ export default function UsersPage() {
   };
 
   useEffect(() => { fetchAll(); }, []);
-  // 普通用户仅查看自己
-  const visibleUsers = currentUser?.role === UserRole.USER
-    ? users.filter(u => u.id === currentUser.id)
-    : users;
+  // 根据角色过滤用户
+  let visibleUsers = users;
+  if (currentUser?.role === UserRole.USER) {
+    visibleUsers = users.filter(u => u.id === currentUser.id);
+  } else if (currentUser?.role === UserRole.MANAGER) {
+    visibleUsers = users.filter(u => u.departmentId === currentUser.departmentId);
+  }
   // 下载配置
   const handleDownload = async (id: string, os: string) => {
     try {
@@ -88,6 +91,7 @@ export default function UsersPage() {
     <MainLayout className="p-4">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">用户管理</h1>
+        {(currentUser?.role === UserRole.ADMIN || currentUser?.role === UserRole.MANAGER) && (
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button>新增用户</Button>
@@ -142,6 +146,7 @@ export default function UsersPage() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+        )}
       </div>
 
       <Card>

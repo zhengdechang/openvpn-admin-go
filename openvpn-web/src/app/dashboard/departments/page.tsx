@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useAuth } from "@/lib/auth-context";
+import { UserRole } from "@/types/types";
 import MainLayout from "@/components/layout/main-layout";
 import { departmentAPI, userManagementAPI } from "@/services/api";
 import type { Department, AdminUser } from "@/types/types";
@@ -12,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 
 export default function DepartmentsPage() {
+  const { user: currentUser } = useAuth();
   const [depts, setDepts] = useState<Department[]>([]);
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
@@ -88,7 +91,9 @@ export default function DepartmentsPage() {
         </TableCell>
         <TableCell>{node.head?.name || '-'}</TableCell>
         <TableCell>
-          <Button size="sm" variant="destructive" onClick={() => handleDelete(node.id)}>删除</Button>
+          {currentUser?.role === UserRole.ADMIN && (
+            <Button size="sm" variant="destructive" onClick={() => handleDelete(node.id)}>删除</Button>
+          )}
         </TableCell>
       </TableRow>,
       ...renderRows(node.children, level + 1)
@@ -97,11 +102,12 @@ export default function DepartmentsPage() {
     <MainLayout className="p-4">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold">部门管理</h2>
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <Button>新增部门</Button>
-          </DialogTrigger>
-          <DialogContent>
+        {currentUser?.role === UserRole.ADMIN && (
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+              <Button>新增部门</Button>
+            </DialogTrigger>
+            <DialogContent>
             <DialogHeader>
               <DialogTitle>新增部门</DialogTitle>
             </DialogHeader>
