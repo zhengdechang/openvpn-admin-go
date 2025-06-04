@@ -110,9 +110,13 @@ export default function DepartmentsPage() {
   // 切换部门展开/收起
   const toggleExpand = (id: string) => {
     setExpandedIds(prev => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
+      const next = new Set<string>(); // Always start with a new, empty Set
+      if (!prev.has(id)) { // If the clicked item was not already expanded (i.e., it's currently collapsed)
+        next.add(id); // Add it to the new Set (it will be the only expanded one)
+      }
+      // If the clicked item was already expanded (prev.has(id) is true),
+      // 'next' will remain empty, effectively collapsing it.
+      // This ensures only one item is expanded at a time, or all are collapsed.
       return next;
     });
   };
