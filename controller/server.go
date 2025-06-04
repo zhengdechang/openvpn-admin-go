@@ -1,18 +1,10 @@
 package controller
 
 import (
-	"fmt"
-	"net/http"
-	"os"
-	"os/exec"
-	"strings"
-	"time"
-
-	"openvpn-admin-go/constants"
-	"openvpn-admin-go/openvpn"
-	"openvpn-admin-go/openvpn/server"
-
-	"github.com/gin-gonic/gin"
+   "net/http"
+   "github.com/gin-gonic/gin"
+   "openvpn-admin-go/openvpn"
+   openvpnserver "openvpn-admin-go/openvpn/server"
 )
 
 type ServerController struct{}
@@ -117,36 +109,9 @@ func (c *ServerController) UpdateServer(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-   // 加载当前配置
-   cfg, err := openvpn.LoadConfig()
-   if err != nil {
-       ctx.JSON(http.StatusInternalServerError, gin.H{"error": "加载配置失败: " + err.Error()})
-       return
-   }
-   // 更新参数
-   cfg.OpenVPNPort = server.Port
-   cfg.OpenVPNProto = server.Protocol
-   cfg.OpenVPNServerNetwork = server.Network
-   cfg.OpenVPNServerNetmask = server.Netmask
-   // 持久化配置
-   if err := openvpn.SaveConfig(cfg); err != nil {
-       ctx.JSON(http.StatusInternalServerError, gin.H{"error": "保存配置失败: " + err.Error()})
-       return
-   }
-   // 生成新的服务端配置文件
-   confStr, err := cfg.GenerateServerConfig()
-   if err != nil {
-       ctx.JSON(http.StatusInternalServerError, gin.H{"error": "生成配置失败: " + err.Error()})
-       return
-   }
-   // 写入配置文件
-   if err := os.WriteFile(constants.ServerConfigPath, []byte(confStr), 0644); err != nil {
-       ctx.JSON(http.StatusInternalServerError, gin.H{"error": "写入配置文件失败: " + err.Error()})
-       return
-   }
-   // 重启服务
-   if err := openvpn.RestartServer(); err != nil {
-       ctx.JSON(http.StatusInternalServerError, gin.H{"error": "重启服务失败: " + err.Error()})
+   // 使用 openvpn/server 包处理参数更新与服务重启
+   if err := openvpnserver.ConfigureServer(server.Port, server.Protocol, server.Network, server.Netmask); err != nil {
+       ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
        return
    }
    ctx.JSON(http.StatusOK, gin.H{"message": "Server updated successfully"})
@@ -217,13 +182,9 @@ func (c *ServerController) UpdateServerConfig(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-   // 直接写入自定义配置并重启服务
-   if err := os.WriteFile(constants.ServerConfigPath, []byte(config.Config), 0644); err != nil {
-       ctx.JSON(http.StatusInternalServerError, gin.H{"error": "写入配置文件失败: " + err.Error()})
-       return
-   }
-   if err := exec.Command("systemctl", "restart", constants.ServiceName).Run(); err != nil {
-       ctx.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("重启服务失败: %v", err)})
+   // 使用 openvpn/server 包写入自定义配置并重启服务
+   if err := openvpnserver.ApplyServerConfig(config.Config); err != nil {
+       ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
        return
    }
    ctx.JSON(http.StatusOK, gin.H{"message": "Server config updated successfully"})
@@ -240,10 +201,10 @@ func (c *ServerController) UpdatePort(ctx *gin.Context) {
 	}
 
 	// 更新端口
-	if err := server.UpdatePort(port.Port); err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
+   if err := openvpnserver.UpdatePort(port.Port); err != nil {
+       ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+       return
+   }
 
 	ctx.JSON(http.StatusOK, gin.H{"message": "Port updated successfully"})
 }
