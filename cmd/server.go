@@ -10,11 +10,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/manifoldco/promptui"
-	"github.com/spf13/cobra"
 	"openvpn-admin-go/constants"
 	"openvpn-admin-go/openvpn"
-	"openvpn-admin-go/openvpn/server"
+
+	"github.com/manifoldco/promptui"
+	"github.com/spf13/cobra"
 )
 
 var serverCmd = &cobra.Command{
@@ -202,17 +202,17 @@ func updatePort(cfg *openvpn.Config) error {
 
 	// 更新配置
 	cfg.OpenVPNPort, _ = strconv.Atoi(newPort)
-	
+
 	// 保存配置后需要重新生成服务配置
 	if err := openvpn.SaveConfig(cfg); err != nil {
 		return fmt.Errorf("保存配置失败: %v", err)
 	}
-	
+
 	// 生成新的服务端配置
-	if err := server.UpdatePort(cfg.OpenVPNPort); err != nil {
+	if err := openvpn.UpdatePort(cfg.OpenVPNPort); err != nil {
 		return fmt.Errorf("更新端口失败: %v", err)
 	}
-	
+
 	fmt.Printf("端口已更新为 %s\n", newPort)
 	return nil
 }
@@ -240,20 +240,20 @@ func updateServerIP(cfg *openvpn.Config) error {
 
 	// 更新配置
 	cfg.OpenVPNServerHostname = newIP
-	
+
 	// 保存配置后需要重新生成服务配置
 	if err := openvpn.SaveConfig(cfg); err != nil {
 		fmt.Printf("保存配置失败: %v\n", err)
 		return err
 	}
-	
+
 	// 添加配置重载
 	reloadCmd := exec.Command("sudo", "systemctl", "daemon-reload")
 	if output, err := reloadCmd.CombinedOutput(); err != nil {
 		fmt.Printf("配置重载失败: %v\n输出: %s\n", err, string(output))
 		return err
 	}
-	
+
 	if err := openvpn.RestartServer(); err != nil {
 		return fmt.Errorf("重启服务失败: %v", err)
 	}
@@ -270,7 +270,7 @@ func updateServerIPAndMask() error {
 	}
 
 	// 获取当前IP和子网掩码
-	currentIP := "10.8.0.0"    // 默认IP
+	currentIP := "10.8.0.0"        // 默认IP
 	currentMask := "255.255.255.0" // 默认子网掩码
 	lines := strings.Split(string(configContent), "\n")
 	for _, line := range lines {

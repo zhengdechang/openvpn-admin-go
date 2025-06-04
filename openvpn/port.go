@@ -1,12 +1,10 @@
-package server
+package openvpn
 
 import (
 	"fmt"
 	"os"
 
-
 	"openvpn-admin-go/constants"
-	"openvpn-admin-go/openvpn"
 )
 
 // UpdatePort 更新端口号
@@ -15,14 +13,14 @@ func UpdatePort(port int) error {
 		return fmt.Errorf("端口号必须在 1-65535 之间")
 	}
 	// 加载配置
-	cfg, err := openvpn.LoadConfig()
+	cfg, err := LoadConfig()
 	if err != nil {
 		return fmt.Errorf("加载配置失败: %v", err)
 	}
 	// 更新配置
 	cfg.OpenVPNPort = port
 	// 保存配置
-	if err := openvpn.SaveConfig(cfg); err != nil {
+	if err := SaveConfig(cfg); err != nil {
 		return fmt.Errorf("保存配置失败: %v", err)
 	}
 
@@ -31,17 +29,16 @@ func UpdatePort(port int) error {
 	if err != nil {
 		return fmt.Errorf("生成服务端配置失败: %v", err)
 	}
-	
+
 	// 写入新的配置文件
 	if err := os.WriteFile(constants.ServerConfigPath, []byte(config), 0644); err != nil {
 		return fmt.Errorf("写入配置文件失败: %v", err)
 	}
-	
+
 	// 重启 OpenVPN 服务
-	if err := openvpn.RestartServer(); err != nil {
+	if err := RestartServer(); err != nil {
 		return fmt.Errorf("重启服务失败: %v", err)
 	}
 
 	return nil
 }
-
