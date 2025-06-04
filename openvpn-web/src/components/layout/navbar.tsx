@@ -88,119 +88,44 @@ export default function Navbar() {
           </Link>
 
           <nav className="flex items-center space-x-6">
-            {user?.role === 'user' ? (
-              <Link
-                href="/dashboard/users"
-                className={`text-gray-600 hover:text-primary ${
-                  isActive("/dashboard/users") ? "font-medium text-primary" : ""
-                }`}
-              >
-                {t("dashboard.users.title")}
-              </Link>
-            ) : (
-              <>
-                <Link
-                  href="/"
-                  className={`text-gray-600 hover:text-primary ${
-                    isActive("/") ? "font-medium text-primary" : ""
-                  }`}
-                >
-                  {t("layout.home")}
-                </Link>
-                <Link
-                  href="/dashboard/clients"
-                  className={`text-gray-600 hover:text-primary ${
-                    isActive("/dashboard/clients") ? "font-medium text-primary" : ""
-                  }`}
-                >
-                  {t("dashboard.clients.title")}
-                </Link>
-                <Link
-                  href="/dashboard/users"
-                  className={`text-gray-600 hover:text-primary ${
-                    isActive("/dashboard/users") ? "font-medium text-primary" : ""
-                  }`}
-                >
-                  {t("dashboard.users.title")}
-                </Link>
-                <Link
-                  href="/dashboard/server"
-                  className={`text-gray-600 hover:text-primary ${
-                    isActive("/dashboard/server") ? "font-medium text-primary" : ""
-                  }`}
-                >
-                  {t("dashboard.server.title")}
-                </Link>
-                <Link
-                  href="/dashboard/logs"
-                  className={`text-gray-600 hover:text-primary ${
-                    isActive("/dashboard/logs") ? "font-medium text-primary" : ""
-                  }`}
-                >
-                  {t("dashboard.logs.titleServer")}
-                </Link>
-                {(user?.role === 'admin' || user?.role === 'superadmin') && (
-                  <Link
-                    href="/dashboard/departments"
-                    className={`text-gray-600 hover:text-primary ${
-                      isActive("/dashboard/departments") ? "font-medium text-primary" : ""
-                    }`}
-                  >
-                    {t("dashboard.departments.title") || '部门管理'}
-                  </Link>
-                )}
-              </>
-            )}
             <Link
               href="/"
-              className={`text-gray-600 hover:text-primary ${
-                isActive("/") ? "font-medium text-primary" : ""
-              }`}
+              className={`text-gray-600 hover:text-primary ${isActive("/") ? "font-medium text-primary" : ""}`}
             >
               {t("layout.home")}
             </Link>
             <Link
               href="/dashboard/clients"
-              className={`text-gray-600 hover:text-primary ${
-                isActive("/dashboard/clients") ? "font-medium text-primary" : ""
-              }`}
+              className={`text-gray-600 hover:text-primary ${isActive("/dashboard/clients") ? "font-medium text-primary" : ""}`}
             >
               {t("dashboard.clients.title")}
             </Link>
             <Link
               href="/dashboard/users"
-              className={`text-gray-600 hover:text-primary ${
-                isActive("/dashboard/users") ? "font-medium text-primary" : ""
-              }`}
+              className={`text-gray-600 hover:text-primary ${isActive("/dashboard/users") ? "font-medium text-primary" : ""}`}
             >
               {t("dashboard.users.title")}
             </Link>
-            {(user?.role === 'admin' || user?.role === 'superadmin') && (
-              <Link
-                href="/dashboard/departments"
-                className={`text-gray-600 hover:text-primary ${
-                  isActive("/dashboard/departments") ? "font-medium text-primary" : ""
-                }`}
-              >
-                部门管理
-              </Link>
-            )}
             <Link
               href="/dashboard/server"
-              className={`text-gray-600 hover:text-primary ${
-                isActive("/dashboard/server") ? "font-medium text-primary" : ""
-              }`}
+              className={`text-gray-600 hover:text-primary ${isActive("/dashboard/server") ? "font-medium text-primary" : ""}`}
             >
               {t("dashboard.server.title")}
             </Link>
             <Link
               href="/dashboard/logs"
-              className={`text-gray-600 hover:text-primary ${
-                isActive("/dashboard/logs") ? "font-medium text-primary" : ""
-              }`}
+              className={`text-gray-600 hover:text-primary ${isActive("/dashboard/logs") ? "font-medium text-primary" : ""}`}
             >
               {t("dashboard.logs.titleServer")}
             </Link>
+            {(user?.role === UserRole.ADMIN || user?.role === UserRole.SUPERADMIN) && (
+              <Link
+                href="/dashboard/departments"
+                className={`text-gray-600 hover:text-primary ${isActive("/dashboard/departments") ? "font-medium text-primary" : ""}`}
+              >
+                {t("dashboard.departments.title") || '部门管理'}
+              </Link>
+            )}
 
             {/* Language Switch */}
             <div className="relative" ref={langDropdownRef}>

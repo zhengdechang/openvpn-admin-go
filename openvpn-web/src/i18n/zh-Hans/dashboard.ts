@@ -65,6 +65,12 @@ const translation = {
   server: {
     title: '服务器',
   },
+  department: {
+    title: '部门',
+  },
+  departments: {
+    title: '部门',
+  },
 }
 
 export default translation

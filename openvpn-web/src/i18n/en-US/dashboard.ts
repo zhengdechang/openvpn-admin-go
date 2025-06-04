@@ -66,6 +66,9 @@ const translation = {
   server: {
     title: "Server",
   },
+  departments: {
+    title: "Department",
+  },
 }
 
 ;
