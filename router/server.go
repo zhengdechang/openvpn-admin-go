@@ -1,24 +1,33 @@
 package router
 
 import (
-	"openvpn-admin-go/controller"
+   "openvpn-admin-go/controller"
+   "openvpn-admin-go/middleware"
+   "openvpn-admin-go/model"
 
-	"github.com/gin-gonic/gin"
+   "github.com/gin-gonic/gin"
 )
 
 // SetupServerRoutes 设置服务器相关路由
 func SetupServerRoutes(r *gin.RouterGroup) {
 	serverCtrl := &controller.ServerController{}
-	server := r.Group("/server")
-	{
-		server.PUT("/update", serverCtrl.UpdateServer)
-		server.DELETE("/delete", serverCtrl.DeleteServer)
-		server.GET("/status", serverCtrl.GetServerStatus)
-		server.POST("/start", serverCtrl.StartServer)
-		server.POST("/stop", serverCtrl.StopServer)
-		server.POST("/restart", serverCtrl.RestartServer)
-		server.GET("/config/template", serverCtrl.GetServerConfigTemplate)
-		server.PUT("/config", serverCtrl.UpdateServerConfig)
-		server.PUT("/port", serverCtrl.UpdatePort)
-	}
+   server := r.Group("/server")
+   server.Use(middleware.JWTAuthMiddleware())
+   {
+       // 查看服务器状态: 所有认证用户
+       server.GET("/status", serverCtrl.GetServerStatus)
+       // 管理操作: superadmin
+       super := server.Group("")
+       super.Use(middleware.RoleRequired(string(model.RoleSuperAdmin)))
+       {
+           super.PUT("/update", serverCtrl.UpdateServer)
+           super.DELETE("/delete", serverCtrl.DeleteServer)
+           super.POST("/start", serverCtrl.StartServer)
+           super.POST("/stop", serverCtrl.StopServer)
+           super.POST("/restart", serverCtrl.RestartServer)
+           super.GET("/config/template", serverCtrl.GetServerConfigTemplate)
+           super.PUT("/config", serverCtrl.UpdateServerConfig)
+           super.PUT("/port", serverCtrl.UpdatePort)
+       }
+   }
 } 

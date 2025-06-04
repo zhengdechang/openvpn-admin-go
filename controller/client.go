@@ -1,10 +1,11 @@
 package controller
 
 import (
-	"net/http"
-
-	"github.com/gin-gonic/gin"
-	"openvpn-admin-go/openvpn"
+   "net/http"
+   "github.com/gin-gonic/gin"
+   "openvpn-admin-go/middleware"
+   "openvpn-admin-go/model"
+   "openvpn-admin-go/openvpn"
 )
 
 type ClientController struct{}
@@ -79,8 +80,14 @@ func (c *ClientController) GetClientConfig(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	// 生成客户端配置
-	config, err := openvpn.GenerateClientConfig(username, cfg)
+   // 权限检查: 普通用户仅能下载自己的配置
+   claims := ctx.MustGet("claims").(*middleware.Claims)
+   if claims.Role == string(model.RoleUser) && claims.UserID != username {
+       ctx.JSON(http.StatusForbidden, gin.H{"error": "forbidden"})
+       return
+   }
+   // 生成客户端配置
+   config, err := openvpn.GenerateClientConfig(username, cfg)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -128,7 +135,12 @@ func (c *ClientController) GetClientStatus(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Username is required"})
 		return
 	}
-	status, err := openvpn.GetClientStatus(username)
+   claims := ctx.MustGet("claims").(*middleware.Claims)
+   if claims.Role == string(model.RoleUser) && claims.UserID != username {
+       ctx.JSON(http.StatusForbidden, gin.H{"error": "forbidden"})
+       return
+   }
+   status, err := openvpn.GetClientStatus(username)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -142,7 +154,9 @@ func (c *ClientController) GetClientStatus(ctx *gin.Context) {
 
 // GetAllClientStatuses 获取所有客户端状态
 func (c *ClientController) GetAllClientStatuses(ctx *gin.Context) {
-	statuses, err := openvpn.GetAllClientStatuses()
+   // 只有管理员和部门负责人可以查看所有状态
+   // 路由已限制，此处无需重复检查
+   statuses, err := openvpn.GetAllClientStatuses()
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

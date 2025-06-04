@@ -1,17 +1,19 @@
 package main
 
 import (
-	"fmt"
-	"log"
-	"os"
-	"os/signal"
-	"syscall"
-	"openvpn-admin-go/cmd"
-	"bufio"
-	"strings"
+   "fmt"
+   "log"
+   "os"
+   "os/signal"
+   "syscall"
+   "bufio"
+   "strings"
 
-	"github.com/gin-gonic/gin"
-	"openvpn-admin-go/router"
+   "github.com/gin-gonic/gin"
+   "openvpn-admin-go/cmd"
+   "openvpn-admin-go/database"
+   "openvpn-admin-go/model"
+   "openvpn-admin-go/router"
 )
 
 // loadEnv 从.env文件加载环境变量
@@ -128,15 +130,25 @@ func main() {
 
 	fmt.Println("环境检查通过")
 	
-	// 启动 Web 服务器
-	r := gin.Default()
+   // 初始化数据库
+   if err := database.Init(); err != nil {
+       log.Fatalf("数据库初始化失败: %v", err)
+   }
+   if err := database.Migrate(&model.User{}, &model.Department{}); err != nil {
+       log.Fatalf("数据库迁移失败: %v", err)
+   }
+   // 启动 Web 服务器
+   r := gin.Default()
 
 	// 注册路由
-	api := r.Group("/api")
-	{
-		router.SetupServerRoutes(api)
-		router.SetupClientRoutes(api)
-	}
+   api := r.Group("/api")
+   {
+       router.SetupUserRoutes(api)
+       router.SetupManageRoutes(api)
+       router.SetupServerRoutes(api)
+       router.SetupClientRoutes(api)
+       router.SetupLogRoutes(api)
+   }
 
 	// 在 goroutine 中启动 Web 服务器
 	go func() {
