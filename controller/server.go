@@ -117,12 +117,39 @@ func (c *ServerController) UpdateServer(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	// 更新服务器配置
-	if err := openvpn.UpdateServerConfig(); err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-	ctx.JSON(http.StatusOK, gin.H{"message": "Server updated successfully"})
+   // 加载当前配置
+   cfg, err := openvpn.LoadConfig()
+   if err != nil {
+       ctx.JSON(http.StatusInternalServerError, gin.H{"error": "加载配置失败: " + err.Error()})
+       return
+   }
+   // 更新参数
+   cfg.OpenVPNPort = server.Port
+   cfg.OpenVPNProto = server.Protocol
+   cfg.OpenVPNServerNetwork = server.Network
+   cfg.OpenVPNServerNetmask = server.Netmask
+   // 持久化配置
+   if err := openvpn.SaveConfig(cfg); err != nil {
+       ctx.JSON(http.StatusInternalServerError, gin.H{"error": "保存配置失败: " + err.Error()})
+       return
+   }
+   // 生成新的服务端配置文件
+   confStr, err := cfg.GenerateServerConfig()
+   if err != nil {
+       ctx.JSON(http.StatusInternalServerError, gin.H{"error": "生成配置失败: " + err.Error()})
+       return
+   }
+   // 写入配置文件
+   if err := os.WriteFile(constants.ServerConfigPath, []byte(confStr), 0644); err != nil {
+       ctx.JSON(http.StatusInternalServerError, gin.H{"error": "写入配置文件失败: " + err.Error()})
+       return
+   }
+   // 重启服务
+   if err := openvpn.RestartServer(); err != nil {
+       ctx.JSON(http.StatusInternalServerError, gin.H{"error": "重启服务失败: " + err.Error()})
+       return
+   }
+   ctx.JSON(http.StatusOK, gin.H{"message": "Server updated successfully"})
 }
 
 // DeleteServer 删除服务器
@@ -190,11 +217,16 @@ func (c *ServerController) UpdateServerConfig(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	if err := openvpn.UpdateServerConfig(); err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-	ctx.JSON(http.StatusOK, gin.H{"message": "Server config updated successfully"})
+   // 直接写入自定义配置并重启服务
+   if err := os.WriteFile(constants.ServerConfigPath, []byte(config.Config), 0644); err != nil {
+       ctx.JSON(http.StatusInternalServerError, gin.H{"error": "写入配置文件失败: " + err.Error()})
+       return
+   }
+   if err := exec.Command("systemctl", "restart", constants.ServiceName).Run(); err != nil {
+       ctx.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("重启服务失败: %v", err)})
+       return
+   }
+   ctx.JSON(http.StatusOK, gin.H{"message": "Server config updated successfully"})
 }
 
 // UpdatePort 更新服务器端口

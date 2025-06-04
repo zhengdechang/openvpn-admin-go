@@ -1,7 +1,7 @@
 package main
 
 import (
-	"bufio"
+   "bufio"
 	"fmt"
 	"log"
 	"os"
@@ -13,6 +13,9 @@ import (
    "openvpn-admin-go/database"
    "openvpn-admin-go/model"
    "openvpn-admin-go/common"
+   "openvpn-admin-go/openvpn"
+   "openvpn-admin-go/constants"
+   "path/filepath"
    "openvpn-admin-go/router"
 
 	"github.com/gin-gonic/gin"
@@ -161,7 +164,23 @@ func main() {
            }
        }
    }()
-	// 启动 Web 服务器
+   // 确保数据库用户在 OpenVPN 客户端存在，不存在则自动创建
+   func() {
+       var users []model.User
+       if err := database.DB.Find(&users).Error; err != nil {
+           log.Printf("查询用户列表失败: %v", err)
+       } else {
+           for _, u := range users {
+               clientPath := filepath.Join(constants.ClientConfigDir, u.ID+".ovpn")
+               if _, err := os.Stat(clientPath); os.IsNotExist(err) {
+                   if err := openvpn.CreateClient(u.ID); err != nil {
+                       log.Printf("创建 OpenVPN 客户端 %s 失败: %v", u.ID, err)
+                   }
+               }
+           }
+       }
+   }()
+   // 启动 Web 服务器
 	r := gin.Default()
 
 	// 注册路由
