@@ -8,8 +8,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "check-i18n": "node ./i18n/check-i18n.js",
-    "auto-gen-i18n": "node ./i18n/auto-gen-i18n.js"
+    "check-i18n": "node ./src/i18n/check-i18n.js",
+    "auto-gen-i18n": "node ./src/i18n/auto-gen-i18n.js"
   },
   "dependencies": {
     "@formatjs/intl-localematcher": "^0.6.1",

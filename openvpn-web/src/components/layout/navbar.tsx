@@ -63,7 +63,7 @@ export default function Navbar() {
   }, [i18n]);
 
   return (
-    <header className="bg-white shadow-sm border-b border-gray-200 py-4 sticky top-0 z-10">
+    <div className="bg-white shadow-sm border-b border-gray-200 py-4 sticky top-0 z-10">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between">
           <Link
@@ -95,15 +95,6 @@ export default function Navbar() {
               }`}
             >
               {t("layout.home")}
-            </Link>
-
-            <Link
-              href="/dashboard"
-              className={`text-gray-600 hover:text-primary ${
-                isActive("/dashboard") ? "font-medium text-primary" : ""
-              }`}
-            >
-              {t("layout.dashboard")}
             </Link>
             <Link
               href="/dashboard/clients"
@@ -179,20 +170,8 @@ export default function Navbar() {
                 </div>
               )}
             </div>
-
-            {/* Login/Register for unauthenticated users */}
-            {!loading && !user && (
-              <>
-                <Link href="/auth/login" className="text-gray-600 hover:text-primary">
-                  {t("layout.login")}
-                </Link>
-                <Link href="/auth/register" className="text-gray-600 hover:text-primary">
-                  {t("layout.register")}
-                </Link>
-              </>
-            )}
             {/* User menu for authenticated users */}
-            {!loading && user && (
+            {!loading && user ? 
                 <div className="flex items-center space-x-4">
                   <div
                     className="relative"
@@ -244,7 +223,7 @@ export default function Navbar() {
                     )}
                   </div>
                 </div>
-              ) : (
+               : 
                 <div className="flex items-center space-x-4">
                   <Link
                     href="/auth/login"
@@ -258,10 +237,10 @@ export default function Navbar() {
                     <Link href="/auth/register">{t("layout.register")}</Link>
                   </Button>
                 </div>
-              ))}
+              }
           </nav>
         </div>
       </div>
-    </header>
+    </div>
   );
 }
