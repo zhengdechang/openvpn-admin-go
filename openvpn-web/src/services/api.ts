@@ -239,10 +239,11 @@ export const openvpnAPI = {
     const response = await api.delete(`/api/client/delete/${username}`);
     return response.data;
   },
-  // 获取客户端配置
-  getClientConfig: async (username: string): Promise<{ config: string }> => {
+  // 获取客户端配置，可根据 os 参数区分下载类型
+  getClientConfig: async (username: string, os?: string): Promise<{ config: string }> => {
     const response = await api.get<{ config: string }>(
-      `/api/client/config/${username}`
+      `/api/client/config/${username}`,
+      { params: { os } }
     );
     return response.data;
   },
@@ -315,8 +316,8 @@ export const departmentAPI = {
     const response = await api.get<Department[]>("/api/departments");
     return response.data;
   },
-  create: async (name: string): Promise<any> => {
-    const response = await api.post("/api/departments", { name });
+  create: async (data: { name: string; headId?: string }): Promise<any> => {
+    const response = await api.post("/api/departments", data);
     return response.data;
   },
   update: async (id: string, name: string): Promise<any> => {

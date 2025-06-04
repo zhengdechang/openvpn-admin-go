@@ -15,15 +15,53 @@ import (
 )
 
 type ServerController struct{}
+// ListServers 列出服务器列表
+func (c *ServerController) ListServers(ctx *gin.Context) {
+   // 加载当前配置
+   cfg, err := openvpn.LoadConfig()
+   if err != nil {
+       ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+       return
+   }
+   // 获取运行状态
+   status, err := GetServerStatus()
+   if err != nil {
+       ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+       return
+   }
+   // 构造返回结构
+   server := struct {
+       Port      int           `json:"port"`
+       Protocol  string        `json:"protocol"`
+       Network   string        `json:"network"`
+       Netmask   string        `json:"netmask"`
+       Status    string        `json:"status"`
+       Uptime    time.Duration `json:"uptime"`
+       Connected int           `json:"connected"`
+       Total     int           `json:"total"`
+   }{
+       Port:      cfg.OpenVPNPort,
+       Protocol:  cfg.OpenVPNProto,
+       Network:   cfg.OpenVPNServerNetwork,
+       Netmask:   cfg.OpenVPNServerNetmask,
+       Status:    status.Status,
+       Uptime:    status.Uptime,
+       Connected: status.Connected,
+       Total:     status.Total,
+   }
+   // 返回数组格式
+   ctx.JSON(http.StatusOK, []interface{}{server})
+}
 
 // ServerStatus 服务器状态
+// ServerStatus 服务器状态
 type ServerStatus struct {
-	Name        string
-	Status      string
-	Uptime      time.Duration
-	Connected   int
-	Total       int
-	LastUpdated time.Time
+   Name        string `json:"name"`
+   Status      string `json:"status"`
+   Uptime      string `json:"uptime"`      // 运行时长
+   Connected   int    `json:"connected"`   // 当前已连接数
+   Total       int    `json:"total"`       // 历史总连接数
+   LastUpdated string `json:"lastUpdated"` // 最后更新时间
 }
 
 // GetServerStatus 获取服务器状态
@@ -35,19 +73,19 @@ func GetServerStatus() (*ServerStatus, error) {
 		return nil, fmt.Errorf("检查服务状态失败: %v", err)
 	}
 
-	status := &ServerStatus{
-		Name:        "server",
-		Status:      strings.TrimSpace(string(output)),
-		LastUpdated: time.Now(),
-	}
+   status := &ServerStatus{
+       Name:        "server",
+       Status:      strings.TrimSpace(string(output)),
+       LastUpdated: time.Now().Format(time.RFC3339),
+   }
 
 	// 如果服务正在运行，获取更多信息
 	if status.Status == "active" {
 		// 获取服务启动时间
 		cmd = exec.Command("systemctl", "show", constants.ServiceName, "--property=ActiveEnterTimestamp")
 		if output, err := cmd.CombinedOutput(); err == nil {
-			if t, err := time.Parse("Mon 2006-01-02 15:04:05 MST", strings.TrimSpace(strings.TrimPrefix(string(output), "ActiveEnterTimestamp="))); err == nil {
-				status.Uptime = time.Since(t)
+           if t0, err := time.Parse("Mon 2006-01-02 15:04:05 MST", strings.TrimSpace(strings.TrimPrefix(string(output), "ActiveEnterTimestamp="))); err == nil {
+               status.Uptime = time.Since(t0).String()
 			}
 		}
 

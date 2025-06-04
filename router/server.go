@@ -14,6 +14,8 @@ func SetupServerRoutes(r *gin.RouterGroup) {
    server := r.Group("/server")
    server.Use(middleware.JWTAuthMiddleware())
    {
+       // 列出服务器列表: 所有认证用户
+       server.GET("/list", serverCtrl.ListServers)
        // 查看服务器状态: 所有认证用户
        server.GET("/status", serverCtrl.GetServerStatus)
        // 管理操作: superadmin

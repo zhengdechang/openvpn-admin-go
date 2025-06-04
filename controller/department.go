@@ -28,7 +28,8 @@ func (c *DepartmentController) CreateDepartment(ctx *gin.Context) {
 // ListDepartments 列出所有部门
 func (c *DepartmentController) ListDepartments(ctx *gin.Context) {
    var deps []model.Department
-   if err := database.DB.Find(&deps).Error; err != nil {
+   // 预加载负责人信息
+   if err := database.DB.Preload("Head").Find(&deps).Error; err != nil {
        ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
        return
    }
@@ -39,7 +40,8 @@ func (c *DepartmentController) ListDepartments(ctx *gin.Context) {
 func (c *DepartmentController) GetDepartment(ctx *gin.Context) {
    id := ctx.Param("id")
    var dep model.Department
-   if err := database.DB.First(&dep, "id = ?", id).Error; err != nil {
+   // 加载部门及负责人信息
+   if err := database.DB.Preload("Head").First(&dep, "id = ?", id).Error; err != nil {
        ctx.JSON(http.StatusNotFound, gin.H{"error": "department not found"})
        return
    }
@@ -54,9 +56,11 @@ func (c *DepartmentController) UpdateDepartment(ctx *gin.Context) {
        ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
        return
    }
+   // 更新名称和负责人
+   updates := map[string]interface{}{"name": req.Name, "head_id": req.HeadID}
    if err := database.DB.Model(&model.Department{}).
        Where("id = ?", id).
-       Updates(map[string]interface{}{"name": req.Name}).Error; err != nil {
+       Updates(updates).Error; err != nil {
        ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
        return
    }

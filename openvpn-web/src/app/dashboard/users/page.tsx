@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogClose } from "@/components/ui/dialog";
 import MainLayout from "@/components/layout/main-layout";
 import { userManagementAPI, departmentAPI } from "@/services/api";
 import type { AdminUser, Department } from "@/types/types";
@@ -15,6 +16,7 @@ export default function UsersPage() {
   const [depts, setDepts] = useState<Department[]>([]);
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState({ name: "", email: "", password: "", role: "user", departmentId: "" });
+  const [open, setOpen] = useState(false);
 
   const fetchAll = async () => {
     setLoading(true);
@@ -59,51 +61,65 @@ export default function UsersPage() {
 
   return (
     <MainLayout className="p-4">
-      <h1 className="text-2xl font-bold mb-4">用户管理</h1>
-      <Card className="mb-6">
-        <CardHeader><CardTitle>新增用户</CardTitle></CardHeader>
-        <CardContent className="space-y-2">
-          <Input
-            placeholder="姓名"
-            value={form.name}
-            onChange={(e) => setForm({ ...form, name: e.target.value })}
-          />
-          <Input
-            placeholder="邮箱"
-            value={form.email}
-            onChange={(e) => setForm({ ...form, email: e.target.value })}
-          />
-          <Input
-            type="password"
-            placeholder="密码"
-            value={form.password}
-            onChange={(e) => setForm({ ...form, password: e.target.value })}
-          />
-          <div className="flex space-x-2">
-            <select
-              className="border px-2"
-              value={form.role}
-              onChange={(e) => setForm({ ...form, role: e.target.value })}
-            >
-              <option value="user">User</option>
-              <option value="manager">Manager</option>
-              <option value="admin">Admin</option>
-              <option value="superadmin">SuperAdmin</option>
-            </select>
-            <select
-              className="border px-2"
-              value={form.departmentId}
-              onChange={(e) => setForm({ ...form, departmentId: e.target.value })}
-            >
-              <option value="">-- 选择部门 --</option>
-              {depts.map((d) => (
-                <option key={d.id} value={d.id}>{d.name}</option>
-              ))}
-            </select>
-          </div>
-          <Button onClick={handleCreate}>创建</Button>
-        </CardContent>
-      </Card>
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-bold">用户管理</h1>
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+            <Button>新增用户</Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>新增用户</n              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-2 pt-2">
+              <Input
+                placeholder="姓名"
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+              />
+              <Input
+                placeholder="邮箱"
+                value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+              />
+              <Input
+                type="password"
+                placeholder="密码"
+                value={form.password}
+                onChange={(e) => setForm({ ...form, password: e.target.value })}
+              />
+              <div className="flex space-x-2">
+                <select
+                  className="border px-2"
+                  value={form.role}
+                  onChange={(e) => setForm({ ...form, role: e.target.value })}
+                >
+                  <option value="user">User</option>
+                  <option value="manager">Manager</option>
+                  <option value="admin">Admin</option>
+                  <option value="superadmin">SuperAdmin</option>
+                </select>
+                <select
+                  className="border px-2"
+                  value={form.departmentId}
+                  onChange={(e) => setForm({ ...form, departmentId: e.target.value })}
+                >
+                  <option value="">-- 选择部门 --</option>
+                  {depts.map((d) => (
+                    <option key={d.id} value={d.id}>{d.name}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button variant="outline">取消</Button>
+              </DialogClose>
+              <Button onClick={() => { handleCreate(); setOpen(false); }}>创建</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
 
       <Card>
         <CardHeader><CardTitle>用户列表</CardTitle></CardHeader>

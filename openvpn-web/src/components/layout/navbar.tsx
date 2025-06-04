@@ -112,6 +112,16 @@ export default function Navbar() {
             >
               {t("dashboard.users.title")}
             </Link>
+            {(user?.role === 'admin' || user?.role === 'superadmin') && (
+              <Link
+                href="/dashboard/departments"
+                className={`text-gray-600 hover:text-primary ${
+                  isActive("/dashboard/departments") ? "font-medium text-primary" : ""
+                }`}
+              >
+                部门管理
+              </Link>
+            )}
             <Link
               href="/dashboard/server"
               className={`text-gray-600 hover:text-primary ${
