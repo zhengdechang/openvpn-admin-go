@@ -4,6 +4,7 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth-context";
 import MainLayout from "@/components/layout/main-layout";
+import { useTranslation } from "react-i18next";
 import { serverAPI } from "@/services/api";
 import type { ServerStatus } from "@/types/types";
 import { UserRole } from "@/types/types";
@@ -13,6 +14,7 @@ import { toast } from "sonner";
 
 export default function ServerPage() {
   const { user: currentUser } = useAuth();
+  const { t } = useTranslation([]);
   const [status, setStatus] = useState<ServerStatus | null>(null);
   const [config, setConfig] = useState<string>("");
   const [loading, setLoading] = useState(true);
@@ -25,7 +27,7 @@ export default function ServerPage() {
       const tpl = await serverAPI.getConfigTemplate();
       setConfig(tpl.template);
     } catch (error) {
-      toast.error("获取服务器信息失败");
+      toast.error(t("dashboard.server.fetchStatusError"));
     } finally {
       setLoading(false);
     }
@@ -35,7 +37,7 @@ export default function ServerPage() {
   if (!currentUser || currentUser.role !== UserRole.SUPERADMIN) {
     return (
       <MainLayout className="p-4">
-        <p className="text-center mt-10">无权限访问此页面</p>
+        <p className="text-center mt-10">{t("dashboard.server.noPermission")}</p>
       </MainLayout>
     );
   }
@@ -43,28 +45,28 @@ export default function ServerPage() {
     <MainLayout className="p-4 space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>服务器状态</CardTitle>
+          <CardTitle>{t("dashboard.server.statusCardTitle")}</CardTitle>
         </CardHeader>
         <CardContent>
           {loading ? (
-            <p>加载中...</p>
+            <p>{t("common.loading")}</p>
           ) : status ? (
             <div className="space-y-2">
-              <p>名称: {status.name}</p>
-              <p>状态: {status.status}</p>
-              <p>运行时长: {status.uptime}</p>
-              <p>当前连接: {status.connected}</p>
-              <p>历史总数: {status.total}</p>
-              <p>最后更新时间: {new Date(status.lastUpdated).toLocaleString()}</p>
+              <p>{t("dashboard.server.labelName")}{status.name}</p>
+              <p>{t("dashboard.server.labelStatus")}{status.status}</p>
+              <p>{t("dashboard.server.labelUptime")}{status.uptime}</p>
+              <p>{t("dashboard.server.labelConnected")}{status.connected}</p>
+              <p>{t("dashboard.server.labelTotal")}{status.total}</p>
+              <p>{t("dashboard.server.labelLastUpdated")}{new Date(status.lastUpdated).toLocaleString()}</p>
             </div>
           ) : (
-            <p>暂无数据</p>
+            <p>{t("dashboard.server.noData")}</p>
           )}
         </CardContent>
       </Card>
       <Card>
         <CardHeader>
-          <CardTitle>服务器配置管理</CardTitle>
+          <CardTitle>{t("dashboard.server.configCardTitle")}</CardTitle>
         </CardHeader>
         <CardContent>
           <textarea
@@ -76,27 +78,27 @@ export default function ServerPage() {
             <Button onClick={async () => {
               try {
                 await serverAPI.updateConfig(config);
-                toast.success('配置更新成功');
+                toast.success(t("dashboard.server.updateConfigSuccess"));
               } catch {
-                toast.error('配置更新失败');
+                toast.error(t("dashboard.server.updateConfigError"));
               }
             }}>
-              保存配置
+              {t("dashboard.server.saveConfigButton")}
             </Button>
             <Button onClick={async () => {
-              try { await serverAPI.start(); toast.success('启动成功'); fetchStatus(); } catch { toast.error('启动失败'); }
+              try { await serverAPI.start(); toast.success(t("dashboard.server.startSuccess")); fetchStatus(); } catch { toast.error(t("dashboard.server.startError")); }
             }}>
-              启动
+              {t("dashboard.server.startButton")}
             </Button>
             <Button onClick={async () => {
-              try { await serverAPI.stop(); toast.success('停止成功'); fetchStatus(); } catch { toast.error('停止失败'); }
+              try { await serverAPI.stop(); toast.success(t("dashboard.server.stopSuccess")); fetchStatus(); } catch { toast.error(t("dashboard.server.stopError")); }
             }}>
-              停止
+              {t("dashboard.server.stopButton")}
             </Button>
             <Button onClick={async () => {
-              try { await serverAPI.restart(); toast.success('重启成功'); fetchStatus(); } catch { toast.error('重启失败'); }
+              try { await serverAPI.restart(); toast.success(t("dashboard.server.restartSuccess")); fetchStatus(); } catch { toast.error(t("dashboard.server.restartError")); }
             }}>
-              重启
+              {t("dashboard.server.restartButton")}
             </Button>
           </div>
         </CardContent>

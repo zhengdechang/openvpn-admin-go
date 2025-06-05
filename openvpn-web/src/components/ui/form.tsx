@@ -11,6 +11,7 @@ import {
   type FieldPath,
   type FieldValues,
 } from "react-hook-form";
+import { useTranslation } from "react-i18next"; // Import useTranslation
 
 import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
@@ -45,11 +46,12 @@ const useFormField = () => {
   const fieldContext = React.useContext(FormFieldContext);
   const itemContext = React.useContext(FormItemContext);
   const { getFieldState, formState } = useFormContext();
+  const { t } = useTranslation(); // Initialize t
 
   const fieldState = getFieldState(fieldContext.name, formState);
 
   if (!fieldContext) {
-    throw new Error("useFormField should be used within <FormField>");
+    throw new Error(t("common.form.useFormFieldError"));
   }
 
   const { id } = itemContext;

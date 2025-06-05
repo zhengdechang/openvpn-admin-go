@@ -7,6 +7,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import { showToast } from "@/lib/toast-utils";
 import { userAPI } from "@/services/api"; // 假设有一个 API 请求封装
 import { Button } from "@/components/ui/button";
@@ -16,6 +17,7 @@ import MainLayout from "@/components/layout/main-layout";
 
 export default function ResetPasswordPage() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState<boolean | null>(null);
@@ -29,7 +31,7 @@ export default function ResetPasswordPage() {
   // 处理重置密码请求
   const handleResetPassword = async () => {
     if (!email) {
-      showToast.error("请输入邮箱");
+      showToast.error(t("auth.forgotpassword.emailRequired"));
       return;
     }
 
@@ -42,16 +44,16 @@ export default function ResetPasswordPage() {
       if (response.success) {
         setSuccess(true);
         showToast.success(
-          response.message || "重置密码邮件已发送，请检查邮箱！"
+          response.message || t("auth.forgotpassword.resetEmailSent")
         );
       } else {
         setSuccess(false);
         console.log(response, "response");
-        setError(response.error || "重置密码失败");
+        setError(response.error || t("auth.forgotpassword.resetFailed"));
       }
     } catch (err) {
       setSuccess(false);
-      setError("请求失败，请稍后再试");
+      setError(t("auth.forgotpassword.requestFailed"));
     } finally {
       setLoading(false);
     }
@@ -62,15 +64,15 @@ export default function ResetPasswordPage() {
       <div className="flex-grow flex items-center justify-center p-4">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-primary">忘记密码</h1>
+            <h1 className="text-3xl font-bold text-primary">{t("auth.forgotpassword.pageTitle")}</h1>
             <div className="h-1 w-16 bg-primary mx-auto my-4"></div>
-            <p className="text-gray-600">使用邮箱重置密码</p>
+            <p className="text-gray-600">{t("auth.forgotpassword.pageSubtitle")}</p>
           </div>
           <Card className="shadow-lg border-t-4 border-t-primary">
             <CardContent className="p-6 text-center">
-              <h2 className="text-2xl font-bold text-primary">🔒 重置密码</h2>
+              <h2 className="text-2xl font-bold text-primary">{t("auth.forgotpassword.cardTitle")}</h2>
               <p className="text-gray-600 mt-2">
-                请输入您的邮箱，我们将发送重置密码链接
+                {t("auth.forgotpassword.cardDescription")}
               </p>
 
               {/* 邮箱输入框 */}
@@ -78,7 +80,7 @@ export default function ResetPasswordPage() {
                 type="email"
                 value={email}
                 onChange={handleInputChange}
-                placeholder="输入邮箱"
+                placeholder={t("auth.forgotpassword.emailPlaceholder")}
                 className="mt-4 text-center"
               />
 
@@ -88,16 +90,16 @@ export default function ResetPasswordPage() {
                 onClick={handleResetPassword}
                 disabled={loading}
               >
-                {loading ? "发送中..." : "发送重置邮件"}
+                {loading ? t("auth.forgotpassword.sending") : t("auth.forgotpassword.sendResetEmail")}
               </Button>
 
               {/* 结果显示 */}
               {success && (
                 <p className="text-green-600 mt-3">
-                  ✅ 邮件已发送，请检查您的邮箱！
+                  {t("auth.forgotpassword.emailSentSuccess")}
                 </p>
               )}
-              {error && <p className="text-red-500 mt-3">❌ {error}</p>}
+              {error && <p className="text-red-500 mt-3">{t("auth.forgotpassword.errorPrefix")}{error}</p>}
 
               {/* 返回登录页 */}
               <Button
@@ -105,7 +107,7 @@ export default function ResetPasswordPage() {
                 variant="outline"
                 onClick={() => router.push("/auth/login")}
               >
-                返回登录
+                {t("auth.forgotpassword.backToLogin")}
               </Button>
             </CardContent>
           </Card>

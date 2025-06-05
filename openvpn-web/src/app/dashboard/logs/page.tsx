@@ -3,12 +3,14 @@
 import React, { useEffect, useState } from "react";
 import MainLayout from "@/components/layout/main-layout";
 import { openvpnAPI } from "@/services/api";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 
 export default function LogsPage() {
+  const { t } = useTranslation();
   const [serverLogs, setServerLogs] = useState<string>("");
   const [clientUsername, setClientUsername] = useState<string>("");
   const [clientLogs, setClientLogs] = useState<string[] | null>(null);
@@ -20,7 +22,7 @@ export default function LogsPage() {
         const logs = await openvpnAPI.getServerLogs();
         setServerLogs(logs);
       } catch (error) {
-        toast.error("获取服务器日志失败");
+        toast.error(t("dashboard.logs.fetchServerLogsError"));
       } finally {
         setLoadingServer(false);
       }
@@ -30,14 +32,14 @@ export default function LogsPage() {
 
   const handleFetchClientLogs = async () => {
     if (!clientUsername) {
-      toast.error("请输入用户名");
+      toast.error(t("dashboard.logs.usernameRequired"));
       return;
     }
     try {
       const logs = await openvpnAPI.getClientLogs(clientUsername);
       setClientLogs(logs);
     } catch (error) {
-      toast.error("获取客户端日志失败");
+      toast.error(t("dashboard.logs.fetchClientLogsError"));
     }
   };
 
@@ -45,14 +47,14 @@ export default function LogsPage() {
     <MainLayout className="p-4 space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>服务器日志</CardTitle>
+          <CardTitle>{t("dashboard.logs.serverLogsCardTitle")}</CardTitle>
         </CardHeader>
         <CardContent>
           {loadingServer ? (
-            <p>加载中...</p>
+            <p>{t("common.loading")}</p>
           ) : (
             <pre className="whitespace-pre-wrap">
-              {serverLogs || "暂无日志"}
+              {serverLogs || t("dashboard.logs.noServerLogs")}
             </pre>
           )}
         </CardContent>
@@ -60,20 +62,22 @@ export default function LogsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>客户端日志查询</CardTitle>
+          <CardTitle>{t("dashboard.logs.clientLogsCardTitle")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center space-x-2">
             <Input
-              placeholder="用户名"
+              placeholder={t("dashboard.logs.usernamePlaceholder")}
               value={clientUsername}
               onChange={(e) => setClientUsername(e.target.value)}
             />
-            <Button onClick={handleFetchClientLogs}>查询</Button>
+            <Button onClick={handleFetchClientLogs}>
+              {t("dashboard.logs.queryButton")}
+            </Button>
           </div>
           {clientLogs && (
             <pre className="whitespace-pre-wrap">
-              {clientLogs.join("\n") || "暂无日志"}
+              {clientLogs.join("\n") || t("dashboard.logs.noClientLogs")}
             </pre>
           )}
         </CardContent>

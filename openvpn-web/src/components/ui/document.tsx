@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import * as docx from "docx-preview";
+import { useTranslation } from "react-i18next";
 
 interface DocxPreviewProps {
   file?: File;
@@ -12,6 +13,7 @@ export const DocxPreview: React.FC<DocxPreviewProps> = ({
   url,
   onHtmlGenerated,
 }) => {
+  const { t } = useTranslation();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [docxHtml, setDocxHtml] = useState<string>("");
 
@@ -26,10 +28,10 @@ export const DocxPreview: React.FC<DocxPreviewProps> = ({
       } else if (url) {
         try {
           const response = await fetch(url);
-          if (!response.ok) throw new Error("无法加载文件");
+          if (!response.ok) throw new Error(t("common.document.loadErrorFetch"));
           arrayBuffer = await response.arrayBuffer();
         } catch (error) {
-          console.error("加载 DOCX 失败:", error);
+          console.error(t("common.document.loadErrorConsole"), error);
           return;
         }
       }
