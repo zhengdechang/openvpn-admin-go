@@ -59,6 +59,32 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, [isLogin, storeUser]);
 
+  useEffect(() => {
+    const attemptRefreshOnLoad = async () => {
+      // Check isLogin directly from the store, as it's initialized from persisted state
+      if (useUserStore.getState().isLogin) {
+        console.log("AuthProvider: User is logged in (from persisted state). Attempting token refresh on load.");
+        setLoading(true); // Optionally set loading state
+        const refreshedSuccessfully = await refreshToken(); // Call the existing refreshToken method
+        if (!refreshedSuccessfully) {
+          console.warn("AuthProvider: Initial token refresh failed. Logging out.");
+          // The refreshToken method itself might set errors, but explicit logout might be needed if it doesn't fully clear session
+          logout(); // Call existing logout which clears info and redirects
+        } else {
+          console.log("AuthProvider: Initial token refresh successful.");
+        }
+        setLoading(false); // Reset loading state
+      }
+    };
+
+    attemptRefreshOnLoad();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // This effect should run once on mount to check initial persisted login state.
+    // Or, if you want it to re-run if isLogin changes from false to true due to some other async init,
+    // you could add isLogin to dependencies, but be careful of loops if refreshToken itself changes isLogin.
+    // For "on load", an empty dependency array or a one-time check is usually best.
+  }, []); // Empty dependency array to run once on mount.
+
   const refreshToken = async () => {
     setLoading(true);
     setError(null);
@@ -66,8 +92,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const response = await userAPI.refreshToken();
       if (response.success) {
         updateIsLogin(true);
-        await fetchUser();
-        return true;
+        const userDetails = await fetchUser();
+        if (userDetails) {
+          return true; // Refresh and user fetch successful
+        } else {
+          setError("Failed to fetch user details after token refresh.");
+          return false;
+        }
       } else {
         setError(response.error || "Please login first");
         return false;
