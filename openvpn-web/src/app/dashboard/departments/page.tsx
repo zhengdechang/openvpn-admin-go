@@ -52,8 +52,17 @@ export default function DepartmentsPage() {
         departmentAPI.list(),
         userManagementAPI.list(),
       ]);
-      setDepts(dList);
+      const userMap = new Map(uList.map((u) => [u.id, u]));
+      const deptsWithHead = dList.map((dept) => ({
+        ...dept,
+        head: dept.headId ? userMap.get(dept.headId) : undefined,
+      }));
+      console.log("dList:", dList);
+      console.log("deptsWithHead:", deptsWithHead);
+      setDepts(deptsWithHead);
       setUsers(uList);
+      console.log("depts after setDepts:", deptsWithHead);
+      console.log("tree after setDepts:", buildTree(deptsWithHead));
     } catch {
       toast.error(t("dashboard.departments.loadError"));
     } finally {
@@ -66,19 +75,26 @@ export default function DepartmentsPage() {
   }, []);
   // 构建部门树
   const buildTree = (list: Department[]): DepartmentTree[] => {
+    console.log("buildTree list:", list);
     const map = new Map<string, DepartmentTree>();
     list.forEach((item) => {
       map.set(item.id, { ...item, children: [] });
     });
+    console.log("map:", map);
     const roots: DepartmentTree[] = [];
     map.forEach((item) => {
-      if (item.parentId) {
+      if (
+        item.parentId &&
+        item.parentId !== item.id &&
+        map.has(item.parentId)
+      ) {
         const parent = map.get(item.parentId);
         parent?.children.push(item);
       } else {
         roots.push(item);
       }
     });
+    console.log("roots:", roots);
     return roots;
   };
   const tree: DepartmentTree[] = buildTree(depts);
@@ -145,6 +161,7 @@ export default function DepartmentsPage() {
     nodes: DepartmentTree[],
     level: number = 0
   ): React.ReactNode[] => {
+    console.log("renderRows nodes:", nodes);
     return nodes.flatMap((node) => {
       const hasChildren = node.children && node.children.length > 0;
       const isExpanded = expandedIds.has(node.id);
@@ -152,20 +169,55 @@ export default function DepartmentsPage() {
         <TableRow key={node.id}>
           <TableCell
             style={{
-              paddingLeft: level * 20,
+              paddingLeft: level !== 0 && level * 20,
               display: "flex",
               alignItems: "center",
             }}
           >
             {hasChildren && (
               <span
-                className="cursor-pointer select-none mr-1"
+                className="cursor-pointer select-none mr-1 flex items-center"
                 onClick={() => toggleExpand(node.id)}
+                style={{
+                  width: 20,
+                  display: "inline-flex",
+                  justifyContent: "center",
+                }}
               >
-                {isExpanded ? "▼" : "▶"}
+                {isExpanded ? (
+                  <svg
+                    width="16"
+                    height="16"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                ) : (
+                  <svg
+                    width="16"
+                    height="16"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                )}
               </span>
             )}
-            {node.name}
+            <span style={{ flex: 1 }}>{node.name}</span>
           </TableCell>
           <TableCell>
             {node.head?.name || t("dashboard.departments.emptyData")}
@@ -303,9 +355,7 @@ export default function DepartmentsPage() {
                       "dashboard.departments.departmentNamePlaceholder"
                     )}
                     value={form.name}
-                    onChange={(e) =>
-                      setForm({ ...form, name: e.target.value })
-                    }
+                    onChange={(e) => setForm({ ...form, name: e.target.value })}
                   />
                   <select
                     className="border px-2 w-full py-1"
@@ -357,7 +407,7 @@ export default function DepartmentsPage() {
                     </Button>
                   </DialogClose>
                   <Button onClick={handleEdit}>
-                    {t("dashboard.departments.saveChanges")}
+                    {t("dashboard.departments.saveChangesButton")}
                   </Button>
                 </DialogFooter>
               </DialogContent>

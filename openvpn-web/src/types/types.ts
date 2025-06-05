@@ -182,14 +182,8 @@ export interface OpenVPNClient {
 export interface Department {
   id: string;
   name: string;
-  // 部门负责人ID
   headId?: string;
-  // 部门负责人信息
-  head?: {
-    id: string;
-    name: string;
-  };
-  // 上级部门ID
+  head?: { id: string; name: string };
   parentId?: string;
   createdAt: string;
   updatedAt: string;
