@@ -14,7 +14,7 @@ import { toast } from "sonner";
 
 export default function ServerPage() {
   const { user: currentUser } = useAuth();
-  const { t } = useTranslation(["dashboard", "common"]);
+  const { t } = useTranslation([]);
   const [status, setStatus] = useState<ServerStatus | null>(null);
   const [config, setConfig] = useState<string>("");
   const [loading, setLoading] = useState(true);
@@ -27,7 +27,7 @@ export default function ServerPage() {
       const tpl = await serverAPI.getConfigTemplate();
       setConfig(tpl.template);
     } catch (error) {
-      toast.error(t("server.fetchStatusError"));
+      toast.error(t("dashboard.server.fetchStatusError"));
     } finally {
       setLoading(false);
     }
@@ -37,7 +37,7 @@ export default function ServerPage() {
   if (!currentUser || currentUser.role !== UserRole.SUPERADMIN) {
     return (
       <MainLayout className="p-4">
-        <p className="text-center mt-10">{t("server.noPermission")}</p>
+        <p className="text-center mt-10">{t("dashboard.server.noPermission")}</p>
       </MainLayout>
     );
   }
@@ -45,28 +45,28 @@ export default function ServerPage() {
     <MainLayout className="p-4 space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>{t("server.statusCardTitle")}</CardTitle>
+          <CardTitle>{t("dashboard.server.statusCardTitle")}</CardTitle>
         </CardHeader>
         <CardContent>
           {loading ? (
-            <p>{t("common:loading")}</p>
+            <p>{t("common.loading")}</p>
           ) : status ? (
             <div className="space-y-2">
-              <p>{t("server.labelName")}{status.name}</p>
-              <p>{t("server.labelStatus")}{status.status}</p>
-              <p>{t("server.labelUptime")}{status.uptime}</p>
-              <p>{t("server.labelConnected")}{status.connected}</p>
-              <p>{t("server.labelTotal")}{status.total}</p>
-              <p>{t("server.labelLastUpdated")}{new Date(status.lastUpdated).toLocaleString()}</p>
+              <p>{t("dashboard.server.labelName")}{status.name}</p>
+              <p>{t("dashboard.server.labelStatus")}{status.status}</p>
+              <p>{t("dashboard.server.labelUptime")}{status.uptime}</p>
+              <p>{t("dashboard.server.labelConnected")}{status.connected}</p>
+              <p>{t("dashboard.server.labelTotal")}{status.total}</p>
+              <p>{t("dashboard.server.labelLastUpdated")}{new Date(status.lastUpdated).toLocaleString()}</p>
             </div>
           ) : (
-            <p>{t("server.noData")}</p>
+            <p>{t("dashboard.server.noData")}</p>
           )}
         </CardContent>
       </Card>
       <Card>
         <CardHeader>
-          <CardTitle>{t("server.configCardTitle")}</CardTitle>
+          <CardTitle>{t("dashboard.server.configCardTitle")}</CardTitle>
         </CardHeader>
         <CardContent>
           <textarea
@@ -78,27 +78,27 @@ export default function ServerPage() {
             <Button onClick={async () => {
               try {
                 await serverAPI.updateConfig(config);
-                toast.success(t("server.updateConfigSuccess"));
+                toast.success(t("dashboard.server.updateConfigSuccess"));
               } catch {
-                toast.error(t("server.updateConfigError"));
+                toast.error(t("dashboard.server.updateConfigError"));
               }
             }}>
-              {t("server.saveConfigButton")}
+              {t("dashboard.server.saveConfigButton")}
             </Button>
             <Button onClick={async () => {
-              try { await serverAPI.start(); toast.success(t("server.startSuccess")); fetchStatus(); } catch { toast.error(t("server.startError")); }
+              try { await serverAPI.start(); toast.success(t("dashboard.server.startSuccess")); fetchStatus(); } catch { toast.error(t("dashboard.server.startError")); }
             }}>
-              {t("server.startButton")}
+              {t("dashboard.server.startButton")}
             </Button>
             <Button onClick={async () => {
-              try { await serverAPI.stop(); toast.success(t("server.stopSuccess")); fetchStatus(); } catch { toast.error(t("server.stopError")); }
+              try { await serverAPI.stop(); toast.success(t("dashboard.server.stopSuccess")); fetchStatus(); } catch { toast.error(t("dashboard.server.stopError")); }
             }}>
-              {t("server.stopButton")}
+              {t("dashboard.server.stopButton")}
             </Button>
             <Button onClick={async () => {
-              try { await serverAPI.restart(); toast.success(t("server.restartSuccess")); fetchStatus(); } catch { toast.error(t("server.restartError")); }
+              try { await serverAPI.restart(); toast.success(t("dashboard.server.restartSuccess")); fetchStatus(); } catch { toast.error(t("dashboard.server.restartError")); }
             }}>
-              {t("server.restartButton")}
+              {t("dashboard.server.restartButton")}
             </Button>
           </div>
         </CardContent>

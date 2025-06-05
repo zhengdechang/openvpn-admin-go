@@ -7,7 +7,6 @@ const translation = {
   create: "创造",
   delete: "删除",
   success: "成功",
-
   auth: {
     forgotpassword: {
       emailRequired: "请输入邮箱",
@@ -66,6 +65,9 @@ const translation = {
   document: {
     loadErrorFetch: "无法加载文件",
     loadErrorConsole: "加载 DOCX 失败:"
+  },
+  form: {
+    useFormFieldError: "useFormField 应该在 <FormField> 内使用"
   }
 }
 

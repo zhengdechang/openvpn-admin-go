@@ -15,7 +15,7 @@ export default function Navbar() {
   const { user, loading, logout } = useAuth();
   const pathname = usePathname();
   // Specify "layout" and "dashboard" namespaces. Add other namespaces if needed.
-  const { t, i18n } = useTranslation(["layout", "dashboard"]);
+  const { t, i18n } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [isLangOpen, setIsLangOpen] = useState(false);
   const [currentLocale, setCurrentLocale] = useState<Locale>(
@@ -85,40 +85,60 @@ export default function Navbar() {
                 d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
               />
             </svg>
-            {t("navbar.logoText")}
+            {t("layout.navbar.logoText")}
           </Link>
 
           <nav className="flex items-center space-x-6">
             {/* Authenticated user links: User management, departments, server, logs */}
             {user && (
               <>
-                {(user.role === UserRole.MANAGER || user.role === UserRole.ADMIN || user.role === UserRole.SUPERADMIN) && (
+                {(user.role === UserRole.MANAGER ||
+                  user.role === UserRole.ADMIN ||
+                  user.role === UserRole.SUPERADMIN) && (
                   <Link
                     href="/dashboard/users"
-                    className={`text-gray-600 hover:text-primary ${isActive("/dashboard/users") ? "font-medium text-primary" : ""}`}
+                    className={`text-gray-600 hover:text-primary ${
+                      isActive("/dashboard/users")
+                        ? "font-medium text-primary"
+                        : ""
+                    }`}
                   >
                     {t("dashboard.users.title")}
                   </Link>
                 )}
-                {(user.role === UserRole.ADMIN || user.role === UserRole.SUPERADMIN) && (
+                {(user.role === UserRole.ADMIN ||
+                  user.role === UserRole.SUPERADMIN) && (
                   <Link
                     href="/dashboard/departments"
-                    className={`text-gray-600 hover:text-primary ${isActive("/dashboard/departments") ? "font-medium text-primary" : ""}`}
+                    className={`text-gray-600 hover:text-primary ${
+                      isActive("/dashboard/departments")
+                        ? "font-medium text-primary"
+                        : ""
+                    }`}
                   >
-                    {t("dashboard:departments.title") || t("navbar.departmentsFallback")}
+                    {t("dashboard.departments.title") ||
+                      t("navbar.departmentsFallback")}
                   </Link>
                 )}
                 {user.role === UserRole.SUPERADMIN && (
                   <>
                     <Link
                       href="/dashboard/server"
-                      className={`text-gray-600 hover:text-primary ${isActive("/dashboard/server") ? "font-medium text-primary" : ""}`}
+                      className={`text-gray-600 hover:text-primary ${
+                        isActive("/dashboard/server")
+                          ? "font-medium text-primary"
+                          : ""
+                      }`}
                     >
                       {t("dashboard.server.title")}
                     </Link>
                     <Link
                       href="/dashboard/logs"
-                      className={`text-gray-600 hover:text-primary ${isActive("/dashboard/logs") ? "font-medium text-primary" : ""}`}
+                      className={`text-gray-600 hover:text-primary ${
+                        isActive("/dashboard/logs")
+                          ? "font-medium text-primary"
+                          : ""
+                      }`}
                     >
                       {t("dashboard.logs.titleServer")}
                     </Link>
@@ -177,7 +197,9 @@ export default function Navbar() {
                           : "text-gray-700 hover:bg-gray-100"
                       }`}
                     >
-                      {locale === "en-US" ? t("navbar.langEnglish") : t("navbar.langSimplifiedChinese")}
+                      {locale === "en-US"
+                        ? t("navbar.langEnglish")
+                        : t("navbar.langSimplifiedChinese")}
                     </button>
                   ))}
                 </div>

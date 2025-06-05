@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 
 export default function LogsPage() {
-  const { t } = useTranslation(["dashboard", "common"]);
+  const { t } = useTranslation();
   const [serverLogs, setServerLogs] = useState<string>("");
   const [clientUsername, setClientUsername] = useState<string>("");
   const [clientLogs, setClientLogs] = useState<string[] | null>(null);
@@ -22,7 +22,7 @@ export default function LogsPage() {
         const logs = await openvpnAPI.getServerLogs();
         setServerLogs(logs);
       } catch (error) {
-        toast.error(t("logs.fetchServerLogsError"));
+        toast.error(t("dashboard.logs.fetchServerLogsError"));
       } finally {
         setLoadingServer(false);
       }
@@ -32,14 +32,14 @@ export default function LogsPage() {
 
   const handleFetchClientLogs = async () => {
     if (!clientUsername) {
-      toast.error(t("logs.usernameRequired"));
+      toast.error(t("dashboard.logs.usernameRequired"));
       return;
     }
     try {
       const logs = await openvpnAPI.getClientLogs(clientUsername);
       setClientLogs(logs);
     } catch (error) {
-      toast.error(t("logs.fetchClientLogsError"));
+      toast.error(t("dashboard.logs.fetchClientLogsError"));
     }
   };
 
@@ -47,14 +47,14 @@ export default function LogsPage() {
     <MainLayout className="p-4 space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>{t("logs.serverLogsCardTitle")}</CardTitle>
+          <CardTitle>{t("dashboard.logs.serverLogsCardTitle")}</CardTitle>
         </CardHeader>
         <CardContent>
           {loadingServer ? (
-            <p>{t("common:loading")}</p>
+            <p>{t("common.loading")}</p>
           ) : (
             <pre className="whitespace-pre-wrap">
-              {serverLogs || t("logs.noServerLogs")}
+              {serverLogs || t("dashboard.logs.noServerLogs")}
             </pre>
           )}
         </CardContent>
@@ -62,20 +62,22 @@ export default function LogsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>{t("logs.clientLogsCardTitle")}</CardTitle>
+          <CardTitle>{t("dashboard.logs.clientLogsCardTitle")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center space-x-2">
             <Input
-              placeholder={t("logs.usernamePlaceholder")}
+              placeholder={t("dashboard.logs.usernamePlaceholder")}
               value={clientUsername}
               onChange={(e) => setClientUsername(e.target.value)}
             />
-            <Button onClick={handleFetchClientLogs}>{t("logs.queryButton")}</Button>
+            <Button onClick={handleFetchClientLogs}>
+              {t("dashboard.logs.queryButton")}
+            </Button>
           </div>
           {clientLogs && (
             <pre className="whitespace-pre-wrap">
-              {clientLogs.join("\n") || t("logs.noClientLogs")}
+              {clientLogs.join("\n") || t("dashboard.logs.noClientLogs")}
             </pre>
           )}
         </CardContent>

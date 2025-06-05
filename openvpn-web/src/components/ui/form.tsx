@@ -46,12 +46,12 @@ const useFormField = () => {
   const fieldContext = React.useContext(FormFieldContext);
   const itemContext = React.useContext(FormItemContext);
   const { getFieldState, formState } = useFormContext();
-  const { t } = useTranslation("common"); // Initialize t
+  const { t } = useTranslation(); // Initialize t
 
   const fieldState = getFieldState(fieldContext.name, formState);
 
   if (!fieldContext) {
-    throw new Error(t("form.useFormFieldError"));
+    throw new Error(t("common.form.useFormFieldError"));
   }
 
   const { id } = itemContext;

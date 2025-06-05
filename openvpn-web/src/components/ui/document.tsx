@@ -13,7 +13,7 @@ export const DocxPreview: React.FC<DocxPreviewProps> = ({
   url,
   onHtmlGenerated,
 }) => {
-  const { t } = useTranslation("common");
+  const { t } = useTranslation();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [docxHtml, setDocxHtml] = useState<string>("");
 
@@ -28,10 +28,10 @@ export const DocxPreview: React.FC<DocxPreviewProps> = ({
       } else if (url) {
         try {
           const response = await fetch(url);
-          if (!response.ok) throw new Error(t("document.loadErrorFetch"));
+          if (!response.ok) throw new Error(t("common.document.loadErrorFetch"));
           arrayBuffer = await response.arrayBuffer();
         } catch (error) {
-          console.error(t("document.loadErrorConsole"), error);
+          console.error(t("common.document.loadErrorConsole"), error);
           return;
         }
       }

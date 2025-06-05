@@ -23,6 +23,7 @@ export interface User {
   departmentId?: string;
   avatar?: string;
   bio?: string;
+  password?: string;
 }
 
 // API response type
@@ -69,7 +70,7 @@ export interface DashboardStats {
 
 // Settings types
 export interface UserSettings {
-  theme: 'light' | 'dark' | 'system';
+  theme: "light" | "dark" | "system";
   notifications: boolean;
   language: string;
 }
@@ -168,7 +169,7 @@ export interface OpenVPNClient {
   id: string;
   name: string;
   email: string;
-  status: 'active' | 'inactive' | 'pending';
+  status: "active" | "inactive" | "pending";
   createdAt: string;
   lastConnected?: string;
   ipAddress?: string;
