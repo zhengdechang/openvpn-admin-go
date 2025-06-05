@@ -90,7 +90,7 @@ const translation = {
     osWindows: "Windows",
     osMacOS: "macOS",
     osLinux: "Linux",
-    deleteButton: "Delete"
+    deleteButton: "Delete",
   },
   logs: {
     titleServer: "Logs",
@@ -102,7 +102,7 @@ const translation = {
     clientLogsCardTitle: "Client Log Query",
     usernamePlaceholder: "Username",
     queryButton: "Query",
-    noClientLogs: "No logs available"
+    noClientLogs: "No logs available",
   },
   server: {
     title: "Server",
@@ -128,7 +128,7 @@ const translation = {
     stopButton: "Stop",
     restartSuccess: "Restart successful",
     restartError: "Restart failed",
-    restartButton: "Restart"
+    restartButton: "Restart",
   },
   departments: {
     title: "Department",
@@ -156,7 +156,9 @@ const translation = {
     columnName: "Name",
     columnHead: "Head",
     columnActions: "Actions",
-    emptyData: "-"
+    emptyData: "-",
+    editDepartmentDialogTitle: "Edit Department",
+    saveChangesButton: "Save Changes",
   },
   profile: {
     updateSuccessToast: "Update successful",
@@ -171,8 +173,8 @@ const translation = {
     saveButton: "Save",
     changePasswordTitle: "Change Password",
     newPasswordPlaceholder: "New Password",
-    updatePasswordButton: "Update Password"
-  }
+    updatePasswordButton: "Update Password",
+  },
 }
 
 ;

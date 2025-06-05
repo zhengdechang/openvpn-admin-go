@@ -27,6 +27,8 @@ const translation = {
     userDefaultName: "用户",
     logoText: "OpenVPN管理系统",
   },
-};
+}
 
-export default translation;
+;
+
+export default translation

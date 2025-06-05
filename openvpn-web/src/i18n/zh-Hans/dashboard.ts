@@ -158,7 +158,9 @@ const translation = {
     columnName: "名称",
     columnHead: "负责人",
     columnActions: "操作",
-    emptyData: "-"
+    emptyData: "-",
+    editDepartmentDialogTitle: "编辑部门",
+    saveChangesButton: "保存更改"
   },
   profile: {
     updateSuccessToast: "更新成功",

@@ -52,8 +52,17 @@ export default function DepartmentsPage() {
         departmentAPI.list(),
         userManagementAPI.list(),
       ]);
-      setDepts(dList);
+      const userMap = new Map(uList.map((u) => [u.id, u]));
+      const deptsWithHead = dList.map((dept) => ({
+        ...dept,
+        head: dept.headId ? userMap.get(dept.headId) : undefined,
+      }));
+      console.log("dList:", dList);
+      console.log("deptsWithHead:", deptsWithHead);
+      setDepts(deptsWithHead);
       setUsers(uList);
+      console.log("depts after setDepts:", deptsWithHead);
+      console.log("tree after setDepts:", buildTree(deptsWithHead));
     } catch {
       toast.error(t("dashboard.departments.loadError"));
     } finally {
@@ -66,19 +75,26 @@ export default function DepartmentsPage() {
   }, []);
   // 构建部门树
   const buildTree = (list: Department[]): DepartmentTree[] => {
+    console.log("buildTree list:", list);
     const map = new Map<string, DepartmentTree>();
     list.forEach((item) => {
       map.set(item.id, { ...item, children: [] });
     });
+    console.log("map:", map);
     const roots: DepartmentTree[] = [];
     map.forEach((item) => {
-      if (item.parentId) {
+      if (
+        item.parentId &&
+        item.parentId !== item.id &&
+        map.has(item.parentId)
+      ) {
         const parent = map.get(item.parentId);
         parent?.children.push(item);
       } else {
         roots.push(item);
       }
     });
+    console.log("roots:", roots);
     return roots;
   };
   const tree: DepartmentTree[] = buildTree(depts);
@@ -131,14 +147,12 @@ export default function DepartmentsPage() {
   // 切换部门展开/收起
   const toggleExpand = (id: string) => {
     setExpandedIds((prev) => {
-      const next = new Set<string>(); // Always start with a new, empty Set
-      if (!prev.has(id)) {
-        // If the clicked item was not already expanded (i.e., it's currently collapsed)
-        next.add(id); // Add it to the new Set (it will be the only expanded one)
+      const next = new Set(prev); // Create a new Set based on the previous state
+      if (next.has(id)) {
+        next.delete(id); // If the id is already in the Set, remove it (collapse)
+      } else {
+        next.add(id); // Otherwise, add it to the Set (expand)
       }
-      // If the clicked item was already expanded (prev.has(id) is true),
-      // 'next' will remain empty, effectively collapsing it.
-      // This ensures only one item is expanded at a time, or all are collapsed.
       return next;
     });
   };
@@ -147,6 +161,7 @@ export default function DepartmentsPage() {
     nodes: DepartmentTree[],
     level: number = 0
   ): React.ReactNode[] => {
+    console.log("renderRows nodes:", nodes);
     return nodes.flatMap((node) => {
       const hasChildren = node.children && node.children.length > 0;
       const isExpanded = expandedIds.has(node.id);
@@ -154,20 +169,55 @@ export default function DepartmentsPage() {
         <TableRow key={node.id}>
           <TableCell
             style={{
-              paddingLeft: level * 20,
+              paddingLeft: level !== 0 && level * 20,
               display: "flex",
               alignItems: "center",
             }}
           >
             {hasChildren && (
               <span
-                className="cursor-pointer select-none mr-1"
+                className="cursor-pointer select-none mr-1 flex items-center"
                 onClick={() => toggleExpand(node.id)}
+                style={{
+                  width: 20,
+                  display: "inline-flex",
+                  justifyContent: "center",
+                }}
               >
-                {isExpanded ? "▼" : "▶"}
+                {isExpanded ? (
+                  <svg
+                    width="16"
+                    height="16"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                ) : (
+                  <svg
+                    width="16"
+                    height="16"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                )}
               </span>
             )}
-            {node.name}
+            <span style={{ flex: 1 }}>{node.name}</span>
           </TableCell>
           <TableCell>
             {node.head?.name || t("dashboard.departments.emptyData")}
@@ -279,6 +329,90 @@ export default function DepartmentsPage() {
             </DialogContent>
           </Dialog>
         )}
+        {/* Edit Department Dialog */}
+        {(currentUser?.role === UserRole.ADMIN ||
+          currentUser?.role === UserRole.SUPERADMIN) &&
+          editingDept && ( // Ensure editingDept is not null to render
+            <Dialog
+              open={editOpen}
+              onOpenChange={(isOpen) => {
+                setEditOpen(isOpen);
+                if (!isOpen) {
+                  setEditingDept(null);
+                  setForm({ name: "", headId: "", parentId: "" }); // Reset form on close
+                }
+              }}
+            >
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>
+                    {t("dashboard.departments.editDepartmentDialogTitle")}
+                  </DialogTitle>
+                </DialogHeader>
+                <div className="space-y-2 pt-2">
+                  <Input
+                    placeholder={t(
+                      "dashboard.departments.departmentNamePlaceholder"
+                    )}
+                    value={form.name}
+                    onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  />
+                  <select
+                    className="border px-2 w-full py-1"
+                    value={form.parentId}
+                    onChange={(e) =>
+                      setForm({ ...form, parentId: e.target.value })
+                    }
+                  >
+                    <option value="">
+                      {t("dashboard.departments.selectParentDepartment")}
+                    </option>
+                    {/* Filter out the current department being edited from the parent list */}
+                    {depts
+                      .filter((d) => d.id !== editingDept?.id)
+                      .map((d) => (
+                        <option key={d.id} value={d.id}>
+                          {d.name}
+                        </option>
+                      ))}
+                  </select>
+                  <select
+                    className="border px-2 w-full py-1"
+                    value={form.headId}
+                    onChange={(e) =>
+                      setForm({ ...form, headId: e.target.value })
+                    }
+                  >
+                    <option value="">
+                      {t("dashboard.departments.selectHead")}
+                    </option>
+                    {users.map((u) => (
+                      <option key={u.id} value={u.id}>
+                        {u.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <DialogFooter>
+                  <DialogClose asChild>
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setEditOpen(false);
+                        setEditingDept(null);
+                        setForm({ name: "", headId: "", parentId: "" }); // Reset form on cancel
+                      }}
+                    >
+                      {t("dashboard.departments.cancel")}
+                    </Button>
+                  </DialogClose>
+                  <Button onClick={handleEdit}>
+                    {t("dashboard.departments.saveChangesButton")}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          )}
       </div>
       <Card>
         <CardHeader>
