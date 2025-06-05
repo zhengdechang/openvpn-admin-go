@@ -175,7 +175,7 @@ export const userAPI = {
   },
 
   // 更新用户信息
-  updateMe: async (userData: Partial<User>): Promise<ApiResponse<User>> => {
+  updateMe: async (userData: { name?: string; email?: string; password?: string }): Promise<ApiResponse<User>> => {
     try {
       const response = await api.patch("/api/user/me", userData);
       return response.data;
@@ -224,9 +224,11 @@ export const openvpnAPI = {
     const response = await api.get<OpenVPNClient[]>("/api/client/list");
     return response.data;
   },
-  // 添加客户端
-  addClient: async (username: string): Promise<any> => {
-    const response = await api.post("/api/client/add", { username });
+  // 添加客户端，支持指定部门
+  addClient: async (username: string, departmentId?: string): Promise<any> => {
+    const payload: any = { username };
+    if (departmentId) payload.departmentId = departmentId;
+    const response = await api.post("/api/client/add", payload);
     return response.data;
   },
   // 更新客户端
@@ -239,10 +241,11 @@ export const openvpnAPI = {
     const response = await api.delete(`/api/client/delete/${username}`);
     return response.data;
   },
-  // 获取客户端配置
-  getClientConfig: async (username: string): Promise<{ config: string }> => {
+  // 获取客户端配置，可根据 os 参数区分下载类型
+  getClientConfig: async (username: string, os?: string): Promise<{ config: string }> => {
     const response = await api.get<{ config: string }>(
-      `/api/client/config/${username}`
+      `/api/client/config/${username}`,
+      { params: { os } }
     );
     return response.data;
   },
@@ -315,12 +318,15 @@ export const departmentAPI = {
     const response = await api.get<Department[]>("/api/departments");
     return response.data;
   },
-  create: async (name: string): Promise<any> => {
-    const response = await api.post("/api/departments", { name });
+  create: async (data: { name: string; headId?: string; parentId?: string }): Promise<any> => {
+    const response = await api.post("/api/departments", data);
     return response.data;
   },
-  update: async (id: string, name: string): Promise<any> => {
-    const response = await api.put(`/api/departments/${id}`, { name });
+  update: async (
+    id: string,
+    data: { name: string; headId?: string; parentId?: string }
+  ): Promise<any> => {
+    const response = await api.put(`/api/departments/${id}`, data);
     return response.data;
   },
   delete: async (id: string): Promise<any> => {

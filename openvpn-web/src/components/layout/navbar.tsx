@@ -63,7 +63,7 @@ export default function Navbar() {
   }, [i18n]);
 
   return (
-    <header className="bg-white shadow-sm border-b border-gray-200 py-4 sticky top-0 z-10">
+    <div className="bg-white shadow-sm border-b border-gray-200 py-4 sticky top-0 z-10">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between">
           <Link
@@ -88,24 +88,60 @@ export default function Navbar() {
           </Link>
 
           <nav className="flex items-center space-x-6">
-            <Link
-              href="/"
-              className={`text-gray-600 hover:text-primary ${
-                isActive("/") ? "font-medium text-primary" : ""
-              }`}
-            >
-              {t("layout.home")}
-            </Link>
-
-            <Link
-              href="/dashboard"
-              className={`text-gray-600 hover:text-primary ${
-                isActive("/dashboard") ? "font-medium text-primary" : ""
-              }`}
-            >
-              {t("layout.dashboard")}
-            </Link>
-
+            {/* Authenticated user links: User management, departments, server, logs */}
+            {user && (
+              <>
+                {(user.role === UserRole.MANAGER || user.role === UserRole.ADMIN || user.role === UserRole.SUPERADMIN) && (
+                  <Link
+                    href="/dashboard/users"
+                    className={`text-gray-600 hover:text-primary ${isActive("/dashboard/users") ? "font-medium text-primary" : ""}`}
+                  >
+                    {t("dashboard.users.title")}
+                  </Link>
+                )}
+                {(user.role === UserRole.ADMIN || user.role === UserRole.SUPERADMIN) && (
+                  <Link
+                    href="/dashboard/departments"
+                    className={`text-gray-600 hover:text-primary ${isActive("/dashboard/departments") ? "font-medium text-primary" : ""}`}
+                  >
+                    {t("dashboard.departments.title") || '部门管理'}
+                  </Link>
+                )}
+                {user.role === UserRole.SUPERADMIN && (
+                  <>
+                    <Link
+                      href="/dashboard/server"
+                      className={`text-gray-600 hover:text-primary ${isActive("/dashboard/server") ? "font-medium text-primary" : ""}`}
+                    >
+                      {t("dashboard.server.title")}
+                    </Link>
+                    <Link
+                      href="/dashboard/logs"
+                      className={`text-gray-600 hover:text-primary ${isActive("/dashboard/logs") ? "font-medium text-primary" : ""}`}
+                    >
+                      {t("dashboard.logs.titleServer")}
+                    </Link>
+                  </>
+                )}
+              </>
+            )}
+            {/* Unauthenticated: show login/register */}
+            {!loading && !user && (
+              <>
+                <Link
+                  href="/auth/login"
+                  className="text-gray-600 hover:text-primary"
+                >
+                  {t("layout.login")}
+                </Link>
+                <Link
+                  href="/auth/register"
+                  className="text-gray-600 hover:text-primary"
+                >
+                  {t("layout.register")}
+                </Link>
+              </>
+            )}
             {/* Language Switch */}
             <div className="relative" ref={langDropdownRef}>
               <button
@@ -128,7 +164,6 @@ export default function Navbar() {
                   />
                 </svg>
               </button>
-
               {isLangOpen && (
                 <div className="absolute right-0 mt-1 pt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
                   {LanguagesSupported.map((locale) => (
@@ -147,78 +182,62 @@ export default function Navbar() {
                 </div>
               )}
             </div>
-
-            {!loading &&
-              (user ? (
-                <div className="flex items-center space-x-4">
-                  <div
-                    className="relative"
-                    onMouseEnter={() => setIsOpen(true)}
-                    onMouseLeave={() => setIsOpen(false)}
-                  >
-                    <button className="flex items-center space-x-1 text-gray-600 hover:text-primary">
-                      <span>
-                        {user.name || "User"}
-                        {user.role === UserRole.ADMIN && " (Admin)"}
-                      </span>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
+            {/* User menu */}
+            {!loading && user && (
+              <div className="flex items-center space-x-4">
+                <div
+                  className="relative"
+                  onMouseEnter={() => setIsOpen(true)}
+                  onMouseLeave={() => setIsOpen(false)}
+                >
+                  <button className="flex items-center space-x-1 text-gray-600 hover:text-primary">
+                    <span>
+                      {user.name || "User"}
+                      {user.role === UserRole.ADMIN && " (Admin)"}
+                    </span>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 9l-7 7-7-7"
+                      />
+                    </svg>
+                  </button>
+                  {isOpen && (
+                    <div className="absolute right-0 mt-0 pt-2 w-48 bg-white rounded-md shadow-lg py-1">
+                      <Link
+                        href="/dashboard"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                       >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M19 9l-7 7-7-7"
-                        />
-                      </svg>
-                    </button>
-
-                    {isOpen && (
-                      <div className="absolute right-0 mt-0 pt-2 w-48 bg-white rounded-md shadow-lg py-1">
-                        <Link
-                          href="/dashboard"
-                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                        >
-                          {t("layout.dashboard")}
-                        </Link>
-                        <Link
-                          href="/dashboard/profile"
-                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                        >
-                          {t("layout.profile")}
-                        </Link>
-                        <button
-                          onClick={logout}
-                          className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
-                        >
-                          {t("layout.logout")}
-                        </button>
-                      </div>
-                    )}
-                  </div>
+                        {t("layout.dashboard")}
+                      </Link>
+                      <Link
+                        href="/dashboard/profile"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        {t("layout.profile")}
+                      </Link>
+                      <button
+                        onClick={logout}
+                        className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                      >
+                        {t("layout.logout")}
+                      </button>
+                    </div>
+                  )}
                 </div>
-              ) : (
-                <div className="flex items-center space-x-4">
-                  <Link
-                    href="/auth/login"
-                    className={`text-gray-600 hover:text-primary ${
-                      isActive("/auth/login") ? "font-medium text-primary" : ""
-                    }`}
-                  >
-                    {t("layout.login")}
-                  </Link>
-                  <Button asChild size="sm">
-                    <Link href="/auth/register">{t("layout.register")}</Link>
-                  </Button>
-                </div>
-              ))}
+              </div>
+            )}
           </nav>
         </div>
       </div>
-    </header>
+    </div>
   );
 }

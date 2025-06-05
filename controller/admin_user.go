@@ -2,12 +2,12 @@ package controller
 
 import (
    "net/http"
-
    "github.com/gin-gonic/gin"
    "openvpn-admin-go/common"
    "openvpn-admin-go/database"
    "openvpn-admin-go/middleware"
    "openvpn-admin-go/model"
+   "openvpn-admin-go/openvpn"
 )
 
 // AdminUserController 管理用户
@@ -54,6 +54,11 @@ func (c *AdminUserController) CreateUser(ctx *gin.Context) {
        ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
        return
    }
+   // 同步创建 OpenVPN 客户端配置
+   if err := openvpn.CreateClient(user.ID); err != nil {
+       ctx.JSON(http.StatusInternalServerError, gin.H{"error": "创建 OpenVPN 客户端失败: " + err.Error()})
+       return
+   }
    ctx.JSON(http.StatusOK, gin.H{"data": gin.H{
        "id":           user.ID,
        "name":         user.Name,
@@ -68,8 +73,11 @@ func (c *AdminUserController) ListUsers(ctx *gin.Context) {
    claims := ctx.MustGet("claims").(*middleware.Claims)
    var users []model.User
    db := database.DB
+   // 部门负责人仅查看本部门用户；普通用户仅查看自身
    if claims.Role == string(model.RoleManager) {
        db = db.Where("department_id = ?", claims.DeptID)
+   } else if claims.Role == string(model.RoleUser) {
+       db = db.Where("id = ?", claims.UserID)
    }
    if err := db.Find(&users).Error; err != nil {
        ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

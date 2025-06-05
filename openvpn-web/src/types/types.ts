@@ -6,7 +6,9 @@
 // User role enum
 export enum UserRole {
   ADMIN = "admin",
+  MANAGER = "manager",
   USER = "user",
+  SUPERADMIN = "superadmin",
 }
 
 // User type definition
@@ -17,6 +19,8 @@ export interface User {
   role: UserRole;
   createdAt: string;
   updatedAt: string;
+  // Department ID for user, if applicable
+  departmentId?: string;
   avatar?: string;
   bio?: string;
 }
@@ -169,12 +173,23 @@ export interface OpenVPNClient {
   lastConnected?: string;
   ipAddress?: string;
   notes?: string;
+  // Department ID associated with this client
+  departmentId?: string;
 }
 
 // 部门类型
 export interface Department {
   id: string;
   name: string;
+  // 部门负责人ID
+  headId?: string;
+  // 部门负责人信息
+  head?: {
+    id: string;
+    name: string;
+  };
+  // 上级部门ID
+  parentId?: string;
   createdAt: string;
   updatedAt: string;
 }

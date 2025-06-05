@@ -108,6 +108,42 @@ func RestartServer() error {
 	return nil
 }
 
+// ConfigureServer 根据参数更新服务器配置并重启服务
+func ConfigureServer(port int, protocol, network, netmask string) error {
+   // 加载现有配置
+   cfg, err := LoadConfig()
+   if err != nil {
+       return fmt.Errorf("加载配置失败: %v", err)
+   }
+   // 更新参数
+   cfg.OpenVPNPort = port
+   cfg.OpenVPNProto = protocol
+   cfg.OpenVPNServerNetwork = network
+   cfg.OpenVPNServerNetmask = netmask
+   // 保存并生成配置文件
+   if err := SaveConfig(cfg); err != nil {
+       return fmt.Errorf("保存配置失败: %v", err)
+   }
+   // 重新写入 server.conf 并更新所有客户端、重启服务
+   if err := UpdateServerConfig(); err != nil {
+       return fmt.Errorf("更新服务器配置失败: %v", err)
+   }
+   return nil
+}
+
+// ApplyServerConfig 根据自定义内容写入配置并重启服务
+func ApplyServerConfig(content string) error {
+   // 写入配置文件
+   if err := os.WriteFile(constants.ServerConfigPath, []byte(content), 0644); err != nil {
+       return fmt.Errorf("写入配置文件失败: %v", err)
+   }
+   // 重启服务
+   if err := RestartServer(); err != nil {
+       return fmt.Errorf("重启服务失败: %v", err)
+   }
+   return nil
+}
+
 // getEnvOrDefault 从环境变量获取值，如果不存在则返回默认值
 func getEnvOrDefault(key, defaultValue string) string {
 	if value := os.Getenv(key); value != "" {

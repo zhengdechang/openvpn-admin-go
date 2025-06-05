@@ -252,10 +252,10 @@ func GetAllClientStatuses() ([]ClientStatus, error) {
 
 // ClientStatus 客户端状态
 type ClientStatus struct {
-	Username      string
-	ConnectedAt   time.Time
-	Disconnected  time.Time
-	IsPaused      bool
+   Username     string    `json:"username"`
+   ConnectedAt  time.Time `json:"connectedAt"`
+   Disconnected time.Time `json:"disconnectedAt"`
+   IsPaused     bool      `json:"isPaused"`
 }
 
 // GenerateClientConfig 生成客户端配置文件内容

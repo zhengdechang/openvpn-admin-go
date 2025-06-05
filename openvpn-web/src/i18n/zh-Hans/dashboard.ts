@@ -53,6 +53,24 @@ const translation = {
     delete: '删除客户端失败',
     load: '加载客户端失败',
   },
+  clients: {
+    title: '客户',
+  },
+  users: {
+    title: '用户',
+  },
+  logs: {
+    titleServer: '日志',
+  },
+  server: {
+    title: '服务器',
+  },
+  department: {
+    title: '部门',
+  },
+  departments: {
+    title: '部门',
+  },
 }
 
-export default translation 
+export default translation

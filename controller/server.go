@@ -3,42 +3,78 @@ package controller
 import (
 	"fmt"
 	"net/http"
+	"openvpn-admin-go/constants"
+	"openvpn-admin-go/openvpn"
 	"os"
 	"os/exec"
 	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"openvpn-admin-go/constants"
-	"openvpn-admin-go/openvpn"
-	"openvpn-admin-go/openvpn/server"
 )
 
 type ServerController struct{}
 
+// ListServers 列出服务器列表
+func (c *ServerController) ListServers(ctx *gin.Context) {
+	// 加载当前配置
+	cfg, err := openvpn.LoadConfig()
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	// 获取运行状态
+	status, err := GetServerStatus()
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	// 构造返回结构
+	server := struct {
+		Port      int    `json:"port"`
+		Protocol  string `json:"protocol"`
+		Network   string `json:"network"`
+		Netmask   string `json:"netmask"`
+		Status    string `json:"status"`
+		Uptime    string `json:"uptime"`
+		Connected int    `json:"connected"`
+		Total     int    `json:"total"`
+	}{
+		Port:      cfg.OpenVPNPort,
+		Protocol:  cfg.OpenVPNProto,
+		Network:   cfg.OpenVPNServerNetwork,
+		Netmask:   cfg.OpenVPNServerNetmask,
+		Status:    status.Status,
+		Uptime:    status.Uptime,
+		Connected: status.Connected,
+		Total:     status.Total,
+	}
+	// 返回数组格式
+	ctx.JSON(http.StatusOK, []interface{}{server})
+}
+
+// ServerStatus 服务器状态
 // ServerStatus 服务器状态
 type ServerStatus struct {
-	Name        string
-	Status      string
-	Uptime      time.Duration
-	Connected   int
-	Total       int
-	LastUpdated time.Time
+	Name        string `json:"name"`
+	Status      string `json:"status"`
+	Uptime      string `json:"uptime"`      // 运行时长
+	Connected   int    `json:"connected"`   // 当前已连接数
+	Total       int    `json:"total"`       // 历史总连接数
+	LastUpdated string `json:"lastUpdated"` // 最后更新时间
 }
 
 // GetServerStatus 获取服务器状态
 func GetServerStatus() (*ServerStatus, error) {
 	// 检查服务是否运行
+	// 检查服务是否运行，忽略非零退出码，获取服务状态字符串
 	cmd := exec.Command("systemctl", "is-active", constants.ServiceName)
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		return nil, fmt.Errorf("检查服务状态失败: %v", err)
-	}
+	output, _ := cmd.CombinedOutput()
 
 	status := &ServerStatus{
 		Name:        "server",
 		Status:      strings.TrimSpace(string(output)),
-		LastUpdated: time.Now(),
+		LastUpdated: time.Now().Format(time.RFC3339),
 	}
 
 	// 如果服务正在运行，获取更多信息
@@ -46,8 +82,8 @@ func GetServerStatus() (*ServerStatus, error) {
 		// 获取服务启动时间
 		cmd = exec.Command("systemctl", "show", constants.ServiceName, "--property=ActiveEnterTimestamp")
 		if output, err := cmd.CombinedOutput(); err == nil {
-			if t, err := time.Parse("Mon 2006-01-02 15:04:05 MST", strings.TrimSpace(strings.TrimPrefix(string(output), "ActiveEnterTimestamp="))); err == nil {
-				status.Uptime = time.Since(t)
+			if t0, err := time.Parse("Mon 2006-01-02 15:04:05 MST", strings.TrimSpace(strings.TrimPrefix(string(output), "ActiveEnterTimestamp="))); err == nil {
+				status.Uptime = time.Since(t0).String()
 			}
 		}
 
@@ -79,8 +115,8 @@ func (c *ServerController) UpdateServer(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	// 更新服务器配置
-	if err := openvpn.UpdateServerConfig(); err != nil {
+	// 使用 openvpn/server 包处理参数更新与服务重启
+	if err := openvpn.ConfigureServer(server.Port, server.Protocol, server.Network, server.Netmask); err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -152,7 +188,8 @@ func (c *ServerController) UpdateServerConfig(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	if err := openvpn.UpdateServerConfig(); err != nil {
+	// 使用 openvpn/server 包写入自定义配置并重启服务
+	if err := openvpn.ApplyServerConfig(config.Config); err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -170,10 +207,10 @@ func (c *ServerController) UpdatePort(ctx *gin.Context) {
 	}
 
 	// 更新端口
-	if err := server.UpdatePort(port.Port); err != nil {
+	if err := openvpn.UpdatePort(port.Port); err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{"message": "Port updated successfully"})
-} 
+}

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"bufio"
+   "bufio"
 	"fmt"
 	"log"
 	"os"
@@ -10,9 +10,13 @@ import (
 	"syscall"
 
 	"openvpn-admin-go/cmd"
-	"openvpn-admin-go/database"
-	"openvpn-admin-go/model"
-	"openvpn-admin-go/router"
+   "openvpn-admin-go/database"
+   "openvpn-admin-go/model"
+   "openvpn-admin-go/common"
+   "openvpn-admin-go/openvpn"
+   "openvpn-admin-go/constants"
+   "path/filepath"
+   "openvpn-admin-go/router"
 
 	"github.com/gin-gonic/gin"
 )
@@ -135,10 +139,48 @@ func main() {
 	if err := database.Init(); err != nil {
 		log.Fatalf("数据库初始化失败: %v", err)
 	}
-	if err := database.Migrate(&model.User{}, &model.Department{}); err != nil {
-		log.Fatalf("数据库迁移失败: %v", err)
-	}
-	// 启动 Web 服务器
+   if err := database.Migrate(&model.User{}, &model.Department{}); err != nil {
+       log.Fatalf("数据库迁移失败: %v", err)
+   }
+   // Seed default superadmin user if not exists
+   func() {
+       var existing model.User
+       if err := database.DB.Where("email = ?", "superadmin@gmail.com").First(&existing).Error; err != nil {
+           hash, err := common.HashPassword("superadmin")
+           if err != nil {
+               log.Printf("默认超级管理员密码哈希失败: %v", err)
+               return
+           }
+           super := model.User{
+               Name:         "Super Admin",
+               Email:        "superadmin@gmail.com",
+               PasswordHash: hash,
+               Role:         model.RoleSuperAdmin,
+           }
+           if err := database.DB.Create(&super).Error; err != nil {
+               log.Printf("创建默认超级管理员失败: %v", err)
+           } else {
+               log.Println("已创建默认超级管理员: superadmin@gmail.com / superadmin")
+           }
+       }
+   }()
+   // 确保数据库用户在 OpenVPN 客户端存在，不存在则自动创建
+   func() {
+       var users []model.User
+       if err := database.DB.Find(&users).Error; err != nil {
+           log.Printf("查询用户列表失败: %v", err)
+       } else {
+           for _, u := range users {
+               clientPath := filepath.Join(constants.ClientConfigDir, u.ID+".ovpn")
+               if _, err := os.Stat(clientPath); os.IsNotExist(err) {
+                   if err := openvpn.CreateClient(u.ID); err != nil {
+                       log.Printf("创建 OpenVPN 客户端 %s 失败: %v", u.ID, err)
+                   }
+               }
+           }
+       }
+   }()
+   // 启动 Web 服务器
 	r := gin.Default()
 
 	// 注册路由
