@@ -36,11 +36,6 @@ export default function UsersPage() {
   useEffect(() => { fetchAll(); }, []);
   // 根据角色过滤用户
   let visibleUsers = users;
-  if (currentUser?.role === UserRole.USER) {
-    visibleUsers = users.filter(u => u.id === currentUser.id);
-  } else if (currentUser?.role === UserRole.MANAGER) {
-    visibleUsers = users.filter(u => u.departmentId === currentUser.departmentId);
-  }
   // 下载配置
   const handleDownload = async (id: string, os: string) => {
     try {
