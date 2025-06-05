@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { UserRole } from "@/types/types";
+import { useTranslation } from "react-i18next";
 import MainLayout from "@/components/layout/main-layout";
 import { departmentAPI, userManagementAPI } from "@/services/api";
 import type { Department, AdminUser } from "@/types/types";
@@ -17,6 +18,7 @@ type DepartmentTree = Department & { children: DepartmentTree[] };
 
 export default function DepartmentsPage() {
   const { user: currentUser } = useAuth();
+  const { t } = useTranslation("dashboard");
   const [depts, setDepts] = useState<Department[]>([]);
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
@@ -35,7 +37,7 @@ export default function DepartmentsPage() {
       setDepts(dList);
       setUsers(uList);
     } catch {
-      toast.error("加载部门或用户失败");
+      toast.error(t("departments.loadError"));
     } finally {
       setLoading(false);
     }
@@ -64,46 +66,46 @@ export default function DepartmentsPage() {
 
   const handleCreate = async () => {
     if (!form.name) {
-      toast.error("请填写部门名称");
+      toast.error(t("departments.nameRequired"));
       return;
     }
     try {
       await departmentAPI.create(form);
-      toast.success("创建成功");
+      toast.success(t("departments.createSuccess"));
       setForm({ name: "", headId: "", parentId: "" });
       fetchData();
       setOpen(false);
     } catch {
-      toast.error("创建失败");
+      toast.error(t("departments.createError"));
     }
   };
   // 编辑部门
   const handleEdit = async () => {
     if (!editingDept) return;
     if (!form.name) {
-      toast.error("请填写部门名称");
+      toast.error(t("departments.nameRequired"));
       return;
     }
     try {
       await departmentAPI.update(editingDept.id, form);
-      toast.success("更新成功");
+      toast.success(t("departments.updateSuccess"));
       setForm({ name: "", headId: "", parentId: "" });
       setEditingDept(null);
       setEditOpen(false);
       fetchData();
     } catch {
-      toast.error("更新失败");
+      toast.error(t("departments.updateError"));
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("确定删除此部门？")) return;
+    if (!confirm(t("departments.deleteConfirm"))) return;
     try {
       await departmentAPI.delete(id);
-      toast.success("删除成功");
+      toast.success(t("departments.deleteSuccess"));
       fetchData();
     } catch {
-      toast.error("删除失败");
+      toast.error(t("departments.deleteError"));
     }
   };
 
@@ -138,7 +140,7 @@ export default function DepartmentsPage() {
             )}
             {node.name}
           </TableCell>
-          <TableCell>{node.head?.name || '-'}</TableCell>
+          <TableCell>{node.head?.name || t("departments.emptyData")}</TableCell>
         <TableCell className="space-x-2">
           {(currentUser?.role === UserRole.ADMIN || currentUser?.role === UserRole.SUPERADMIN) && (
             <>
@@ -146,8 +148,8 @@ export default function DepartmentsPage() {
                 setEditingDept(node);
                 setForm({ name: node.name, headId: node.headId || "", parentId: node.parentId || "" });
                 setEditOpen(true);
-              }}>编辑</Button>
-              <Button size="sm" variant="destructive" onClick={() => handleDelete(node.id)}>删除</Button>
+              }}>{t("departments.edit")}</Button>
+              <Button size="sm" variant="destructive" onClick={() => handleDelete(node.id)}>{t("departments.delete")}</Button>
             </>
           )}
         </TableCell>
@@ -160,19 +162,19 @@ export default function DepartmentsPage() {
   return (
     <MainLayout className="p-4">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold">部门管理</h2>
+        <h2 className="text-xl font-semibold">{t("departments.pageTitle")}</h2>
         {(currentUser?.role === UserRole.ADMIN || currentUser?.role === UserRole.SUPERADMIN) && (
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-              <Button>新增部门</Button>
+              <Button>{t("departments.addDepartment")}</Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>新增部门</DialogTitle>
+                <DialogTitle>{t("departments.addDepartmentDialogTitle")}</DialogTitle>
               </DialogHeader>
               <div className="space-y-2 pt-2">
                 <Input
-                  placeholder="部门名称"
+                  placeholder={t("departments.departmentNamePlaceholder")}
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                 />
@@ -181,7 +183,7 @@ export default function DepartmentsPage() {
                   value={form.parentId}
                   onChange={(e) => setForm({ ...form, parentId: e.target.value })}
                 >
-                  <option value="">-- 选择上级部门 --</option>
+                  <option value="">{t("departments.selectParentDepartment")}</option>
                   {depts.map((d) => (
                     <option key={d.id} value={d.id}>{d.name}</option>
                   ))}
@@ -191,7 +193,7 @@ export default function DepartmentsPage() {
                   value={form.headId}
                   onChange={(e) => setForm({ ...form, headId: e.target.value })}
                 >
-                  <option value="">-- 选择负责人 --</option>
+                  <option value="">{t("departments.selectHead")}</option>
                   {users.map((u) => (
                     <option key={u.id} value={u.id}>{u.name}</option>
                   ))}
@@ -199,9 +201,9 @@ export default function DepartmentsPage() {
               </div>
               <DialogFooter>
                 <DialogClose asChild>
-                  <Button variant="outline">取消</Button>
+                  <Button variant="outline">{t("departments.cancel")}</Button>
                 </DialogClose>
-                <Button onClick={handleCreate}>创建</Button>
+                <Button onClick={handleCreate}>{t("departments.create")}</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
@@ -209,18 +211,18 @@ export default function DepartmentsPage() {
       </div>
       <Card>
         <CardHeader>
-          <CardTitle>部门列表</CardTitle>
+          <CardTitle>{t("departments.listTitle")}</CardTitle>
         </CardHeader>
       <CardContent>
         {loading ? (
-          <p>加载中...</p>
+          <p>{t("departments.loading")}</p>
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>名称</TableHead>
-                <TableHead>负责人</TableHead>
-                <TableHead>操作</TableHead>
+                <TableHead>{t("departments.columnName")}</TableHead>
+                <TableHead>{t("departments.columnHead")}</TableHead>
+                <TableHead>{t("departments.columnActions")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

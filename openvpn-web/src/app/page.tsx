@@ -57,10 +57,10 @@ export default function Home() {
       <div className="bg-white py-24">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-3xl font-semibold mb-6">Key Features</h2>
+            <h2 className="text-3xl font-semibold mb-6">{t("featuresSection.title")}</h2>
             <div className="h-1 w-16 bg-primary mx-auto mb-8"></div>
             <p className="text-gray-700 mb-10">
-              Everything you need to build a modern web application
+              {t("featuresSection.subtitle")}
             </p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
               <div className="card p-6">
@@ -80,9 +80,9 @@ export default function Home() {
                     />
                   </svg>
                 </div>
-                <h3 className="text-lg font-semibold mb-2">Authentication</h3>
+                <h3 className="text-lg font-semibold mb-2">{t("featuresSection.auth.title")}</h3>
                 <p className="text-gray-600">
-                  Built-in authentication system with role-based access control
+                  {t("featuresSection.auth.description")}
                 </p>
               </div>
               <div className="card p-6">
@@ -102,9 +102,9 @@ export default function Home() {
                     />
                   </svg>
                 </div>
-                <h3 className="text-lg font-semibold mb-2">Modern UI</h3>
+                <h3 className="text-lg font-semibold mb-2">{t("featuresSection.ui.title")}</h3>
                 <p className="text-gray-600">
-                  Beautiful UI components built with Tailwind CSS and Radix UI
+                  {t("featuresSection.ui.description")}
                 </p>
               </div>
               <div className="card p-6">
@@ -124,14 +124,14 @@ export default function Home() {
                     />
                   </svg>
                 </div>
-                <h3 className="text-lg font-semibold mb-2">Docker Ready</h3>
+                <h3 className="text-lg font-semibold mb-2">{t("featuresSection.docker.title")}</h3>
                 <p className="text-gray-600">
-                  Production-ready Docker configuration for easy deployment
+                  {t("featuresSection.docker.description")}
                 </p>
               </div>
             </div>
             <Button asChild size="lg" className="px-8">
-              <Link href="/docs">View Documentation</Link>
+              <Link href="/docs">{t("featuresSection.viewDocsButton")}</Link>
             </Button>
           </div>
         </div>
@@ -141,14 +141,14 @@ export default function Home() {
       <div className="bg-gradient-to-r from-secondary to-secondary/50 py-24">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-3xl font-semibold mb-6">Built with Modern Tech</h2>
+            <h2 className="text-3xl font-semibold mb-6">{t("techStackSection.title")}</h2>
             <div className="h-1 w-16 bg-primary mx-auto mb-8"></div>
             <p className="text-gray-700 mb-10">
-              Next.js 14, TypeScript, Tailwind CSS, and more. All the latest tools and best practices.
+              {t("techStackSection.subtitle")}
             </p>
             <Button asChild size="lg" className="px-8">
               <Link href="/github" target="_blank" rel="noopener noreferrer">
-                View on GitHub
+                {t("techStackSection.viewOnGithubButton")}
               </Link>
             </Button>
           </div>

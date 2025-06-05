@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogClose } from "@/components/ui/dialog";
+import { useTranslation } from "react-i18next";
 import MainLayout from "@/components/layout/main-layout";
 import { userManagementAPI, departmentAPI, openvpnAPI } from "@/services/api";
 import { AdminUser, Department, UserRole } from "@/types/types";
@@ -14,6 +15,7 @@ import { toast } from "sonner";
 
 export default function UsersPage() {
   const { user: currentUser } = useAuth();
+  const { t } = useTranslation(["dashboard", "common"]);
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [depts, setDepts] = useState<Department[]>([]);
   const [loading, setLoading] = useState(true);
@@ -27,7 +29,7 @@ export default function UsersPage() {
       setUsers(u);
       setDepts(d);
     } catch {
-      toast.error("加载用户或部门失败");
+      toast.error(t("users.loadError"));
     } finally {
       setLoading(false);
     }
@@ -50,65 +52,65 @@ export default function UsersPage() {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      toast.success('下载成功');
+      toast.success(t("users.downloadConfigSuccess"));
     } catch {
-      toast.error('下载失败');
+      toast.error(t("users.downloadConfigError"));
     }
   };
 
   const handleCreate = async () => {
     if (!form.name || !form.email || !form.password) {
-      toast.error("请填写必填项");
+      toast.error(t("users.formRequiredFields"));
       return;
     }
     try {
       await userManagementAPI.create(form);
-      toast.success("创建成功");
+      toast.success(t("users.createSuccess"));
       setForm({ name: "", email: "", password: "", role: UserRole.USER, departmentId: "" });
       fetchAll();
     } catch {
-      toast.error("创建失败");
+      toast.error(t("users.createError"));
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("确定删除此用户?")) return;
+    if (!confirm(t("users.deleteConfirm"))) return;
     try {
       await userManagementAPI.delete(id);
-      toast.success("删除成功");
+      toast.success(t("users.deleteSuccess"));
       fetchAll();
     } catch {
-      toast.error("删除失败");
+      toast.error(t("users.deleteError"));
     }
   };
 
   return (
     <MainLayout className="p-4">
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">用户管理</h1>
+        <h1 className="text-2xl font-bold">{t("users.pageTitle")}</h1>
         {(currentUser?.role === UserRole.ADMIN || currentUser?.role === UserRole.MANAGER || currentUser?.role === UserRole.SUPERADMIN) && (
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button>新增用户</Button>
+            <Button>{t("users.addUserButton")}</Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>新增用户</DialogTitle>
+              <DialogTitle>{t("users.addUserDialogTitle")}</DialogTitle>
             </DialogHeader>
             <div className="space-y-2 pt-2">
               <Input
-                placeholder="姓名"
+                placeholder={t("users.namePlaceholder")}
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
               />
               <Input
-                placeholder="邮箱"
+                placeholder={t("users.emailPlaceholder")}
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
               />
               <Input
                 type="password"
-                placeholder="密码"
+                placeholder={t("users.passwordPlaceholder")}
                 value={form.password}
                 onChange={(e) => setForm({ ...form, password: e.target.value })}
               />
@@ -118,12 +120,12 @@ export default function UsersPage() {
                   value={form.role}
                   onChange={(e) => setForm({ ...form, role: e.target.value as UserRole })}
                 >
-                  <option value={UserRole.USER}>User</option>
+                  <option value={UserRole.USER}>{t("users.roleUser")}</option>
                   {(currentUser?.role === UserRole.ADMIN || currentUser?.role === UserRole.SUPERADMIN) && (
                     <> 
-                      <option value={UserRole.MANAGER}>Manager</option>
-                      <option value={UserRole.ADMIN}>Admin</option>
-                      <option value={UserRole.SUPERADMIN}>Superadmin</option>
+                      <option value={UserRole.MANAGER}>{t("users.roleManager")}</option>
+                      <option value={UserRole.ADMIN}>{t("users.roleAdmin")}</option>
+                      <option value={UserRole.SUPERADMIN}>{t("users.roleSuperadmin")}</option>
                     </>
                   )}
                 </select>
@@ -132,7 +134,7 @@ export default function UsersPage() {
                   value={form.departmentId}
                   onChange={(e) => setForm({ ...form, departmentId: e.target.value })}
                 >
-                  <option value="">-- 选择部门 --</option>
+                  <option value="">{t("users.selectDepartmentPlaceholder")}</option>
                   {depts.map((d) => (
                     <option key={d.id} value={d.id}>{d.name}</option>
                   ))}
@@ -141,9 +143,9 @@ export default function UsersPage() {
             </div>
             <DialogFooter>
               <DialogClose asChild>
-                <Button variant="outline">取消</Button>
+                <Button variant="outline">{t("common:cancel")}</Button>
               </DialogClose>
-              <Button onClick={() => { handleCreate(); setOpen(false); }}>创建</Button>
+              <Button onClick={() => { handleCreate(); setOpen(false); }}>{t("common:create")}</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -151,19 +153,19 @@ export default function UsersPage() {
       </div>
 
       <Card>
-        <CardHeader><CardTitle>用户列表</CardTitle></CardHeader>
+        <CardHeader><CardTitle>{t("users.listTitle")}</CardTitle></CardHeader>
         <CardContent>
           {loading ? (
-            <p>加载中...</p>
+            <p>{t("common:loading")}</p>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>姓名</TableHead>
-                  <TableHead>邮箱</TableHead>
-                  <TableHead>角色</TableHead>
-                  <TableHead>部门</TableHead>
-                  <TableHead>操作</TableHead>
+                  <TableHead>{t("users.columnName")}</TableHead>
+                  <TableHead>{t("users.columnEmail")}</TableHead>
+                  <TableHead>{t("users.columnRole")}</TableHead>
+                  <TableHead>{t("users.columnDepartment")}</TableHead>
+                  <TableHead>{t("users.columnActions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -172,20 +174,20 @@ export default function UsersPage() {
                     <TableCell>{u.name}</TableCell>
                     <TableCell>{u.email}</TableCell>
                     <TableCell>{u.role}</TableCell>
-                    <TableCell>{depts.find((d) => d.id === u.departmentId)?.name || '-'}</TableCell>
+                    <TableCell>{depts.find((d) => d.id === u.departmentId)?.name || t("users.emptyDepartment")}</TableCell>
                     <TableCell className="space-x-2">
                       <select
                         className="border px-2 py-1"
                         defaultValue=""
                         onChange={(e) => handleDownload(u.id, e.target.value)}
                       >
-                        <option value="" disabled>下载配置</option>
-                        <option value="windows">Windows</option>
-                        <option value="macos">macOS</option>
-                        <option value="linux">Linux</option>
+                        <option value="" disabled>{t("users.downloadConfigButton")}</option>
+                        <option value="windows">{t("users.osWindows")}</option>
+                        <option value="macos">{t("users.osMacOS")}</option>
+                        <option value="linux">{t("users.osLinux")}</option>
                       </select>
                       {(currentUser?.role === UserRole.ADMIN || currentUser?.role === UserRole.MANAGER || currentUser?.role === UserRole.SUPERADMIN) && (
-                        <Button size="sm" variant="destructive" onClick={() => handleDelete(u.id)}>删除</Button>
+                        <Button size="sm" variant="destructive" onClick={() => handleDelete(u.id)}>{t("users.deleteButton")}</Button>
                       )}
                     </TableCell>
                   </TableRow>

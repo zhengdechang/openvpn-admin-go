@@ -14,7 +14,8 @@ import type { Locale } from "@/i18n";
 export default function Navbar() {
   const { user, loading, logout } = useAuth();
   const pathname = usePathname();
-  const { t, i18n } = useTranslation();
+  // Specify "layout" and "dashboard" namespaces. Add other namespaces if needed.
+  const { t, i18n } = useTranslation(["layout", "dashboard"]);
   const [isOpen, setIsOpen] = useState(false);
   const [isLangOpen, setIsLangOpen] = useState(false);
   const [currentLocale, setCurrentLocale] = useState<Locale>(
@@ -84,7 +85,7 @@ export default function Navbar() {
                 d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
               />
             </svg>
-            OpenVPN 管理系统
+            {t("navbar.logoText")}
           </Link>
 
           <nav className="flex items-center space-x-6">
@@ -104,7 +105,7 @@ export default function Navbar() {
                     href="/dashboard/departments"
                     className={`text-gray-600 hover:text-primary ${isActive("/dashboard/departments") ? "font-medium text-primary" : ""}`}
                   >
-                    {t("dashboard.departments.title") || '部门管理'}
+                    {t("dashboard:departments.title") || t("navbar.departmentsFallback")}
                   </Link>
                 )}
                 {user.role === UserRole.SUPERADMIN && (
@@ -176,7 +177,7 @@ export default function Navbar() {
                           : "text-gray-700 hover:bg-gray-100"
                       }`}
                     >
-                      {locale === "en-US" ? "English" : "简体中文"}
+                      {locale === "en-US" ? t("navbar.langEnglish") : t("navbar.langSimplifiedChinese")}
                     </button>
                   ))}
                 </div>
@@ -192,8 +193,8 @@ export default function Navbar() {
                 >
                   <button className="flex items-center space-x-1 text-gray-600 hover:text-primary">
                     <span>
-                      {user.name || "User"}
-                      {user.role === UserRole.ADMIN && " (Admin)"}
+                      {user.name || t("navbar.userDefaultName")}
+                      {user.role === UserRole.ADMIN && t("navbar.adminSuffix")}
                     </span>
                     <svg
                       xmlns="http://www.w3.org/2000/svg"

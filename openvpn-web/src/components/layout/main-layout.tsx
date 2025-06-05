@@ -2,6 +2,7 @@
 
 import React from "react";
 import Navbar from "./navbar";
+import { useTranslation } from "react-i18next";
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -14,6 +15,9 @@ export default function MainLayout({
   showFooter = true,
   className,
 }: MainLayoutProps) {
+  const { t } = useTranslation("layout");
+  const currentYear = new Date().getFullYear();
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -25,10 +29,10 @@ export default function MainLayout({
           <div className="container mx-auto px-4">
             <div className="text-center">
               <p className="mb-2">
-                Next.js Template © {new Date().getFullYear()} All Rights Reserved
+                {t("footer.copyrightText", { year: currentYear })}
               </p>
               <p className="text-sm text-gray-600">
-                Built with Next.js, TypeScript, and Tailwind CSS
+                {t("footer.builtWithText")}
               </p>
             </div>
           </div>
