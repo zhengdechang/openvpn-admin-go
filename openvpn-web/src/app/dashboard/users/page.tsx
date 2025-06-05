@@ -41,7 +41,12 @@ export default function UsersPage() {
     role: UserRole.USER,
     departmentId: "",
   });
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(false); // For Add User Dialog
+
+  // State for Edit User Dialog
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<AdminUser | null>(null);
+  const [editFormDepartmentId, setEditFormDepartmentId] = useState<string>("");
 
   const fetchAll = async () => {
     setLoading(true);
@@ -118,6 +123,32 @@ export default function UsersPage() {
     }
   };
 
+  const handleEditClick = (user: AdminUser) => {
+    setEditingUser(user);
+    setEditFormDepartmentId(user.departmentId || "");
+    setEditDialogOpen(true);
+  };
+
+  const handleUpdateUserDepartment = async () => {
+    if (!editingUser || !editFormDepartmentId) {
+      toast.error(t("dashboard.users.editUserErrorMissingInfo"));
+      return;
+    }
+    try {
+      await userManagementAPI.update(editingUser.id, {
+        departmentId: editFormDepartmentId,
+      });
+      toast.success(t("dashboard.users.editUserSuccess"));
+      setEditDialogOpen(false);
+      fetchAll();
+    } catch {
+      toast.error(t("dashboard.users.editUserError"));
+    } finally {
+      setEditingUser(null);
+      setEditFormDepartmentId("");
+    }
+  };
+
   return (
     <MainLayout className="p-4">
       <div className="flex justify-between items-center mb-4">
@@ -125,7 +156,29 @@ export default function UsersPage() {
         {(currentUser?.role === UserRole.ADMIN ||
           currentUser?.role === UserRole.MANAGER ||
           currentUser?.role === UserRole.SUPERADMIN) && (
-          <Dialog open={open} onOpenChange={setOpen}>
+          <Dialog
+            open={open}
+            onOpenChange={(isOpen) => {
+              setOpen(isOpen);
+              if (isOpen) {
+                // Reset form fields when dialog opens
+                let initialDepartmentId = "";
+                if (
+                  currentUser?.role === UserRole.MANAGER &&
+                  currentUser.departmentId
+                ) {
+                  initialDepartmentId = currentUser.departmentId;
+                }
+                setForm({
+                  name: "",
+                  email: "",
+                  password: "",
+                  role: UserRole.USER, // Default role
+                  departmentId: initialDepartmentId,
+                });
+              }
+            }}
+          >
             <DialogTrigger asChild>
               <Button>{t("dashboard.users.addUserButton")}</Button>
             </DialogTrigger>
@@ -181,14 +234,18 @@ export default function UsersPage() {
                     )}
                   </select>
                   <select
-                    className="border px-2"
+                    className="border px-2 py-2 w-full rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                     value={form.departmentId}
                     onChange={(e) =>
                       setForm({ ...form, departmentId: e.target.value })
                     }
+                    disabled={
+                      currentUser?.role === UserRole.MANAGER &&
+                      !!currentUser.departmentId
+                    }
                   >
                     <option value="">
-                      {t("dashboard.users.selectDepartmentPlaceholder")}
+                      {t("dashboard.users.selectDepartmentPlaceholder", "Select a department")}
                     </option>
                     {depts.map((d) => (
                       <option key={d.id} value={d.id}>
@@ -215,6 +272,68 @@ export default function UsersPage() {
           </Dialog>
         )}
       </div>
+
+      {/* Edit User Dialog */}
+      <Dialog
+        open={editDialogOpen}
+        onOpenChange={(isOpen) => {
+          setEditDialogOpen(isOpen);
+          if (!isOpen) {
+            setEditingUser(null);
+            setEditFormDepartmentId("");
+          }
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {t("dashboard.users.editUserDialogTitle", "Edit User Department")}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2 pt-2">
+            <label htmlFor="edit-department" className="block text-sm font-medium text-gray-700">
+              {t("dashboard.users.departmentLabel", "Department")}
+            </label>
+            <select
+              id="edit-department"
+              className="border px-2 py-2 w-full rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              value={editFormDepartmentId}
+              onChange={(e) => setEditFormDepartmentId(e.target.value)}
+            >
+              <option value="">
+                {t("dashboard.users.selectDepartmentPlaceholder")}
+              </option>
+              {depts.map((d) => (
+                <option key={d.id} value={d.id}>
+                  {d.name}
+                </option>
+              ))}
+            </select>
+            {editingUser && (
+              <p className="text-sm text-gray-500 mt-2">
+                {t("dashboard.users.editingUserLabel", "Editing user:")}{" "}
+                {editingUser.name} ({editingUser.email})
+              </p>
+            )}
+          </div>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setEditingUser(null);
+                  setEditFormDepartmentId("");
+                }}
+              >
+                {t("common.cancel")}
+              </Button>
+            </DialogClose>
+            <Button onClick={handleUpdateUserDepartment}>
+              {t("common.saveChanges")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Card>
         <CardHeader>
@@ -272,6 +391,17 @@ export default function UsersPage() {
                           onClick={() => handleDelete(u.id)}
                         >
                           {t("dashboard.users.deleteButton")}
+                        </Button>
+                      )}
+                      {(currentUser?.role === UserRole.ADMIN ||
+                        currentUser?.role === UserRole.SUPERADMIN) && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleEditClick(u)}
+                          className="ml-2"
+                        >
+                          {t("common.edit")}
                         </Button>
                       )}
                     </TableCell>

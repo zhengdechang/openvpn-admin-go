@@ -92,8 +92,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const response = await userAPI.refreshToken();
       if (response.success) {
         updateIsLogin(true);
-        await fetchUser();
-        return true;
+        const userDetails = await fetchUser();
+        if (userDetails) {
+          return true; // Refresh and user fetch successful
+        } else {
+          setError("Failed to fetch user details after token refresh.");
+          return false;
+        }
       } else {
         setError(response.error || "Please login first");
         return false;
