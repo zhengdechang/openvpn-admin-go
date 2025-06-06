@@ -1,10 +1,10 @@
 const translation = {
-  loading: "装载。。。",
+  loading: "加载中",
   error: "错误",
   cancel: "取消",
-  save: "救",
+  save: "保存",
   edit: "编辑",
-  create: "创造",
+  create: "创建",
   delete: "删除",
   success: "成功",
   auth: {

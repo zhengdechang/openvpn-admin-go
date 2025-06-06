@@ -106,9 +106,7 @@ export default function Navbar() {
             {/* Authenticated user links: User management, departments, server, logs */}
             {user && (
               <>
-                {(user.role === UserRole.MANAGER ||
-                  user.role === UserRole.ADMIN ||
-                  user.role === UserRole.SUPERADMIN) && (
+                {
                   <Link
                     href="/dashboard/users"
                     className={`text-gray-600 hover:text-primary ${
@@ -119,7 +117,7 @@ export default function Navbar() {
                   >
                     {t("dashboard.users.title")}
                   </Link>
-                )}
+                }
                 {(user.role === UserRole.ADMIN ||
                   user.role === UserRole.SUPERADMIN) && (
                   <Link

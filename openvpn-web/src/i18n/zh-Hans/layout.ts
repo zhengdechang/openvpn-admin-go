@@ -10,7 +10,7 @@ const translation = {
   dark: "黑暗",
   dashboard: "看板",
   login: "登录",
-  profile: "轮廓",
+  profile: "个人资料",
   language: "语言",
   settings: "设置",
   metadataTitle: "OpenVPN 管理系统",
