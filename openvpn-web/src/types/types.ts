@@ -24,6 +24,9 @@ export interface User {
   avatar?: string;
   bio?: string;
   password?: string;
+  lastConnectionTime?: string; // Optional: Timestamp of the last connection
+  isOnline?: boolean; // Optional: Current online status
+  creatorId?: string; // Optional: ID of the user who created this user
 }
 
 // API response type
@@ -206,4 +209,23 @@ export interface ServerStatus {
   connected: number;
   total: number;
   lastUpdated: string;
+}
+
+// Client Log type definition
+export interface ClientLog {
+  id: string;
+  userId: string;
+  isOnline: boolean;
+  onlineDuration: number; // in seconds
+  trafficUsage: number; // in bytes
+  lastConnectionTime?: string; // Optional: Timestamp of the last connection
+  createdAt: string;
+}
+
+// Paginated Client Logs type definition
+export interface PaginatedClientLogs {
+  data: ClientLog[]; // Changed from 'logs' to 'data' to match common API responses, can be 'logs' if preferred
+  total: number;
+  page: number;
+  pageSize: number;
 }

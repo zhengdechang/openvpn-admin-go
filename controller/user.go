@@ -41,6 +41,14 @@ func Register(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "error": err.Error()})
 		return
 	}
+
+	// Set CreatorID to the user's own ID after creation
+	if err := database.DB.Model(&user).Update("CreatorID", user.ID).Error; err != nil {
+		// Log this error, but don't fail the registration because of it
+		// Or handle it more gracefully depending on requirements
+		// For now, we'll just proceed
+	}
+
 	c.JSON(http.StatusOK, gin.H{"success": true, "message": "register success"})
 }
 
@@ -109,8 +117,16 @@ func GetMe(c *gin.Context) {
 		"name":         user.Name,
 		"email":        user.Email,
 		"role":         user.Role,
-		"departmentId": user.DepartmentID, // 添加这一行，假设字段名为 DepartmentID
-	}})
+		"departmentId": user.DepartmentID,
+		"isOnline":     user.IsOnline,
+		"creatorId":    user.CreatorID,
+	}
+	if user.LastConnectionTime != nil {
+		responseData["lastConnectionTime"] = *user.LastConnectionTime
+	} else {
+		responseData["lastConnectionTime"] = nil
+	}
+	c.JSON(http.StatusOK, gin.H{"success": true, "data": responseData})
 }
 
 // UpdateMe 更新当前用户信息
@@ -196,5 +212,13 @@ func GetUserInfo(c *gin.Context) {
 		"email": user.Email,
 		"role":  user.Role,
 		"dept":  user.DepartmentID,
-	}})
+		"isOnline": user.IsOnline,
+		"creatorId": user.CreatorID,
+	}
+	if user.LastConnectionTime != nil {
+		responseData["lastConnectionTime"] = *user.LastConnectionTime
+	} else {
+		responseData["lastConnectionTime"] = nil
+	}
+	c.JSON(http.StatusOK, gin.H{"success": true, "data": responseData})
 }
