@@ -9,8 +9,8 @@ import { Inter } from "next/font/google";
 import { AuthProvider } from "@/lib/auth-context";
 import { Toaster } from "sonner";
 import { LoadingScreen } from "@/components/ui/loading";
-import { cookies } from "next/headers";
-import { i18n } from "@/i18n";
+import { getLocaleOnServer } from "@/i18n/server";
+import { I18nProvider } from "@/i18n/i18n-provider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -20,8 +20,7 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const cookieStore = cookies();
-  const locale = cookieStore.get("locale")?.value || i18n.defaultLocale;
+  const locale = getLocaleOnServer();
 
   return (
     <html lang={locale} suppressHydrationWarning>
@@ -31,10 +30,11 @@ export default async function RootLayout({
         <title>OpenVPN Management System</title>
       </head>
       <body className={inter.className} suppressHydrationWarning>
-        <LoadingScreen />
-        <AuthProvider>
-          <div>{children}</div>
-          <Toaster
+        <I18nProvider locale={locale}>
+          <LoadingScreen />
+          <AuthProvider>
+            <div>{children}</div>
+            <Toaster
             position="top-right"
             expand={true}
             visibleToasts={6}
@@ -48,7 +48,8 @@ export default async function RootLayout({
               },
             }}
           />
-        </AuthProvider>
+          </AuthProvider>
+        </I18nProvider>
       </body>
     </html>
   );
