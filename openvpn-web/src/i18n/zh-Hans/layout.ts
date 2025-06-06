@@ -16,14 +16,15 @@ const translation = {
   metadataTitle: "OpenVPN 管理系统",
   metadataDescription: "基于 OpenVPN 的集中式管理平台，支持权限控制和日志查询",
   footer: {
-    copyrightText: "Next.js 模板 © {{year}} 保留所有权利",
-    builtWithText: "基于 Next.js、TypeScript 和 Tailwind CSS 构建",
+    copyrightText: "OpenVPN 管理系统 © {{year}} 保留所有权利",
+    builtWithText:
+      "基于 OpenVPN 的集中式管理平台，支持用户管理、证书管理和实时监控",
   },
   navbar: {
     adminSuffix: "(管理员)",
     departmentsFallback: "部门管理",
     langSimplifiedChinese: "简体中文",
-    langEnglish: "中文简体",
+    langEnglish: "English",
     userDefaultName: "用户",
     logoText: "OpenVPN管理系统",
   },

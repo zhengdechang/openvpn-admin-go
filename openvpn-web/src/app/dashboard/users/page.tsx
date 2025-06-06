@@ -67,6 +67,7 @@ export default function UsersPage() {
   useEffect(() => {
     fetchAll();
   }, []);
+
   // 根据角色过滤用户
   let visibleUsers = users;
   // 下载配置
@@ -161,19 +162,29 @@ export default function UsersPage() {
             onOpenChange={(isOpen) => {
               setOpen(isOpen);
               if (isOpen) {
-                // Reset form fields when dialog opens
+                console.log("Dialog opened. currentUser:", currentUser);
+                console.log(
+                  "currentUser.departmentId:",
+                  currentUser?.departmentId
+                );
+
+                // Reset form fields and set initial values when dialog opens
                 let initialDepartmentId = "";
-                if (
-                  currentUser?.role === UserRole.MANAGER &&
-                  currentUser.departmentId
-                ) {
-                  initialDepartmentId = currentUser.departmentId;
+                let initialRole = UserRole.USER; // Default role for new users
+
+                if (currentUser?.role === UserRole.MANAGER) {
+                  // Manager adds USER role
+                  initialRole = UserRole.USER;
+                  // Manager's department is pre-filled and disabled
+                  initialDepartmentId = currentUser.departmentId || ""; // Ensure it's a string
                 }
+                // For other roles (Admin, Superadmin), default role is USER, department is selectable (initialDepartmentId remains "")
+
                 setForm({
                   name: "",
                   email: "",
                   password: "",
-                  role: UserRole.USER, // Default role
+                  role: initialRole,
                   departmentId: initialDepartmentId,
                 });
               }
@@ -214,6 +225,7 @@ export default function UsersPage() {
                     onChange={(e) =>
                       setForm({ ...form, role: e.target.value as UserRole })
                     }
+                    disabled={currentUser?.role === UserRole.MANAGER}
                   >
                     <option value={UserRole.USER}>
                       {t("dashboard.users.roleUser")}
@@ -236,22 +248,35 @@ export default function UsersPage() {
                   <select
                     className="border px-2 py-2 w-full rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                     value={form.departmentId}
-                    onChange={(e) =>
-                      setForm({ ...form, departmentId: e.target.value })
-                    }
-                    disabled={
-                      currentUser?.role === UserRole.MANAGER &&
-                      !!currentUser.departmentId
-                    }
+                    onChange={(e) => {
+                      if (currentUser?.role !== UserRole.MANAGER) {
+                        setForm({ ...form, departmentId: e.target.value });
+                      }
+                    }}
+                    disabled={currentUser?.role === UserRole.MANAGER}
                   >
-                    <option value="">
-                      {t("dashboard.users.selectDepartmentPlaceholder", "Select a department")}
-                    </option>
-                    {depts.map((d) => (
-                      <option key={d.id} value={d.id}>
-                        {d.name}
-                      </option>
-                    ))}
+                    {currentUser?.role === UserRole.MANAGER ? (
+                      currentUser.departmentId && (
+                        <option value={currentUser.departmentId}>
+                          {depts.length > 0
+                            ? depts.find(
+                                (d) => d.id === currentUser.departmentId
+                              )?.name || t("dashboard.users.emptyDepartment")
+                            : t("common.loading")}
+                        </option>
+                      )
+                    ) : (
+                      <>
+                        <option value="">
+                          {t("dashboard.users.selectDepartmentPlaceholder")}
+                        </option>
+                        {depts.map((d) => (
+                          <option key={d.id} value={d.id}>
+                            {d.name}
+                          </option>
+                        ))}
+                      </>
+                    )}
                   </select>
                 </div>
               </div>
@@ -287,11 +312,14 @@ export default function UsersPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {t("dashboard.users.editUserDialogTitle", "Edit User Department")}
+              {t("dashboard.users.editUserDialogTitle")}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-2 pt-2">
-            <label htmlFor="edit-department" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="edit-department"
+              className="block text-sm font-medium text-gray-700"
+            >
               {t("dashboard.users.departmentLabel", "Department")}
             </label>
             <select
@@ -311,8 +339,8 @@ export default function UsersPage() {
             </select>
             {editingUser && (
               <p className="text-sm text-gray-500 mt-2">
-                {t("dashboard.users.editingUserLabel", "Editing user:")}{" "}
-                {editingUser.name} ({editingUser.email})
+                {t("dashboard.users.editingUserLabel")} {editingUser.name} (
+                {editingUser.email})
               </p>
             )}
           </div>
@@ -364,46 +392,49 @@ export default function UsersPage() {
                         t("dashboard.users.emptyDepartment")}
                     </TableCell>
                     <TableCell className="space-x-2">
-                      <select
-                        className="border px-2 py-1"
-                        defaultValue=""
-                        onChange={(e) => handleDownload(u.id, e.target.value)}
-                      >
-                        <option value="" disabled>
-                          {t("dashboard.users.downloadConfigButton")}
-                        </option>
-                        <option value="windows">
-                          {t("dashboard.users.osWindows")}
-                        </option>
-                        <option value="macos">
-                          {t("dashboard.users.osMacOS")}
-                        </option>
-                        <option value="linux">
-                          {t("dashboard.users.osLinux")}
-                        </option>
-                      </select>
-                      {(currentUser?.role === UserRole.ADMIN ||
-                        currentUser?.role === UserRole.MANAGER ||
-                        currentUser?.role === UserRole.SUPERADMIN) && (
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => handleDelete(u.id)}
+                      <div className="flex items-center gap-2">
+                        {(currentUser?.role === UserRole.ADMIN ||
+                          currentUser?.role === UserRole.SUPERADMIN) && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-8 px-3"
+                            onClick={() => handleEditClick(u)}
+                          >
+                            {t("common.edit")}
+                          </Button>
+                        )}
+                        {(currentUser?.role === UserRole.ADMIN ||
+                          currentUser?.role === UserRole.MANAGER ||
+                          currentUser?.role === UserRole.SUPERADMIN) && (
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            className="h-8 px-3"
+                            onClick={() => handleDelete(u.id)}
+                          >
+                            {t("dashboard.users.deleteButton")}
+                          </Button>
+                        )}
+                        <select
+                          className="border px-2 py-1 rounded-md text-sm h-8"
+                          defaultValue=""
+                          onChange={(e) => handleDownload(u.id, e.target.value)}
                         >
-                          {t("dashboard.users.deleteButton")}
-                        </Button>
-                      )}
-                      {(currentUser?.role === UserRole.ADMIN ||
-                        currentUser?.role === UserRole.SUPERADMIN) && (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleEditClick(u)}
-                          className="ml-2"
-                        >
-                          {t("common.edit")}
-                        </Button>
-                      )}
+                          <option value="" disabled>
+                            {t("dashboard.users.downloadConfigButton")}
+                          </option>
+                          <option value="windows">
+                            {t("dashboard.users.osWindows")}
+                          </option>
+                          <option value="macos">
+                            {t("dashboard.users.osMacOS")}
+                          </option>
+                          <option value="linux">
+                            {t("dashboard.users.osLinux")}
+                          </option>
+                        </select>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}

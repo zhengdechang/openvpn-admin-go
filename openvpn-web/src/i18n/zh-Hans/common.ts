@@ -68,7 +68,8 @@ const translation = {
   },
   form: {
     useFormFieldError: "useFormField 应该在 <FormField> 内使用"
-  }
+  },
+  saveChanges: "保存更改"
 }
 
 export default translation

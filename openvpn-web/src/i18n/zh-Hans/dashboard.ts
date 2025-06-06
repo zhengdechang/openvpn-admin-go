@@ -89,7 +89,10 @@ const translation = {
     osWindows: "Windows",
     osMacOS: "macOS",
     osLinux: "Linux",
-    deleteButton: "删除"
+    deleteButton: "删除",
+    editUserDialogTitle: "编辑用户部门",
+    departmentLabel: "部门",
+    editingUserLabel: "编辑用户："
   },
   logs: {
     titleServer: '日志',

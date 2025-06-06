@@ -20,7 +20,9 @@ interface AuthContextType {
   refreshToken: () => Promise<boolean>;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+export const AuthContext = createContext<AuthContextType | undefined>(
+  undefined
+);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -63,11 +65,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const attemptRefreshOnLoad = async () => {
       // Check isLogin directly from the store, as it's initialized from persisted state
       if (useUserStore.getState().isLogin) {
-        console.log("AuthProvider: User is logged in (from persisted state). Attempting token refresh on load.");
+        console.log(
+          "AuthProvider: User is logged in (from persisted state). Attempting token refresh on load."
+        );
         setLoading(true); // Optionally set loading state
         const refreshedSuccessfully = await refreshToken(); // Call the existing refreshToken method
         if (!refreshedSuccessfully) {
-          console.warn("AuthProvider: Initial token refresh failed. Logging out.");
+          console.warn(
+            "AuthProvider: Initial token refresh failed. Logging out."
+          );
           // The refreshToken method itself might set errors, but explicit logout might be needed if it doesn't fully clear session
           logout(); // Call existing logout which clears info and redirects
         } else {

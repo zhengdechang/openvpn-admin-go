@@ -91,6 +91,9 @@ const translation = {
     osMacOS: "macOS",
     osLinux: "Linux",
     deleteButton: "Delete",
+    editUserDialogTitle: "Edit User Department",
+    departmentLabel: "Department",
+    editingUserLabel: "Editing User: ",
   },
   logs: {
     titleServer: "Logs",

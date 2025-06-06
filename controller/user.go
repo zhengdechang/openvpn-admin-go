@@ -98,15 +98,18 @@ func ResetPassword(c *gin.Context) {
 func GetMe(c *gin.Context) {
 	claims := c.MustGet("claims").(*middleware.Claims)
 	var user model.User
+	// 确保查询用户时也能加载部门信息，如果需要的话。
+	// 这里假设 model.User 结构体中直接包含了 DepartmentID 字段或者关联了 Department 模型
 	if err := database.DB.First(&user, "id = ?", claims.UserID).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "error": "user not found"})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"success": true, "data": gin.H{
-		"id":    user.ID,
-		"name":  user.Name,
-		"email": user.Email,
-		"role":  user.Role,
+		"id":           user.ID,
+		"name":         user.Name,
+		"email":        user.Email,
+		"role":         user.Role,
+		"departmentId": user.DepartmentID, // 添加这一行，假设字段名为 DepartmentID
 	}})
 }
 

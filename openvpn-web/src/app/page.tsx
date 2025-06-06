@@ -37,7 +37,7 @@ export default function Home() {
                   size="lg"
                   className="w-full sm:w-auto"
                 >
-                  <Link href="/auth/register">{t("signUp")}</Link>
+                  <Link href="/auth/register">{t("home.signUp")}</Link>
                 </Button>
               </div>
             ) : (

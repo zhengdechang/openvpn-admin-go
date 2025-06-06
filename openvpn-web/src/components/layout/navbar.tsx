@@ -14,7 +14,6 @@ import type { Locale } from "@/i18n";
 export default function Navbar() {
   const { user, loading, logout } = useAuth();
   const pathname = usePathname();
-  // Specify "layout" and "dashboard" namespaces. Add other namespaces if needed.
   const { t, i18n } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [isLangOpen, setIsLangOpen] = useState(false);
@@ -29,9 +28,16 @@ export default function Navbar() {
   };
 
   const handleLanguageChange = (locale: Locale) => {
-    setLocaleOnClient(locale, false);
+    setLocaleOnClient(locale, true);
     setCurrentLocale(locale);
     setIsLangOpen(false);
+
+    // 立即更新 DOM 中的语言设置
+    document.documentElement.lang = locale;
+    document.documentElement.setAttribute("data-locale", locale);
+
+    // 强制重新加载页面
+    window.location.reload();
   };
 
   // 点击外部区域关闭下拉菜单
@@ -62,6 +68,14 @@ export default function Navbar() {
       i18n.off("languageChanged", handleLanguageChanged);
     };
   }, [i18n]);
+
+  // 初始化时同步语言设置
+  useEffect(() => {
+    const savedLocale = getLocaleOnClient();
+    if (savedLocale !== i18n.language) {
+      i18n.changeLanguage(savedLocale);
+    }
+  }, []);
 
   return (
     <div className="bg-white shadow-sm border-b border-gray-200 py-4 sticky top-0 z-10">
@@ -198,8 +212,8 @@ export default function Navbar() {
                       }`}
                     >
                       {locale === "en-US"
-                        ? t("navbar.langEnglish")
-                        : t("navbar.langSimplifiedChinese")}
+                        ? t("layout.navbar.langEnglish")
+                        : t("layout.navbar.langSimplifiedChinese")}
                     </button>
                   ))}
                 </div>
@@ -215,8 +229,9 @@ export default function Navbar() {
                 >
                   <button className="flex items-center space-x-1 text-gray-600 hover:text-primary">
                     <span>
-                      {user.name || t("navbar.userDefaultName")}
-                      {user.role === UserRole.ADMIN && t("navbar.adminSuffix")}
+                      {user.name || t("layout.navbar.userDefaultName")}
+                      {user.role === UserRole.ADMIN &&
+                        t("layout.navbar.adminSuffix")}
                     </span>
                     <svg
                       xmlns="http://www.w3.org/2000/svg"

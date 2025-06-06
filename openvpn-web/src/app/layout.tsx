@@ -5,29 +5,14 @@
  */
 import React from "react";
 import "./globals.css";
-import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { AuthProvider } from "@/lib/auth-context";
 import { Toaster } from "sonner";
-import { useTranslation, getLocaleOnServer } from "@/i18n/server"; // Import server-side translation utils
-import type { Locale } from "@/i18n";
+import { LoadingScreen } from "@/components/ui/loading";
+import { cookies } from "next/headers";
+import { i18n } from "@/i18n";
 
 const inter = Inter({ subsets: ["latin"] });
-
-export async function generateMetadata({
-  params,
-}: {
-  params: { lang: Locale };
-}): Promise<Metadata> {
-  // Determine locale - this might need adjustment based on how lang is passed or detected
-  // For now, assuming getLocaleOnServer can be used or lang is available via params
-  const locale = getLocaleOnServer(); // Or params.lang if available and reliable
-  const { t } = await useTranslation(locale, "layout");
-  return {
-    title: t("metadataTitle"),
-    description: t("metadataDescription"),
-  };
-}
 
 export default async function RootLayout({
   // Make it an async function
@@ -35,15 +20,20 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const locale = getLocaleOnServer(); // Get current locale
+  const cookieStore = cookies();
+  const locale = cookieStore.get("locale")?.value || i18n.defaultLocale;
 
   return (
-    <html lang={locale}>
-      {" "}
-      {/* Use determined locale */}
-      <body className={inter.className}>
+    <html lang={locale} suppressHydrationWarning>
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="description" content="OpenVPN Management System" />
+        <title>OpenVPN Management System</title>
+      </head>
+      <body className={inter.className} suppressHydrationWarning>
+        <LoadingScreen />
         <AuthProvider>
-          {children}
+          <div>{children}</div>
           <Toaster
             position="top-right"
             expand={true}

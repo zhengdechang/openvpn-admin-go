@@ -15,7 +15,7 @@ const loadLangResources = (lang: string) => ({
     register: require(`./${lang}/register`).default,
     dashboard: require(`./${lang}/dashboard`).default,
   },
-})
+});
 
 // Automatically generate the resources object
 const resources = LanguagesSupported.reduce((acc: any, lang: string) => {
