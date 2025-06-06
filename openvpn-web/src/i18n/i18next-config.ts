@@ -23,12 +23,8 @@ const resources = LanguagesSupported.reduce((acc: any, lang: string) => {
   return acc
 }, {})
 
-// Get the saved language from cookie or use default
-const savedLanguage = Cookies.get(LOCALE_COOKIE_NAME) || 'en-US'
-
 i18n.use(initReactI18next)
   .init({
-    lng: savedLanguage,
     fallbackLng: 'en-US',
     resources,
     react: {

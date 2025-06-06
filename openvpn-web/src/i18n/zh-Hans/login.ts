@@ -4,7 +4,7 @@ const translation = {
   password: '密码',
   emailPlaceholder: '请输入邮箱',
   passwordPlaceholder: '请输入密码',
-  rememberMe: '记住我',
+  rememberMe: '记住',
   forgotPassword: '忘记密码？',
   login: '登录',
   register: '注册',
