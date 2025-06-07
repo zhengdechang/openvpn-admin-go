@@ -209,7 +209,6 @@ func GetUserInfo(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"success": false, "error": "user not found"})
 		return
 	}
-	
 	responseData := gin.H{
 		"id":           user.ID,
 		"name":         user.Name,
@@ -219,12 +218,10 @@ func GetUserInfo(c *gin.Context) {
 		"isOnline":     user.IsOnline,
 		"creatorId":    user.CreatorID,
 	}
-	
 	if user.LastConnectionTime != nil {
 		responseData["lastConnectionTime"] = *user.LastConnectionTime
 	} else {
 		responseData["lastConnectionTime"] = nil
 	}
-	
 	c.JSON(http.StatusOK, gin.H{"success": true, "data": responseData})
 }
