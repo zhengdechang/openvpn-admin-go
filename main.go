@@ -17,6 +17,8 @@ import (
    "openvpn-admin-go/constants"
    "path/filepath"
    "openvpn-admin-go/router"
+   "openvpn-admin-go/services" // Added for OpenVPN Sync Service
+   "openvpn-admin-go/utils"    // Added for config utils
 
 	"github.com/gin-gonic/gin"
 )
@@ -200,6 +202,12 @@ func main() {
 			log.Fatal("Failed to start server:", err)
 		}
 	}()
+
+	// Start OpenVPN Data Synchronization Service
+	statusLogPath := utils.GetOpenVPNStatusLogPath()
+	syncInterval := utils.GetOpenVPNSyncInterval()
+	log.Printf("Starting OpenVPN Sync Service: LogPath='%s', Interval=%s", statusLogPath, syncInterval)
+	go services.StartOpenVPNSyncService(database.DB, statusLogPath, syncInterval)
 
 	// 启动主菜单
 	cmd.Execute()

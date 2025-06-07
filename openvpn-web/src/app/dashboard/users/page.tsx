@@ -98,7 +98,9 @@ export default function UsersPage() {
       return;
     }
     try {
-      await userManagementAPI.create(form);
+      await userManagementAPI.create({
+        ...form,
+      });
       toast.success(t("dashboard.users.createSuccess"));
       setForm({
         name: "",
@@ -378,11 +380,14 @@ export default function UsersPage() {
                   <TableHead>{t("dashboard.users.columnEmail")}</TableHead>
                   <TableHead>{t("dashboard.users.columnRole")}</TableHead>
                   <TableHead>{t("dashboard.users.columnDepartment")}</TableHead>
+                  <TableHead>{t("dashboard.users.columnLastConnection")}</TableHead>
+                  <TableHead>{t("dashboard.users.columnOnlineStatus")}</TableHead>
+                  <TableHead>{t("dashboard.users.columnCreator")}</TableHead>
                   <TableHead>{t("dashboard.users.columnActions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {visibleUsers.map((u: any) => (
+                {visibleUsers.map((u: AdminUser) => ( // Explicitly use AdminUser type
                   <TableRow key={u.id}>
                     <TableCell>{u.name}</TableCell>
                     <TableCell>{u.email}</TableCell>
@@ -390,6 +395,21 @@ export default function UsersPage() {
                     <TableCell>
                       {depts.find((d) => d.id === u.departmentId)?.name ||
                         t("dashboard.users.emptyDepartment")}
+                    </TableCell>
+                    <TableCell>
+                      {u.lastConnectionTime
+                        ? new Date(u.lastConnectionTime).toLocaleString()
+                        : t("common.na")}
+                    </TableCell>
+                    <TableCell>
+                      {typeof u.isOnline === 'boolean'
+                        ? u.isOnline
+                          ? t("dashboard.users.statusOnline")
+                          : t("dashboard.users.statusOffline")
+                        : t("common.na")}
+                    </TableCell>
+                    <TableCell>
+                      {users.find(creator => creator.id === u.creatorId)?.name || t("common.na")}
                     </TableCell>
                     <TableCell className="space-x-2">
                       <div className="flex items-center gap-2">

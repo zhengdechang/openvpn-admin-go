@@ -49,6 +49,7 @@ func (c *AdminUserController) CreateUser(ctx *gin.Context) {
        PasswordHash: hash,
        Role:         model.Role(req.Role),
        DepartmentID: req.DepartmentID,
+       CreatorID:    claims.UserID,
    }
    if err := database.DB.Create(&user).Error; err != nil {
        ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -89,8 +90,13 @@ func (c *AdminUserController) ListUsers(ctx *gin.Context) {
            "id":           u.ID,
            "name":         u.Name,
            "email":        u.Email,
-           "role":         u.Role,
-           "departmentId": u.DepartmentID,
+           "role":               u.Role,
+           "departmentId":       u.DepartmentID,
+           "creatorId":          u.CreatorID,
+           "lastConnectionTime": u.LastConnectionTime,
+           "isOnline":           u.IsOnline,
+           "createdAt":          u.CreatedAt,
+           "updatedAt":          u.UpdatedAt,
        })
    }
    ctx.JSON(http.StatusOK, resp)

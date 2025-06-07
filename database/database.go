@@ -7,6 +7,7 @@ import (
 
    "gorm.io/driver/sqlite"
    "gorm.io/gorm"
+   "openvpn-admin-go/model" // Import the model package
 )
 
 var DB *gorm.DB
@@ -31,5 +32,8 @@ func Init() error {
 
 // Migrate 自动迁移模型
 func Migrate(models ...interface{}) error {
-   return DB.AutoMigrate(models...)
+   // Ensure User and ClientLog are always included in migrations
+   allModels := []interface{}{&model.User{}, &model.ClientLog{}}
+   allModels = append(allModels, models...)
+   return DB.AutoMigrate(allModels...)
 }

@@ -25,6 +25,9 @@ type User struct {
    PasswordHash string    `gorm:"size:255;not null"`
    Role         Role      `gorm:"size:20;not null;default:'user'"`
    DepartmentID string    `gorm:"size:36"`
+   LastConnectionTime *time.Time
+   IsOnline     bool
+   CreatorID    string `gorm:"size:36"`
    CreatedAt    time.Time
    UpdatedAt    time.Time
 }
