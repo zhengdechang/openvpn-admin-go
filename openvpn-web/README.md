@@ -1,73 +1,34 @@
-# Next.js Template
+# openvpn-web
 
-A modern Next.js template with authentication, UI components, and Docker support.
+This is the web frontend for the `openvpn-admin-go` project. It provides a user interface for managing OpenVPN servers and users.
 
 ## Features
 
-- Next.js 14 with TypeScript
-- Authentication system
-- Modern UI components with Tailwind CSS
-- Toast notifications
-- Docker support for easy deployment
-- ESLint and TypeScript configuration
+- User authentication
+- Dashboard for managing OpenVPN servers
+- User management interface
+- Client configuration download
 
 ## Prerequisites
 
 - Node.js 18.x or higher
 - npm or yarn
-- Docker (optional, for containerized deployment)
+- A running instance of the `openvpn-admin-go` backend.
 
 ## Installation
 
-1. Clone the repository
-
-```bash
-git clone https://github.com/yourusername/nextjs-template.git
-cd nextjs-template
-```
-
-2. Install dependencies
-
-```bash
-npm install
-# or
-yarn install
-```
-
-3. Create a `.env` file based on `.env.example`
-
-4. Run the development server
-
-```bash
-npm run dev
-# or
-yarn dev
-```
-
-5. Open [http://localhost:3000](http://localhost:3000) in your browser
-
-## Docker Deployment
-
-1. Build the Docker image
-
-```bash
-docker-compose build
-```
-
-2. Start the containers
-
-```bash
-docker-compose up -d
-```
+- `git clone <repository-url>`
+- `cd openvpn-web`
+- `npm install` (or `yarn install`)
+- Create a `.env` file based on `.env.example` and configure the backend API URL.
+- `npm run dev` (or `yarn dev`)
 
 ## Project Structure
 
-- `src/app` - Next.js app router pages
-- `src/components` - Reusable UI components
-- `src/lib` - Utility functions and configurations
-- `src/store` - State management
-- `src/assets` - Static assets
-
-## License
-
-MIT
+- `src/app` - Next.js app router pages and layouts
+- `src/components` - Reusable UI components (buttons, forms, etc.)
+- `src/services` - API communication and data fetching logic
+- `src/lib` - Utility functions, configurations, and helper scripts
+- `src/store` - State management (e.g., Zustand, Redux)
+- `src/assets` - Static assets like images and fonts
+- `public` - Publicly accessible static files
