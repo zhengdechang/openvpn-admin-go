@@ -52,7 +52,7 @@ export const getLocaleOnServer = (): Locale => {
   // 如果没有有效的 cookie，使用浏览器语言
   const headersList = headers();
   const acceptLanguage = headersList.get('accept-language');
-
+  
   // If no accept-language header is present, return default locale
   if (!acceptLanguage) {
     return i18n.defaultLocale;
@@ -61,7 +61,7 @@ export const getLocaleOnServer = (): Locale => {
   const negotiatorHeaders: Record<string, string> = {
     'accept-language': acceptLanguage
   };
-
+  
   const languages = new Negotiator(negotiatorHeaders).languages();
 
   // 验证语言
