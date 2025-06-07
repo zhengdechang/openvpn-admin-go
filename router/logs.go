@@ -10,10 +10,13 @@ import (
 // SetupLogRoutes 设置日志查询路由
 func SetupLogRoutes(r *gin.RouterGroup) {
    logCtrl := &controller.LogController{}
+
    logs := r.Group("/logs")
    logs.Use(middleware.JWTAuthMiddleware())
    {
        logs.GET("/server", logCtrl.GetServerLogs)
-       logs.GET("/client/:username", logCtrl.GetClientLogs)
+       // Routes for client logs
+       logs.POST("/client", controller.CreateClientLog)
+       logs.GET("/client", controller.GetClientLogs)
    }
 }

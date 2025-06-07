@@ -83,6 +83,9 @@ const translation = {
     columnEmail: "邮箱",
     columnRole: "角色",
     columnDepartment: "部门",
+    columnLastConnection: "最后连接",
+    columnOnlineStatus: "在线状态",
+    columnCreator: "创建者",
     columnActions: "操作",
     emptyDepartment: "-",
     downloadConfigButton: "下载配置",
@@ -92,10 +95,12 @@ const translation = {
     deleteButton: "删除",
     editUserDialogTitle: "编辑用户部门",
     departmentLabel: "部门",
-    editingUserLabel: "编辑用户："
+    editingUserLabel: "编辑用户：",
+    statusOnline: "在线",
+    statusOffline: "离线"
   },
   logs: {
-    titleServer: '日志',
+    titleServer: "日志",
     fetchServerLogsError: "获取服务器日志失败",
     usernameRequired: "请输入用户名",
     fetchClientLogsError: "获取客户端日志失败",
@@ -104,7 +109,20 @@ const translation = {
     clientLogsCardTitle: "客户端日志查询",
     usernamePlaceholder: "用户名",
     queryButton: "查询",
-    noClientLogs: "暂无日志"
+    noClientLogs: "暂无日志",
+    clientConnectionLogsTitle: "客户端连接日志",
+    filterByUserIdPlaceholder: "按用户ID筛选",
+    searchButton: "搜索",
+    showEntries: "显示 {{count}} 条记录",
+    noClientConnectionLogs: "暂无客户端连接日志",
+    columnUserId: "用户ID",
+    columnOnlineStatus: "在线状态",
+    columnOnlineDuration: "在线时长",
+    columnTrafficUsage: "流量使用",
+    columnLastConnectionTime: "最后连接时间",
+    columnLogCreatedAt: "创建时间",
+    statusOnline: "在线",
+    statusOffline: "离线"
   },
   server: {
     title: '服务器',

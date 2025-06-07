@@ -49,6 +49,7 @@ func (c *AdminUserController) CreateUser(ctx *gin.Context) {
        PasswordHash: hash,
        Role:         model.Role(req.Role),
        DepartmentID: req.DepartmentID,
+       CreatorID:    claims.UserID,
    }
    if err := database.DB.Create(&user).Error; err != nil {
        ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

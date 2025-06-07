@@ -7,6 +7,7 @@ const translation = {
   cancel: "Cancel",
   create: "create",
   success: "Success",
+  na: "-",
   auth: {
     forgotpassword: {
       emailRequired: "Please enter your email",
