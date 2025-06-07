@@ -202,6 +202,8 @@ export interface AdminUser {
   lastConnectionTime?: string;
   isOnline?: boolean;
   creatorId?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 // 服务器状态
