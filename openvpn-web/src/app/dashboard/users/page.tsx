@@ -383,6 +383,8 @@ export default function UsersPage() {
                   <TableHead>{t("dashboard.users.columnLastConnection")}</TableHead>
                   <TableHead>{t("dashboard.users.columnOnlineStatus")}</TableHead>
                   <TableHead>{t("dashboard.users.columnCreator")}</TableHead>
+                  <TableHead>{t("dashboard.users.columnCreatedAt", "Created At")}</TableHead>
+                  <TableHead>{t("dashboard.users.columnUpdatedAt", "Updated At")}</TableHead>
                   <TableHead>{t("dashboard.users.columnActions")}</TableHead>
                 </TableRow>
               </TableHeader>
@@ -409,6 +411,8 @@ export default function UsersPage() {
                         : t("common.na")}
                     </TableCell>
                     <TableCell>{u.creatorId || t("common.na")}</TableCell>
+                    <TableCell>{u.createdAt ? new Date(u.createdAt).toLocaleString() : t("common.na")}</TableCell>
+                    <TableCell>{u.updatedAt ? new Date(u.updatedAt).toLocaleString() : t("common.na")}</TableCell>
                     <TableCell className="space-x-2">
                       <div className="flex items-center gap-2">
                         {(currentUser?.role === UserRole.ADMIN ||
