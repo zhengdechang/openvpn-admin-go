@@ -3,7 +3,6 @@ package services
 import (
 	"log"
 	"time"
-	"fmt"
 
 	"gorm.io/gorm"
 	"openvpn-admin-go/model"

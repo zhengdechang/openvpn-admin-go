@@ -84,6 +84,9 @@ const translation = {
     columnEmail: "Email",
     columnRole: "Role",
     columnDepartment: "Department",
+    columnLastConnection: "Last Connection",
+    columnOnlineStatus: "Online Status",
+    columnCreator: "Creator",
     columnActions: "Actions",
     emptyDepartment: "-",
     downloadConfigButton: "Download Config",
@@ -94,6 +97,8 @@ const translation = {
     editUserDialogTitle: "Edit User Department",
     departmentLabel: "Department",
     editingUserLabel: "Editing User: ",
+    statusOnline: "Online",
+    statusOffline: "Offline"
   },
   logs: {
     titleServer: "Logs",
@@ -106,6 +111,19 @@ const translation = {
     usernamePlaceholder: "Username",
     queryButton: "Query",
     noClientLogs: "No logs available",
+    clientConnectionLogsTitle: "Client Connection Logs",
+    filterByUserIdPlaceholder: "Filter by User ID",
+    searchButton: "Search",
+    showEntries: "Show {{count}} entries",
+    noClientConnectionLogs: "No client connection logs found",
+    columnUserId: "User ID",
+    columnOnlineStatus: "Online Status",
+    columnOnlineDuration: "Online Duration",
+    columnTrafficUsage: "Traffic Usage",
+    columnLastConnectionTime: "Last Connection Time",
+    columnLogCreatedAt: "Created At",
+    statusOnline: "Online",
+    statusOffline: "Offline"
   },
   server: {
     title: "Server",

@@ -7,6 +7,7 @@ const translation = {
   create: "创建",
   delete: "删除",
   success: "成功",
+  na: "-",
   auth: {
     forgotpassword: {
       emailRequired: "请输入邮箱",

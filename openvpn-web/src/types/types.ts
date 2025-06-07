@@ -199,6 +199,9 @@ export interface AdminUser {
   email: string;
   role: UserRole;
   departmentId?: string;
+  lastConnectionTime?: string;
+  isOnline?: boolean;
+  creatorId?: string;
 }
 
 // 服务器状态

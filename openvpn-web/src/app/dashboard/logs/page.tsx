@@ -56,7 +56,6 @@ export default function LogsPage() {
   const [filterUserId, setFilterUserId] = useState<string>("");
   const [searchInputUserId, setSearchInputUserId] = useState<string>("");
 
-
   // Fetch server logs
   useEffect(() => {
     const fetchServerLogs = async () => {
@@ -84,9 +83,8 @@ export default function LogsPage() {
           filterUserId.trim() === "" ? undefined : filterUserId.trim()
         );
         if (response.success && response.data) {
-          setClientApiLogs(response.data.data); // Assuming 'data' holds the array of logs
-          setTotalLogs(response.data.total);
-          // setCurrentPage(response.data.page); // Backend should confirm the page
+          setClientApiLogs(response.data.data || []); // Ensure we always set an array
+          setTotalLogs(response.data.total || 0);
         } else {
           toast.error(response.error || t("dashboard.logs.fetchClientLogsError"));
           setClientApiLogs([]);
@@ -143,7 +141,7 @@ export default function LogsPage() {
             <Button onClick={handleSearchUserId}>
               {t("dashboard.logs.searchButton")}
             </Button>
-             <select
+            <select
               value={pageSize}
               onChange={(e) => {
                 setPageSize(Number(e.target.value));
@@ -161,7 +159,7 @@ export default function LogsPage() {
 
           {loadingClientLogs ? (
             <p>{t("common.loading")}</p>
-          ) : clientApiLogs.length === 0 ? (
+          ) : !clientApiLogs || clientApiLogs.length === 0 ? (
             <p>{t("dashboard.logs.noClientConnectionLogs")}</p>
           ) : (
             <>

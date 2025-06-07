@@ -98,7 +98,9 @@ export default function UsersPage() {
       return;
     }
     try {
-      await userManagementAPI.create(form);
+      await userManagementAPI.create({
+        ...form,
+      });
       toast.success(t("dashboard.users.createSuccess"));
       setForm({
         name: "",

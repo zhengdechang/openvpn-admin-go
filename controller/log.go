@@ -3,7 +3,6 @@ package controller
 import (
    "net/http"
    "os"
-   "strings"
 
    "github.com/gin-gonic/gin"
    "openvpn-admin-go/constants"
