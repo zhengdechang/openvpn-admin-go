@@ -70,7 +70,6 @@ func RunSyncCycle(db *gorm.DB, statusLogPath string) {
 			currentOnlineDuration = int64(now.Sub(clientStatus.ConnectedSince).Seconds())
 		}
 
-
 		if logResult.Error == gorm.ErrRecordNotFound { // No active log, create new
 			clientLog = model.ClientLog{
 				UserID:             user.ID,
@@ -87,7 +86,7 @@ func RunSyncCycle(db *gorm.DB, statusLogPath string) {
 			}
 		} else if logResult.Error == nil { // Active log found, update it
 			clientLog.OnlineDuration = currentOnlineDuration // Update duration
-			clientLog.TrafficUsage = currentTraffic         // Update with current session's total traffic
+			clientLog.TrafficUsage = currentTraffic          // Update with current session's total traffic
 			// LastConnectionTime in ClientLog could mean two things:
 			// 1. The start of this specific online session (clientStatus.ConnectedSince)
 			// 2. The last time we saw this client (clientStatus.LastRef)
@@ -131,9 +130,9 @@ func RunSyncCycle(db *gorm.DB, statusLogPath string) {
 				// TrafficUsage is already the last known cumulative for that session.
 
 				// Set the LastConnectionTime of the log to the actual disconnection time
-                // This field in ClientLog now better represents "session ended at" or "last seen for this session"
-                logDisconnectedTime := time.Now()
-                activeLog.LastConnectionTime = &logDisconnectedTime
+				// This field in ClientLog now better represents "session ended at" or "last seen for this session"
+				logDisconnectedTime := time.Now()
+				activeLog.LastConnectionTime = &logDisconnectedTime
 
 				if err := db.Save(&activeLog).Error; err != nil {
 					log.Printf("Error finalizing ClientLog for disconnected user '%s': %v", dbUser.Name, err)

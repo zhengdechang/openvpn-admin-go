@@ -26,22 +26,23 @@ func RenderServerConfig(cfg *Config) (string, error) {
 	}
 
 	data := map[string]interface{}{
-		"openvpn_port":            cfg.OpenVPNPort,
-		"openvpn_proto":           cfg.OpenVPNProto,
-		"openvpn_server_network":  cfg.OpenVPNServerNetwork,
-		"openvpn_server_netmask":  cfg.OpenVPNServerNetmask,
+		"openvpn_port":             cfg.OpenVPNPort,
+		"openvpn_proto":            cfg.OpenVPNProto,
+		"openvpn_server_network":   cfg.OpenVPNServerNetwork,
+		"openvpn_server_netmask":   cfg.OpenVPNServerNetmask,
 		"openvpn_client_to_client": cfg.OpenVPNClientToClient,
-		"openvpn_routes":          cfg.OpenVPNRoutes,
-		"dns_server_ip":           cfg.DNSServerIP,
-		"dns_server_domain":       cfg.DNSServerDomain,
-		"openvpn_tls_version":     cfg.OpenVPNTLSVersion,
-		"ca_cert_path":            constants.ServerCACertPath,
-		"server_cert_path":        constants.ServerCertPath,
-		"server_key_path":         constants.ServerKeyPath,
-		"dh_path":                 constants.ServerDHPath,
-		"ipp_path":                constants.ServerIPPPath,
-		"tls_key_path":            constants.ServerTLSKeyPath,
-		"status_log_path":         constants.ServerStatusLogPath,
+		"openvpn_routes":           cfg.OpenVPNRoutes,
+		"dns_server_ip":            cfg.DNSServerIP,
+		"dns_server_domain":        cfg.DNSServerDomain,
+		"openvpn_tls_version":      cfg.OpenVPNTLSVersion,
+		"ca_cert_path":             constants.ServerCACertPath,
+		"server_cert_path":         constants.ServerCertPath,
+		"server_key_path":          constants.ServerKeyPath,
+		"dh_path":                  constants.ServerDHPath,
+		"ipp_path":                 constants.ServerIPPPath,
+		"tls_key_path":             constants.ServerTLSKeyPath,
+		"status_log_path":          constants.ServerStatusLogPath,
+		"openvpn_log_path":         cfg.OpenVPNLogPath, // Added for main log file
 	}
 
 	var buf bytes.Buffer
@@ -118,4 +119,4 @@ func RenderClientConfig(username string, cfg *Config) (string, error) {
 	}
 
 	return buf.String(), nil
-} 
+}

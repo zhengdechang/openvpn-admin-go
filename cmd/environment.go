@@ -260,7 +260,7 @@ func InstallEnvironment() error {
 	if err := generateCertificates(); err != nil {
 		return fmt.Errorf("生成证书失败: %v", err)
 	}
-	
+
 	// 生成Openvpn配置文件
 	fmt.Println("正在生成Openvpn配置文件...")
 	if err := generateOpenVPNConfig(); err != nil {
@@ -330,4 +330,4 @@ func CheckEnvironment() error {
 	}
 
 	return nil
-} 
+}

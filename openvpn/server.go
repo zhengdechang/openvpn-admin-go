@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"os/user" // Added for user/group lookup
 	"path/filepath"
+	"strconv" // Added for string to int conversion for UID/GID
 	"strings"
 
 	"openvpn-admin-go/constants"
@@ -87,8 +89,52 @@ func UpdateServerConfig() error {
 	}
 
 	// 创建状态日志文件
-	if err := os.WriteFile(constants.ServerStatusLogPath, []byte{}, 0644); err != nil {
+	// Permissions set to 0664 to allow 'nobody' (or configured user) to write.
+	if err := os.WriteFile(constants.ServerStatusLogPath, []byte{}, 0664); err != nil {
 		return fmt.Errorf("创建状态日志文件失败: %v", err)
+	}
+
+	// 创建主日志文件 (如果不存在)
+	// Permissions set to 0664 to allow 'nobody' (or configured user) to write.
+	// The directory should already be created by the MkdirAll for ServerStatusLogPath if they share the same parent dir.
+	if _, err := os.Stat(constants.OpenVPNLogPath); os.IsNotExist(err) {
+		if err := os.WriteFile(constants.OpenVPNLogPath, []byte{}, 0664); err != nil {
+			return fmt.Errorf("创建主日志文件失败: %v", err)
+		}
+	} else if err != nil {
+		// Handle other errors from os.Stat
+		return fmt.Errorf("检查主日志文件失败: %v", err)
+	}
+
+	// Set ownership for log files to nobody:nogroup
+	// This is important if OpenVPN drops privileges to this user/group.
+	nobodyUser, err := user.Lookup("nobody")
+	if err != nil {
+		return fmt.Errorf("查找用户 'nobody' 失败: %v. 请确保该用户存在.", err)
+	}
+	nogroupGroup, err := user.LookupGroup("nogroup")
+	if err != nil {
+		// Some systems use 'nobody' as the group for the 'nobody' user.
+		nogroupGroup, err = user.LookupGroup("nobody")
+		if err != nil {
+			return fmt.Errorf("查找用户组 'nogroup' 或 'nobody' 失败: %v. 请确保相应的组存在.", err)
+		}
+	}
+
+	uid, err := strconv.Atoi(nobodyUser.Uid)
+	if err != nil {
+		return fmt.Errorf("转换 'nobody' UID 失败: %v", err)
+	}
+	gid, err := strconv.Atoi(nogroupGroup.Gid)
+	if err != nil {
+		return fmt.Errorf("转换 'nogroup' GID 失败: %v", err)
+	}
+
+	if err := os.Chown(constants.ServerStatusLogPath, uid, gid); err != nil {
+		return fmt.Errorf("设置状态日志文件所有权失败: %v", err)
+	}
+	if err := os.Chown(constants.OpenVPNLogPath, uid, gid); err != nil {
+		return fmt.Errorf("设置主日志文件所有权失败: %v", err)
 	}
 
 	// 重启OpenVPN服务
@@ -110,38 +156,38 @@ func RestartServer() error {
 
 // ConfigureServer 根据参数更新服务器配置并重启服务
 func ConfigureServer(port int, protocol, network, netmask string) error {
-   // 加载现有配置
-   cfg, err := LoadConfig()
-   if err != nil {
-       return fmt.Errorf("加载配置失败: %v", err)
-   }
-   // 更新参数
-   cfg.OpenVPNPort = port
-   cfg.OpenVPNProto = protocol
-   cfg.OpenVPNServerNetwork = network
-   cfg.OpenVPNServerNetmask = netmask
-   // 保存并生成配置文件
-   if err := SaveConfig(cfg); err != nil {
-       return fmt.Errorf("保存配置失败: %v", err)
-   }
-   // 重新写入 server.conf 并更新所有客户端、重启服务
-   if err := UpdateServerConfig(); err != nil {
-       return fmt.Errorf("更新服务器配置失败: %v", err)
-   }
-   return nil
+	// 加载现有配置
+	cfg, err := LoadConfig()
+	if err != nil {
+		return fmt.Errorf("加载配置失败: %v", err)
+	}
+	// 更新参数
+	cfg.OpenVPNPort = port
+	cfg.OpenVPNProto = protocol
+	cfg.OpenVPNServerNetwork = network
+	cfg.OpenVPNServerNetmask = netmask
+	// 保存并生成配置文件
+	if err := SaveConfig(cfg); err != nil {
+		return fmt.Errorf("保存配置失败: %v", err)
+	}
+	// 重新写入 server.conf 并更新所有客户端、重启服务
+	if err := UpdateServerConfig(); err != nil {
+		return fmt.Errorf("更新服务器配置失败: %v", err)
+	}
+	return nil
 }
 
 // ApplyServerConfig 根据自定义内容写入配置并重启服务
 func ApplyServerConfig(content string) error {
-   // 写入配置文件
-   if err := os.WriteFile(constants.ServerConfigPath, []byte(content), 0644); err != nil {
-       return fmt.Errorf("写入配置文件失败: %v", err)
-   }
-   // 重启服务
-   if err := RestartServer(); err != nil {
-       return fmt.Errorf("重启服务失败: %v", err)
-   }
-   return nil
+	// 写入配置文件
+	if err := os.WriteFile(constants.ServerConfigPath, []byte(content), 0644); err != nil {
+		return fmt.Errorf("写入配置文件失败: %v", err)
+	}
+	// 重启服务
+	if err := RestartServer(); err != nil {
+		return fmt.Errorf("重启服务失败: %v", err)
+	}
+	return nil
 }
 
 // getEnvOrDefault 从环境变量获取值，如果不存在则返回默认值

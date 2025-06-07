@@ -210,13 +210,13 @@ func GetUserInfo(c *gin.Context) {
 		return
 	}
 	responseData := gin.H{
-		"id":           user.ID,
-		"name":         user.Name,
-		"email":        user.Email,
-		"role":         user.Role,
-		"dept":         user.DepartmentID,
-		"isOnline":     user.IsOnline,
-		"creatorId":    user.CreatorID,
+		"id":        user.ID,
+		"name":      user.Name,
+		"email":     user.Email,
+		"role":      user.Role,
+		"dept":      user.DepartmentID,
+		"isOnline":  user.IsOnline,
+		"creatorId": user.CreatorID,
 	}
 	if user.LastConnectionTime != nil {
 		responseData["lastConnectionTime"] = *user.LastConnectionTime

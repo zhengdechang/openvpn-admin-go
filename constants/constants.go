@@ -21,13 +21,14 @@ const (
 
 	// 服务器状态日志路径
 	ServerStatusLogPath = "/var/log/openvpn/status.log"
+	// 主 OpenVPN 日志文件路径
+	OpenVPNLogPath = "/var/log/openvpn/openvpn.log"
 
 	// 服务器 IP 分配文件路径
 	ServerIPPPath = "/etc/openvpn/server/ipp.txt"
 
 	// 客户端配置目录
 	ClientConfigDir = "/etc/openvpn/client"
-
 )
 
 // openssl 扩展文件
@@ -36,7 +37,6 @@ var OpenSSLExtFiles = []string{
 	"openssl-server.ext",
 	"openssl-client.ext",
 }
-
 
 // GetClientConfigPath 获取客户端配置文件路径
 func GetClientConfigPath(username string) string {
@@ -51,4 +51,4 @@ func GetClientCertPath(username string) string {
 // GetClientKeyPath 获取客户端密钥路径
 func GetClientKeyPath(username string) string {
 	return filepath.Join(ClientConfigDir, username+".key")
-} 
+}

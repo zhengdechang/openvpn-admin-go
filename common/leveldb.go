@@ -1,20 +1,20 @@
 package common
 
 import (
-  "os"
+	"os"
 
-  "github.com/syndtr/goleveldb/leveldb"
+	"github.com/syndtr/goleveldb/leveldb"
 )
 
 var dbPath string
 
 func init() {
-  // 数据库路径，可通过环境变量 LEVELDB_PATH 覆盖
-  dp := os.Getenv("LEVELDB_PATH")
-  if dp == "" {
-    dp = "/var/lib/openvpn-manager"
-  }
-  dbPath = dp
+	// 数据库路径，可通过环境变量 LEVELDB_PATH 覆盖
+	dp := os.Getenv("LEVELDB_PATH")
+	if dp == "" {
+		dp = "/var/lib/openvpn-manager"
+	}
+	dbPath = dp
 }
 
 // DBPath 返回 LevelDB 存储路径

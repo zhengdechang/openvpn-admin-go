@@ -165,13 +165,13 @@ func ListClients() {
 	fmt.Println("----------------------------------------")
 	fmt.Printf("%-20s %-20s %-10s\n", "用户名", "创建时间", "状态")
 	fmt.Println("----------------------------------------")
-	
+
 	for _, status := range statuses {
 		statusText := "正常"
 		if status.IsPaused {
 			statusText = "已暂停"
 		}
-		fmt.Printf("%-20s %-20s %-10s\n", 
+		fmt.Printf("%-20s %-20s %-10s\n",
 			status.Username,
 			status.ConnectedAt.Format("2006-01-02 15:04:05"),
 			statusText)

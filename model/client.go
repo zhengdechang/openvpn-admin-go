@@ -9,8 +9,8 @@ import (
 
 // ClientLog records client connection status and usage
 type ClientLog struct {
-	ID                 string    `gorm:"primaryKey;size:36"`
-	UserID             string    `gorm:"size:36;index"` // Indexed for faster lookups
+	ID                 string `gorm:"primaryKey;size:36"`
+	UserID             string `gorm:"size:36;index"` // Indexed for faster lookups
 	IsOnline           bool
 	OnlineDuration     int64 // in seconds
 	TrafficUsage       int64 // in bytes

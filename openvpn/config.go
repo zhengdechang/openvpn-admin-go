@@ -29,6 +29,7 @@ type Config struct {
 	OpenVPNClientToClient  bool     `json:"openvpn_client_to_client"`
 	DNSServerIP            string   `json:"dns_server_ip"`
 	DNSServerDomain        string   `json:"dns_server_domain"`
+	OpenVPNLogPath         string   `json:"openvpn_log_path"`
 }
 
 // LoadConfig 从服务端配置文件加载配置
@@ -56,6 +57,7 @@ func LoadConfig() (*Config, error) {
 		cfg.OpenVPNTLSVersion = getEnv("OPENVPN_TLS_VERSION", "1.2")
 		cfg.OpenVPNTLSKey = getEnv("OPENVPN_TLS_KEY", "ta.key")
 		cfg.OpenVPNTLSKeyPath = getEnv("OPENVPN_TLS_KEY_PATH", constants.ServerTLSKeyPath)
+		cfg.OpenVPNLogPath = getEnv("OPENVPN_LOG_PATH", constants.OpenVPNLogPath)
 
 		// 生成默认配置文件
 		configContent, err := cfg.GenerateServerConfig()
@@ -127,6 +129,7 @@ func LoadConfig() (*Config, error) {
 	cfg.OpenVPNTLSVersion = getEnv("OPENVPN_TLS_VERSION", "1.2")
 	cfg.OpenVPNTLSKey = getEnv("OPENVPN_TLS_KEY", "ta.key")
 	cfg.OpenVPNTLSKeyPath = getEnv("OPENVPN_TLS_KEY_PATH", constants.ServerTLSKeyPath)
+	cfg.OpenVPNLogPath = getEnv("OPENVPN_LOG_PATH", constants.OpenVPNLogPath) // Add here as well
 
 	// 加载路由配置
 	if routes, exists := os.LookupEnv("OPENVPN_ROUTES"); exists {
@@ -186,11 +189,11 @@ func SaveConfig(cfg *Config) error {
 	if err != nil {
 		return fmt.Errorf("序列化配置失败: %v", err)
 	}
-	
+
 	configPath := filepath.Join(filepath.Dir(constants.ServerConfigPath), "config.json")
 	if err := os.WriteFile(configPath, data, 0644); err != nil {
 		return fmt.Errorf("写入配置文件失败: %v", err)
 	}
-	
+
 	return nil
-} 
+}

@@ -1,10 +1,10 @@
 package utils
 
 import (
+	"log"
 	"os"
 	"strconv"
 	"time"
-	"log"
 )
 
 // GetEnvOrDefault 从环境变量获取值，如果不存在则返回默认值

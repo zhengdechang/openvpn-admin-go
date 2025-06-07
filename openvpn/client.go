@@ -14,7 +14,7 @@ import (
 // CreateClient 创建新的OpenVPN客户端
 func CreateClient(username string) error {
 	fmt.Printf("开始创建客户端: %s\n", username)
-	
+
 	// 检查证书目录
 	fmt.Printf("检查证书目录: %s\n", constants.ClientConfigDir)
 	if _, err := os.Stat(constants.ClientConfigDir); os.IsNotExist(err) {
@@ -41,14 +41,14 @@ func CreateClient(username string) error {
 	// 检查CA证书和密钥是否存在
 	fmt.Printf("检查CA证书: %s\n", constants.ServerCACertPath)
 	fmt.Printf("检查CA密钥: %s\n", constants.ServerCAKeyPath)
-	
+
 	if _, err := os.Stat(constants.ServerCACertPath); os.IsNotExist(err) {
 		return fmt.Errorf("CA证书不存在: %s", constants.ServerCACertPath)
 	}
 	if _, err := os.Stat(constants.ServerCAKeyPath); os.IsNotExist(err) {
 		return fmt.Errorf("CA密钥不存在: %s", constants.ServerCAKeyPath)
 	}
-	
+
 	fmt.Printf("使用CA证书: %s\n", constants.ServerCACertPath)
 	fmt.Printf("使用CA密钥: %s\n", constants.ServerCAKeyPath)
 	fmt.Println("CA证书和密钥检查通过")
@@ -108,13 +108,13 @@ func CreateClient(username string) error {
 	// 生成.ovpn配置文件
 	fmt.Printf("正在为客户端 %s 生成配置文件...\n", username)
 	ovpnPath := filepath.Join(constants.ClientConfigDir, username+".ovpn")
-	
+
 	// 加载配置
 	cfg, err := LoadConfig()
 	if err != nil {
 		return fmt.Errorf("加载配置失败: %v", err)
 	}
-	
+
 	// 生成客户端配置
 	clientConfig, err := GenerateClientConfig(username, cfg)
 	if err != nil {
@@ -127,7 +127,7 @@ func CreateClient(username string) error {
 	if err := os.WriteFile(tempFile, []byte(clientConfig), 0644); err != nil {
 		return fmt.Errorf("创建临时配置文件失败: %v", err)
 	}
-	
+
 	fmt.Printf("移动配置文件到: %s\n", ovpnPath)
 	cmd = exec.Command("sudo", "mv", tempFile, ovpnPath)
 	output, err = cmd.CombinedOutput()
@@ -190,7 +190,7 @@ func ResumeClient(username string) error {
 func GetClientStatus(username string) (*ClientStatus, error) {
 	// 检查客户端配置文件是否存在
 	ovpnPath := filepath.Join(constants.ClientConfigDir, username+".ovpn")
-	
+
 	// 获取文件信息
 	fileInfo, err := os.Stat(ovpnPath)
 	if os.IsNotExist(err) {
@@ -252,10 +252,10 @@ func GetAllClientStatuses() ([]ClientStatus, error) {
 
 // ClientStatus 客户端状态
 type ClientStatus struct {
-   Username     string    `json:"username"`
-   ConnectedAt  time.Time `json:"connectedAt"`
-   Disconnected time.Time `json:"disconnectedAt"`
-   IsPaused     bool      `json:"isPaused"`
+	Username     string    `json:"username"`
+	ConnectedAt  time.Time `json:"connectedAt"`
+	Disconnected time.Time `json:"disconnectedAt"`
+	IsPaused     bool      `json:"isPaused"`
 }
 
 // GenerateClientConfig 生成客户端配置文件内容

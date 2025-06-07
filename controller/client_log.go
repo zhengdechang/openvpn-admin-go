@@ -75,10 +75,10 @@ func GetClientLogs(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"success":   true,
-		"data":      clientLogs,
-		"total":     total,
-		"page":      page,
-		"pageSize":  pageSize,
+		"success":  true,
+		"data":     clientLogs,
+		"total":    total,
+		"page":     page,
+		"pageSize": pageSize,
 	})
 }
