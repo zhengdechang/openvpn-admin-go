@@ -16,9 +16,17 @@ func SetupClientRoutes(r *gin.RouterGroup) {
    {
        // 客户端配置下载: all roles, but users only own
        client.GET("/config/:username", clientCtrl.GetClientConfig)
-       // 客户端状态查看
-       client.GET("/status", middleware.RoleRequired(string(model.RoleSuperAdmin), string(model.RoleAdmin), string(model.RoleManager)), clientCtrl.GetAllClientStatuses)
-       client.GET("/status/:username", clientCtrl.GetClientStatus)
+
+       // Client Status Routes
+       statusGroup := client.Group("/status")
+       statusGroup.Use(middleware.RoleRequired(string(model.RoleSuperAdmin), string(model.RoleAdmin), string(model.RoleManager)))
+       {
+           statusGroup.GET("", clientCtrl.GetAllClientStatuses)      // Existing: /client/status
+           statusGroup.GET("/live", clientCtrl.GetLiveConnections) // New: /client/status/live
+       }
+       // Individual client status - this route might need role protection too, depending on policy
+       client.GET("/status/:username", clientCtrl.GetClientStatus) // Path: /client/status/:username
+
        // 管理操作: superadmin, admin, manager
        admin := client.Group("")
        admin.Use(middleware.RoleRequired(string(model.RoleSuperAdmin), string(model.RoleAdmin), string(model.RoleManager)))

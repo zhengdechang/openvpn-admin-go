@@ -20,6 +20,27 @@ func (c *ClientController) GetClientList(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, statuses)
 }
 
+// GetLiveConnections godoc
+// @Summary Get all currently connected OpenVPN clients' live status
+// @Description Retrieves a list of all clients currently connected to the OpenVPN server with live data like IP, duration, data transfer.
+// @Tags Client
+// @Produce json
+// @Security ApiKeyAuth
+// @Success 200 {array} openvpn.OpenVPNClientStatus "List of live client statuses"
+// @Failure 500 {object} gin.H "Error message"
+// @Router /client/status/live [get]
+func (c *ClientController) GetLiveConnections(ctx *gin.Context) {
+	statuses, err := openvpn.GetAllClientStatuses()
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get client statuses: " + err.Error()})
+		return
+	}
+	if statuses == nil { // Handle case where parsing might return nil, nil
+		statuses = []openvpn.OpenVPNClientStatus{}
+	}
+	ctx.JSON(http.StatusOK, statuses)
+}
+
 // AddClient 添加客户端
 func (c *ClientController) AddClient(ctx *gin.Context) {
 	var client struct {
@@ -158,7 +179,12 @@ func (c *ClientController) GetAllClientStatuses(ctx *gin.Context) {
    // 路由已限制，此处无需重复检查
    statuses, err := openvpn.GetAllClientStatuses()
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get client statuses: " + err.Error()})
+		return
+	}
+	if statuses == nil {
+		// Ensure an empty array is returned instead of null if no statuses are found
+		ctx.JSON(http.StatusOK, []openvpn.OpenVPNClientStatus{})
 		return
 	}
 	ctx.JSON(http.StatusOK, statuses)

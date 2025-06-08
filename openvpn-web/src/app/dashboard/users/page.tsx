@@ -1,6 +1,7 @@
+// In openvpn-web/src/app/dashboard/users/page.tsx
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react"; // Added useCallback
 import { useAuth } from "@/lib/auth-context";
 import {
   Dialog,
@@ -9,12 +10,14 @@ import {
   DialogHeader,
   DialogFooter,
   DialogTitle,
+  DialogDescription, // Added DialogDescription
   DialogClose,
 } from "@/components/ui/dialog";
 import { useTranslation } from "react-i18next";
 import MainLayout from "@/components/layout/main-layout";
 import { userManagementAPI, departmentAPI, openvpnAPI } from "@/services/api";
-import { AdminUser, Department, UserRole } from "@/types/types";
+// Ensure UserUpdateRequest is imported if defined and used
+import { AdminUser, Department, UserRole, UserUpdateRequest } from "@/types/types";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import {
   Table,
@@ -26,7 +29,19 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label"; // Added Label
 import { toast } from "sonner";
+import { Switch } from "@/components/ui/switch"; // For potential future use (e.g. enable/disable)
+
+// Define initial state for the edit form
+const initialEditFormState: UserUpdateRequest = {
+  name: "",
+  email: "",
+  role: UserRole.USER,
+  departmentId: "",
+  fixedIp: "", // Initialize with empty string
+  password: "", // For password changes
+};
 
 export default function UsersPage() {
   const { user: currentUser } = useAuth();
@@ -34,21 +49,25 @@ export default function UsersPage() {
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [depts, setDepts] = useState<Department[]>([]);
   const [loading, setLoading] = useState(true);
-  const [form, setForm] = useState({
+
+  // Form state for adding a new user
+  const [addUserForm, setAddUserForm] = useState<UserUpdateRequest>({ // Using UserUpdateRequest for consistency
     name: "",
     email: "",
     password: "",
     role: UserRole.USER,
     departmentId: "",
+    fixedIp: "",
   });
-  const [open, setOpen] = useState(false); // For Add User Dialog
+  const [addUserDialogOpen, setAddUserDialogOpen] = useState(false);
 
   // State for Edit User Dialog
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editUserDialogOpen, setEditUserDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<AdminUser | null>(null);
-  const [editFormDepartmentId, setEditFormDepartmentId] = useState<string>("");
+  const [editForm, setEditForm] = useState<UserUpdateRequest>(initialEditFormState);
 
-  const fetchAll = async () => {
+
+  const fetchAll = useCallback(async () => {
     setLoading(true);
     try {
       const [u, d] = await Promise.all([
@@ -62,317 +81,261 @@ export default function UsersPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [t]); // Added t
 
   useEffect(() => {
     fetchAll();
-  }, []);
+  }, [fetchAll]);
 
-  // 根据角色过滤用户
-  let visibleUsers = users;
-  // 下载配置
   const handleDownload = async (id: string, os: string) => {
-    try {
-      const { config } = await openvpnAPI.getClientConfig(id, os);
-      const blob = new Blob([config], {
-        type: "application/x-openvpn-profile",
-      });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      const ext = os === "linux" ? "conf" : "ovpn";
-      a.download = `${id}.${ext}`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      toast.success(t("dashboard.users.downloadConfigSuccess"));
-    } catch {
-      toast.error(t("dashboard.users.downloadConfigError"));
-    }
+     try {
+       const data = await openvpnAPI.getClientConfig(id, os);
+       const config = data.config;
+       const blob = new Blob([config], {
+         type: "application/x-openvpn-profile",
+       });
+       const url = URL.createObjectURL(blob);
+       const a = document.createElement("a");
+       a.href = url;
+       const ext = os === "linux" ? "conf" : "ovpn";
+       a.download = `${id}.${ext}`;
+       document.body.appendChild(a);
+       a.click();
+       document.body.removeChild(a);
+       URL.revokeObjectURL(url);
+       toast.success(t("dashboard.users.downloadConfigSuccess"));
+     } catch {
+       toast.error(t("dashboard.users.downloadConfigError"));
+     }
   };
 
-  const handleCreate = async () => {
-    if (!form.name || !form.email || !form.password) {
+  const handleCreateUser = async () => {
+    if (!addUserForm.name || !addUserForm.email || !addUserForm.password) {
       toast.error(t("dashboard.users.formRequiredFields"));
       return;
     }
     try {
-      await userManagementAPI.create({
-        ...form,
-      });
+      const payload: UserUpdateRequest = { ...addUserForm };
+      if (!(currentUser?.role === UserRole.ADMIN || currentUser?.role === UserRole.SUPERADMIN) && payload.fixedIp) {
+         // Non-admins cannot set fixed IP on creation, clear it if set by mistake in form state
+         payload.fixedIp = "";
+      }
+      // Ensure departmentId is set if manager is creating user
+      if (currentUser?.role === UserRole.MANAGER && !payload.departmentId) {
+          payload.departmentId = currentUser.departmentId || "";
+      }
+
+
+      await userManagementAPI.create(payload as (Partial<AdminUser> & { password: string })); // API expects password to be there for create
       toast.success(t("dashboard.users.createSuccess"));
-      setForm({
-        name: "",
-        email: "",
-        password: "",
-        role: UserRole.USER,
-        departmentId: "",
-      });
+      setAddUserDialogOpen(false);
       fetchAll();
-    } catch {
-      toast.error(t("dashboard.users.createError"));
+    } catch (error: any) {
+      toast.error(error?.response?.data?.error || t("dashboard.users.createError"));
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm(t("dashboard.users.deleteConfirm"))) return;
+     if (!confirm(t("dashboard.users.deleteConfirm"))) return;
+     try {
+       await userManagementAPI.delete(id);
+       toast.success(t("dashboard.users.deleteSuccess"));
+       fetchAll();
+     } catch {
+       toast.error(t("dashboard.users.deleteError"));
+     }
+  };
+
+  const handleEditClick = (userToEdit: AdminUser) => {
+    setEditingUser(userToEdit);
+    setEditForm({
+      name: userToEdit.name,
+      email: userToEdit.email,
+      role: userToEdit.role,
+      departmentId: userToEdit.departmentId || "",
+      fixedIp: userToEdit.fixedIp || "",
+      password: "",
+    });
+    setEditUserDialogOpen(true);
+  };
+
+  const handleUpdateUser = async () => {
+    if (!editingUser) return;
+
+    const updatePayload: UserUpdateRequest = { ...editForm };
+
+    if (!updatePayload.password?.trim()) {
+      delete updatePayload.password;
+    }
+
+    if (!(currentUser?.role === UserRole.ADMIN || currentUser?.role === UserRole.SUPERADMIN)) {
+         // If user is not admin/superadmin, don't send fixedIp (even if it was populated in form)
+         // This prevents non-privileged users from trying to set it via manipulated client state,
+         // though backend RBAC should be the primary enforcer.
+         delete updatePayload.fixedIp;
+    }
+
+
     try {
-      await userManagementAPI.delete(id);
-      toast.success(t("dashboard.users.deleteSuccess"));
+      await userManagementAPI.update(editingUser.id, updatePayload);
+      toast.success(t("dashboard.users.editUserSuccess", "User updated successfully!")); // Added fallback translation
+      setEditUserDialogOpen(false);
       fetchAll();
-    } catch {
-      toast.error(t("dashboard.users.deleteError"));
+    } catch (error: any) {
+      toast.error(error?.response?.data?.error || t("dashboard.users.editUserError", "Failed to update user.")); // Added fallback
     }
   };
 
-  const handleEditClick = (user: AdminUser) => {
-    setEditingUser(user);
-    setEditFormDepartmentId(user.departmentId || "");
-    setEditDialogOpen(true);
-  };
+  const canEditFixedIp = currentUser?.role === UserRole.ADMIN || currentUser?.role === UserRole.SUPERADMIN;
+  const canManageUsers = currentUser?.role === UserRole.ADMIN || currentUser?.role === UserRole.SUPERADMIN || currentUser?.role === UserRole.MANAGER;
 
-  const handleUpdateUserDepartment = async () => {
-    if (!editingUser || !editFormDepartmentId) {
-      toast.error(t("dashboard.users.editUserErrorMissingInfo"));
-      return;
-    }
-    try {
-      await userManagementAPI.update(editingUser.id, {
-        departmentId: editFormDepartmentId,
-      });
-      toast.success(t("dashboard.users.editUserSuccess"));
-      setEditDialogOpen(false);
-      fetchAll();
-    } catch {
-      toast.error(t("dashboard.users.editUserError"));
-    } finally {
-      setEditingUser(null);
-      setEditFormDepartmentId("");
-    }
-  };
 
   return (
     <MainLayout className="p-4">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">{t("dashboard.users.pageTitle")}</h1>
-        {(currentUser?.role === UserRole.ADMIN ||
-          currentUser?.role === UserRole.MANAGER ||
-          currentUser?.role === UserRole.SUPERADMIN) && (
-          <Dialog
-            open={open}
-            onOpenChange={(isOpen) => {
-              setOpen(isOpen);
-              if (isOpen) {
-                console.log("Dialog opened. currentUser:", currentUser);
-                console.log(
-                  "currentUser.departmentId:",
-                  currentUser?.departmentId
-                );
-
-                // Reset form fields and set initial values when dialog opens
-                let initialDepartmentId = "";
-                let initialRole = UserRole.USER; // Default role for new users
-
-                if (currentUser?.role === UserRole.MANAGER) {
-                  // Manager adds USER role
-                  initialRole = UserRole.USER;
-                  // Manager's department is pre-filled and disabled
-                  initialDepartmentId = currentUser.departmentId || ""; // Ensure it's a string
-                }
-                // For other roles (Admin, Superadmin), default role is USER, department is selectable (initialDepartmentId remains "")
-
-                setForm({
-                  name: "",
-                  email: "",
-                  password: "",
-                  role: initialRole,
-                  departmentId: initialDepartmentId,
-                });
-              }
-            }}
-          >
+        {canManageUsers && (
+          <Dialog open={addUserDialogOpen} onOpenChange={setAddUserDialogOpen}>
             <DialogTrigger asChild>
-              <Button>{t("dashboard.users.addUserButton")}</Button>
+              <Button onClick={() => {
+                 let initialDeptId = "";
+                 let initialRole = UserRole.USER;
+                 if (currentUser?.role === UserRole.MANAGER) {
+                     initialDeptId = currentUser.departmentId || "";
+                     // Managers can only create users
+                 }
+                 setAddUserForm({
+                     name: "", email: "", password: "",
+                     role: initialRole, departmentId: initialDeptId, fixedIp: ""
+                 });
+                 setAddUserDialogOpen(true);
+              }}>
+                 {t("dashboard.users.addUserButton")}
+              </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>
-                  {t("dashboard.users.addUserDialogTitle")}
-                </DialogTitle>
+                <DialogTitle>{t("dashboard.users.addUserDialogTitle")}</DialogTitle>
               </DialogHeader>
-              <div className="space-y-2 pt-2">
-                <Input
-                  placeholder={t("dashboard.users.namePlaceholder")}
-                  value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
-                />
-                <Input
-                  placeholder={t("dashboard.users.emailPlaceholder")}
-                  value={form.email}
-                  onChange={(e) => setForm({ ...form, email: e.target.value })}
-                />
-                <Input
-                  type="password"
-                  placeholder={t("dashboard.users.passwordPlaceholder")}
-                  value={form.password}
-                  onChange={(e) =>
-                    setForm({ ...form, password: e.target.value })
-                  }
-                />
-                <div className="flex space-x-2">
-                  <select
-                    className="border px-2"
-                    value={form.role}
-                    onChange={(e) =>
-                      setForm({ ...form, role: e.target.value as UserRole })
-                    }
-                    disabled={currentUser?.role === UserRole.MANAGER}
-                  >
-                    <option value={UserRole.USER}>
-                      {t("dashboard.users.roleUser")}
-                    </option>
-                    {(currentUser?.role === UserRole.ADMIN ||
-                      currentUser?.role === UserRole.SUPERADMIN) && (
-                      <>
-                        <option value={UserRole.MANAGER}>
-                          {t("dashboard.users.roleManager")}
-                        </option>
-                        <option value={UserRole.ADMIN}>
-                          {t("dashboard.users.roleAdmin")}
-                        </option>
-                        <option value={UserRole.SUPERADMIN}>
-                          {t("dashboard.users.roleSuperadmin")}
-                        </option>
-                      </>
-                    )}
-                  </select>
-                  <select
-                    className="border px-2 py-2 w-full rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                    value={form.departmentId}
-                    onChange={(e) => {
-                      if (currentUser?.role !== UserRole.MANAGER) {
-                        setForm({ ...form, departmentId: e.target.value });
-                      }
-                    }}
-                    disabled={currentUser?.role === UserRole.MANAGER}
-                  >
-                    {currentUser?.role === UserRole.MANAGER ? (
-                      currentUser.departmentId && (
-                        <option value={currentUser.departmentId}>
-                          {depts.length > 0
-                            ? depts.find(
-                                (d) => d.id === currentUser.departmentId
-                              )?.name || t("dashboard.users.emptyDepartment")
-                            : t("common.loading")}
-                        </option>
-                      )
-                    ) : (
-                      <>
-                        <option value="">
-                          {t("dashboard.users.selectDepartmentPlaceholder")}
-                        </option>
-                        {depts.map((d) => (
-                          <option key={d.id} value={d.id}>
-                            {d.name}
-                          </option>
-                        ))}
-                      </>
-                    )}
-                  </select>
+              <div className="space-y-3 py-3">
+                 <div><Label htmlFor="add-name">{t("dashboard.users.namePlaceholder")}</Label><Input id="add-name" value={addUserForm.name} onChange={(e) => setAddUserForm({ ...addUserForm, name: e.target.value })}/></div>
+                 <div><Label htmlFor="add-email">{t("dashboard.users.emailPlaceholder")}</Label><Input id="add-email" type="email" value={addUserForm.email} onChange={(e) => setAddUserForm({ ...addUserForm, email: e.target.value })}/></div>
+                 <div><Label htmlFor="add-password">{t("dashboard.users.passwordPlaceholder")}</Label><Input id="add-password" type="password" value={addUserForm.password} onChange={(e) => setAddUserForm({ ...addUserForm, password: e.target.value })}/></div>
+
+                 {canEditFixedIp && (
+                     <div><Label htmlFor="add-fixedIp">{t("dashboard.users.fixedIpLabel", "Fixed VPN IP (Optional)")}</Label><Input id="add-fixedIp" value={addUserForm.fixedIp || ""} onChange={(e) => setAddUserForm({ ...addUserForm, fixedIp: e.target.value })} placeholder={t("dashboard.users.fixedIpPlaceholder", "e.g., 10.8.0.100 or empty")}/></div>
+                 )}
+
+                 <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="add-role" className="text-right">{t("dashboard.users.roleLabel", "Role")}</Label>
+                    <select id="add-role" value={addUserForm.role}
+                            onChange={e => setAddUserForm({...addUserForm, role: e.target.value as UserRole})}
+                            className="col-span-3 border px-2 py-2 rounded-md"
+                            disabled={currentUser?.role === UserRole.MANAGER} /* Managers can only create 'user' role */
+                    >
+                        {Object.values(UserRole).filter(role =>
+                            (currentUser?.role === UserRole.SUPERADMIN) || // Superadmin can assign any role
+                            (currentUser?.role === UserRole.ADMIN && role !== UserRole.SUPERADMIN) || // Admin can assign any role except Superadmin
+                            (currentUser?.role === UserRole.MANAGER && role === UserRole.USER) // Manager can only assign User
+                        ).map(role => <option key={role} value={role}>{t(`dashboard.users.role${role.charAt(0).toUpperCase() + role.slice(1)}`, role)}</option>)}
+                    </select>
+                  </div>
+
+                 <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="add-department" className="text-right">{t("dashboard.users.departmentLabel")}</Label>
+                    <select id="add-department" value={addUserForm.departmentId || ""}
+                            onChange={e => setAddUserForm({...addUserForm, departmentId: e.target.value})}
+                            className="col-span-3 border px-2 py-2 rounded-md"
+                            disabled={currentUser?.role === UserRole.MANAGER && !!currentUser.departmentId} /* Manager cannot change their own department selection */
+                    >
+                        <option value="">{t("dashboard.users.selectDepartmentPlaceholder")}</option>
+                        {depts.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+                    </select>
                 </div>
               </div>
               <DialogFooter>
-                <DialogClose asChild>
-                  <Button variant="outline">{t("common.cancel")}</Button>
-                </DialogClose>
-                <Button
-                  onClick={() => {
-                    handleCreate();
-                    setOpen(false);
-                  }}
-                >
-                  {t("common.create")}
-                </Button>
+                <DialogClose asChild><Button variant="outline">{t("common.cancel")}</Button></DialogClose>
+                <Button onClick={handleCreateUser}>{t("common.create")}</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
         )}
       </div>
 
-      {/* Edit User Dialog */}
-      <Dialog
-        open={editDialogOpen}
-        onOpenChange={(isOpen) => {
-          setEditDialogOpen(isOpen);
-          if (!isOpen) {
-            setEditingUser(null);
-            setEditFormDepartmentId("");
-          }
-        }}
-      >
-        <DialogContent>
+      <Dialog open={editUserDialogOpen} onOpenChange={setEditUserDialogOpen}>
+        <DialogContent className="sm:max-w-[525px]">
           <DialogHeader>
-            <DialogTitle>
-              {t("dashboard.users.editUserDialogTitle")}
-            </DialogTitle>
+            <DialogTitle>{t("dashboard.users.editUserDialogTitle", "Edit User")}</DialogTitle>
+            <DialogDescription>
+             {t("dashboard.users.editUserDescription", "Make changes to the user profile here. Click save when you're done.")}
+            </DialogDescription>
           </DialogHeader>
-          <div className="space-y-2 pt-2">
-            <label
-              htmlFor="edit-department"
-              className="block text-sm font-medium text-gray-700"
-            >
-              {t("dashboard.users.departmentLabel", "Department")}
-            </label>
-            <select
-              id="edit-department"
-              className="border px-2 py-2 w-full rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-              value={editFormDepartmentId}
-              onChange={(e) => setEditFormDepartmentId(e.target.value)}
-            >
-              <option value="">
-                {t("dashboard.users.selectDepartmentPlaceholder")}
-              </option>
-              {depts.map((d) => (
-                <option key={d.id} value={d.id}>
-                  {d.name}
-                </option>
-              ))}
-            </select>
-            {editingUser && (
-              <p className="text-sm text-gray-500 mt-2">
-                {t("dashboard.users.editingUserLabel")} {editingUser.name} (
-                {editingUser.email})
-              </p>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="edit-name" className="text-right">{t("dashboard.users.namePlaceholder")}</Label>
+              <Input id="edit-name" value={editForm.name || ""} onChange={(e) => setEditForm({...editForm, name: e.target.value})} className="col-span-3" />
+            </div>
+             <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="edit-email" className="text-right">{t("dashboard.users.emailPlaceholder")}</Label>
+              <Input id="edit-email" type="email" value={editForm.email || ""} onChange={(e) => setEditForm({...editForm, email: e.target.value})} className="col-span-3" />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+             <Label htmlFor="edit-password" className="text-right">{t("dashboard.users.passwordOptionalPlaceholder", "Password (optional)")}</Label>
+             <Input id="edit-password" type="password" value={editForm.password || ""} onChange={(e) => setEditForm({...editForm, password: e.target.value})} className="col-span-3" placeholder={t("dashboard.users.passwordLeaveBlankPlaceholder", "Leave blank to keep current")}/>
+            </div>
+
+            {canEditFixedIp && (
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="edit-fixedIp" className="text-right">
+                  {t("dashboard.users.fixedIpLabel", "Fixed VPN IP")}
+                </Label>
+                <Input
+                  id="edit-fixedIp"
+                  value={editForm.fixedIp || ""}
+                  onChange={(e) => setEditForm({ ...editForm, fixedIp: e.target.value })}
+                  className="col-span-3"
+                  placeholder={t("dashboard.users.fixedIpPlaceholder", "e.g., 10.8.0.100 or empty")}
+                  disabled={!canEditFixedIp} // Technically redundant if block is conditional, but good for clarity
+                />
+              </div>
             )}
+             <div className="grid grid-cols-4 items-center gap-4">
+                 <Label htmlFor="edit-department" className="text-right">{t("dashboard.users.departmentLabel")}</Label>
+                 <select id="edit-department" value={editForm.departmentId || ""}
+                         onChange={e => setEditForm({...editForm, departmentId: e.target.value})}
+                         className="col-span-3 border px-2 py-2 rounded-md"
+                         disabled={currentUser?.role === UserRole.MANAGER && editingUser?.departmentId !== currentUser.departmentId && editingUser?.id !== currentUser.id}
+                 >
+                     <option value="">{t("dashboard.users.selectDepartmentPlaceholder")}</option>
+                     {depts.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+                 </select>
+             </div>
+             { (currentUser?.role === UserRole.SUPERADMIN || (currentUser?.role === UserRole.ADMIN && editingUser?.role !== UserRole.SUPERADMIN) ) &&
+               (editingUser?.id !== currentUser?.id || currentUser?.role === UserRole.SUPERADMIN) && /* Can't change own role unless superadmin */
+               <div className="grid grid-cols-4 items-center gap-4">
+                 <Label htmlFor="edit-role" className="text-right">{t("dashboard.users.roleLabel", "Role")}</Label>
+                 <select id="edit-role" value={editForm.role || ""}
+                         onChange={e => setEditForm({...editForm, role: e.target.value as UserRole})}
+                         className="col-span-3 border px-2 py-2 rounded-md">
+                     {Object.values(UserRole).filter(role =>
+                         (currentUser?.role === UserRole.SUPERADMIN) ||
+                         (role !== UserRole.SUPERADMIN)
+                     ).map(role => <option key={role} value={role}>{t(`dashboard.users.role${role.charAt(0).toUpperCase() + role.slice(1)}`, role)}</option>)}
+                 </select>
+               </div>
+             }
           </div>
           <DialogFooter>
-            <DialogClose asChild>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setEditingUser(null);
-                  setEditFormDepartmentId("");
-                }}
-              >
-                {t("common.cancel")}
-              </Button>
-            </DialogClose>
-            <Button onClick={handleUpdateUserDepartment}>
-              {t("common.saveChanges")}
-            </Button>
+            <DialogClose asChild><Button variant="outline">{t("common.cancel")}</Button></DialogClose>
+            <Button onClick={handleUpdateUser}>{t("common.saveChanges")}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       <Card>
-        <CardHeader>
-          <CardTitle>{t("dashboard.users.listTitle")}</CardTitle>
-        </CardHeader>
+        <CardHeader><CardTitle>{t("dashboard.users.listTitle")}</CardTitle></CardHeader>
         <CardContent>
-          {loading ? (
-            <p>{t("common.loading")}</p>
-          ) : (
+          {loading ? <p>{t("common.loading")}</p> : (
             <Table>
               <TableHeader>
                 <TableRow>
@@ -380,6 +343,9 @@ export default function UsersPage() {
                   <TableHead>{t("dashboard.users.columnEmail")}</TableHead>
                   <TableHead>{t("dashboard.users.columnRole")}</TableHead>
                   <TableHead>{t("dashboard.users.columnDepartment")}</TableHead>
+                  <TableHead>{t("dashboard.users.columnFixedIp", "Fixed IP")}</TableHead>
+                     <TableHead>{t("dashboard.users.columnConnectionIp", "Connection IP")}</TableHead> {/* New Column */}
+                     <TableHead>{t("dashboard.users.columnAllocatedVpnIp", "VPN IP")}</TableHead> {/* New Column */}
                   <TableHead>{t("dashboard.users.columnLastConnection")}</TableHead>
                   <TableHead>{t("dashboard.users.columnOnlineStatus")}</TableHead>
                   <TableHead>{t("dashboard.users.columnCreator")}</TableHead>
@@ -387,73 +353,41 @@ export default function UsersPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {visibleUsers.map((u: AdminUser) => ( // Explicitly use AdminUser type
+                   {users.map((u: AdminUser) => ( // Ensure u is typed as AdminUser
                   <TableRow key={u.id}>
                     <TableCell>{u.name}</TableCell>
                     <TableCell>{u.email}</TableCell>
                     <TableCell>{u.role}</TableCell>
-                    <TableCell>
-                      {depts.find((d) => d.id === u.departmentId)?.name ||
-                        t("dashboard.users.emptyDepartment")}
-                    </TableCell>
-                    <TableCell>
-                      {u.lastConnectionTime
-                        ? new Date(u.lastConnectionTime).toLocaleString()
-                        : t("common.na")}
-                    </TableCell>
-                    <TableCell>
-                      {typeof u.isOnline === 'boolean'
-                        ? u.isOnline
-                          ? t("dashboard.users.statusOnline")
-                          : t("dashboard.users.statusOffline")
-                        : t("common.na")}
-                    </TableCell>
-                    <TableCell>
-                      {users.find(creator => creator.id === u.creatorId)?.name || t("common.na")}
-                    </TableCell>
-                    <TableCell className="space-x-2">
-                      <div className="flex items-center gap-2">
-                        {(currentUser?.role === UserRole.ADMIN ||
-                          currentUser?.role === UserRole.SUPERADMIN) && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="h-8 px-3"
-                            onClick={() => handleEditClick(u)}
-                          >
-                            {t("common.edit")}
-                          </Button>
-                        )}
-                        {(currentUser?.role === UserRole.ADMIN ||
-                          currentUser?.role === UserRole.MANAGER ||
-                          currentUser?.role === UserRole.SUPERADMIN) && (
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            className="h-8 px-3"
-                            onClick={() => handleDelete(u.id)}
-                          >
-                            {t("dashboard.users.deleteButton")}
-                          </Button>
-                        )}
-                        <select
-                          className="border px-2 py-1 rounded-md text-sm h-8"
-                          defaultValue=""
-                          onChange={(e) => handleDownload(u.id, e.target.value)}
-                        >
-                          <option value="" disabled>
-                            {t("dashboard.users.downloadConfigButton")}
-                          </option>
-                          <option value="windows">
-                            {t("dashboard.users.osWindows")}
-                          </option>
-                          <option value="macos">
-                            {t("dashboard.users.osMacOS")}
-                          </option>
-                          <option value="linux">
-                            {t("dashboard.users.osLinux")}
-                          </option>
-                        </select>
+                    <TableCell>{depts.find((d) => d.id === u.departmentId)?.name || t("dashboard.users.emptyDepartment")}</TableCell>
+                    <TableCell>{u.fixedIp || t("common.na")}</TableCell>
+                       <TableCell>{u.connectionIp || t("common.na")}</TableCell> {/* New Cell */}
+                       <TableCell>{u.allocatedVpnIp || t("common.na")}</TableCell> {/* New Cell */}
+                    <TableCell>{u.lastConnectionTime ? new Date(u.lastConnectionTime).toLocaleString() : t("common.na")}</TableCell>
+                       <TableCell>
+                         {typeof u.isOnline === 'boolean'
+                           ? (u.isOnline ? t("dashboard.users.statusOnline") : t("dashboard.users.statusOffline"))
+                           : t("common.na")}
+                       </TableCell>
+                    <TableCell>{users.find(creator => creator.id === u.creatorId)?.name || t("common.na")}</TableCell>
+                       <TableCell className="space-x-1">
+                         {/* ... existing actions buttons ... */}
+                      <div className="flex items-center gap-1">
+                            {(currentUser?.role === UserRole.ADMIN || currentUser?.role === UserRole.SUPERADMIN || (currentUser?.role === UserRole.MANAGER && currentUser.departmentId === u.departmentId)) && (
+                                <Button size="sm" variant="outline" className="h-8 px-2" onClick={() => handleEditClick(u)}>{t("common.edit")}</Button>
+                            )}
+                            {/* Delete button RBAC - ensure this is correct from previous steps */}
+                            {( (currentUser?.role === UserRole.SUPERADMIN) ||
+                              (currentUser?.role === UserRole.ADMIN && u.role !== UserRole.SUPERADMIN) ||
+                              (currentUser?.role === UserRole.MANAGER && u.departmentId === currentUser.departmentId && u.role !== UserRole.SUPERADMIN && u.role !== UserRole.ADMIN)
+                            ) && u.id !== currentUser?.id && ( /* Prevent self-deletion via this button, though handled by backend too */
+                                <Button size="sm" variant="destructive" className="h-8 px-2" onClick={() => handleDelete(u.id)}>{t("dashboard.users.deleteButton")}</Button>
+                            )}
+                            <select className="border px-1 py-1 rounded-md text-sm h-8" defaultValue="" onChange={(e) => handleDownload(u.id, e.target.value)}>
+                                <option value="" disabled>{t("dashboard.users.downloadConfigButtonShort", "DL")}</option>
+                                <option value="windows">{t("dashboard.users.osWindows")}</option>
+                                <option value="macos">{t("dashboard.users.osMacOS")}</option>
+                                <option value="linux">{t("dashboard.users.osLinux")}</option>
+                            </select>
                       </div>
                     </TableCell>
                   </TableRow>

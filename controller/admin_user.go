@@ -8,6 +8,7 @@ import (
    "openvpn-admin-go/middleware"
    "openvpn-admin-go/model"
    "openvpn-admin-go/openvpn"
+   "strings" // Added for TrimSpace
 )
 
 // AdminUserController 管理用户
@@ -22,6 +23,7 @@ func (c *AdminUserController) CreateUser(ctx *gin.Context) {
        Password     string `json:"password" binding:"required,min=6"`
        Role         string `json:"role" binding:"required,oneof=superadmin admin manager user"`
        DepartmentID string `json:"departmentId"`
+       FixedIP      *string `json:"fixedIp" binding:"omitempty,ip|cidrv4|cidrv6"`
    }
    if err := ctx.ShouldBindJSON(&req); err != nil {
        ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -37,7 +39,12 @@ func (c *AdminUserController) CreateUser(ctx *gin.Context) {
            ctx.JSON(http.StatusForbidden, gin.H{"error": "manager can only assign user role"})
            return
        }
+       if req.FixedIP != nil && strings.TrimSpace(*req.FixedIP) != "" { // Check against trimmed value
+           ctx.JSON(http.StatusForbidden, gin.H{"error": "manager cannot set fixed IP"})
+           return
+       }
    }
+
    hash, err := common.HashPassword(req.Password)
    if err != nil {
        ctx.JSON(http.StatusInternalServerError, gin.H{"error": "hash password failed"})
@@ -51,21 +58,49 @@ func (c *AdminUserController) CreateUser(ctx *gin.Context) {
        DepartmentID: req.DepartmentID,
        CreatorID:    claims.UserID,
    }
+
+   // Handle FixedIP assignment on creation
+   if req.FixedIP != nil {
+       trimmedFixedIP := strings.TrimSpace(*req.FixedIP)
+       if trimmedFixedIP != "" {
+           if !(claims.Role == string(model.RoleSuperAdmin) || claims.Role == string(model.RoleAdmin)) {
+               ctx.JSON(http.StatusForbidden, gin.H{"error": "only superadmin or admin can set fixed IP during creation"})
+               return
+           }
+           user.FixedIP = trimmedFixedIP
+       }
+   }
+
    if err := database.DB.Create(&user).Error; err != nil {
-       ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+       ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create user in database: " + err.Error()})
        return
    }
-   // 同步创建 OpenVPN 客户端配置
+
+   // If fixed IP was set for the user, apply it via CCD
+   if user.FixedIP != "" {
+       if err := openvpn.SetClientFixedIP(user.ID, user.FixedIP); err != nil {
+           ctx.JSON(http.StatusInternalServerError, gin.H{"error": "user created, but failed to set fixed IP in OpenVPN config: " + err.Error()})
+           return
+       }
+   }
+
+   // Create OpenVPN client certs
    if err := openvpn.CreateClient(user.ID); err != nil {
-       ctx.JSON(http.StatusInternalServerError, gin.H{"error": "创建 OpenVPN 客户端失败: " + err.Error()})
+       // If cert creation fails, and fixed IP was set, should we try to remove CCD?
+       if user.FixedIP != "" {
+           openvpn.RemoveClientFixedIP(user.ID) // Attempt to clean up CCD
+       }
+       ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create OpenVPN client certificate: " + err.Error()})
        return
    }
+
    ctx.JSON(http.StatusOK, gin.H{"data": gin.H{
        "id":           user.ID,
        "name":         user.Name,
        "email":        user.Email,
        "role":         user.Role,
        "departmentId": user.DepartmentID,
+       "fixedIp":      user.FixedIP,
    }})
 }
 
@@ -80,24 +115,53 @@ func (c *AdminUserController) ListUsers(ctx *gin.Context) {
    } else if claims.Role == string(model.RoleUser) {
        db = db.Where("id = ?", claims.UserID)
    }
-   if err := db.Find(&users).Error; err != nil {
-       ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+
+   // Added Order by created_at desc
+   if err := db.Order("created_at desc").Find(&users).Error; err != nil {
+       ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to list users: " + err.Error()})
        return
    }
+
+   // Fetch all current OpenVPN client statuses
+   statuses, err := openvpn.GetAllClientStatuses() // This is from openvpn/status_parser.go
+   if err != nil {
+       // Log the error but proceed, users will just not have live IP info
+       // log.Printf("Warning: Failed to get OpenVPN client statuses: %v", err)
+       statuses = []openvpn.OpenVPNClientStatus{} // Ensure statuses is not nil
+   }
+
+   // Create a map for quick lookup: commonName (userID) -> status
+   statusMap := make(map[string]openvpn.OpenVPNClientStatus)
+   for _, status := range statuses {
+       statusMap[status.CommonName] = status
+   }
+
    var resp []gin.H
    for _, u := range users {
-       resp = append(resp, gin.H{
-           "id":           u.ID,
-           "name":         u.Name,
-           "email":        u.Email,
+       userData := gin.H{
+           "id":                 u.ID,
+           "name":               u.Name,
+           "email":              u.Email,
            "role":               u.Role,
            "departmentId":       u.DepartmentID,
            "creatorId":          u.CreatorID,
-           "lastConnectionTime": u.LastConnectionTime,
-           "isOnline":           u.IsOnline,
+           "lastConnectionTime": u.LastConnectionTime, // This is from DB, might be historical
+           "fixedIp":            u.FixedIP,            // From DB
            "createdAt":          u.CreatedAt,
            "updatedAt":          u.UpdatedAt,
-       })
+           // Default live status fields
+           "isOnline":       false, // Will be updated if user is in statusMap
+           "connectionIp":   nil,
+           "allocatedVpnIp": nil,
+       }
+
+       if liveStatus, found := statusMap[u.ID]; found {
+           userData["isOnline"] = true
+           userData["connectionIp"] = liveStatus.RealAddress
+           userData["allocatedVpnIp"] = liveStatus.VirtualAddress
+       }
+
+       resp = append(resp, userData)
    }
    ctx.JSON(http.StatusOK, resp)
 }
@@ -115,12 +179,46 @@ func (c *AdminUserController) GetUser(ctx *gin.Context) {
        ctx.JSON(http.StatusForbidden, gin.H{"error": "manager can only view own department users"})
        return
    }
+    // Stricter RBAC for GetUser based on the comprehensive plan
+    if claims.Role == string(model.RoleUser) && u.ID != claims.UserID {
+        ctx.JSON(http.StatusForbidden, gin.H{"error": "user can only view self"})
+        return
+    }
+    // Manager can view self even if not in their department (e.g. if they are head of a parent dept)
+    if claims.Role == string(model.RoleManager) && u.DepartmentID != claims.DeptID && u.ID != claims.UserID {
+		    ctx.JSON(http.StatusForbidden, gin.H{"error": "manager can only view own department users or self"})
+		    return
+	  }
+
+
+	isOnline := false
+	var connectionIp interface{} = nil
+	var allocatedVpnIp interface{} = nil
+
+	liveStatus, err := openvpn.GetClientStatus(u.ID)
+	if err == nil && liveStatus != nil {
+		isOnline = true
+		connectionIp = liveStatus.RealAddress
+		allocatedVpnIp = liveStatus.VirtualAddress
+	} else if err != nil {
+		// Log error getting individual client status, but don't fail the request
+		// log.Printf("Warning: Failed to get live status for user %s: %v", u.ID, err)
+	}
+
    ctx.JSON(http.StatusOK, gin.H{"data": gin.H{
-       "id":           u.ID,
-       "name":         u.Name,
-       "email":        u.Email,
-       "role":         u.Role,
-       "departmentId": u.DepartmentID,
+       "id":                 u.ID,
+       "name":               u.Name,
+       "email":              u.Email,
+       "role":               u.Role,
+       "departmentId":       u.DepartmentID,
+       "fixedIp":            u.FixedIP,
+       "isOnline":           isOnline,
+       "connectionIp":       connectionIp,
+       "allocatedVpnIp":     allocatedVpnIp,
+       "lastConnectionTime": u.LastConnectionTime,
+       "creatorId":          u.CreatorID,
+       "createdAt":          u.CreatedAt,
+       "updatedAt":          u.UpdatedAt,
    }})
 }
 
@@ -133,16 +231,24 @@ func (c *AdminUserController) UpdateUser(ctx *gin.Context) {
        ctx.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
        return
    }
+   // RBAC: Managers can only update users in their own department.
+   // Users cannot update other users, only their own profile (but this endpoint is admin-focused).
    if claims.Role == string(model.RoleManager) && u.DepartmentID != claims.DeptID {
-       ctx.JSON(http.StatusForbidden, gin.H{"error": "manager can only update own department users"})
+       ctx.JSON(http.StatusForbidden, gin.H{"error": "manager can only update users in own department"})
        return
    }
+    if claims.Role == string(model.RoleUser) && u.ID != claims.UserID { // Should not happen if routes are correct
+        ctx.JSON(http.StatusForbidden, gin.H{"error": "user can only update their own profile via dedicated endpoint"})
+        return
+    }
+
    var req struct {
        Name         *string `json:"name"`
        Email        *string `json:"email" binding:"omitempty,email"`
        Role         *string `json:"role" binding:"omitempty,oneof=superadmin admin manager user"`
        DepartmentID *string `json:"departmentId"`
        Password     *string `json:"password" binding:"omitempty,min=6"`
+       FixedIP      *string `json:"fixedIp" binding:"omitempty,ip|cidrv4|cidrv6"`
    }
    if err := ctx.ShouldBindJSON(&req); err != nil {
        ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -155,21 +261,46 @@ func (c *AdminUserController) UpdateUser(ctx *gin.Context) {
    if req.Email != nil {
        updates["email"] = *req.Email
    }
+   originalFixedIP := u.FixedIP
+   fixedIpActuallyChanged := false
+
+   if req.Name != nil { updates["name"] = *req.Name }
+   if req.Email != nil { updates["email"] = *req.Email }
+
    if req.Role != nil {
-       if claims.Role == string(model.RoleManager) {
-           ctx.JSON(http.StatusForbidden, gin.H{"error": "manager cannot update role"})
+       targetRole := model.Role(*req.Role)
+       if claims.Role == string(model.RoleManager) && targetRole != model.RoleUser {
+           ctx.JSON(http.StatusForbidden, gin.H{"error": "manager can only assign 'user' role"})
            return
        }
-       updates["role"] = *req.Role
+       if targetRole == model.RoleSuperAdmin && claims.Role != string(model.RoleSuperAdmin) {
+           ctx.JSON(http.StatusForbidden, gin.H{"error": "only superadmin can assign superadmin role"})
+           return
+       }
+       if targetRole == model.RoleSuperAdmin && u.Role != model.RoleSuperAdmin && claims.Role != string(model.RoleSuperAdmin) {
+            ctx.JSON(http.StatusForbidden, gin.H{"error": "only superadmin can promote a user to superadmin"})
+            return
+       }
+       if u.Role == model.RoleSuperAdmin && targetRole != model.RoleSuperAdmin && claims.Role != string(model.RoleSuperAdmin) {
+           ctx.JSON(http.StatusForbidden, gin.H{"error": "only superadmin can change a superadmin's role"})
+           return
+       }
+       if u.ID == claims.UserID && claims.Role != string(model.RoleSuperAdmin) && targetRole != u.Role {
+           ctx.JSON(http.StatusForbidden, gin.H{"error": "you cannot change your own role unless you are a superadmin"})
+           return
+       }
+       updates["role"] = targetRole
    }
+
    if req.DepartmentID != nil {
        if claims.Role == string(model.RoleManager) && *req.DepartmentID != claims.DeptID {
-           ctx.JSON(http.StatusForbidden, gin.H{"error": "manager cannot change department"})
+           ctx.JSON(http.StatusForbidden, gin.H{"error": "manager cannot change user's department to another one"})
            return
        }
        updates["department_id"] = *req.DepartmentID
    }
-   if req.Password != nil {
+
+   if req.Password != nil && *req.Password != "" {
        hash, err := common.HashPassword(*req.Password)
        if err != nil {
            ctx.JSON(http.StatusInternalServerError, gin.H{"error": "hash password failed"})
@@ -177,15 +308,70 @@ func (c *AdminUserController) UpdateUser(ctx *gin.Context) {
        }
        updates["password_hash"] = hash
    }
+
+   if req.FixedIP != nil {
+       if !(claims.Role == string(model.RoleSuperAdmin) || claims.Role == string(model.RoleAdmin)) {
+           ctx.JSON(http.StatusForbidden, gin.H{"error": "only superadmin or admin can modify fixed IP"})
+           return
+       }
+       newFixedIP := strings.TrimSpace(*req.FixedIP)
+       if newFixedIP != originalFixedIP {
+           fixedIpActuallyChanged = true
+           if newFixedIP == "" {
+               updates["fixed_ip"] = ""
+           } else {
+               updates["fixed_ip"] = newFixedIP
+           }
+       }
+   }
+
    if len(updates) == 0 {
-       ctx.JSON(http.StatusBadRequest, gin.H{"error": "no data to update"})
+       ctx.JSON(http.StatusOK, gin.H{"message": "no data to update"})
        return
    }
-   if err := database.DB.Model(&model.User{}).Where("id = ?", id).Updates(updates).Error; err != nil {
-       ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+
+   if fixedIpActuallyChanged {
+       newIPInUpdates, newIPExists := updates["fixed_ip"]
+       var newIP string
+       if newIPExists {
+           newIP = newIPInUpdates.(string)
+       }
+
+       if newIP == "" && originalFixedIP != "" {
+           if err := openvpn.RemoveClientFixedIP(u.ID); err != nil {
+               ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to remove client fixed IP config: " + err.Error()})
+               return
+           }
+       } else if newIP != "" {
+           if err := openvpn.SetClientFixedIP(u.ID, newIP); err != nil {
+               ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to set client fixed IP config: " + err.Error()})
+               return
+           }
+       }
+   }
+
+   if err := database.DB.Model(&u).Updates(updates).Error; err != nil {
+       if fixedIpActuallyChanged {
+           newIPInUpdates, newIPExists := updates["fixed_ip"]
+           var newIP string
+           if newIPExists {
+               newIP = newIPInUpdates.(string)
+           }
+
+           if newIP == "" && originalFixedIP != "" {
+               openvpn.SetClientFixedIP(u.ID, originalFixedIP)
+           } else if newIP != "" && newIP != originalFixedIP {
+               if originalFixedIP == "" {
+                   openvpn.RemoveClientFixedIP(u.ID)
+               } else {
+                   openvpn.SetClientFixedIP(u.ID, originalFixedIP)
+               }
+           }
+       }
+       ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update user in database: " + err.Error()})
        return
    }
-   ctx.JSON(http.StatusOK, gin.H{"message": "user updated"})
+   ctx.JSON(http.StatusOK, gin.H{"message": "user updated successfully"})
 }
 
 // DeleteUser 删除用户 (manager 仅本部门)
@@ -197,13 +383,34 @@ func (c *AdminUserController) DeleteUser(ctx *gin.Context) {
        ctx.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
        return
    }
-   if claims.Role == string(model.RoleManager) && u.DepartmentID != claims.DeptID {
-       ctx.JSON(http.StatusForbidden, gin.H{"error": "manager can only delete own department users"})
+   // RBAC for deletion
+   if claims.Role == string(model.RoleManager) && (u.DepartmentID != claims.DeptID || u.ID == claims.UserID) {
+       ctx.JSON(http.StatusForbidden, gin.H{"error": "manager can only delete users in own department and cannot delete self"})
        return
    }
+   if u.Role == model.RoleSuperAdmin && claims.Role != string(model.RoleSuperAdmin) {
+       ctx.JSON(http.StatusForbidden, gin.H{"error": "only superadmin can delete superadmin user"})
+       return
+   }
+   if u.ID == claims.UserID && claims.Role != string(model.RoleSuperAdmin) {
+       ctx.JSON(http.StatusForbidden, gin.H{"error": "you cannot delete your own account unless you are a superadmin"})
+       return
+   }
+
+   // Remove Fixed IP config if it exists
+   if u.FixedIP != "" {
+       if err := openvpn.RemoveClientFixedIP(u.ID); err != nil {
+           // log.Printf("Warning: failed to remove fixed IP for user %s during deletion: %v", u.ID, err)
+       }
+   }
+   // Remove OpenVPN client certificate and other related configs
+   if err := openvpn.DeleteClient(u.ID); err != nil {
+       // log.Printf("Warning: failed to delete OpenVPN client data for user %s during deletion: %v", u.ID, err)
+   }
+
    if err := database.DB.Delete(&model.User{}, "id = ?", id).Error; err != nil {
-       ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+       ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete user from database: " + err.Error()})
        return
    }
-   ctx.JSON(http.StatusOK, gin.H{"message": "user deleted"})
+   ctx.JSON(http.StatusOK, gin.H{"message": "user deleted successfully"})
 }

@@ -14,6 +14,8 @@ import {
   Department,
   PaginatedClientLogs, // Added import
   ClientLog, // Added import
+  LiveClientConnection, // Added import for live connections
+  UserUpdateRequest, // Added for user update payload
 } from "@/types";
 import Cookies from "js-cookie";
 import { useUserStore } from "@/store";
@@ -262,6 +264,13 @@ export const userAPI = {
       };
     }
   },
+
+  async getLiveClientConnections(): Promise<LiveClientConnection[]> {
+    // The actual backend endpoint is /api/client/status/live
+    // The `/api` prefix is handled by the baseURL of the axios instance `api`
+    const response = await api.get<LiveClientConnection[]>("/api/client/status/live");
+    return response.data; // Assuming the backend directly returns the array
+  },
 };
 
 // OpenVPN 客户端管理 API
@@ -448,9 +457,9 @@ export const userManagementAPI = {
   },
   update: async (
     id: string,
-    updates: Partial<AdminUser> & { password?: string }
-  ): Promise<any> => {
-    const response = await api.put(`/api/users/${id}`, updates);
+    data: UserUpdateRequest // Changed to use UserUpdateRequest
+  ): Promise<AdminUser> => { // Changed return type
+    const response = await api.put<AdminUser>(`/api/users/${id}`, data); // Assuming backend returns AdminUser
     return response.data;
   },
   delete: async (id: string): Promise<any> => {
