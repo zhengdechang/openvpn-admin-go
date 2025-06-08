@@ -25,6 +25,28 @@ import (
 
 // loadEnv 从.env文件加载环境变量
 func loadEnv() error {
+	// Check if .env file exists. If not, copy from .env.example
+	if _, err := os.Stat(".env"); os.IsNotExist(err) {
+		log.Println(".env file not found. Attempting to copy from .env.example...")
+		sourceFile, err := os.Open(".env.example")
+		if err != nil {
+			return fmt.Errorf("无法打开 .env.example 文件: %v", err)
+		}
+		defer sourceFile.Close()
+
+		destinationFile, err := os.Create(".env")
+		if err != nil {
+			return fmt.Errorf("无法创建 .env 文件: %v", err)
+		}
+		defer destinationFile.Close()
+
+		_, err = bufio.NewReader(sourceFile).WriteTo(destinationFile)
+		if err != nil {
+			return fmt.Errorf("无法从 .env.example 复制到 .env: %v", err)
+		}
+		log.Println(".env file copied successfully from .env.example.")
+	}
+
 	file, err := os.Open(".env")
 	if err != nil {
 		return fmt.Errorf("无法打开.env文件: %v", err)
@@ -85,10 +107,11 @@ func loadEnv() error {
 	return nil
 }
 
-func main() {
+// InitCore initializes core application services.
+func InitCore() error {
 	// 加载环境变量
 	if err := loadEnv(); err != nil {
-		log.Fatalf("错误: 加载环境变量失败: %v\n请确保.env文件存在且包含所有必需的配置项。", err)
+		return fmt.Errorf("加载环境变量失败: %v\n请确保.env文件存在且包含所有必需的配置项。", err)
 	}
 
 	// 设置Ctrl+C信号处理
@@ -105,7 +128,7 @@ func main() {
 	// 获取当前工作目录
 	dir, err := os.Getwd()
 	if err != nil {
-		log.Fatalf("获取工作目录失败: %v", err)
+		return fmt.Errorf("获取工作目录失败: %v", err)
 	}
 	fmt.Printf("当前工作目录: %s\n", dir)
 
@@ -117,21 +140,15 @@ func main() {
 		var choice string
 		fmt.Scanln(&choice)
 		if choice == "y" || choice == "Y" {
-			if err := cmd.InstallEnvironment(); err != nil {
-				fmt.Printf("环境安装失败: %v\n", err)
-				fmt.Println("请确保您有足够的权限，软件源配置正确，网络连接稳定。")
-				fmt.Println("您可以手动检查并修复问题后重新运行程序。")
-				return
+			if errInstall := cmd.InstallEnvironment(); errInstall != nil {
+				return fmt.Errorf("环境安装失败: %v\n请确保您有足够的权限，软件源配置正确，网络连接稳定。\n您可以手动检查并修复问题后重新运行程序。", errInstall)
 			}
 			// 重新检查环境
-			if err := cmd.CheckEnvironment(); err != nil {
-				fmt.Printf("环境检查仍然失败: %v\n", err)
-				fmt.Println("请手动检查并修复问题后重新运行程序。")
-				return
+			if errCheckAgain := cmd.CheckEnvironment(); errCheckAgain != nil {
+				return fmt.Errorf("环境检查仍然失败: %v\n请手动检查并修复问题后重新运行程序。", errCheckAgain)
 			}
 		} else {
-			fmt.Println("请手动安装所需环境后重新运行程序。")
-			return
+			return fmt.Errorf("请手动安装所需环境后重新运行程序")
 		}
 	}
 
@@ -139,50 +156,61 @@ func main() {
 
 	// 初始化数据库
 	if err := database.Init(); err != nil {
-		log.Fatalf("数据库初始化失败: %v", err)
+		return fmt.Errorf("数据库初始化失败: %v", err)
 	}
-   if err := database.Migrate(&model.User{}, &model.Department{}); err != nil {
-       log.Fatalf("数据库迁移失败: %v", err)
-   }
-   // Seed default superadmin user if not exists
-   func() {
-       var existing model.User
-       if err := database.DB.Where("email = ?", "superadmin@gmail.com").First(&existing).Error; err != nil {
-           hash, err := common.HashPassword("superadmin")
-           if err != nil {
-               log.Printf("默认超级管理员密码哈希失败: %v", err)
-               return
-           }
-           super := model.User{
-               Name:         "Super Admin",
-               Email:        "superadmin@gmail.com",
-               PasswordHash: hash,
-               Role:         model.RoleSuperAdmin,
-           }
-           if err := database.DB.Create(&super).Error; err != nil {
-               log.Printf("创建默认超级管理员失败: %v", err)
-           } else {
-               log.Println("已创建默认超级管理员: superadmin@gmail.com / superadmin")
-           }
-       }
-   }()
-   // 确保数据库用户在 OpenVPN 客户端存在，不存在则自动创建
-   func() {
-       var users []model.User
-       if err := database.DB.Find(&users).Error; err != nil {
-           log.Printf("查询用户列表失败: %v", err)
-       } else {
-           for _, u := range users {
-               clientPath := filepath.Join(constants.ClientConfigDir, u.ID+".ovpn")
-               if _, err := os.Stat(clientPath); os.IsNotExist(err) {
-                   if err := openvpn.CreateClient(u.ID); err != nil {
-                       log.Printf("创建 OpenVPN 客户端 %s 失败: %v", u.ID, err)
-                   }
-               }
-           }
-       }
-   }()
-   // 启动 Web 服务器
+	if err := database.Migrate(&model.User{}, &model.Department{}); err != nil {
+		return fmt.Errorf("数据库迁移失败: %v", err)
+	}
+	// Seed default superadmin user if not exists
+	func() {
+		var existing model.User
+		if err := database.DB.Where("email = ?", "superadmin@gmail.com").First(&existing).Error; err != nil {
+			hash, errHash := common.HashPassword("superadmin")
+			if errHash != nil {
+				log.Printf("默认超级管理员密码哈希失败: %v", errHash) // Log and continue
+				return
+			}
+			super := model.User{
+				Name:         "Super Admin",
+				Email:        "superadmin@gmail.com",
+				PasswordHash: hash,
+				Role:         model.RoleSuperAdmin,
+			}
+			if errCreate := database.DB.Create(&super).Error; errCreate != nil {
+				log.Printf("创建默认超级管理员失败: %v", errCreate) // Log and continue
+			} else {
+				log.Println("已创建默认超级管理员: superadmin@gmail.com / superadmin")
+			}
+		}
+	}()
+	// 确保数据库用户在 OpenVPN 客户端存在，不存在则自动创建
+	func() {
+		var users []model.User
+		if err := database.DB.Find(&users).Error; err != nil {
+			log.Printf("查询用户列表失败: %v", err) // Log and continue
+		} else {
+			for _, u := range users {
+				clientPath := filepath.Join(constants.ClientConfigDir, u.ID+".ovpn")
+				if _, errStat := os.Stat(clientPath); os.IsNotExist(errStat) {
+					if errCreate := openvpn.CreateClient(u.ID); errCreate != nil {
+						log.Printf("创建 OpenVPN 客户端 %s 失败: %v", u.ID, errCreate) // Log and continue
+					}
+				}
+			}
+		}
+	}()
+
+	// Start OpenVPN Data Synchronization Service
+	statusLogPath := utils.GetOpenVPNStatusLogPath()
+	syncInterval := utils.GetOpenVPNSyncInterval()
+	log.Printf("Starting OpenVPN Sync Service: LogPath='%s', Interval=%s", statusLogPath, syncInterval)
+	go services.StartOpenVPNSyncService(database.DB, statusLogPath, syncInterval)
+
+	return nil
+}
+
+// StartWebServer starts the Gin web server.
+func StartWebServer() {
 	r := gin.Default()
 
 	// 注册路由
@@ -199,16 +227,27 @@ func main() {
 	go func() {
 		fmt.Println("Web 服务器启动在 :8085 端口")
 		if err := r.Run(":8085"); err != nil {
-			log.Fatal("Failed to start server:", err)
+			log.Printf("Web 服务器启动失败: %v", err) // Use log.Printf for goroutine
 		}
 	}()
+}
 
-	// Start OpenVPN Data Synchronization Service
-	statusLogPath := utils.GetOpenVPNStatusLogPath()
-	syncInterval := utils.GetOpenVPNSyncInterval()
-	log.Printf("Starting OpenVPN Sync Service: LogPath='%s', Interval=%s", statusLogPath, syncInterval)
-	go services.StartOpenVPNSyncService(database.DB, statusLogPath, syncInterval)
+func main() {
+	// Assign the public functions to the variables in the cmd package.
+	// This allows cmd package to call InitCore and StartWebServer without direct import cycles.
+	cmd.CoreInitializer = InitCore
+	cmd.WebServerStarter = StartWebServer
 
-	// 启动主菜单
-	cmd.Execute()
+	if len(os.Args) < 2 { // No subcommand, run default behavior
+		if err := InitCore(); err != nil {
+			log.Fatalf("核心初始化失败: %v", err)
+		}
+		StartWebServer()
+		cmd.Execute() // This will show the interactive menu
+	} else { // Subcommand provided
+		// cmd.Execute() will handle parsing the subcommand.
+		// The webCmd.Run (and potentially other commands in the future)
+		// will use CoreInitializer and WebServerStarter.
+		cmd.Execute()
+	}
 }

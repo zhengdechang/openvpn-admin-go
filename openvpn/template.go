@@ -8,6 +8,7 @@ import (
 	"text/template"
 
 	"openvpn-admin-go/constants"
+	"openvpn-admin-go/utils"
 )
 
 // RenderServerConfig 渲染服务端配置模板
@@ -41,7 +42,7 @@ func RenderServerConfig(cfg *Config) (string, error) {
 		"dh_path":                 constants.ServerDHPath,
 		"ipp_path":                constants.ServerIPPPath,
 		"tls_key_path":            constants.ServerTLSKeyPath,
-		"status_log_path":         constants.ServerStatusLogPath,
+		"status_log_path":         utils.GetOpenVPNStatusLogPath(),
 	}
 
 	var buf bytes.Buffer
