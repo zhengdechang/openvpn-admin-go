@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"os/signal"
 	"strings"
@@ -10,7 +11,57 @@ import (
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
 	"openvpn-admin-go/openvpn"
+	"openvpn-admin-go/utils"
 )
+
+// CoreInitializer is a function variable to hold the core initialization logic from the main package.
+var CoreInitializer func() error
+
+// startCmd represents the start command
+var startCmd = &cobra.Command{
+	Use:   "start",
+	Short: "Start the service (Placeholder)",
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println("start command called (Full system service functionality not yet implemented.)")
+	},
+}
+
+// stopCmd represents the stop command
+var stopCmd = &cobra.Command{
+	Use:   "stop",
+	Short: "Stop the service (Placeholder)",
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println("stop command called (Full system service functionality not yet implemented.)")
+	},
+}
+
+// restartCmd represents the restart command
+var restartCmd = &cobra.Command{
+	Use:   "restart",
+	Short: "Restart the service (Placeholder)",
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println("restart command called (Full system service functionality not yet implemented.)")
+	},
+}
+
+// logCmd represents the log command
+var logCmd = &cobra.Command{
+	Use:   "log",
+	Short: "Display OpenVPN status logs",
+	Run: func(cmd *cobra.Command, args []string) {
+		logPath := utils.GetOpenVPNStatusLogPath()
+		if _, err := os.Stat(logPath); os.IsNotExist(err) {
+			fmt.Printf("Log file not found at %s\n", logPath)
+			return
+		}
+
+		content, err := os.ReadFile(logPath)
+		if err != nil {
+			log.Fatalf("Error reading log file %s: %v", logPath, err)
+		}
+		fmt.Println(string(content))
+	},
+}
 
 var rootCmd = &cobra.Command{
 	Use:   "openvpn-admin",
@@ -80,6 +131,11 @@ func MainMenu(cfg *openvpn.Config) {
 }
 
 func Execute() {
+	rootCmd.AddCommand(webCmd)
+	rootCmd.AddCommand(startCmd)
+	rootCmd.AddCommand(stopCmd)
+	rootCmd.AddCommand(restartCmd)
+	rootCmd.AddCommand(logCmd)
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
