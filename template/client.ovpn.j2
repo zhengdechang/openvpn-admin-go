@@ -13,7 +13,7 @@ key-direction 1
 tls-client
 tls-version-min {{ .openvpn_tls_version }}
 auth-nocache
-log-append openvpn-client.log
+# log-append openvpn-client.log
 {{range .openvpn_routes}}
 push "route {{ . }}"
 {{end}}
