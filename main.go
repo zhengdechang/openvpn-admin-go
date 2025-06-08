@@ -198,7 +198,7 @@ func InitCore() error {
 	}()
 
 	// Start OpenVPN Data Synchronization Service
-	statusLogPath := utils.GetOpenVPNStatusLogPath()
+	statusLogPath := constants.ServerStatusLogPath
 	syncInterval := utils.GetOpenVPNSyncInterval()
 	log.Printf("Starting OpenVPN Sync Service: LogPath='%s', Interval=%s", statusLogPath, syncInterval)
 	go services.StartOpenVPNSyncService(database.DB, statusLogPath, syncInterval)
