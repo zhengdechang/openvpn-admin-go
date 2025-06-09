@@ -20,7 +20,7 @@ const (
 // User 用户模型
 type User struct {
    ID           string    `gorm:"primaryKey;size:36"`
-   Name         string    `gorm:"size:100;not null"`
+   Name         string    `gorm:"uniqueIndex;size:100;not null"`
    Email        string    `gorm:"uniqueIndex;size:100;not null"`
    PasswordHash string    `gorm:"size:255;not null"`
    Role         Role      `gorm:"size:20;not null;default:'user'"`
