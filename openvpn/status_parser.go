@@ -9,113 +9,164 @@ import (
 	"time"
 )
 
+const (
+	logHeaderTimeLayout   = "2006-01-02 15:04:05"
+	onlineThresholdDuration = 5 * time.Minute
+	jancsitechPrefix      = "Jancsitech-"
+)
+
 // OpenVPNClientStatus holds information for each client parsed from the status log.
 type OpenVPNClientStatus struct {
 	CommonName            string    `json:"commonName"`     // Often used as UserID
+	Username              string    `json:"username"`       // Added: For derived username
 	RealAddress           string    `json:"realAddress"`    // Connection IP
-	VirtualAddress        string    `json:"virtualAddress"` // Allocated VPN IP
+	VirtualAddress        string    `json:"virtualAddress"` // Ensure this is populated from ROUTING TABLE
 	BytesReceived         int64     `json:"bytesReceived"`
 	BytesSent             int64     `json:"bytesSent"`
-	ConnectedSince        time.Time `json:"connectedSince"`
-	LastRef               time.Time `json:"lastRef"`
-	OnlineDurationSeconds int64     `json:"onlineDurationSeconds"` // Online duration
+	ConnectedSince        time.Time `json:"connectedSince"` // To be parsed from CLIENT_LIST
+	LastRef               time.Time `json:"lastRef"`        // To be parsed from ROUTING TABLE
+	IsOnline              bool      `json:"isOnline"`       // Added: Calculated online status
+	OnlineDurationSeconds int64     `json:"onlineDurationSeconds"` // Will be calculated based on ConnectedSince
 }
 
 // ParseStatusLog reads and parses an OpenVPN status log file.
-func ParseStatusLog(logPath string) ([]OpenVPNClientStatus, error) {
+// It returns a slice of client statuses, the log update time, and an error if any.
+func ParseStatusLog(logPath string) ([]OpenVPNClientStatus, time.Time, error) {
 	file, err := os.Open(logPath)
 	if err != nil {
-		return nil, fmt.Errorf("failed to open status log file %s: %w", logPath, err)
+		return nil, time.Time{}, fmt.Errorf("failed to open status log file %s: %w", logPath, err)
 	}
 	defer file.Close()
 
 	var clients []OpenVPNClientStatus
+	var logUpdateTime time.Time
+
+	clientDataMap := make(map[string]OpenVPNClientStatus)
+	routingDataMap := make(map[string]struct {
+		VirtualAddress string
+		LastRefTime    time.Time
+	})
+
 	scanner := bufio.NewScanner(file)
-	clientListStarted := false
-	// OpenVPN status log time format e.g. "Mon Jan _2 15:04:05 2006" or "Thu Oct 26 10:00:00 2023"
-	const timeLayout = "Mon Jan _2 15:04:05 2006"
+	var parsingClientList, parsingRoutingTable bool
 
 	for scanner.Scan() {
-		line := scanner.Text()
-		if strings.HasPrefix(line, "CLIENT_LIST") {
-			if !clientListStarted {
-				clientListStarted = true
-				// TODO: Potentially parse header to determine column order dynamically
-				continue // Skip header line
-			}
+		line := strings.TrimSpace(scanner.Text())
 
+		if strings.HasPrefix(line, "Updated,") {
 			parts := strings.Split(line, ",")
-			// Example formats:
-			// CLIENT_LIST,CommonName,RealAddress,VirtualAddress,BytesReceived,BytesSent,ConnectedSince,LastRef (8 parts)
-			// CLIENT_LIST,CommonName,RealAddress,BytesReceived,BytesSent,ConnectedSince,LastRef (7 parts, no VirtualAddress inline)
-
-			if len(parts) < 7 { // Minimum parts for a valid client line (7 if no VirtualAddress, 8 with it)
-				continue // Skip malformed lines
+			if len(parts) == 2 {
+				logUpdateTime, _ = time.Parse(logHeaderTimeLayout, strings.TrimSpace(parts[1]))
+				// If parsing fails, logUpdateTime remains zero, which is handled.
 			}
+			continue
+		}
 
-			var client OpenVPNClientStatus
-			client.CommonName = parts[1]
-			client.RealAddress = parts[2]
+		if strings.HasPrefix(line, "OpenVPN CLIENT LIST") { // Marks the beginning of the client list section header
+			parsingClientList = false // Ensure we don't start parsing from "OpenVPN CLIENT LIST" itself
+			parsingRoutingTable = false
+			continue
+		}
 
-			idxOffset := 0 // Offset for BytesReceived, BytesSent, etc. if VirtualAddress is present
+		if line == "Common Name,Real Address,Bytes Received,Bytes Sent,Connected Since" {
+			parsingClientList = true
+			parsingRoutingTable = false
+			continue // Skip header line
+		}
 
-			// Check if VirtualAddress is likely present in parts[3]
-			// A common indicator is if parts[3] contains a "." (as in an IP) AND there are enough subsequent parts
-			if len(parts) >= 8 && (strings.Contains(parts[3], ".") || strings.Contains(parts[3], ":")) { // IPv4 or IPv6
-				client.VirtualAddress = parts[3]
-				idxOffset = 1
-			} else if len(parts) == 7 { // No VirtualAddress in this line, fields start directly after RealAddress
-				client.VirtualAddress = "" // Explicitly empty
-				idxOffset = 0
-			} else {
-				// Line doesn't match 7 or 8 parts structure or VirtualAddress heuristics
-				continue
-			}
+		if line == "ROUTING TABLE" { // Marks the end of CLIENT_LIST and start of ROUTING_TABLE header block
+			parsingClientList = false
+			parsingRoutingTable = false // Wait for actual header
+			continue
+		}
 
-			// Ensure there are enough parts for the remaining fields based on idxOffset
-			// Need 4 more fields: BytesReceived, BytesSent, ConnectedSince, LastRef
-			// So, 3 (for CN, RealAddr, OptVirtAddr) + idxOffset + 4 <= len(parts)
-			// Simplified: parts[0]=CL, parts[1]=CN, parts[2]=RealAddr.
-			// If idxOffset=1 (VirtAddr present), next is parts[3+1]=parts[4] for BytesRcv. We need up to parts[6+1]=parts[7] for LastRef.
-			// If idxOffset=0 (No VirtAddr), next is parts[3+0]=parts[3] for BytesRcv. We need up to parts[6+0]=parts[6] for LastRef.
-			// So, required length is 7+idxOffset.
-			if len(parts) < (7 + idxOffset) {
-				continue // Not enough fields for the assumed structure
-			}
+		if line == "Virtual Address,Common Name,Real Address,Last Ref" {
+			parsingClientList = false
+			parsingRoutingTable = true
+			continue // Skip header line
+		}
 
-			client.BytesReceived, _ = strconv.ParseInt(parts[3+idxOffset], 10, 64) // Error handling for ParseInt can be added
-			client.BytesSent, _ = strconv.ParseInt(parts[4+idxOffset], 10, 64)
+		if line == "GLOBAL STATS" || line == "END" { // GLOBAL STATS or END marks the end of ROUTING_TABLE
+			parsingClientList = false
+			parsingRoutingTable = false
+			continue
+		}
 
-			connectedSinceStr := parts[5+idxOffset]
-			cs, err := time.Parse(timeLayout, connectedSinceStr)
-			if err == nil {
-				client.ConnectedSince = cs
-				if !cs.IsZero() { // Calculate duration if ConnectedSince is valid
-					client.OnlineDurationSeconds = int64(time.Since(cs).Seconds())
-				} else {
-					client.OnlineDurationSeconds = 0
+		if parsingClientList {
+			parts := strings.Split(line, ",")
+			if len(parts) == 5 {
+				commonName := strings.TrimSpace(parts[0])
+				realAddress := strings.TrimSpace(parts[1])
+				bytesReceived, _ := strconv.ParseInt(strings.TrimSpace(parts[2]), 10, 64)
+				bytesSent, _ := strconv.ParseInt(strings.TrimSpace(parts[3]), 10, 64)
+				connectedSinceStr := strings.TrimSpace(parts[4])
+				connectedSince, _ := time.Parse(logHeaderTimeLayout, connectedSinceStr)
+
+				username := commonName
+				if strings.HasPrefix(commonName, jancsitechPrefix) {
+					username = strings.TrimPrefix(commonName, jancsitechPrefix)
 				}
-			} else {
-				client.ConnectedSince = time.Time{} // Ensure zero value on parse error
-				client.OnlineDurationSeconds = 0
-			}
 
-			// LastRef is often the last field, parts[6+idxOffset]
-			lastRefStr := parts[6+idxOffset]
-			lr, err := time.Parse(timeLayout, lastRefStr)
-			if err == nil {
-				client.LastRef = lr
-			} else {
-				client.LastRef = time.Time{} // Ensure zero value on parse error
+				clientDataMap[commonName] = OpenVPNClientStatus{
+					CommonName:     commonName,
+					Username:       username,
+					RealAddress:    realAddress,
+					BytesReceived:  bytesReceived,
+					BytesSent:      bytesSent,
+					ConnectedSince: connectedSince,
+				}
 			}
-			clients = append(clients, client)
+		} else if parsingRoutingTable {
+			parts := strings.Split(line, ",")
+			if len(parts) == 4 {
+				virtualAddress := strings.TrimSpace(parts[0])
+				commonName := strings.TrimSpace(parts[1])
+				// RealAddress from routing table (parts[2]) is ignored for now, taking from CLIENT_LIST
+				lastRefStr := strings.TrimSpace(parts[3])
+				lastRef, _ := time.Parse(logHeaderTimeLayout, lastRefStr)
+
+				if existing, ok := routingDataMap[commonName]; !ok || lastRef.After(existing.LastRefTime) {
+					routingDataMap[commonName] = struct {
+						VirtualAddress string
+						LastRefTime    time.Time
+					}{
+						VirtualAddress: virtualAddress,
+						LastRefTime:    lastRef,
+					}
+				}
+			}
 		}
 	}
 
 	if err := scanner.Err(); err != nil {
-		return nil, fmt.Errorf("error reading status log file: %w", err)
+		return nil, logUpdateTime, fmt.Errorf("error reading status log file: %w", err)
 	}
-	return clients, nil
+
+	for cn, client := range clientDataMap {
+		if routeInfo, ok := routingDataMap[cn]; ok {
+			client.VirtualAddress = routeInfo.VirtualAddress
+			client.LastRef = routeInfo.LastRefTime
+		}
+
+		if !client.LastRef.IsZero() && !logUpdateTime.IsZero() {
+			client.IsOnline = logUpdateTime.Sub(client.LastRef) <= onlineThresholdDuration
+		} else if !client.LastRef.IsZero() && logUpdateTime.IsZero() { // Log update time not parsed, fallback to time.Now()
+			client.IsOnline = time.Now().Sub(client.LastRef) <= onlineThresholdDuration
+		} else {
+			client.IsOnline = false
+		}
+
+
+		if !client.ConnectedSince.IsZero() {
+			// The old code used time.Since(cs) which is time.Now().Sub(cs). We'll stick to that.
+			client.OnlineDurationSeconds = int64(time.Since(client.ConnectedSince).Seconds())
+		} else {
+			client.OnlineDurationSeconds = 0
+		}
+		clients = append(clients, client)
+	}
+
+	return clients, logUpdateTime, nil
 }
 
 // GetStatusFilePath returns the path to the OpenVPN status file.
@@ -136,8 +187,11 @@ func GetStatusFilePath() string {
 // It uses GetStatusFilePath to determine the log file location.
 func ParseAllClientStatuses() ([]OpenVPNClientStatus, error) {
 	logPath := GetStatusFilePath()
-	// ParseStatusLog will handle errors related to file opening.
-	return ParseStatusLog(logPath)
+	clients, _, err := ParseStatusLog(logPath) // Discard logUpdateTime for now
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse status log: %w", err)
+	}
+	return clients, nil
 }
 
 // ParseClientStatus retrieves the status for a specific client by commonName.
