@@ -7,9 +7,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/manifoldco/promptui"
 	"openvpn-admin-go/constants"
 	"openvpn-admin-go/openvpn"
+
+	"github.com/manifoldco/promptui"
 )
 
 func ClientMenu() {
@@ -141,12 +142,13 @@ func ViewClientStatus() {
 		return
 	}
 
-	fmt.Printf("客户端 %s 状态:\n", username)
-	fmt.Printf("连接时间: %s\n", status.ConnectedAt.Format("2006-01-02 15:04:05"))
-	if !status.Disconnected.IsZero() {
-		fmt.Printf("断开时间: %s\n", status.Disconnected.Format("2006-01-02 15:04:05"))
-	}
-	fmt.Printf("是否暂停: %v\n", status.IsPaused)
+	fmt.Printf("客户端 %s 状态:\n", status.CommonName)
+	fmt.Printf("连接时间: %s\n", status.ConnectedSince.Format("2006-01-02 15:04:05"))
+	fmt.Printf("最后活动: %s\n", status.LastRef.Format("2006-01-02 15:04:05"))
+	fmt.Printf("接收字节: %d\n", status.BytesReceived)
+	fmt.Printf("发送字节: %d\n", status.BytesSent)
+	fmt.Printf("虚拟地址: %s\n", status.VirtualAddress)
+	fmt.Printf("真实地址: %s\n", status.RealAddress)
 }
 
 func ListClients() {
@@ -163,18 +165,15 @@ func ListClients() {
 
 	fmt.Println("客户端列表:")
 	fmt.Println("----------------------------------------")
-	fmt.Printf("%-20s %-20s %-10s\n", "用户名", "创建时间", "状态")
+	fmt.Printf("%-20s %-20s %-15s %-15s\n", "用户名", "连接时间", "虚拟地址", "真实地址")
 	fmt.Println("----------------------------------------")
-	
+
 	for _, status := range statuses {
-		statusText := "正常"
-		if status.IsPaused {
-			statusText = "已暂停"
-		}
-		fmt.Printf("%-20s %-20s %-10s\n", 
-			status.Username,
-			status.ConnectedAt.Format("2006-01-02 15:04:05"),
-			statusText)
+		fmt.Printf("%-20s %-20s %-15s %-15s\n",
+			status.CommonName,
+			status.ConnectedSince.Format("2006-01-02 15:04:05"),
+			status.VirtualAddress,
+			status.RealAddress)
 	}
 	fmt.Println("----------------------------------------")
 }

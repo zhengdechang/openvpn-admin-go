@@ -28,6 +28,7 @@ type User struct {
    LastConnectionTime *time.Time
    IsOnline     bool
    CreatorID    string `gorm:"size:36"`
+	FixedIP            string `gorm:"size:15;default:null"`
    CreatedAt    time.Time
    UpdatedAt    time.Time
 }

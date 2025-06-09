@@ -199,9 +199,14 @@ export interface AdminUser {
   email: string;
   role: UserRole;
   departmentId?: string;
-  lastConnectionTime?: string;
-  isOnline?: boolean;
+  departmentName?: string; // Assuming this might exist or be useful
   creatorId?: string;
+  creatorName?: string; // Assuming this might exist
+  lastConnectionTime?: string | null;
+  isOnline?: boolean;        // Should exist, now more accurate
+  fixedIp?: string | null;   // Should exist
+  connectionIp?: string | null; // Add this
+  allocatedVpnIp?: string | null; // Add this
   createdAt?: string;
   updatedAt?: string;
 }
@@ -233,4 +238,25 @@ export interface PaginatedClientLogs {
   total: number;
   page: number;
   pageSize: number;
+}
+
+export interface LiveClientConnection {
+  commonName: string; // UserID
+  realAddress: string; // Connection IP
+  virtualAddress: string; // Allocated VPN IP
+  bytesReceived: number;
+  bytesSent: number;
+  connectedSince: string; // ISO date string
+  lastRef: string; // ISO date string
+  onlineDurationSeconds: number;
+}
+
+// User Update payload type
+export interface UserUpdateRequest {
+    name?: string;
+    email?: string;
+    password?: string;
+    role?: UserRole;
+    departmentId?: string;
+    fixedIp?: string | null; // Added this line
 }
