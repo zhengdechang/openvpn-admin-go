@@ -99,18 +99,19 @@ const translation = {
     editingUserLabel: "Editing User: ",
     statusOnline: "Online",
     statusOffline: "Offline",
-    fixedIpLabel": "Fixed VPN IP",
-    fixedIpPlaceholder": "e.g., 10.8.0.100 or empty to remove",
-    columnFixedIp": "Fixed IP",
-    columnConnectionIp": "Connection IP",
-    columnAllocatedVpnIp": "VPN IP",
-    editUserDescription": "Make changes to the user profile here. Click save when you're done.",
-    passwordOptionalPlaceholder": "Password (optional)",
-    passwordLeaveBlankPlaceholder": "Leave blank to keep current",
-    roleLabel": "Role",
-    downloadConfigButtonShort": "DL Cfg",
-    editUserSuccess": "User updated successfully!",
-    editUserError": "Failed to update user."
+    fixedIpLabel: "Fixed VPN IP",
+    fixedIpPlaceholder: "e.g., 10.8.0.100 or empty to remove",
+    columnFixedIp: "Fixed IP",
+    columnConnectionIp: "Connection IP",
+    columnAllocatedVpnIp: "VPN IP",
+    editUserDescription:
+      "Make changes to the user profile here. Click save when you're done.",
+    passwordOptionalPlaceholder: "Password (optional)",
+    passwordLeaveBlankPlaceholder: "Leave blank to keep current",
+    roleLabel: "Role",
+    downloadConfigButtonShort: "DL Cfg",
+    editUserSuccess: "User updated successfully!",
+    editUserError: "Failed to update user.",
   },
   logs: {
     titleServer: "Logs",
@@ -139,13 +140,13 @@ const translation = {
     liveConnectionsCardTitle: "Live VPN Sessions",
     fetchLiveConnectionsError: "Failed to fetch live VPN sessions.",
     noLiveConnections: "No active VPN sessions found.",
-    liveColumnUserId": "User ID",
-    liveColumnConnectionIp": "Connection IP",
-    liveColumnVpnIp": "VPN IP",
-    liveColumnOnlineDuration": "Duration",
-    liveColumnBytesSent": "Sent",
-    liveColumnBytesReceived": "Received",
-    liveColumnConnectedSince": "Connected Since"
+    liveColumnUserId: "User ID",
+    liveColumnConnectionIp: "Connection IP",
+    liveColumnVpnIp: "VPN IP",
+    liveColumnOnlineDuration: "Duration",
+    liveColumnBytesSent: "Sent",
+    liveColumnBytesReceived: "Received",
+    liveColumnConnectedSince: "Connected Since",
   },
   server: {
     title: "Server",
@@ -218,8 +219,6 @@ const translation = {
     newPasswordPlaceholder: "New Password",
     updatePasswordButton: "Update Password",
   },
-}
+};
 
-;
-
-export default translation
+export default translation;

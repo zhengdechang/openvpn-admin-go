@@ -5,7 +5,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strings"
 	"time"
 
 	"openvpn-admin-go/constants"
@@ -14,7 +13,7 @@ import (
 // CreateClient 创建新的OpenVPN客户端
 func CreateClient(username string) error {
 	fmt.Printf("开始创建客户端: %s\n", username)
-	
+
 	// 检查证书目录
 	fmt.Printf("检查证书目录: %s\n", constants.ClientConfigDir)
 	if _, err := os.Stat(constants.ClientConfigDir); os.IsNotExist(err) {
@@ -41,14 +40,14 @@ func CreateClient(username string) error {
 	// 检查CA证书和密钥是否存在
 	fmt.Printf("检查CA证书: %s\n", constants.ServerCACertPath)
 	fmt.Printf("检查CA密钥: %s\n", constants.ServerCAKeyPath)
-	
+
 	if _, err := os.Stat(constants.ServerCACertPath); os.IsNotExist(err) {
 		return fmt.Errorf("CA证书不存在: %s", constants.ServerCACertPath)
 	}
 	if _, err := os.Stat(constants.ServerCAKeyPath); os.IsNotExist(err) {
 		return fmt.Errorf("CA密钥不存在: %s", constants.ServerCAKeyPath)
 	}
-	
+
 	fmt.Printf("使用CA证书: %s\n", constants.ServerCACertPath)
 	fmt.Printf("使用CA密钥: %s\n", constants.ServerCAKeyPath)
 	fmt.Println("CA证书和密钥检查通过")
@@ -108,13 +107,13 @@ func CreateClient(username string) error {
 	// 生成.ovpn配置文件
 	fmt.Printf("正在为客户端 %s 生成配置文件...\n", username)
 	ovpnPath := filepath.Join(constants.ClientConfigDir, username+".ovpn")
-	
+
 	// 加载配置
 	cfg, err := LoadConfig()
 	if err != nil {
 		return fmt.Errorf("加载配置失败: %v", err)
 	}
-	
+
 	// 生成客户端配置
 	clientConfig, err := GenerateClientConfig(username, cfg)
 	if err != nil {
@@ -127,7 +126,7 @@ func CreateClient(username string) error {
 	if err := os.WriteFile(tempFile, []byte(clientConfig), 0644); err != nil {
 		return fmt.Errorf("创建临时配置文件失败: %v", err)
 	}
-	
+
 	fmt.Printf("移动配置文件到: %s\n", ovpnPath)
 	cmd = exec.Command("sudo", "mv", tempFile, ovpnPath)
 	output, err = cmd.CombinedOutput()
@@ -188,74 +187,55 @@ func ResumeClient(username string) error {
 
 // GetClientStatus 获取OpenVPN客户端状态
 func GetClientStatus(username string) (*ClientStatus, error) {
-	// 检查客户端配置文件是否存在
-	ovpnPath := filepath.Join(constants.ClientConfigDir, username+".ovpn")
-	
-	// 获取文件信息
-	fileInfo, err := os.Stat(ovpnPath)
-	if os.IsNotExist(err) {
-		return nil, fmt.Errorf("客户端 %s 不存在", username)
-	}
+	status, err := ParseClientStatus(username)
 	if err != nil {
-		return nil, fmt.Errorf("获取客户端信息失败: %v", err)
+		return nil, err
 	}
-
-	// 创建状态对象，使用文件创建时间作为客户端创建时间
-	status := &ClientStatus{
-		Username:    username,
-		ConnectedAt: fileInfo.ModTime(), // 使用文件修改时间作为创建时间
-		IsPaused:    false,
+	if status == nil {
+		return nil, nil
 	}
-
-	// 检查OpenVPN状态日志获取连接状态
-	if logContent, err := os.ReadFile(constants.ServerStatusLogPath); err == nil {
-		lines := strings.Split(string(logContent), "\n")
-		for _, line := range lines {
-			// 查找客户端连接信息
-			if strings.Contains(line, username) {
-				fields := strings.Fields(line)
-				if len(fields) >= 2 {
-					// 解析连接时间
-					if t, err := time.Parse("2006-01-02 15:04:05", fields[1]); err == nil {
-						status.ConnectedAt = t
-					}
-				}
-			}
-		}
-	}
-
-	return status, nil
+	return &ClientStatus{
+		CommonName:     status.CommonName,
+		RealAddress:    status.RealAddress,
+		VirtualAddress: status.VirtualAddress,
+		BytesReceived:  status.BytesReceived,
+		BytesSent:      status.BytesSent,
+		ConnectedSince: status.ConnectedSince,
+		LastRef:        status.LastRef,
+	}, nil
 }
 
 // GetAllClientStatuses 获取所有OpenVPN客户端状态
 func GetAllClientStatuses() ([]ClientStatus, error) {
-	var statuses []ClientStatus
-
-	// 读取客户端目录
-	files, err := os.ReadDir(constants.ClientConfigDir)
+	statuses, err := ParseAllClientStatuses()
 	if err != nil {
-		return nil, fmt.Errorf("读取客户端目录失败: %v", err)
+		return nil, err
 	}
 
-	// 遍历所有.ovpn文件
-	for _, file := range files {
-		if strings.HasSuffix(file.Name(), ".ovpn") {
-			username := strings.TrimSuffix(file.Name(), ".ovpn")
-			if status, err := GetClientStatus(username); err == nil {
-				statuses = append(statuses, *status)
-			}
+	result := make([]ClientStatus, len(statuses))
+	for i, status := range statuses {
+		result[i] = ClientStatus{
+			CommonName:     status.CommonName,
+			RealAddress:    status.RealAddress,
+			VirtualAddress: status.VirtualAddress,
+			BytesReceived:  status.BytesReceived,
+			BytesSent:      status.BytesSent,
+			ConnectedSince: status.ConnectedSince,
+			LastRef:        status.LastRef,
 		}
 	}
-
-	return statuses, nil
+	return result, nil
 }
 
 // ClientStatus 客户端状态
 type ClientStatus struct {
-   Username     string    `json:"username"`
-   ConnectedAt  time.Time `json:"connectedAt"`
-   Disconnected time.Time `json:"disconnectedAt"`
-   IsPaused     bool      `json:"isPaused"`
+	CommonName     string    `json:"commonName"`
+	RealAddress    string    `json:"realAddress"`
+	VirtualAddress string    `json:"virtualAddress"`
+	BytesReceived  int64     `json:"bytesReceived"`
+	BytesSent      int64     `json:"bytesSent"`
+	ConnectedSince time.Time `json:"connectedSince"`
+	LastRef        time.Time `json:"lastRef"`
 }
 
 // GenerateClientConfig 生成客户端配置文件内容

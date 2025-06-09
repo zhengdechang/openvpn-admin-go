@@ -11,8 +11,8 @@ import (
 
 // OpenVPNClientStatus holds information for each client parsed from the status log.
 type OpenVPNClientStatus struct {
-	CommonName            string    `json:"commonName"` // Often used as UserID
-	RealAddress           string    `json:"realAddress"` // Connection IP
+	CommonName            string    `json:"commonName"`     // Often used as UserID
+	RealAddress           string    `json:"realAddress"`    // Connection IP
 	VirtualAddress        string    `json:"virtualAddress"` // Allocated VPN IP
 	BytesReceived         int64     `json:"bytesReceived"`
 	BytesSent             int64     `json:"bytesSent"`
@@ -68,20 +68,20 @@ func ParseStatusLog(logPath string) ([]OpenVPNClientStatus, error) {
 				client.VirtualAddress = "" // Explicitly empty
 				idxOffset = 0
 			} else {
-                // Line doesn't match 7 or 8 parts structure or VirtualAddress heuristics
-                continue
-            }
+				// Line doesn't match 7 or 8 parts structure or VirtualAddress heuristics
+				continue
+			}
 
-            // Ensure there are enough parts for the remaining fields based on idxOffset
-            // Need 4 more fields: BytesReceived, BytesSent, ConnectedSince, LastRef
-            // So, 3 (for CN, RealAddr, OptVirtAddr) + idxOffset + 4 <= len(parts)
-            // Simplified: parts[0]=CL, parts[1]=CN, parts[2]=RealAddr.
-            // If idxOffset=1 (VirtAddr present), next is parts[3+1]=parts[4] for BytesRcv. We need up to parts[6+1]=parts[7] for LastRef.
-            // If idxOffset=0 (No VirtAddr), next is parts[3+0]=parts[3] for BytesRcv. We need up to parts[6+0]=parts[6] for LastRef.
-            // So, required length is 7+idxOffset.
-            if len(parts) < (7 + idxOffset) {
-                continue // Not enough fields for the assumed structure
-            }
+			// Ensure there are enough parts for the remaining fields based on idxOffset
+			// Need 4 more fields: BytesReceived, BytesSent, ConnectedSince, LastRef
+			// So, 3 (for CN, RealAddr, OptVirtAddr) + idxOffset + 4 <= len(parts)
+			// Simplified: parts[0]=CL, parts[1]=CN, parts[2]=RealAddr.
+			// If idxOffset=1 (VirtAddr present), next is parts[3+1]=parts[4] for BytesRcv. We need up to parts[6+1]=parts[7] for LastRef.
+			// If idxOffset=0 (No VirtAddr), next is parts[3+0]=parts[3] for BytesRcv. We need up to parts[6+0]=parts[6] for LastRef.
+			// So, required length is 7+idxOffset.
+			if len(parts) < (7 + idxOffset) {
+				continue // Not enough fields for the assumed structure
+			}
 
 			client.BytesReceived, _ = strconv.ParseInt(parts[3+idxOffset], 10, 64) // Error handling for ParseInt can be added
 			client.BytesSent, _ = strconv.ParseInt(parts[4+idxOffset], 10, 64)
@@ -121,28 +121,28 @@ func ParseStatusLog(logPath string) ([]OpenVPNClientStatus, error) {
 // GetStatusFilePath returns the path to the OpenVPN status file.
 // This should ideally come from configuration.
 func GetStatusFilePath() string {
-    // Placeholder: In a real application, this path would come from a configuration file
-    // or an environment variable (e.g., via openvpn.LoadConfig()).
-    // Common locations: /var/log/openvpn-status.log, /run/openvpn/status.log, or custom.
-    // Ensure the OpenVPN server is configured to write to this path.
-    statusPath := os.Getenv("OPENVPN_STATUS_PATH")
-    if statusPath != "" {
-        return statusPath
-    }
-    return "/tmp/openvpn-status.log" // Default placeholder if not set by env var
+	// Placeholder: In a real application, this path would come from a configuration file
+	// or an environment variable (e.g., via openvpn.LoadConfig()).
+	// Common locations: /var/log/openvpn-status.log, /run/openvpn/status.log, or custom.
+	// Ensure the OpenVPN server is configured to write to this path.
+	statusPath := os.Getenv("OPENVPN_STATUS_PATH")
+	if statusPath != "" {
+		return statusPath
+	}
+	return "/tmp/openvpn-status.log" // Default placeholder if not set by env var
 }
 
-// GetAllClientStatuses retrieves all client statuses from the OpenVPN status log.
+// ParseAllClientStatuses retrieves all client statuses from the OpenVPN status log.
 // It uses GetStatusFilePath to determine the log file location.
-func GetAllClientStatuses() ([]OpenVPNClientStatus, error) {
-    logPath := GetStatusFilePath()
-    // ParseStatusLog will handle errors related to file opening.
-    return ParseStatusLog(logPath)
+func ParseAllClientStatuses() ([]OpenVPNClientStatus, error) {
+	logPath := GetStatusFilePath()
+	// ParseStatusLog will handle errors related to file opening.
+	return ParseStatusLog(logPath)
 }
 
-// GetClientStatus retrieves the status for a specific client by commonName.
-func GetClientStatus(commonName string) (*OpenVPNClientStatus, error) {
-	statuses, err := GetAllClientStatuses()
+// ParseClientStatus retrieves the status for a specific client by commonName.
+func ParseClientStatus(commonName string) (*OpenVPNClientStatus, error) {
+	statuses, err := ParseAllClientStatuses()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get all client statuses: %w", err)
 	}
