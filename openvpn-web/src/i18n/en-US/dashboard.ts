@@ -219,6 +219,8 @@ const translation = {
     newPasswordPlaceholder: "New Password",
     updatePasswordButton: "Update Password",
   },
-};
+}
 
-export default translation;
+;
+
+export default translation

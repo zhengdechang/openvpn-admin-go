@@ -97,7 +97,19 @@ const translation = {
     departmentLabel: "部门",
     editingUserLabel: "编辑用户：",
     statusOnline: "在线",
-    statusOffline: "离线"
+    statusOffline: "离线",
+    fixedIpLabel: "固定VPN IP",
+    columnConnectionIp: "连接 IP",
+    fixedIpPlaceholder: "例如，10.8.0.100 或者空白表示删除",
+    editUserDescription: "在这里对用户个人资料进行更改。完成后点击保存。",
+    editUserSuccess: "用户更新成功！",
+    passwordOptionalPlaceholder: "密码（可选）",
+    passwordLeaveBlankPlaceholder: "留下空白以保持当前状态",
+    columnAllocatedVpnIp: "VPN IP",
+    roleLabel: "角色",
+    editUserError: "更新用户失败。",
+    downloadConfigButtonShort: "下载配置",
+    columnFixedIp: "固定IP"
   },
   logs: {
     titleServer: "日志",
@@ -122,7 +134,17 @@ const translation = {
     columnLastConnectionTime: "最后连接时间",
     columnLogCreatedAt: "创建时间",
     statusOnline: "在线",
-    statusOffline: "离线"
+    statusOffline: "离线",
+    liveColumnConnectionIp: "连接 IP",
+    liveColumnBytesReceived: "收到",
+    liveColumnUserId: "用户 ID",
+    liveColumnVpnIp: "VPN IP",
+    liveConnectionsCardTitle: "实时VPN会话",
+    liveColumnOnlineDuration: "持续时间",
+    noLiveConnections: "未找到活动的 VPN 会话。",
+    liveColumnConnectedSince: "自连接以来",
+    liveColumnBytesSent: "发送",
+    fetchLiveConnectionsError: "无法获取实时VPN会话。"
   },
   server: {
     title: '服务器',

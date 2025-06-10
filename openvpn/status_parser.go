@@ -174,13 +174,12 @@ func ParseStatusLog(logPath string) ([]OpenVPNClientStatus, time.Time, error) {
 func GetStatusFilePath() string {
 	// Placeholder: In a real application, this path would come from a configuration file
 	// or an environment variable (e.g., via openvpn.LoadConfig()).
-	// Common locations: /var/log/openvpn-status.log, /run/openvpn/status.log, or custom.
-	// Ensure the OpenVPN server is configured to write to this path.
+	// Common locations: /var/log/openvpn/status.log
 	statusPath := os.Getenv("OPENVPN_STATUS_PATH")
 	if statusPath != "" {
 		return statusPath
 	}
-	return "/tmp/openvpn-status.log" // Default placeholder if not set by env var
+	return "/var/log/openvpn/status.log" // 正确的默认路径
 }
 
 // ParseAllClientStatuses retrieves all client statuses from the OpenVPN status log.
