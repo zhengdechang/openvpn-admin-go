@@ -5,6 +5,7 @@ import (
 	"os" // Added
 	"path/filepath" // Added
 	"strings"
+	"log"
 
 	"openvpn-admin-go/common"
 	"openvpn-admin-go/constants" // Added
@@ -142,8 +143,10 @@ func (c *AdminUserController) ListUsers(ctx *gin.Context) {
 	// 获取在线状态
 	statuses, err := openvpn.GetAllClientStatuses() // 使用 GetAllClientStatuses 而不是 ParseAllClientStatuses
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "获取客户端状态失败"})
-		return
+		// 打印错误日志
+		log.Printf("Warning: Failed to get OpenVPN client statuses: %v", err)
+		// 如果获取状态失败，使用空列表继续处理
+		statuses = []openvpn.OpenVPNClientStatus{}
 	}
 
 	var resp []gin.H

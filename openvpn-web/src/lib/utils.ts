@@ -7,7 +7,7 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export const getPolicyFileUrl = (fileId: string): string => {
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL
   return `${baseUrl}/api/policy/download/${fileId}`;
 };
 

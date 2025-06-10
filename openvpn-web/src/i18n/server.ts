@@ -50,32 +50,5 @@ export const getLocaleOnServer = (): Locale => {
   }
 
   // 如果没有有效的 cookie，使用浏览器语言
-  const headersList = headers();
-  const acceptLanguage = headersList.get('accept-language');
-  
-  // If no accept-language header is present, return default locale
-  if (!acceptLanguage) {
-    return i18n.defaultLocale;
-  }
-
-  const negotiatorHeaders: Record<string, string> = {
-    'accept-language': acceptLanguage
-  };
-  
-  const languages = new Negotiator(negotiatorHeaders).languages();
-
-  // 验证语言
-  if (
-    !Array.isArray(languages) ||
-    languages.length === 0 ||
-    !languages.every(
-      (lang) => typeof lang === "string" && /^[\w-]+$/.test(lang)
-    )
-  ) {
-    return i18n.defaultLocale;
-  }
-
-  // 匹配语言
-  const matchedLocale = match(languages, locales, i18n.defaultLocale) as Locale;
-  return matchedLocale;
+  return i18n.defaultLocale;
 };
