@@ -146,7 +146,7 @@ func (c *AdminUserController) ListUsers(ctx *gin.Context) {
 		// 打印错误日志
 		log.Printf("Warning: Failed to get OpenVPN client statuses: %v", err)
 		// 如果获取状态失败，使用空列表继续处理
-		statuses = []openvpn.OpenVPNClientStatus{}
+		statuses = []openvpn.ClientStatus{}
 	}
 
 	var resp []gin.H
