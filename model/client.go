@@ -12,6 +12,7 @@ type ClientLog struct {
 	ID                 string    `gorm:"primaryKey;size:36"`
 	UserID             string    `gorm:"size:36;index"` // Indexed for faster lookups
 	IsOnline           bool
+	RealAddress        string    `gorm:"size:255;default:null"` // Added field for client's real address
 	OnlineDuration     int64 // in seconds
 	TrafficUsage       int64 // in bytes
 	LastConnectionTime *time.Time
