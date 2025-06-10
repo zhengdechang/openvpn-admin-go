@@ -2,12 +2,17 @@ package controller
 
 import (
 	"net/http"
+	"os" // Added
+	"path/filepath" // Added
+	"strings"
+	"log"
+
 	"openvpn-admin-go/common"
+	"openvpn-admin-go/constants" // Added
 	"openvpn-admin-go/database"
 	"openvpn-admin-go/middleware"
 	"openvpn-admin-go/model"
 	"openvpn-admin-go/openvpn"
-	"strings" // Added for TrimSpace
 
 	"github.com/gin-gonic/gin"
 )
@@ -77,19 +82,31 @@ func (c *AdminUserController) CreateUser(ctx *gin.Context) {
 		return
 	}
 
+	// Check for existing client configuration
+	clientOvpnFile := filepath.Join(constants.ClientConfigDir, user.Name+".ovpn")
+	if _, err := os.Stat(clientOvpnFile); err == nil {
+		// File exists, so client with this name likely exists
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "A VPN client with the username '" + user.Name + "' already exists."})
+		return
+	} else if !os.IsNotExist(err) {
+		// Another error occurred during stat, not just file not existing
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to check for existing VPN client config: " + err.Error()})
+		return
+	}
+
 	// If fixed IP was set for the user, apply it via CCD
 	if user.FixedIP != "" {
-		if err := openvpn.SetClientFixedIP(user.ID, user.FixedIP); err != nil {
+		if err := openvpn.SetClientFixedIP(user.Name, user.FixedIP); err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "user created, but failed to set fixed IP in OpenVPN config: " + err.Error()})
 			return
 		}
 	}
 
 	// Create OpenVPN client certs
-	if err := openvpn.CreateClient(user.ID); err != nil {
+	if err := openvpn.CreateClient(user.Name); err != nil {
 		// If cert creation fails, and fixed IP was set, should we try to remove CCD?
 		if user.FixedIP != "" {
-			openvpn.RemoveClientFixedIP(user.ID) // Attempt to clean up CCD
+			openvpn.RemoveClientFixedIP(user.Name) // Attempt to clean up CCD
 		}
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create OpenVPN client certificate: " + err.Error()})
 		return
@@ -126,8 +143,10 @@ func (c *AdminUserController) ListUsers(ctx *gin.Context) {
 	// 获取在线状态
 	statuses, err := openvpn.GetAllClientStatuses() // 使用 GetAllClientStatuses 而不是 ParseAllClientStatuses
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "获取客户端状态失败"})
-		return
+		// 打印错误日志
+		log.Printf("Warning: Failed to get OpenVPN client statuses: %v", err)
+		// 如果获取状态失败，使用空列表继续处理
+		statuses = []openvpn.OpenVPNClientStatus{}
 	}
 
 	var resp []gin.H
@@ -295,7 +314,7 @@ func (c *AdminUserController) UpdateUser(ctx *gin.Context) {
 
 	// If fixed IP was set for the user, apply it via CCD
 	if u.FixedIP != "" {
-		if err := openvpn.SetClientFixedIP(u.ID, u.FixedIP); err != nil {
+		if err := openvpn.SetClientFixedIP(u.Name, u.FixedIP); err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "user updated, but failed to set fixed IP in OpenVPN config: " + err.Error()})
 			return
 		}
@@ -337,13 +356,13 @@ func (c *AdminUserController) DeleteUser(ctx *gin.Context) {
 
 	// Remove Fixed IP config if it exists
 	if u.FixedIP != "" {
-		if err := openvpn.RemoveClientFixedIP(u.ID); err != nil {
-			// log.Printf("Warning: failed to remove fixed IP for user %s during deletion: %v", u.ID, err)
+		if err := openvpn.RemoveClientFixedIP(u.Name); err != nil {
+			// log.Printf("Warning: failed to remove fixed IP for user %s during deletion: %v", u.Name, err)
 		}
 	}
 	// Remove OpenVPN client certificate and other related configs
-	if err := openvpn.DeleteClient(u.ID); err != nil {
-		// log.Printf("Warning: failed to delete OpenVPN client data for user %s during deletion: %v", u.ID, err)
+	if err := openvpn.DeleteClient(u.Name); err != nil {
+		// log.Printf("Warning: failed to delete OpenVPN client data for user %s during deletion: %v", u.Name, err)
 	}
 
 	if err := database.DB.Delete(&model.User{}, "id = ?", id).Error; err != nil {

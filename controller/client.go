@@ -2,14 +2,100 @@ package controller
 
 import (
 	"net/http"
+	"openvpn-admin-go/database" // Added
 	"openvpn-admin-go/middleware"
 	"openvpn-admin-go/model"
 	"openvpn-admin-go/openvpn"
+	"time" // Added
 
 	"github.com/gin-gonic/gin"
 )
 
 type ClientController struct{}
+
+// UserClientStatusDetailed combines user data with OpenVPN client status
+type UserClientStatusDetailed struct {
+	// Fields from model.User (excluding PasswordHash)
+	ID                 string     `json:"id"`
+	Name               string     `json:"name"`
+	Email              string     `json:"email"`
+	Role               model.Role `json:"role"`
+	DepartmentID       string     `json:"departmentId,omitempty"`
+	CreatorID          string     `json:"creatorId,omitempty"`
+	FixedIP            string     `json:"fixedIp,omitempty"`
+	CreatedAt          time.Time  `json:"createdAt"`
+	UpdatedAt          time.Time  `json:"updatedAt"`
+	DBIsOnline         bool       `json:"dbIsOnline"` // User.IsOnline from DB
+	DBLastConnectionTime *time.Time `json:"dbLastConnectionTime,omitempty"`
+
+	// Fields from openvpn.OpenVPNClientStatus
+	ClientCommonName      string    `json:"clientCommonName"` // This is status.CommonName (user.Name)
+	RealAddress           string    `json:"realAddress,omitempty"`
+	VirtualAddress        string    `json:"virtualAddress,omitempty"`
+	BytesReceived         int64     `json:"bytesReceived"`
+	BytesSent             int64     `json:"bytesSent"`
+	ConnectedSince        time.Time `json:"connectedSince,omitempty"`
+	LastRef               time.Time `json:"lastRef,omitempty"`
+	LiveIsOnline          bool      `json:"liveIsOnline"` // status.IsOnline from status log
+	OnlineDurationSeconds int64     `json:"onlineDurationSeconds"`
+}
+
+// GetDetailedClientStatuses godoc
+// @Summary Get detailed status for all OpenVPN clients including user data
+// @Description Retrieves a list of all clients with live data and associated user details.
+// @Tags Client
+// @Produce json
+// @Security ApiKeyAuth
+// @Success 200 {array} UserClientStatusDetailed "List of detailed client statuses"
+// @Failure 500 {object} gin.H "Error message"
+// @Router /client/status/detailed [get]
+func (cc *ClientController) GetDetailedClientStatuses(c *gin.Context) {
+	parsedStatuses, err := openvpn.ParseAllClientStatuses() // From openvpn/status_parser.go
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse client statuses: " + err.Error()})
+		return
+	}
+
+	if parsedStatuses == nil {
+		parsedStatuses = []openvpn.OpenVPNClientStatus{}
+	}
+
+	var detailedStatuses []UserClientStatusDetailed
+
+	for _, status := range parsedStatuses {
+		var user model.User
+		// Query user by name, as status.CommonName is now user.Name
+		dbErr := database.DB.Where("name = ?", status.CommonName).First(&user).Error
+
+		item := UserClientStatusDetailed{
+			ClientCommonName:      status.CommonName,
+			RealAddress:           status.RealAddress,
+			VirtualAddress:        status.VirtualAddress,
+			BytesReceived:         status.BytesReceived,
+			BytesSent:             status.BytesSent,
+			ConnectedSince:        status.ConnectedSince,
+			LastRef:               status.LastRef,
+			LiveIsOnline:          status.IsOnline,
+			OnlineDurationSeconds: status.OnlineDurationSeconds,
+		}
+
+		if dbErr == nil { // User found
+			item.ID = user.ID
+			item.Name = user.Name // Should be same as status.CommonName if matched
+			item.Email = user.Email
+			item.Role = user.Role
+			item.DepartmentID = user.DepartmentID
+			item.CreatorID = user.CreatorID
+			item.FixedIP = user.FixedIP
+			item.CreatedAt = user.CreatedAt
+			item.UpdatedAt = user.UpdatedAt
+			item.DBIsOnline = user.IsOnline
+			item.DBLastConnectionTime = user.LastConnectionTime
+		}
+		detailedStatuses = append(detailedStatuses, item)
+	}
+	c.JSON(http.StatusOK, detailedStatuses)
+}
 
 // GetClientList 获取客户端列表
 func (c *ClientController) GetClientList(ctx *gin.Context) {

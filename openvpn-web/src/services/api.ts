@@ -20,7 +20,7 @@ import {
 import Cookies from "js-cookie";
 import { useUserStore } from "@/store";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL
 
 // 创建axios实例
 const api = axios.create({
