@@ -32,8 +32,8 @@ user nobody
 group nogroup
 persist-key
 persist-tun
-status {{ .status_log_path }}
-log-append /var/log/openvpn/openvpn.log
+status {{ .OpenVPNStatusLogPath }}
+log-append {{ .OpenVPNLogPath }}
 verb 3
 {{if or (eq .openvpn_proto "udp") (eq .openvpn_proto "udp6")}}
 explicit-exit-notify 1

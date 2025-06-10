@@ -19,8 +19,14 @@ const (
 	ServerDHPath     = "/etc/openvpn/server/dh.pem"
 	ServerTLSKeyPath = "/etc/openvpn/server/tls-auth.key"
 
+	// Default log paths
+	DefaultOpenVPNStatusLogPath = "/etc/openvpn/log/status.log"
+	DefaultOpenVPNLogPath       = "/etc/openvpn/log/openvpn.log"
+
 	// 服务器状态日志路径
-	ServerStatusLogPath = "/var/log/openvpn/status.log"
+	// ServerStatusLogPath is now set from config in openvpn/config.go
+	// This line is kept for compatibility but should be removed in the future.
+	ServerStatusLogPath = DefaultOpenVPNStatusLogPath
 
 	// 服务器 IP 分配文件路径
 	ServerIPPPath = "/etc/openvpn/server/ipp.txt"
@@ -51,4 +57,4 @@ func GetClientCertPath(username string) string {
 // GetClientKeyPath 获取客户端密钥路径
 func GetClientKeyPath(username string) string {
 	return filepath.Join(ClientConfigDir, username+".key")
-} 
+}

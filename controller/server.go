@@ -66,6 +66,11 @@ type ServerStatus struct {
 
 // GetServerStatus 获取服务器状态
 func GetServerStatus() (*ServerStatus, error) {
+	cfg, err := openvpn.LoadConfig()
+	if err != nil {
+		return nil, fmt.Errorf("failed to load OpenVPN config: %w", err)
+	}
+
 	// 检查服务是否运行
 	// 检查服务是否运行，忽略非零退出码，获取服务状态字符串
 	cmd := exec.Command("systemctl", "is-active", constants.ServiceName)
@@ -88,7 +93,7 @@ func GetServerStatus() (*ServerStatus, error) {
 		}
 
 		// 获取连接数
-		if content, err := os.ReadFile(constants.ServerStatusLogPath); err == nil {
+		if content, err := os.ReadFile(cfg.OpenVPNStatusLogPath); err == nil {
 			lines := strings.Split(string(content), "\n")
 			status.Total = len(lines)
 			status.Connected = 0
