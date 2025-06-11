@@ -2,9 +2,7 @@ package openvpn
 
 import (
 	"fmt"
-	"os"
 
-	"openvpn-admin-go/constants"
 )
 
 // UpdatePort 更新端口号

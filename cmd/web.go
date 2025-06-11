@@ -13,11 +13,8 @@ import (
 	"strconv"
 	"syscall"
 	"time"
+	"os/signal"
 
-	"openvpn-admin-go/router"
-
-	"github.com/gin-gonic/gin"
-	"github.com/spf13/cobra"
 )
 
 const pidFileName = "web.pid" // Or a more suitable path

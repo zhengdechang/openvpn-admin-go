@@ -20,8 +20,8 @@ const (
 	ServerTLSKeyPath = "/etc/openvpn/server/tls-auth.key"
 
 	// Default log paths
-	DefaultOpenVPNStatusLogPath = "/etc/openvpn/log/status.log"
-	DefaultOpenVPNLogPath       = "/etc/openvpn/log/openvpn.log"
+	DefaultOpenVPNStatusLogPath = "/etc/openvpn/status.log"
+	DefaultOpenVPNLogPath       = "/etc/openvpn/openvpn.log"
 
 	// 服务器状态日志路径
 	// ServerStatusLogPath is now set from config in openvpn/config.go
