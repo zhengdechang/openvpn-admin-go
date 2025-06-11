@@ -41,7 +41,9 @@ func RenderServerConfig(cfg *Config) (string, error) {
 		"dh_path":                 constants.ServerDHPath,
 		"ipp_path":                constants.ServerIPPPath,
 		"tls_key_path":            constants.ServerTLSKeyPath,
-		"status_log_path":         constants.ServerStatusLogPath,
+		// Use the values from the Config struct
+		"OpenVPNStatusLogPath":    cfg.OpenVPNStatusLogPath,
+		"OpenVPNLogPath":          cfg.OpenVPNLogPath,
 	}
 
 	var buf bytes.Buffer

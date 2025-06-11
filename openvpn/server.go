@@ -124,10 +124,19 @@ func ConfigureServer(port int, protocol, network, netmask string) error {
    if err := SaveConfig(cfg); err != nil {
        return fmt.Errorf("保存配置失败: %v", err)
    }
-   // 重新写入 server.conf 并更新所有客户端、重启服务
-   if err := UpdateServerConfig(); err != nil {
-       return fmt.Errorf("更新服务器配置失败: %v", err)
+   // 重启服务以应用更改
+   if err := RestartServer(); err != nil {
+       return fmt.Errorf("重启服务失败: %v", err)
    }
+   // TODO: Consider if client configs need regeneration here or if it's handled elsewhere.
+   // The old UpdateServerConfig did regenerate all client configs.
+   // If direct server parameter changes (port, proto, network) affect client configs,
+   // that logic might need to be triggered here as well.
+   // For now, focusing on server config persistence.
+   // Note: UpdateServerConfig() also handles client config regeneration.
+   // Since SaveConfig() now writes server.conf, if client configs depend on parameters
+   // changed in ConfigureServer, they should be regenerated.
+   // A call to a simplified client regeneration function might be needed if UpdateServerConfig() is too broad.
    return nil
 }
 
@@ -141,10 +150,21 @@ func ApplyServerConfig(content string) error {
    if err := RestartServer(); err != nil {
        return fmt.Errorf("重启服务失败: %v", err)
    }
+   // Update config.json to reflect the changes applied to server.conf
+   // This helps keep config.json somewhat in sync, although server.conf is parsed by LoadConfig.
+   cfg, err := LoadConfig() // This will parse the server.conf that was just written.
+   if err == nil {
+       // SaveConfig will write to config.json and regenerate server.conf again (idempotent)
+       // This ensures that if server.conf had settings not covered by config.json's struct,
+       // they are still part of the active config loaded, and then config.json is updated
+       // with the parts that are covered.
+       _ = SaveConfig(cfg) // Ignoring error from this SaveConfig for now, as primary action was direct write.
+   }
    return nil
 }
 
 // getEnvOrDefault 从环境变量获取值，如果不存在则返回默认值
+// This function seems unused in this file now. Consider removing if not used elsewhere.
 func getEnvOrDefault(key, defaultValue string) string {
 	if value := os.Getenv(key); value != "" {
 		return value

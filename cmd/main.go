@@ -17,33 +17,6 @@ import (
 // CoreInitializer is a function variable to hold the core initialization logic from the main package.
 var CoreInitializer func() error
 
-// startCmd represents the start command
-var startCmd = &cobra.Command{
-	Use:   "start",
-	Short: "Start the service (Placeholder)",
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("start command called (Full system service functionality not yet implemented.)")
-	},
-}
-
-// stopCmd represents the stop command
-var stopCmd = &cobra.Command{
-	Use:   "stop",
-	Short: "Stop the service (Placeholder)",
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("stop command called (Full system service functionality not yet implemented.)")
-	},
-}
-
-// restartCmd represents the restart command
-var restartCmd = &cobra.Command{
-	Use:   "restart",
-	Short: "Restart the service (Placeholder)",
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("restart command called (Full system service functionality not yet implemented.)")
-	},
-}
-
 // logCmd represents the log command
 var logCmd = &cobra.Command{
 	Use:   "log",
@@ -131,10 +104,7 @@ func MainMenu(cfg *openvpn.Config) {
 }
 
 func Execute() {
-	rootCmd.AddCommand(webCmd)
-	rootCmd.AddCommand(startCmd)
-	rootCmd.AddCommand(stopCmd)
-	rootCmd.AddCommand(restartCmd)
+	// webCmd is added to rootCmd in cmd/web.go's init()
 	rootCmd.AddCommand(logCmd)
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)

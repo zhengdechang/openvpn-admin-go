@@ -198,8 +198,14 @@ func InitCore() error {
 	}()
 
 	// Start OpenVPN Data Synchronization Service
-	statusLogPath := constants.ServerStatusLogPath
-	syncInterval := utils.GetOpenVPNSyncInterval()
+	cfg, err := openvpn.LoadConfig()
+	if err != nil {
+		// If config loading fails here, it's a significant issue as other parts might also fail.
+		// However, InitCore is already designed to return an error.
+		return fmt.Errorf("无法加载 OpenVPN 配置以启动同步服务: %v", err)
+	}
+	statusLogPath := cfg.OpenVPNStatusLogPath // Use configured path
+	syncInterval := utils.GetOpenVPNSyncInterval() // Assuming this handles its own config or defaults
 	log.Printf("Starting OpenVPN Sync Service: LogPath='%s', Interval=%s", statusLogPath, syncInterval)
 	go services.StartOpenVPNSyncService(database.DB, statusLogPath, syncInterval)
 
