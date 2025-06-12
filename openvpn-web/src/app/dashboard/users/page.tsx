@@ -92,9 +92,9 @@ export default function UsersPage() {
     fetchAll();
   }, [fetchAll]);
 
-  const handleDownload = async (id: string, os: string) => {
+  const handleDownload = async (username: string, os: string) => {
     try {
-      const data = await openvpnAPI.getClientConfig(id, os);
+      const data = await openvpnAPI.getClientConfig(username, os);
       const config = data.config;
       const blob = new Blob([config], {
         type: "application/x-openvpn-profile",
@@ -103,7 +103,7 @@ export default function UsersPage() {
       const a = document.createElement("a");
       a.href = url;
       const ext = os === "linux" ? "conf" : "ovpn";
-      a.download = `${id}.${ext}`;
+      a.download = `${username}.${ext}`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -134,6 +134,11 @@ export default function UsersPage() {
       // Ensure departmentId is set if manager is creating user
       if (currentUser?.role === UserRole.MANAGER && !payload.departmentId) {
         payload.departmentId = currentUser.departmentId || "";
+      }
+
+      // If fixedIp is empty string, set it to null
+      if (payload.fixedIp === "") {
+        payload.fixedIp = null;
       }
 
       await userManagementAPI.create(
@@ -192,6 +197,9 @@ export default function UsersPage() {
       // This prevents non-privileged users from trying to set it via manipulated client state,
       // though backend RBAC should be the primary enforcer.
       delete updatePayload.fixedIp;
+    } else if (updatePayload.fixedIp === "") {
+      // If fixedIp is empty string, set it to null
+      updatePayload.fixedIp = null;
     }
 
     try {
@@ -676,7 +684,7 @@ export default function UsersPage() {
                             className="border px-1 py-1 rounded-md text-sm h-8"
                             defaultValue=""
                             onChange={(e) =>
-                              handleDownload(u.id, e.target.value)
+                              handleDownload(u.name, e.target.value)
                             }
                           >
                             <option value="" disabled>
