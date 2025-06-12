@@ -7,6 +7,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/Jancsitech/openvpn-web-ui/utils"
 )
 
 const (
@@ -29,6 +31,8 @@ type OpenVPNClientStatus struct {
 	VirtualIPv6Address    string    `json:"virtualIPv6Address"` // Added
 	BytesReceived         int64     `json:"bytesReceived"`
 	BytesSent             int64     `json:"bytesSent"`
+	BytesReceivedFormatted string   `json:"bytesReceivedFormatted"` // New field
+	BytesSentFormatted     string   `json:"bytesSentFormatted"`     // New field
 	ConnectedSince        time.Time `json:"connectedSince"`      // Parsed from "Connected Since (time_t)"
 	ConnectedSinceTimeT   int64     `json:"connectedSinceTimeT"` // Added
 	LastRef               time.Time `json:"lastRef"`             // Parsed from "Last Ref (time_t)"
@@ -134,6 +138,8 @@ func ParseStatusLog(logPath string) ([]OpenVPNClientStatus, time.Time, error) {
 					VirtualIPv6Address: virtualIPv6Address,
 					BytesReceived:      bytesReceived,
 					BytesSent:          bytesSent,
+					BytesReceivedFormatted: utils.FormatBytes(bytesReceived),
+					BytesSentFormatted:     utils.FormatBytes(bytesSent),
 					ConnectedSince:     connectedSince,
 					ConnectedSinceTimeT:connectedSinceEpoch,
 					ClientID:           clientIDStr,

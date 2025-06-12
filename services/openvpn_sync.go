@@ -37,17 +37,17 @@ func RunSyncCycle(db *gorm.DB, statusLogPath string) {
 
 	// --- Step 2: Process clients from the status log ---
 	for _, clientStatus := range parsedClients {
-		processedUserNames[clientStatus.Username] = true // Use derived Username
+		processedUserNames[clientStatus.CommonName] = true // Use CommonName
 		var user model.User
-		// Find user by derived Username
-		result := db.Where("name = ?", clientStatus.Username).First(&user)
+		// Find user by CommonName
+		result := db.Where("name = ?", clientStatus.CommonName).First(&user)
 
 		if result.Error == gorm.ErrRecordNotFound {
-			log.Printf("User with Username '%s' (derived from CommonName: '%s') not found in DB. Consider creating or logging.", clientStatus.Username, clientStatus.CommonName)
+			log.Printf("User with CommonName '%s' not found in DB. (Log Username: '%s', Log RealAddress: '%s'). Consider creating or logging.", clientStatus.CommonName, clientStatus.Username, clientStatus.RealAddress)
 			// For now, we only update existing users.
 			continue
 		} else if result.Error != nil {
-			log.Printf("Error fetching user with Username '%s' from DB: %v", clientStatus.Username, result.Error)
+			log.Printf("Error fetching user with CommonName '%s' from DB: %v", clientStatus.CommonName, result.Error)
 			continue
 		}
 

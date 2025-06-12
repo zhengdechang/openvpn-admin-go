@@ -69,6 +69,16 @@ func TestParseStatusLog_NewFormat(t *testing.T) {
 		t.Errorf("Expected BytesSent %d, got %d", expectedBytesSent, client.BytesSent)
 	}
 
+	expectedBytesReceivedFormatted := "809.5K" // 828967 / 1024 = 809.538...
+	if client.BytesReceivedFormatted != expectedBytesReceivedFormatted {
+		t.Errorf("Expected BytesReceivedFormatted %s, got %s", expectedBytesReceivedFormatted, client.BytesReceivedFormatted)
+	}
+
+	expectedBytesSentFormatted := "50.4K" // 51576 / 1024 = 50.367... -> rounded to 50.4
+	if client.BytesSentFormatted != expectedBytesSentFormatted {
+		t.Errorf("Expected BytesSentFormatted %s, got %s", expectedBytesSentFormatted, client.BytesSentFormatted)
+	}
+
 	expectedConnectedSince := time.Unix(1749637756, 0)
 	if !client.ConnectedSince.Equal(expectedConnectedSince) {
 		t.Errorf("Expected ConnectedSince %v, got %v", expectedConnectedSince, client.ConnectedSince)
