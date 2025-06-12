@@ -13,9 +13,6 @@ import (
 func RunSyncCycle(db *gorm.DB, statusLogPath string) {
 	log.Println("Running OpenVPN sync cycle...")
 
-	// Note: logUpdateTime is parsed but not directly used here yet, as clientStatus.IsOnline and
-	// clientStatus.OnlineDurationSeconds are expected to be correctly calculated by ParseStatusLog.
-	// It's available if more complex logic involving the log's timestamp is needed later.
 	parsedClients, _, err := openvpn.ParseStatusLog(statusLogPath)
 	if err != nil {
 		log.Printf("Error parsing OpenVPN status log: %v. Skipping sync cycle.", err)
@@ -30,133 +27,126 @@ func RunSyncCycle(db *gorm.DB, statusLogPath string) {
 	}
 	dbOnlineUserMap := make(map[string]model.User)
 	for _, u := range dbOnlineUsers {
-		dbOnlineUserMap[u.Name] = u // User.Name should store the derived username
+		dbOnlineUserMap[u.Name] = u
 	}
 
-	processedUserNames := make(map[string]bool) // To track users processed in this cycle (using derived username)
+	processedUserNames := make(map[string]bool)
 
 	// --- Step 2: Process clients from the status log ---
 	for _, clientStatus := range parsedClients {
-		processedUserNames[clientStatus.CommonName] = true // Use CommonName
+		processedUserNames[clientStatus.CommonName] = true
 		var user model.User
-		// Find user by CommonName
 		result := db.Where("name = ?", clientStatus.CommonName).First(&user)
 
 		if result.Error == gorm.ErrRecordNotFound {
 			log.Printf("User with CommonName '%s' not found in DB. (Log Username: '%s', Log RealAddress: '%s'). Consider creating or logging.", clientStatus.CommonName, clientStatus.Username, clientStatus.RealAddress)
-			// For now, we only update existing users.
 			continue
 		} else if result.Error != nil {
 			log.Printf("Error fetching user with CommonName '%s' from DB: %v", clientStatus.CommonName, result.Error)
 			continue
 		}
 
-		// User found, update status
+		// Update all user status fields
 		user.IsOnline = clientStatus.IsOnline
+		user.RealAddress = clientStatus.RealAddress
+		user.VirtualAddress = clientStatus.VirtualAddress
+		user.BytesReceived = clientStatus.BytesReceived
+		user.BytesSent = clientStatus.BytesSent
+		user.OnlineDuration = clientStatus.OnlineDurationSeconds
+		
+		if !clientStatus.ConnectedSince.IsZero() {
+			user.ConnectedSince = &clientStatus.ConnectedSince
+		}
 		if !clientStatus.LastRef.IsZero() {
+			user.LastRef = &clientStatus.LastRef
 			user.LastConnectionTime = &clientStatus.LastRef
-		} else {
-			// Retain existing LastConnectionTime or set to nil if it must be strictly from LastRef
-			// For now, if LastRef is zero, we don't update it.
 		}
 
 		if err := db.Save(&user).Error; err != nil {
-			log.Printf("Error updating user '%s' online status: %v", user.Name, err)
-			continue // Skip to next client if user update fails
+			log.Printf("Error updating user '%s' status: %v", user.Name, err)
+			continue
 		}
 
 		// Create or Update ClientLog
 		var clientLog model.ClientLog
-		// Attempt to find an existing *active* log for this user.
-		// An active log is one that is marked IsOnline = true.
 		logResult := db.Where("user_id = ? AND is_online = ?", user.ID, true).Last(&clientLog)
 
 		currentTraffic := clientStatus.BytesReceived + clientStatus.BytesSent
 
-		if logResult.Error == gorm.ErrRecordNotFound { // No active log, create new
+		if logResult.Error == gorm.ErrRecordNotFound {
 			newLog := model.ClientLog{
 				UserID:         user.ID,
 				IsOnline:       clientStatus.IsOnline,
 				RealAddress:    clientStatus.RealAddress,
-				OnlineDuration: clientStatus.OnlineDurationSeconds, // This is time.Since(ConnectedSince) from parser
+				OnlineDuration: clientStatus.OnlineDurationSeconds,
 				TrafficUsage:   currentTraffic,
 			}
 			if !clientStatus.ConnectedSince.IsZero() {
-				newLog.LastConnectionTime = &clientStatus.ConnectedSince // Log session start time
+				newLog.LastConnectionTime = &clientStatus.ConnectedSince
 			}
-			// CreatedAt will be set by GORM or BeforeCreate hook
 			if err := db.Create(&newLog).Error; err != nil {
 				log.Printf("Error creating new ClientLog for user '%s': %v", user.Name, err)
 			} else {
 				log.Printf("Created new ClientLog for user '%s'. RealAddress: %s", user.Name, newLog.RealAddress)
 			}
-		} else if logResult.Error == nil { // Active log found, update it
-			clientLog.IsOnline = clientStatus.IsOnline // Update online status (could have been reconnected)
-			clientLog.RealAddress = clientStatus.RealAddress // Update real address
-			clientLog.OnlineDuration = clientStatus.OnlineDurationSeconds // Update duration
-			clientLog.TrafficUsage = currentTraffic         // Update with current session's total traffic
+		} else if logResult.Error == nil {
+			clientLog.IsOnline = clientStatus.IsOnline
+			clientLog.RealAddress = clientStatus.RealAddress
+			clientLog.OnlineDuration = clientStatus.OnlineDurationSeconds
+			clientLog.TrafficUsage = currentTraffic
 
-			// clientLog.LastConnectionTime should ideally remain the start of this session (ConnectedSince).
-			// If clientStatus.ConnectedSince represents the true start of the current continuous session, update it.
-			// This assumes clientStatus.ConnectedSince is stable for an ongoing session.
 			if !clientStatus.ConnectedSince.IsZero() &&
-			   (clientLog.LastConnectionTime == nil || (*clientLog.LastConnectionTime != clientStatus.ConnectedSince && clientStatus.IsOnline)) {
-				// Update if ConnectedSince changed, e.g., after a quick reconnect that didn't create a new log entry.
-				// Only update if IsOnline is true, to ensure this is for current session.
+				(clientLog.LastConnectionTime == nil || (*clientLog.LastConnectionTime != clientStatus.ConnectedSince && clientStatus.IsOnline)) {
 				clientLog.LastConnectionTime = &clientStatus.ConnectedSince
 			}
 
 			if err := db.Save(&clientLog).Error; err != nil {
 				log.Printf("Error updating active ClientLog for user '%s': %v", user.Name, err)
 			}
-		} else { // Some other error fetching the client log
+		} else {
 			log.Printf("Error fetching ClientLog for user '%s': %v", user.Name, logResult.Error)
 		}
 	}
 
 	// --- Step 3: Process users who were in DB as online but are no longer in status log (disconnected) ---
-	now := time.Now() // Define 'now' for disconnected client processing
+	now := time.Now()
 	for _, dbUser := range dbOnlineUsers {
-		if _, found := processedUserNames[dbUser.Name]; !found { // User.Name is the derived username
-			// This user was online but is no longer in the status log -> disconnected
-			log.Printf("User '%s' (Username: %s) disconnected.", dbUser.Name, dbUser.Name)
+		if _, found := processedUserNames[dbUser.Name]; !found {
+			log.Printf("User '%s' disconnected.", dbUser.Name)
+			
+			// Reset all online status fields
 			dbUser.IsOnline = false
-			// We don't update dbUser.LastConnectionTime here; it reflects the last time they were seen (LastRef).
-			// If it needs to be the disconnect time:
-			// disconnectedTimestamp := now
-			// dbUser.LastConnectionTime = &disconnectedTimestamp
+			dbUser.RealAddress = ""
+			dbUser.VirtualAddress = ""
+			dbUser.BytesReceived = 0
+			dbUser.BytesSent = 0
+			dbUser.OnlineDuration = 0
+			dbUser.ConnectedSince = nil
+			dbUser.LastRef = nil
+
 			if err := db.Save(&dbUser).Error; err != nil {
 				log.Printf("Error updating user '%s' to offline: %v", dbUser.Name, err)
 				continue
 			}
 
-			// Find their active ClientLog and mark it as offline
+			// Find and update their active ClientLog
 			var activeLog model.ClientLog
-			// Search for a log that was marked as online for this user.
 			if err := db.Where("user_id = ? AND is_online = ?", dbUser.ID, true).Last(&activeLog).Error; err == nil {
 				activeLog.IsOnline = false
 
-				// Finalize OnlineDuration based on its stored ConnectedSince (session start).
-				if activeLog.LastConnectionTime != nil { // This field stored ConnectedSince for the session
-					// Ensure duration is not negative if clocks are skewed or ConnectedSince was in future.
-					// Also, using 'now' (disconnect detection time) as end of session.
+				if activeLog.LastConnectionTime != nil {
 					sessionEndTime := now
 					if sessionEndTime.Before(*activeLog.LastConnectionTime) {
-						activeLog.OnlineDuration = 0 // Or log error, ConnectedSince is unexpectedly in future
+						activeLog.OnlineDuration = 0
 					} else {
 						activeLog.OnlineDuration = int64(sessionEndTime.Sub(*activeLog.LastConnectionTime).Seconds())
 					}
 				} else {
-					// If LastConnectionTime (ConnectedSince) was nil, duration might be suspect or 0.
-					// This case should be rare if logs are created correctly.
 					activeLog.OnlineDuration = 0
 				}
-				// TrafficUsage is already the last known cumulative for that session.
 
-				// Set the LastConnectionTime of the log to the actual disconnection time (when we noticed it).
-				// This field in ClientLog now represents "session ended at".
-                logDisconnectedTime := now
-                activeLog.LastConnectionTime = &logDisconnectedTime // Overwrite ConnectedSince with disconnect time
+				logDisconnectedTime := now
+				activeLog.LastConnectionTime = &logDisconnectedTime
 
 				if err := db.Save(&activeLog).Error; err != nil {
 					log.Printf("Error finalizing ClientLog for disconnected user '%s': %v", dbUser.Name, err)
@@ -185,27 +175,3 @@ func StartOpenVPNSyncService(db *gorm.DB, statusLogPath string, interval time.Du
 	}()
 }
 
-// Example of how it might be called in main.go (not part of this subtask's file changes)
-/*
-func main() {
-    // ... other initializations ...
-    database.Init() // Initialize DB
-    db := database.DB
-
-    // AutoMigrate models if you haven't already
-    // db.AutoMigrate(&model.User{}, &model.ClientLog{})
-
-    statusLog := "/var/log/openvpn/status.log" // Or from config
-    syncInterval := 5 * time.Minute          // Or from config
-
-    services.StartOpenVPNSyncService(db, statusLog, syncInterval)
-
-    // ... start your web server etc. ...
-	// select {} // Block main goroutine if needed
-}
-*/
-
-// Helper function (if needed, e.g. for more complex duration calculation, but time.Sub.Seconds() is fine)
-// func calculateDuration(startTime time.Time) int64 {
-// 	return int64(time.Since(startTime).Seconds())
-// }

@@ -8,7 +8,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Jancsitech/openvpn-web-ui/utils"
 )
 
 const (
@@ -138,8 +137,8 @@ func ParseStatusLog(logPath string) ([]OpenVPNClientStatus, time.Time, error) {
 					VirtualIPv6Address: virtualIPv6Address,
 					BytesReceived:      bytesReceived,
 					BytesSent:          bytesSent,
-					BytesReceivedFormatted: utils.FormatBytes(bytesReceived),
-					BytesSentFormatted:     utils.FormatBytes(bytesSent),
+					BytesReceivedFormatted: formatBytes(bytesReceived),
+					BytesSentFormatted:    formatBytes(bytesSent),
 					ConnectedSince:     connectedSince,
 					ConnectedSinceTimeT:connectedSinceEpoch,
 					ClientID:           clientIDStr,
@@ -273,4 +272,18 @@ func ParseClientStatus(commonName string) (*OpenVPNClientStatus, error) {
 	// If no client is found, return nil and no error, or a specific "not found" error.
 	// Returning nil, nil is common to indicate "not found" without it being a processing error.
 	return nil, nil
+}
+
+// formatBytes converts bytes to a human-readable string (e.g., "1.5 MB")
+func formatBytes(bytes int64) string {
+	const unit = 1024
+	if bytes < unit {
+		return fmt.Sprintf("%d B", bytes)
+	}
+	div, exp := int64(unit), 0
+	for n := bytes / unit; n >= unit; n /= unit {
+		div *= unit
+		exp++
+	}
+	return fmt.Sprintf("%.1f %cB", float64(bytes)/float64(div), "KMGTPE"[exp])
 }

@@ -6,13 +6,11 @@ import (
 	"openvpn-admin-go/middleware"
 	"openvpn-admin-go/model"
 	"openvpn-admin-go/openvpn"
-	"time" // Added
 
 	"github.com/gin-gonic/gin"
 	"os" // Added
 	"path/filepath" // Added
 	"strings" // Added
-	"log" // Added
 	"openvpn-admin-go/common" // Added
 	"openvpn-admin-go/constants" // Added
 )
@@ -139,15 +137,6 @@ func (c *ClientController) ListUsers(ctx *gin.Context) {
 		return
 	}
 
-	// 获取在线状态
-	statuses, err := openvpn.GetAllClientStatuses() // 使用 GetAllClientStatuses 而不是 ParseAllClientStatuses
-	if err != nil {
-		// 打印错误日志
-		log.Printf("Warning: Failed to get OpenVPN client statuses: %v", err)
-		// 如果获取状态失败，使用空列表继续处理
-		statuses = []openvpn.ClientStatus{}
-	}
-
 	var resp []gin.H
 	for _, u := range users {
 		userData := gin.H{
@@ -157,25 +146,19 @@ func (c *ClientController) ListUsers(ctx *gin.Context) {
 			"role":               u.Role,
 			"departmentId":       u.DepartmentID,
 			"creatorId":          u.CreatorID,
-			"lastConnectionTime": u.LastConnectionTime, // This is from DB, might be historical
-			"fixedIp":            u.FixedIP,            // From DB
+			"lastConnectionTime": u.LastConnectionTime,
+			"fixedIp":            u.FixedIP,
 			"createdAt":          u.CreatedAt,
 			"updatedAt":          u.UpdatedAt,
-			"isOnline":           false,
-			"connectionIp":       nil,
-			"allocatedVpnIp":     nil,
+			"isOnline":           u.IsOnline,
+			"connectionIp":       u.RealAddress,
+			"allocatedVpnIp":     u.VirtualAddress,
+			"bytesReceived":      u.BytesReceived,
+			"bytesSent":          u.BytesSent,
+			"onlineDuration":     u.OnlineDuration,
+			"connectedSince":     u.ConnectedSince,
+			"lastRef":            u.LastRef,
 		}
-
-		// 检查用户是否在线
-		for _, status := range statuses {
-			if status.CommonName == u.Name { // Corrected: u.ID to u.Name
-				userData["isOnline"] = true
-				userData["connectionIp"] = status.RealAddress
-				userData["allocatedVpnIp"] = status.VirtualAddress
-				break
-			}
-		}
-
 		resp = append(resp, userData)
 	}
 	ctx.JSON(http.StatusOK, resp)
@@ -371,198 +354,17 @@ func (c *ClientController) DeleteUser(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"message": "user deleted successfully"})
 }
 
-// UserClientStatusDetailed combines user data with OpenVPN client status
-type UserClientStatusDetailed struct {
-	// Fields from model.User (excluding PasswordHash)
-	ID                 string     `json:"id"`
-	Name               string     `json:"name"`
-	Email              string     `json:"email"`
-	Role               model.Role `json:"role"`
-	DepartmentID       string     `json:"departmentId,omitempty"`
-	CreatorID          string     `json:"creatorId,omitempty"`
-	FixedIP            string     `json:"fixedIp,omitempty"`
-	CreatedAt          time.Time  `json:"createdAt"`
-	UpdatedAt          time.Time  `json:"updatedAt"`
-	DBIsOnline         bool       `json:"dbIsOnline"` // User.IsOnline from DB
-	DBLastConnectionTime *time.Time `json:"dbLastConnectionTime,omitempty"`
-
-	// Fields from openvpn.OpenVPNClientStatus
-	ClientCommonName      string    `json:"clientCommonName"` // This is status.CommonName (user.Name)
-	RealAddress           string    `json:"realAddress,omitempty"`
-	VirtualAddress        string    `json:"virtualAddress,omitempty"`
-	BytesReceived         int64     `json:"bytesReceived"`
-	BytesSent             int64     `json:"bytesSent"`
-	ConnectedSince        time.Time `json:"connectedSince,omitempty"`
-	LastRef               time.Time `json:"lastRef,omitempty"`
-	LiveIsOnline          bool      `json:"liveIsOnline"` // status.IsOnline from status log
-	OnlineDurationSeconds int64     `json:"onlineDurationSeconds"`
-}
-
-// GetDetailedClientStatuses godoc
-// @Summary Get detailed status for all OpenVPN clients including user data
-// @Description Retrieves a list of all clients with live data and associated user details.
-// @Tags Client
-// @Produce json
-// @Security ApiKeyAuth
-// @Success 200 {array} UserClientStatusDetailed "List of detailed client statuses"
-// @Failure 500 {object} gin.H "Error message"
-// @Router /client/status/detailed [get]
-func (cc *ClientController) GetDetailedClientStatuses(c *gin.Context) {
-	parsedStatuses, err := openvpn.ParseAllClientStatuses() // From openvpn/status_parser.go
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse client statuses: " + err.Error()})
-		return
-	}
-
-	if parsedStatuses == nil {
-		parsedStatuses = []openvpn.OpenVPNClientStatus{}
-	}
-
-	var detailedStatuses []UserClientStatusDetailed
-
-	for _, status := range parsedStatuses {
-		var user model.User
-		// Query user by name, as status.CommonName is now user.Name
-		dbErr := database.DB.Where("name = ?", status.CommonName).First(&user).Error
-
-		item := UserClientStatusDetailed{
-			ClientCommonName:      status.CommonName,
-			RealAddress:           status.RealAddress,
-			VirtualAddress:        status.VirtualAddress,
-			BytesReceived:         status.BytesReceived,
-			BytesSent:             status.BytesSent,
-			ConnectedSince:        status.ConnectedSince,
-			LastRef:               status.LastRef,
-			LiveIsOnline:          status.IsOnline,
-			OnlineDurationSeconds: status.OnlineDurationSeconds,
-		}
-
-		if dbErr == nil { // User found
-			item.ID = user.ID
-			item.Name = user.Name // Should be same as status.CommonName if matched
-			item.Email = user.Email
-			item.Role = user.Role
-			item.DepartmentID = user.DepartmentID
-			item.CreatorID = user.CreatorID
-			item.FixedIP = user.FixedIP
-			item.CreatedAt = user.CreatedAt
-			item.UpdatedAt = user.UpdatedAt
-			item.DBIsOnline = user.IsOnline
-			item.DBLastConnectionTime = user.LastConnectionTime
-		}
-		detailedStatuses = append(detailedStatuses, item)
-	}
-	c.JSON(http.StatusOK, detailedStatuses)
-}
-
-// GetClientList 获取客户端列表
-func (c *ClientController) GetClientList(ctx *gin.Context) {
-	statuses, err := openvpn.GetAllClientStatuses()
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-	ctx.JSON(http.StatusOK, statuses)
-}
-
-// GetLiveConnections godoc
-// @Summary Get all currently connected OpenVPN clients' live status
-// @Description Retrieves a list of all clients currently connected to the OpenVPN server with live data like IP, duration, data transfer.
-// @Tags Client
-// @Produce json
-// @Security ApiKeyAuth
-// @Success 200 {array} openvpn.OpenVPNClientStatus "List of live client statuses"
-// @Failure 500 {object} gin.H "Error message"
-// @Router /client/status/live [get]
-func (c *ClientController) GetLiveConnections(ctx *gin.Context) {
-	statuses, err := openvpn.GetAllClientStatuses()
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get client statuses: " + err.Error()})
-		return
-	}
-	if statuses == nil { // Handle case where parsing might return nil, nil
-		statuses = []openvpn.ClientStatus{}
-	}
-	ctx.JSON(http.StatusOK, statuses)
-}
-
-// AddClient 添加客户端 (generates certs for an existing user, invoked via /client/:userId/actions/create-config)
-func (c *ClientController) AddClient(ctx *gin.Context) {
-	userId := ctx.Param("userId")
-	if userId == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "userId path parameter is required"})
-		return
-	}
-
-	// Fetch user by ID
-	var user model.User
-	if err := database.DB.First(&user, "id = ?", userId).Error; err != nil {
-		ctx.JSON(http.StatusNotFound, gin.H{"success": false, "error": "user not found"})
-		return
-	}
-
-	if err := openvpn.CreateClient(user.Name); err != nil { // Use user.Name
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-	ctx.JSON(http.StatusOK, gin.H{"message": "Client config created successfully for user " + user.Name})
-}
-
-// UpdateClient 更新客户端 (regenerates certs, invoked via /client/:userId/actions/update-config)
-func (c *ClientController) UpdateClient(ctx *gin.Context) {
-	userId := ctx.Param("userId")
-	if userId == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "userId path parameter is required"})
-		return
-	}
-	// Fetch user by ID
-	var user model.User
-	if err := database.DB.First(&user, "id = ?", userId).Error; err != nil {
-		ctx.JSON(http.StatusNotFound, gin.H{"success": false, "error": "user not found"})
-		return
-	}
-
-	// 更新客户端实际上就是重新生成证书和配置
-	if err := openvpn.CreateClient(user.Name); err != nil { // Use user.Name
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-	ctx.JSON(http.StatusOK, gin.H{"message": "Client config updated successfully for user " + user.Name})
-}
-
-// DeleteClient 删除客户端
-func (c *ClientController) DeleteClient(ctx *gin.Context) {
-	userId := ctx.Param("userId") // Changed from username to userId
-	if userId == "" { // Basic validation
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "userId is required"})
-		return
-	}
-
-	// Fetch user by ID
-	var user model.User
-	if err := database.DB.First(&user, "id = ?", userId).Error; err != nil {
-		ctx.JSON(http.StatusNotFound, gin.H{"success": false, "error": "user not found"})
-		return
-	}
-
-	if err := openvpn.DeleteClient(user.Name); err != nil { // Use user.Name
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-	ctx.JSON(http.StatusOK, gin.H{"message": "Client deleted successfully"})
-}
-
 // GetClientConfig 获取客户端配置
 func (c *ClientController) GetClientConfig(ctx *gin.Context) {
-	userId := ctx.Param("userId") // Changed from username to userId
-	if userId == "" { // Basic validation
+	username := ctx.Param("username") // Changed from username to userId
+	if username == "" { // Basic validation
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "userId is required"})
 		return
 	}
 
 	// Fetch user by ID
 	var user model.User
-	if err := database.DB.First(&user, "id = ?", userId).Error; err != nil {
+	if err := database.DB.First(&user, "name = ?", username).Error; err != nil {
 		ctx.JSON(http.StatusNotFound, gin.H{"success": false, "error": "user not found"})
 		return
 	}
@@ -592,143 +394,3 @@ func (c *ClientController) GetClientConfig(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"config": config})
 }
 
-// RevokeClient 吊销客户端证书 (invoked via /client/:userId/actions/revoke-config)
-func (c *ClientController) RevokeClient(ctx *gin.Context) {
-	userId := ctx.Param("userId")
-	if userId == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "userId path parameter is required"})
-		return
-	}
-
-	// Fetch user by ID
-	var user model.User
-	if err := database.DB.First(&user, "id = ?", userId).Error; err != nil {
-		ctx.JSON(http.StatusNotFound, gin.H{"success": false, "error": "user not found"})
-		return
-	}
-
-	if err := openvpn.DeleteClient(user.Name); err != nil { // Use user.Name
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-	ctx.JSON(http.StatusOK, gin.H{"message": "Client certificate revoked successfully for user " + user.Name})
-}
-
-// RenewClient 续期客户端证书 (invoked via /client/:userId/actions/renew-config)
-func (c *ClientController) RenewClient(ctx *gin.Context) {
-	userId := ctx.Param("userId")
-	if userId == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "userId path parameter is required"})
-		return
-	}
-
-	// Fetch user by ID
-	var user model.User
-	if err := database.DB.First(&user, "id = ?", userId).Error; err != nil {
-		ctx.JSON(http.StatusNotFound, gin.H{"success": false, "error": "user not found"})
-		return
-	}
-
-	// 续期证书实际上就是重新生成证书和配置
-	if err := openvpn.CreateClient(user.Name); err != nil { // Use user.Name
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-	ctx.JSON(http.StatusOK, gin.H{"message": "Client certificate renewed successfully for user " + user.Name})
-}
-
-// GetClientStatus 获取客户端状态
-func (c *ClientController) GetClientStatus(ctx *gin.Context) {
-	userId := ctx.Param("userId") // Changed from username to userId
-	if userId == "" { // Basic validation
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "userId is required"})
-		return
-	}
-
-	// Fetch user by ID
-	var user model.User
-	if err := database.DB.First(&user, "id = ?", userId).Error; err != nil {
-		ctx.JSON(http.StatusNotFound, gin.H{"success": false, "error": "user not found"})
-		return
-	}
-
-	claims := ctx.MustGet("claims").(*middleware.Claims)
-	// In the original code, claims.UserID is compared with username.
-	// Assuming claims.UserID is the actual user ID.
-	if claims.Role == string(model.RoleUser) && claims.UserID != user.ID {
-		ctx.JSON(http.StatusForbidden, gin.H{"error": "forbidden"})
-		return
-	}
-
-	status, err := openvpn.GetClientStatus(user.Name) // Use user.Name
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-	if status == nil {
-		ctx.JSON(http.StatusNotFound, gin.H{"error": "Client not found"})
-		return
-	}
-	ctx.JSON(http.StatusOK, status)
-}
-
-// GetAllClientStatuses 获取所有客户端状态
-func (c *ClientController) GetAllClientStatuses(ctx *gin.Context) {
-	// 只有管理员和部门负责人可以查看所有状态
-	// 路由已限制，此处无需重复检查
-	statuses, err := openvpn.GetAllClientStatuses()
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get client statuses: " + err.Error()})
-		return
-	}
-	if statuses == nil {
-		// Ensure an empty array is returned instead of null if no statuses are found
-		ctx.JSON(http.StatusOK, []openvpn.OpenVPNClientStatus{})
-		return
-	}
-	ctx.JSON(http.StatusOK, statuses)
-}
-
-// PauseClient 暂停客户端连接
-func (c *ClientController) PauseClient(ctx *gin.Context) {
-	userId := ctx.Param("userId") // Changed from username to userId
-	if userId == "" { // Basic validation
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "userId is required"})
-		return
-	}
-
-	// Fetch user by ID
-	var user model.User
-	if err := database.DB.First(&user, "id = ?", userId).Error; err != nil {
-		ctx.JSON(http.StatusNotFound, gin.H{"success": false, "error": "user not found"})
-		return
-	}
-
-	if err := openvpn.PauseClient(user.Name); err != nil { // Use user.Name
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-	ctx.JSON(http.StatusOK, gin.H{"message": "Client paused successfully"})
-}
-
-// ResumeClient 恢复客户端连接
-func (c *ClientController) ResumeClient(ctx *gin.Context) {
-	userId := ctx.Param("userId") // Changed from username to userId
-	if userId == "" { // Basic validation
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "userId is required"})
-		return
-	}
-
-	// Fetch user by ID
-	var user model.User
-	if err := database.DB.First(&user, "id = ?", userId).Error; err != nil {
-		ctx.JSON(http.StatusNotFound, gin.H{"success": false, "error": "user not found"})
-		return
-	}
-
-	if err := openvpn.ResumeClient(user.Name); err != nil { // Use user.Name
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-	ctx.JSON(http.StatusOK, gin.H{"message": "Client resumed successfully"})
-}

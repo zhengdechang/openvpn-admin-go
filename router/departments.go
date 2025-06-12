@@ -28,6 +28,4 @@ func SetupManageRoutes(r *gin.RouterGroup) {
 		dep.DELETE("/:id", depCtrl.DeleteDepartment)
 	}
 
-	userCtrl := &controller.AdminUserController{}
-	// 用户管理 routes have been moved to router/client.go
 }

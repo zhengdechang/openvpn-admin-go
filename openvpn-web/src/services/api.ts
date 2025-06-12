@@ -446,24 +446,24 @@ export const departmentAPI = {
 // 用户管理 API
 export const userManagementAPI = {
   list: async (): Promise<AdminUser[]> => {
-    const response = await api.get<AdminUser[]>("/api/users");
+    const response = await api.get<AdminUser[]>("/api/client");
     return response.data;
   },
   create: async (
     user: Partial<AdminUser> & { password: string }
   ): Promise<any> => {
-    const response = await api.post("/api/users", user);
+    const response = await api.post("/api/client", user);
     return response.data;
   },
   update: async (
     id: string,
     data: UserUpdateRequest // Changed to use UserUpdateRequest
   ): Promise<AdminUser> => { // Changed return type
-    const response = await api.put<AdminUser>(`/api/users/${id}`, data); // Assuming backend returns AdminUser
+    const response = await api.put<AdminUser>(`/api/client/${id}`, data); // Assuming backend returns AdminUser
     return response.data;
   },
   delete: async (id: string): Promise<any> => {
-    const response = await api.delete(`/api/users/${id}`);
+    const response = await api.delete(`/api/client/${id}`);
     return response.data;
   },
 };
