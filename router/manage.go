@@ -29,22 +29,5 @@ func SetupManageRoutes(r *gin.RouterGroup) {
 	}
 
 	userCtrl := &controller.AdminUserController{}
-	// 用户管理: superadmin, admin, manager, user
-	usr := r.Group("/users")
-	usr.Use(
-		middleware.JWTAuthMiddleware(),
-		middleware.RoleRequired(
-			string(model.RoleSuperAdmin),
-			string(model.RoleAdmin),
-			string(model.RoleManager),
-			string(model.RoleUser),
-		),
-	)
-	{
-		usr.POST("", userCtrl.CreateUser)
-		usr.GET("", userCtrl.ListUsers)
-		usr.GET("/:id", userCtrl.GetUser)
-		usr.PUT("/:id", userCtrl.UpdateUser)
-		usr.DELETE("/:id", userCtrl.DeleteUser)
-	}
+	// 用户管理 routes have been moved to router/client.go
 }
