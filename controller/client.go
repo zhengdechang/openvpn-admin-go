@@ -131,13 +131,21 @@ func (c *ClientController) GetLiveConnections(ctx *gin.Context) {
 // AddClient 添加客户端
 func (c *ClientController) AddClient(ctx *gin.Context) {
 	var client struct {
-		Username string `json:"username" binding:"required"`
+		UserID string `json:"userId" binding:"required"` // Changed from Username to UserID
 	}
 	if err := ctx.ShouldBindJSON(&client); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	if err := openvpn.CreateClient(client.Username); err != nil {
+
+	// Fetch user by ID
+	var user model.User
+	if err := database.DB.First(&user, "id = ?", client.UserID).Error; err != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"success": false, "error": "user not found"})
+		return
+	}
+
+	if err := openvpn.CreateClient(user.Name); err != nil { // Use user.Name
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -163,12 +171,20 @@ func (c *ClientController) UpdateClient(ctx *gin.Context) {
 
 // DeleteClient 删除客户端
 func (c *ClientController) DeleteClient(ctx *gin.Context) {
-	username := ctx.Param("username")
-	if username == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Username is required"})
+	userId := ctx.Param("userId") // Changed from username to userId
+	if userId == "" { // Basic validation
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "userId is required"})
 		return
 	}
-	if err := openvpn.DeleteClient(username); err != nil {
+
+	// Fetch user by ID
+	var user model.User
+	if err := database.DB.First(&user, "id = ?", userId).Error; err != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"success": false, "error": "user not found"})
+		return
+	}
+
+	if err := openvpn.DeleteClient(user.Name); err != nil { // Use user.Name
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -177,25 +193,37 @@ func (c *ClientController) DeleteClient(ctx *gin.Context) {
 
 // GetClientConfig 获取客户端配置
 func (c *ClientController) GetClientConfig(ctx *gin.Context) {
-	username := ctx.Param("username")
-	if username == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Username is required"})
+	userId := ctx.Param("userId") // Changed from username to userId
+	if userId == "" { // Basic validation
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "userId is required"})
 		return
 	}
+
+	// Fetch user by ID
+	var user model.User
+	if err := database.DB.First(&user, "id = ?", userId).Error; err != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"success": false, "error": "user not found"})
+		return
+	}
+
 	// 加载配置
 	cfg, err := openvpn.LoadConfig()
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
 	// 权限检查: 普通用户仅能下载自己的配置
 	claims := ctx.MustGet("claims").(*middleware.Claims)
-	if claims.Role == string(model.RoleUser) && claims.UserID != username {
+	// In the original code, claims.UserID is compared with username.
+	// Assuming claims.UserID is the actual user ID.
+	if claims.Role == string(model.RoleUser) && claims.UserID != user.ID {
 		ctx.JSON(http.StatusForbidden, gin.H{"error": "forbidden"})
 		return
 	}
+
 	// 生成客户端配置
-	config, err := openvpn.GenerateClientConfig(username, cfg)
+	config, err := openvpn.GenerateClientConfig(user.Name, cfg) // Use user.Name
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -206,13 +234,21 @@ func (c *ClientController) GetClientConfig(ctx *gin.Context) {
 // RevokeClient 吊销客户端证书
 func (c *ClientController) RevokeClient(ctx *gin.Context) {
 	var client struct {
-		Username string `json:"username" binding:"required"`
+		UserID string `json:"userId" binding:"required"` // Changed from Username to UserID
 	}
 	if err := ctx.ShouldBindJSON(&client); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	if err := openvpn.DeleteClient(client.Username); err != nil {
+
+	// Fetch user by ID
+	var user model.User
+	if err := database.DB.First(&user, "id = ?", client.UserID).Error; err != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"success": false, "error": "user not found"})
+		return
+	}
+
+	if err := openvpn.DeleteClient(user.Name); err != nil { // Use user.Name
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -222,14 +258,22 @@ func (c *ClientController) RevokeClient(ctx *gin.Context) {
 // RenewClient 续期客户端证书
 func (c *ClientController) RenewClient(ctx *gin.Context) {
 	var client struct {
-		Username string `json:"username" binding:"required"`
+		UserID string `json:"userId" binding:"required"` // Changed from Username to UserID
 	}
 	if err := ctx.ShouldBindJSON(&client); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
+	// Fetch user by ID
+	var user model.User
+	if err := database.DB.First(&user, "id = ?", client.UserID).Error; err != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"success": false, "error": "user not found"})
+		return
+	}
+
 	// 续期证书实际上就是重新生成证书和配置
-	if err := openvpn.CreateClient(client.Username); err != nil {
+	if err := openvpn.CreateClient(user.Name); err != nil { // Use user.Name
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -238,17 +282,28 @@ func (c *ClientController) RenewClient(ctx *gin.Context) {
 
 // GetClientStatus 获取客户端状态
 func (c *ClientController) GetClientStatus(ctx *gin.Context) {
-	username := ctx.Param("username")
-	if username == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Username is required"})
+	userId := ctx.Param("userId") // Changed from username to userId
+	if userId == "" { // Basic validation
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "userId is required"})
 		return
 	}
+
+	// Fetch user by ID
+	var user model.User
+	if err := database.DB.First(&user, "id = ?", userId).Error; err != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"success": false, "error": "user not found"})
+		return
+	}
+
 	claims := ctx.MustGet("claims").(*middleware.Claims)
-	if claims.Role == string(model.RoleUser) && claims.UserID != username {
+	// In the original code, claims.UserID is compared with username.
+	// Assuming claims.UserID is the actual user ID.
+	if claims.Role == string(model.RoleUser) && claims.UserID != user.ID {
 		ctx.JSON(http.StatusForbidden, gin.H{"error": "forbidden"})
 		return
 	}
-	status, err := openvpn.GetClientStatus(username)
+
+	status, err := openvpn.GetClientStatus(user.Name) // Use user.Name
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -279,12 +334,20 @@ func (c *ClientController) GetAllClientStatuses(ctx *gin.Context) {
 
 // PauseClient 暂停客户端连接
 func (c *ClientController) PauseClient(ctx *gin.Context) {
-	username := ctx.Param("username")
-	if username == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Username is required"})
+	userId := ctx.Param("userId") // Changed from username to userId
+	if userId == "" { // Basic validation
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "userId is required"})
 		return
 	}
-	if err := openvpn.PauseClient(username); err != nil {
+
+	// Fetch user by ID
+	var user model.User
+	if err := database.DB.First(&user, "id = ?", userId).Error; err != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"success": false, "error": "user not found"})
+		return
+	}
+
+	if err := openvpn.PauseClient(user.Name); err != nil { // Use user.Name
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -293,12 +356,20 @@ func (c *ClientController) PauseClient(ctx *gin.Context) {
 
 // ResumeClient 恢复客户端连接
 func (c *ClientController) ResumeClient(ctx *gin.Context) {
-	username := ctx.Param("username")
-	if username == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Username is required"})
+	userId := ctx.Param("userId") // Changed from username to userId
+	if userId == "" { // Basic validation
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "userId is required"})
 		return
 	}
-	if err := openvpn.ResumeClient(username); err != nil {
+
+	// Fetch user by ID
+	var user model.User
+	if err := database.DB.First(&user, "id = ?", userId).Error; err != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"success": false, "error": "user not found"})
+		return
+	}
+
+	if err := openvpn.ResumeClient(user.Name); err != nil { // Use user.Name
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
