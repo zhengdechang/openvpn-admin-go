@@ -12,8 +12,6 @@ import {
   ServerStatus,
   AdminUser,
   Department,
-  PaginatedClientLogs, // Added import
-  ClientLog, // Added import
   LiveClientConnection, // Added import for live connections
   UserUpdateRequest, // Added for user update payload
 } from "@/types";
@@ -325,69 +323,15 @@ export const openvpnAPI = {
     const response = await api.get<{ logs: string }>("/api/logs/server");
     return response.data.logs;
   },
+  // 获取客户端日志
+  getClientLogs: async (): Promise<string> => {
+    const response = await api.get<{ logs: string }>("/api/logs/client");
+    return response.data.logs;
+  },
   // 获取实时客户端连接
   getLiveClientConnections: async (): Promise<LiveClientConnection[]> => {
     const response = await api.get<LiveClientConnection[]>("/api/client/status/live");
     return response.data;
-  },
-  // 获取指定客户端日志 (New paginated version)
-  getClientLogs: async (
-    page: number,
-    pageSize: number,
-    username?: string
-  ): Promise<ApiResponse<PaginatedClientLogs>> => {
-    try {
-      const params: { page: number; pageSize: number; username?: string } = {
-        page,
-        pageSize,
-      };
-      if (username) {
-        params.username = username;
-      }
-      const response = await api.get("/api/logs/client", { params });
-      return response.data;
-    } catch (error: any) {
-      return {
-        success: false,
-        error: error.response?.data?.error || "Failed to fetch client logs",
-      };
-    }
-  },
-
-  // 创建客户端日志条目
-  createClientLog: async (logData: {
-    userId: string;
-    isOnline: boolean;
-    onlineDuration: number; // in seconds
-    trafficUsage: number; // in bytes
-    lastConnectionTime?: Date | string; // Allow Date object or ISO string
-  }): Promise<ApiResponse<ClientLog>> => {
-    try {
-      // Ensure lastConnectionTime is in a format the backend expects (e.g., ISO string)
-      const payload = {
-        ...logData,
-        last_connection_time: logData.lastConnectionTime instanceof Date
-          ? logData.lastConnectionTime.toISOString()
-          : logData.lastConnectionTime,
-        user_id: logData.userId, // Ensure backend field name consistency
-        online_duration: logData.onlineDuration,
-        traffic_usage: logData.trafficUsage,
-        is_online: logData.isOnline,
-      };
-      // Remove the original camelCase key if it's different from snake_case for lastConnectionTime
-      if ('lastConnectionTime' in payload && payload.lastConnectionTime !== payload.last_connection_time) {
-        delete (payload as any).lastConnectionTime;
-      }
-
-
-      const response = await api.post("/api/logs/client", payload);
-      return response.data;
-    } catch (error: any) {
-      return {
-        success: false,
-        error: error.response?.data?.error || "Failed to create client log",
-      };
-    }
   },
 };
 

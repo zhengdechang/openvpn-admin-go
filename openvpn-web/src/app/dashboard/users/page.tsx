@@ -37,6 +37,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label"; // Added Label
 import { toast } from "sonner";
 
+// Helper function to format bytes into a readable string
+const formatBytes = (bytes?: number, decimals = 2): string => {
+  if (bytes === undefined || bytes === null || bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const dm = decimals < 0 ? 0 : decimals;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+};
+
 // Define initial state for the edit form
 const initialEditFormState: UserUpdateRequest = {
   name: "",
@@ -608,6 +618,8 @@ export default function UsersPage() {
                         {t("dashboard.users.columnOnlineStatus")}
                       </TableHead>
                       <TableHead className="w-[120px]">{t("dashboard.users.columnCreator")}</TableHead>
+                      <TableHead className="w-[120px]">{t("dashboard.users.columnBytesReceived", "Bytes Received")}</TableHead>
+                      <TableHead className="w-[120px]">{t("dashboard.users.columnBytesSent", "Bytes Sent")}</TableHead>
                       <TableHead className="w-[250px] sticky right-0 bg-background shadow-[-4px_0_8px_rgba(0,0,0,0.2)]">
                         {t("dashboard.users.columnActions")}
                       </TableHead>
@@ -646,6 +658,8 @@ export default function UsersPage() {
                           {users.find((creator) => creator.id === u.creatorId)
                             ?.name || t("common.na")}
                         </TableCell>
+                        <TableCell>{formatBytes(u.bytesReceived)}</TableCell>
+                        <TableCell>{formatBytes(u.bytesSent)}</TableCell>
                         <TableCell className="sticky right-0 bg-background shadow-[-4px_0_8px_rgba(0,0,0,0.1)]">
                           <div className="flex items-center justify-center gap-1">
                             {(currentUser?.role === UserRole.ADMIN ||

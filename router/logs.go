@@ -15,8 +15,6 @@ func SetupLogRoutes(r *gin.RouterGroup) {
    logs.Use(middleware.JWTAuthMiddleware())
    {
        logs.GET("/server", logCtrl.GetServerLogs)
-       // Routes for client logs
-       logs.POST("/client", controller.CreateClientLog)
-       logs.GET("/client", controller.GetClientLogs)
+       logs.GET("/client", logCtrl.GetClientLogs)
    }
 }
