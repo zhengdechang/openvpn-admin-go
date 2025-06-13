@@ -66,46 +66,6 @@ func RunSyncCycle(db *gorm.DB, statusLogPath string) {
 			log.Printf("Error updating user '%s' status: %v", user.Name, err)
 			continue
 		}
-
-		// Create or Update ClientLog
-		var clientLog model.ClientLog
-		logResult := db.Where("user_id = ? AND is_online = ?", user.ID, true).Last(&clientLog)
-
-		currentTraffic := clientStatus.BytesReceived + clientStatus.BytesSent
-
-		if logResult.Error == gorm.ErrRecordNotFound {
-			newLog := model.ClientLog{
-				UserID:         user.ID,
-				IsOnline:       clientStatus.IsOnline,
-				RealAddress:    clientStatus.RealAddress,
-				OnlineDuration: clientStatus.OnlineDurationSeconds,
-				TrafficUsage:   currentTraffic,
-			}
-			if !clientStatus.ConnectedSince.IsZero() {
-				newLog.LastConnectionTime = &clientStatus.ConnectedSince
-			}
-			if err := db.Create(&newLog).Error; err != nil {
-				log.Printf("Error creating new ClientLog for user '%s': %v", user.Name, err)
-			} else {
-				log.Printf("Created new ClientLog for user '%s'. RealAddress: %s", user.Name, newLog.RealAddress)
-			}
-		} else if logResult.Error == nil {
-			clientLog.IsOnline = clientStatus.IsOnline
-			clientLog.RealAddress = clientStatus.RealAddress
-			clientLog.OnlineDuration = clientStatus.OnlineDurationSeconds
-			clientLog.TrafficUsage = currentTraffic
-
-			if !clientStatus.ConnectedSince.IsZero() &&
-				(clientLog.LastConnectionTime == nil || (*clientLog.LastConnectionTime != clientStatus.ConnectedSince && clientStatus.IsOnline)) {
-				clientLog.LastConnectionTime = &clientStatus.ConnectedSince
-			}
-
-			if err := db.Save(&clientLog).Error; err != nil {
-				log.Printf("Error updating active ClientLog for user '%s': %v", user.Name, err)
-			}
-		} else {
-			log.Printf("Error fetching ClientLog for user '%s': %v", user.Name, logResult.Error)
-		}
 	}
 
 	// --- Step 3: Process users who were in DB as online but are no longer in status log (disconnected) ---
@@ -127,34 +87,6 @@ func RunSyncCycle(db *gorm.DB, statusLogPath string) {
 			if err := db.Save(&dbUser).Error; err != nil {
 				log.Printf("Error updating user '%s' to offline: %v", dbUser.Name, err)
 				continue
-			}
-
-			// Find and update their active ClientLog
-			var activeLog model.ClientLog
-			if err := db.Where("user_id = ? AND is_online = ?", dbUser.ID, true).Last(&activeLog).Error; err == nil {
-				activeLog.IsOnline = false
-
-				if activeLog.LastConnectionTime != nil {
-					sessionEndTime := now
-					if sessionEndTime.Before(*activeLog.LastConnectionTime) {
-						activeLog.OnlineDuration = 0
-					} else {
-						activeLog.OnlineDuration = int64(sessionEndTime.Sub(*activeLog.LastConnectionTime).Seconds())
-					}
-				} else {
-					activeLog.OnlineDuration = 0
-				}
-
-				logDisconnectedTime := now
-				activeLog.LastConnectionTime = &logDisconnectedTime
-
-				if err := db.Save(&activeLog).Error; err != nil {
-					log.Printf("Error finalizing ClientLog for disconnected user '%s': %v", dbUser.Name, err)
-				} else {
-					log.Printf("Finalized ClientLog for disconnected user '%s'. Duration: %d s, Traffic: %d bytes, RealAddress: %s", dbUser.Name, activeLog.OnlineDuration, activeLog.TrafficUsage, activeLog.RealAddress)
-				}
-			} else if err != gorm.ErrRecordNotFound {
-				log.Printf("Error finding active ClientLog for disconnected user '%s': %v", dbUser.Name, err)
 			}
 		}
 	}

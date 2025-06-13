@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 // Ensure LiveClientConnection is imported
-import { ClientLog, PaginatedClientLogs, LiveClientConnection } from "@/types/types";
+import { LiveClientConnection } from "@/types/types";
 import {
   Table,
   TableHeader,
@@ -49,14 +49,6 @@ export default function LogsPage() {
   const [serverLogs, setServerLogs] = useState<string>("");
   const [loadingServer, setLoadingServer] = useState(true);
 
-  const [clientApiLogs, setClientApiLogs] = useState<ClientLog[]>([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-  const [totalLogs, setTotalLogs] = useState(0);
-  const [loadingClientLogs, setLoadingClientLogs] = useState(true);
-  const [filterUsername, setFilterUsername] = useState<string>("");
-  const [searchInputUsername, setSearchInputUsername] = useState<string>("");
-
   // New state for Live Client Connections
   const [liveConnections, setLiveConnections] = useState<LiveClientConnection[]>([]);
   const [loadingLiveConnections, setLoadingLiveConnections] = useState(true);
@@ -77,35 +69,6 @@ export default function LogsPage() {
     };
     fetchServerLogs();
   }, [t]);
-
-  // Fetch client API logs (existing useEffect)
-  useEffect(() => {
-    const fetchClientApiLogs = async () => {
-      setLoadingClientLogs(true);
-      try {
-        const response = await openvpnAPI.getClientLogs(
-          currentPage,
-          pageSize,
-          filterUsername.trim() === "" ? undefined : filterUsername.trim()
-        );
-        if (response.success && response.data) {
-          setClientApiLogs(response.data.data || []);
-          setTotalLogs(response.data.total || 0);
-        } else {
-          toast.error(response.error || t("dashboard.logs.fetchClientLogsError"));
-          setClientApiLogs([]);
-          setTotalLogs(0);
-        }
-      } catch (error) {
-        toast.error(t("dashboard.logs.fetchClientLogsError"));
-        setClientApiLogs([]);
-        setTotalLogs(0);
-      } finally {
-        setLoadingClientLogs(false);
-      }
-    };
-    fetchClientApiLogs();
-  }, [currentPage, pageSize, filterUsername, t]);
 
   // New useEffect for fetching live client connections
   const fetchLiveConnections = useCallback(async () => {
@@ -130,13 +93,6 @@ export default function LogsPage() {
   //    return () => clearInterval(intervalId); // Cleanup on unmount
   // }, [fetchLiveConnections]);
 
-
-  const handleSearchUsername = () => {
-    setCurrentPage(1);
-    setFilterUsername(searchInputUsername);
-  };
-
-  const totalPages = Math.ceil(totalLogs / pageSize);
 
   return (
     <MainLayout className="p-4 space-y-6">
@@ -205,104 +161,6 @@ export default function LogsPage() {
           )}
         </CardContent>
       </Card> */}
-
-      {/* Client API Logs Card (existing) */}
-      <Card>
-        <CardHeader>
-          <CardTitle>{t("dashboard.logs.clientConnectionLogsTitle")}</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {/* ... existing content for client API logs ... */}
-           <div className="flex items-center space-x-2 mb-4">
-             <Input
-               placeholder={t("dashboard.logs.filterByUsernamePlaceholder")}
-               value={searchInputUsername}
-               onChange={(e) => setSearchInputUsername(e.target.value)}
-               onKeyPress={(e) => e.key === 'Enter' && handleSearchUsername()}
-             />
-             <Button onClick={handleSearchUsername}>
-               {t("dashboard.logs.searchButton")}
-             </Button>
-             <select
-               value={pageSize}
-               onChange={(e) => {
-                 setPageSize(Number(e.target.value));
-                 setCurrentPage(1);
-               }}
-               className="border px-2 py-2 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-             >
-               {[10, 25, 50, 100].map(size => (
-                 <option key={size} value={size}>
-                   {t("dashboard.logs.showEntries", { count: size })}
-                 </option>
-               ))}
-             </select>
-           </div>
-
-           {loadingClientLogs ? (
-             <p>{t("common.loading")}</p>
-           ) : !clientApiLogs || clientApiLogs.length === 0 ? (
-             <p>{t("dashboard.logs.noClientConnectionLogs")}</p>
-           ) : (
-             <>
-               <Table>
-                 <TableHeader>
-                   <TableRow>
-                     <TableHead>{t("dashboard.logs.columnUserId")}</TableHead>
-                     <TableHead>{t("dashboard.logs.columnOnlineStatus")}</TableHead>
-                     <TableHead>{t("dashboard.logs.columnOnlineDuration")}</TableHead>
-                     <TableHead>{t("dashboard.logs.columnTrafficUsage")}</TableHead>
-                     <TableHead>{t("dashboard.logs.columnLastConnectionTime")}</TableHead>
-                     <TableHead>{t("dashboard.logs.columnLogCreatedAt")}</TableHead>
-                   </TableRow>
-                 </TableHeader>
-                 <TableBody>
-                   {clientApiLogs.map((log) => (
-                     <TableRow key={log.id}>
-                       <TableCell>{log.userId}</TableCell>
-                       <TableCell>
-                         {log.isOnline
-                           ? t("dashboard.logs.statusOnline")
-                           : t("dashboard.logs.statusOffline")}
-                       </TableCell>
-                       <TableCell>{formatDuration(log.onlineDuration)}</TableCell>
-                       <TableCell>{formatBytes(log.trafficUsage)}</TableCell>
-                       <TableCell>
-                         {log.lastConnectionTime
-                           ? new Date(log.lastConnectionTime).toLocaleString()
-                           : t("common.na")}
-                       </TableCell>
-                       <TableCell>{new Date(log.createdAt).toLocaleString()}</TableCell>
-                     </TableRow>
-                   ))}
-                 </TableBody>
-               </Table>
-               <div className="flex justify-between items-center mt-4">
-                 <div>
-                   <Button
-                     onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-                     disabled={currentPage === 1 || loadingClientLogs}
-                   >
-                     {t("common.previous")}
-                   </Button>
-                   <span className="mx-2">
-                     {t("common.pageInfo", { currentPage, totalPages })}
-                   </span>
-                   <Button
-                     onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
-                     disabled={currentPage === totalPages || totalPages === 0 || loadingClientLogs}
-                   >
-                     {t("common.next")}
-                   </Button>
-                 </div>
-                 <div className="text-sm text-gray-600">
-                   {t("common.totalItems", { count: totalLogs })}
-                 </div>
-               </div>
-             </>
-           )}
-        </CardContent>
-      </Card>
     </MainLayout>
   );
 }

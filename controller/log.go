@@ -20,7 +20,7 @@ func (c *LogController) GetServerLogs(ctx *gin.Context) {
        ctx.JSON(http.StatusForbidden, gin.H{"error": "forbidden"})
        return
    }
-   data, err := os.ReadFile(constants.ServerStatusLogPath)
+   data, err := os.ReadFile(constants.DefaultOpenVPNLogPath) // <<< Changed to DefaultOpenVPNLogPath
    if err != nil {
        ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
        return
