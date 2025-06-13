@@ -325,19 +325,24 @@ export const openvpnAPI = {
     const response = await api.get<{ logs: string }>("/api/logs/server");
     return response.data.logs;
   },
+  // 获取实时客户端连接
+  getLiveClientConnections: async (): Promise<LiveClientConnection[]> => {
+    const response = await api.get<LiveClientConnection[]>("/api/client/status/live");
+    return response.data;
+  },
   // 获取指定客户端日志 (New paginated version)
   getClientLogs: async (
     page: number,
     pageSize: number,
-    userId?: string
+    username?: string
   ): Promise<ApiResponse<PaginatedClientLogs>> => {
     try {
-      const params: { page: number; pageSize: number; user_id?: string } = {
+      const params: { page: number; pageSize: number; username?: string } = {
         page,
         pageSize,
       };
-      if (userId) {
-        params.user_id = userId;
+      if (username) {
+        params.username = username;
       }
       const response = await api.get("/api/logs/client", { params });
       return response.data;

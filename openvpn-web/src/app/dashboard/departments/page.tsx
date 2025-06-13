@@ -169,19 +169,17 @@ export default function DepartmentsPage() {
         <TableRow key={node.id}>
           <TableCell
             style={{
-              paddingLeft: level !== 0 && level * 20,
-              display: "flex",
-              alignItems: "center",
+              paddingLeft: level === 0 ? undefined : level * 20,
+              position:"relative"
             }}
           >
             {hasChildren && (
               <span
-                className="cursor-pointer select-none mr-1 flex items-center"
+                className="cursor-pointer select-none mr-1 flex items-center "
                 onClick={() => toggleExpand(node.id)}
                 style={{
                   width: 20,
-                  display: "inline-flex",
-                  justifyContent: "center",
+                  position:"absolute"
                 }}
               >
                 {isExpanded ? (

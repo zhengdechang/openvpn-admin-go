@@ -125,7 +125,7 @@ const translation = {
     queryButton: "Query",
     noClientLogs: "No logs available",
     clientConnectionLogsTitle: "Client Connection Logs",
-    filterByUserIdPlaceholder: "Filter by User ID",
+    filterByUsernamePlaceholder: "Filter by User Name",
     searchButton: "Search",
     showEntries: "Show {{count}} entries",
     noClientConnectionLogs: "No client connection logs found",

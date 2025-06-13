@@ -123,7 +123,7 @@ const translation = {
     queryButton: "查询",
     noClientLogs: "暂无日志",
     clientConnectionLogsTitle: "客户端连接日志",
-    filterByUserIdPlaceholder: "按用户ID筛选",
+    filterByUsernamePlaceholder: "按用户名称筛选",
     searchButton: "搜索",
     showEntries: "显示 {{count}} 条记录",
     noClientConnectionLogs: "暂无客户端连接日志",

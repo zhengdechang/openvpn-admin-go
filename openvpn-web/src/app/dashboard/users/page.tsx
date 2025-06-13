@@ -261,8 +261,8 @@ export default function UsersPage() {
                 </DialogTitle>
               </DialogHeader>
               <div className="space-y-3 py-3">
-                <div>
-                  <Label htmlFor="add-name">
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="add-name" className="text-right">
                     {t("dashboard.users.namePlaceholder")}
                   </Label>
                   <Input
@@ -271,10 +271,11 @@ export default function UsersPage() {
                     onChange={(e) =>
                       setAddUserForm({ ...addUserForm, name: e.target.value })
                     }
+                    className="col-span-3"
                   />
                 </div>
-                <div>
-                  <Label htmlFor="add-email">
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="add-email" className="text-right">
                     {t("dashboard.users.emailPlaceholder")}
                   </Label>
                   <Input
@@ -284,10 +285,11 @@ export default function UsersPage() {
                     onChange={(e) =>
                       setAddUserForm({ ...addUserForm, email: e.target.value })
                     }
+                    className="col-span-3"
                   />
                 </div>
-                <div>
-                  <Label htmlFor="add-password">
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="add-password" className="text-right">
                     {t("dashboard.users.passwordPlaceholder")}
                   </Label>
                   <Input
@@ -300,12 +302,13 @@ export default function UsersPage() {
                         password: e.target.value,
                       })
                     }
+                    className="col-span-3"
                   />
                 </div>
 
                 {canEditFixedIp && (
-                  <div>
-                    <Label htmlFor="add-fixedIp">
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="add-fixedIp" className="text-right">
                       {t(
                         "dashboard.users.fixedIpLabel",
                         "Fixed VPN IP (Optional)"
@@ -324,6 +327,7 @@ export default function UsersPage() {
                         "dashboard.users.fixedIpPlaceholder",
                         "e.g., 10.8.0.100 or empty"
                       )}
+                      className="col-span-3"
                     />
                   </div>
                 )}
@@ -579,137 +583,127 @@ export default function UsersPage() {
           {loading ? (
             <p>{t("common.loading")}</p>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{t("dashboard.users.columnName")}</TableHead>
-                  <TableHead>{t("dashboard.users.columnEmail")}</TableHead>
-                  <TableHead>{t("dashboard.users.columnRole")}</TableHead>
-                  <TableHead>{t("dashboard.users.columnDepartment")}</TableHead>
-                  <TableHead>
-                    {t("dashboard.users.columnFixedIp", "Fixed IP")}
-                  </TableHead>
-                  <TableHead>
-                    {t("dashboard.users.columnConnectionIp", "Connection IP")}
-                  </TableHead>{" "}
-                  {/* New Column */}
-                  <TableHead>
-                    {t("dashboard.users.columnAllocatedVpnIp", "VPN IP")}
-                  </TableHead>{" "}
-                  {/* New Column */}
-                  <TableHead>
-                    {t("dashboard.users.columnLastConnection")}
-                  </TableHead>
-                  <TableHead>
-                    {t("dashboard.users.columnOnlineStatus")}
-                  </TableHead>
-                  <TableHead>{t("dashboard.users.columnCreator")}</TableHead>
-                  <TableHead>{t("dashboard.users.columnActions")}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {users.map(
-                  (
-                    u: AdminUser // Ensure u is typed as AdminUser
-                  ) => (
-                    <TableRow key={u.id}>
-                      <TableCell>{u.name}</TableCell>
-                      <TableCell>{u.email}</TableCell>
-                      <TableCell>{u.role}</TableCell>
-                      <TableCell>
-                        {depts.find((d) => d.id === u.departmentId)?.name ||
-                          t("dashboard.users.emptyDepartment")}
-                      </TableCell>
-                      <TableCell>{u.fixedIp || t("common.na")}</TableCell>
-                      <TableCell>
-                        {u.connectionIp || t("common.na")}
-                      </TableCell>{" "}
-                      {/* New Cell */}
-                      <TableCell>
-                        {u.allocatedVpnIp || t("common.na")}
-                      </TableCell>{" "}
-                      {/* New Cell */}
-                      <TableCell>
-                        {u.lastConnectionTime
-                          ? new Date(u.lastConnectionTime).toLocaleString()
-                          : t("common.na")}
-                      </TableCell>
-                      <TableCell>
-                        {typeof u.isOnline === "boolean"
-                          ? u.isOnline
-                            ? t("dashboard.users.statusOnline")
-                            : t("dashboard.users.statusOffline")
-                          : t("common.na")}
-                      </TableCell>
-                      <TableCell>
-                        {users.find((creator) => creator.id === u.creatorId)
-                          ?.name || t("common.na")}
-                      </TableCell>
-                      <TableCell className="space-x-1">
-                        {/* ... existing actions buttons ... */}
-                        <div className="flex items-center gap-1">
-                          {(currentUser?.role === UserRole.ADMIN ||
-                            currentUser?.role === UserRole.SUPERADMIN ||
-                            (currentUser?.role === UserRole.MANAGER &&
-                              currentUser.departmentId === u.departmentId)) && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="h-8 px-2"
-                              onClick={() => handleEditClick(u)}
-                            >
-                              {t("common.edit")}
-                            </Button>
-                          )}
-                          {/* Delete button RBAC - ensure this is correct from previous steps */}
-                          {(currentUser?.role === UserRole.SUPERADMIN ||
-                            (currentUser?.role === UserRole.ADMIN &&
-                              u.role !== UserRole.SUPERADMIN) ||
-                            (currentUser?.role === UserRole.MANAGER &&
-                              u.departmentId === currentUser.departmentId &&
-                              u.role !== UserRole.SUPERADMIN &&
-                              u.role !== UserRole.ADMIN)) &&
-                            u.id !==
-                              currentUser?.id /* Prevent self-deletion via this button, though handled by backend too */ && (
+            <div className="relative">
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[150px]">{t("dashboard.users.columnName")}</TableHead>
+                      <TableHead className="w-[200px]">{t("dashboard.users.columnEmail")}</TableHead>
+                      <TableHead className="w-[100px]">{t("dashboard.users.columnRole")}</TableHead>
+                      <TableHead className="w-[150px]">{t("dashboard.users.columnDepartment")}</TableHead>
+                      <TableHead className="w-[120px]">
+                        {t("dashboard.users.columnFixedIp", "Fixed IP")}
+                      </TableHead>
+                      <TableHead className="w-[120px]">
+                        {t("dashboard.users.columnConnectionIp", "Connection IP")}
+                      </TableHead>
+                      <TableHead className="w-[120px]">
+                        {t("dashboard.users.columnAllocatedVpnIp", "VPN IP")}
+                      </TableHead>
+                      <TableHead className="w-[180px]">
+                        {t("dashboard.users.columnLastConnection")}
+                      </TableHead>
+                      <TableHead className="w-[100px]">
+                        {t("dashboard.users.columnOnlineStatus")}
+                      </TableHead>
+                      <TableHead className="w-[120px]">{t("dashboard.users.columnCreator")}</TableHead>
+                      <TableHead className="w-[250px] sticky right-0 bg-background shadow-[-4px_0_8px_rgba(0,0,0,0.2)]">
+                        {t("dashboard.users.columnActions")}
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {users.map((u: AdminUser) => (
+                      <TableRow key={u.id}>
+                        <TableCell>{u.name}</TableCell>
+                        <TableCell>{u.email}</TableCell>
+                        <TableCell>{u.role}</TableCell>
+                        <TableCell>
+                          {depts.find((d) => d.id === u.departmentId)?.name ||
+                            t("dashboard.users.emptyDepartment")}
+                        </TableCell>
+                        <TableCell>{u.fixedIp || t("common.na")}</TableCell>
+                        <TableCell>
+                          {u.connectionIp || t("common.na")}
+                        </TableCell>
+                        <TableCell>
+                          {u.allocatedVpnIp || t("common.na")}
+                        </TableCell>
+                        <TableCell>
+                          {u.lastConnectionTime
+                            ? new Date(u.lastConnectionTime).toLocaleString()
+                            : t("common.na")}
+                        </TableCell>
+                        <TableCell>
+                          {typeof u.isOnline === "boolean"
+                            ? u.isOnline
+                              ? t("dashboard.users.statusOnline")
+                              : t("dashboard.users.statusOffline")
+                            : t("common.na")}
+                        </TableCell>
+                        <TableCell>
+                          {users.find((creator) => creator.id === u.creatorId)
+                            ?.name || t("common.na")}
+                        </TableCell>
+                        <TableCell className="sticky right-0 bg-background shadow-[-4px_0_8px_rgba(0,0,0,0.1)]">
+                          <div className="flex items-center justify-center gap-1">
+                            {(currentUser?.role === UserRole.ADMIN ||
+                              currentUser?.role === UserRole.SUPERADMIN ||
+                              (currentUser?.role === UserRole.MANAGER &&
+                                currentUser.departmentId === u.departmentId)) && (
                               <Button
                                 size="sm"
-                                variant="destructive"
+                                variant="outline"
                                 className="h-8 px-2"
-                                onClick={() => handleDelete(u.id)}
+                                onClick={() => handleEditClick(u)}
                               >
-                                {t("dashboard.users.deleteButton")}
+                                {t("common.edit")}
                               </Button>
                             )}
-                          <select
-                            className="border px-1 py-1 rounded-md text-sm h-8"
-                            defaultValue=""
-                            onChange={(e) =>
-                              handleDownload(u.name, e.target.value)
-                            }
-                          >
-                            <option value="" disabled>
-                              {t(
-                                "dashboard.users.downloadConfigButtonShort",
-                                "DL"
+                            {(currentUser?.role === UserRole.SUPERADMIN ||
+                              (currentUser?.role === UserRole.ADMIN &&
+                                u.role !== UserRole.SUPERADMIN) ||
+                              (currentUser?.role === UserRole.MANAGER &&
+                                u.departmentId === currentUser.departmentId &&
+                                u.role !== UserRole.SUPERADMIN &&
+                                u.role !== UserRole.ADMIN)) &&
+                              u.id !== currentUser?.id && (
+                                <Button
+                                  size="sm"
+                                  variant="destructive"
+                                  className="h-8 px-2"
+                                  onClick={() => handleDelete(u.id)}
+                                >
+                                  {t("dashboard.users.deleteButton")}
+                                </Button>
                               )}
-                            </option>
-                            <option value="windows">
-                              {t("dashboard.users.osWindows")}
-                            </option>
-                            <option value="macos">
-                              {t("dashboard.users.osMacOS")}
-                            </option>
-                            <option value="linux">
-                              {t("dashboard.users.osLinux")}
-                            </option>
-                          </select>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  )
-                )}
-              </TableBody>
-            </Table>
+                            <select
+                              className="border px-1 py-1 rounded-md text-sm h-8"
+                              defaultValue=""
+                              onChange={(e) => handleDownload(u.name, e.target.value)}
+                            >
+                              <option value="" disabled>
+                                {t("dashboard.users.downloadConfigButtonShort", "DL")}
+                              </option>
+                              <option value="windows">
+                                {t("dashboard.users.osWindows")}
+                              </option>
+                              <option value="macos">
+                                {t("dashboard.users.osMacOS")}
+                              </option>
+                              <option value="linux">
+                                {t("dashboard.users.osLinux")}
+                              </option>
+                            </select>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </div>
           )}
         </CardContent>
       </Card>

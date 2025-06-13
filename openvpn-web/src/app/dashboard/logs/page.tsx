@@ -54,8 +54,8 @@ export default function LogsPage() {
   const [pageSize, setPageSize] = useState(10);
   const [totalLogs, setTotalLogs] = useState(0);
   const [loadingClientLogs, setLoadingClientLogs] = useState(true);
-  const [filterUserId, setFilterUserId] = useState<string>("");
-  const [searchInputUserId, setSearchInputUserId] = useState<string>("");
+  const [filterUsername, setFilterUsername] = useState<string>("");
+  const [searchInputUsername, setSearchInputUsername] = useState<string>("");
 
   // New state for Live Client Connections
   const [liveConnections, setLiveConnections] = useState<LiveClientConnection[]>([]);
@@ -86,7 +86,7 @@ export default function LogsPage() {
         const response = await openvpnAPI.getClientLogs(
           currentPage,
           pageSize,
-          filterUserId.trim() === "" ? undefined : filterUserId.trim()
+          filterUsername.trim() === "" ? undefined : filterUsername.trim()
         );
         if (response.success && response.data) {
           setClientApiLogs(response.data.data || []);
@@ -105,7 +105,7 @@ export default function LogsPage() {
       }
     };
     fetchClientApiLogs();
-  }, [currentPage, pageSize, filterUserId, t]);
+  }, [currentPage, pageSize, filterUsername, t]);
 
   // New useEffect for fetching live client connections
   const fetchLiveConnections = useCallback(async () => {
@@ -124,16 +124,16 @@ export default function LogsPage() {
     }
   }, [t]); // Added t to dependency array
 
-  useEffect(() => {
-     fetchLiveConnections(); // Initial fetch
-     const intervalId = setInterval(fetchLiveConnections, 10000); // Poll every 10 seconds
-     return () => clearInterval(intervalId); // Cleanup on unmount
-  }, [fetchLiveConnections]);
+  // useEffect(() => {
+  //    fetchLiveConnections(); // Initial fetch
+  //    const intervalId = setInterval(fetchLiveConnections, 10000); // Poll every 10 seconds
+  //    return () => clearInterval(intervalId); // Cleanup on unmount
+  // }, [fetchLiveConnections]);
 
 
-  const handleSearchUserId = () => {
+  const handleSearchUsername = () => {
     setCurrentPage(1);
-    setFilterUserId(searchInputUserId);
+    setFilterUsername(searchInputUsername);
   };
 
   const totalPages = Math.ceil(totalLogs / pageSize);
@@ -157,7 +157,7 @@ export default function LogsPage() {
       </Card>
 
       {/* New Live Client Connections Card */}
-      <Card>
+      {/* <Card>
         <CardHeader className="flex flex-row items-center justify-between">
          <CardTitle>{t("dashboard.logs.liveConnectionsCardTitle")}</CardTitle>
          <Button onClick={fetchLiveConnections} disabled={loadingLiveConnections} size="sm">
@@ -204,7 +204,7 @@ export default function LogsPage() {
             </Table>
           )}
         </CardContent>
-      </Card>
+      </Card> */}
 
       {/* Client API Logs Card (existing) */}
       <Card>
@@ -215,12 +215,12 @@ export default function LogsPage() {
           {/* ... existing content for client API logs ... */}
            <div className="flex items-center space-x-2 mb-4">
              <Input
-               placeholder={t("dashboard.logs.filterByUserIdPlaceholder")}
-               value={searchInputUserId}
-               onChange={(e) => setSearchInputUserId(e.target.value)}
-               onKeyPress={(e) => e.key === 'Enter' && handleSearchUserId()}
+               placeholder={t("dashboard.logs.filterByUsernamePlaceholder")}
+               value={searchInputUsername}
+               onChange={(e) => setSearchInputUsername(e.target.value)}
+               onKeyPress={(e) => e.key === 'Enter' && handleSearchUsername()}
              />
-             <Button onClick={handleSearchUserId}>
+             <Button onClick={handleSearchUsername}>
                {t("dashboard.logs.searchButton")}
              </Button>
              <select
