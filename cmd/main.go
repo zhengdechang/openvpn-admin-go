@@ -5,10 +5,8 @@ import (
 	"log"
 	"os"
 	"os/signal"
-	"strings"
 	"syscall"
 
-	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
 	"openvpn-admin-go/openvpn"
 	"openvpn-admin-go/utils"
@@ -62,45 +60,49 @@ var rootCmd = &cobra.Command{
 }
 
 func MainMenu(cfg *openvpn.Config) {
-	menuItems := []string{
-		"服务器管理",
-		"客户端管理",
-		"退出",
-	}
-
-	prompt := promptui.Select{
-		Label: "请选择操作",
-		Items: menuItems,
-		Size:  len(menuItems),
-		Templates: &promptui.SelectTemplates{
-			Label:    "{{ . }}",
-			Active:   "➤ {{ . | cyan }}",
-			Inactive: "  {{ . | white }}",
-			Selected: "{{ . | green }}",
-		},
-		HideSelected: true,
-	}
-
 	for {
-		_, result, err := prompt.Run()
-		if err != nil {
-			if strings.Contains(err.Error(), "^C") {
-				fmt.Println("\n程序已退出")
-				os.Exit(0)
-			}
-			fmt.Printf("选择失败: %v\n", err)
-			return
-		}
+		fmt.Println("\n=== 欢迎使用 OpenVPN 管理程序 ===\n")
+		fmt.Println("1.服务器管理    2.客户端管理 \n")
+		fmt.Println("3.Web服务管理   4.查看配置 \n")
+		fmt.Println("5.查看日志      0.退出程序 \n")
+		fmt.Print("请选择操作 (0-5): ")
 
-		switch result {
-		case "服务器管理":
-			ServerMenu()
-		case "客户端管理":
-			ClientMenu()
-		case "退出":
+		var choice string
+		fmt.Scanln(&choice)
+
+		switch choice {
+		case "0":
+			fmt.Println("再见!")
 			return
+		case "1":
+			ServerMenu()
+		case "2":
+			ClientMenu()
+		case "3":
+			WebMenu()
+		case "4":
+			ShowConfig(cfg)
+		case "5":
+			logCmd.Run(nil, nil)
+		default:
+			fmt.Println("无效选择，请重试")
 		}
 	}
+}
+
+func ShowConfig(cfg *openvpn.Config) {
+	fmt.Println("\n当前配置:")
+	fmt.Printf("服务器地址: %s\n", cfg.OpenVPNServerHostname)
+	fmt.Printf("服务器端口: %d\n", cfg.OpenVPNPort)
+	fmt.Printf("协议: %s\n", cfg.OpenVPNProto)
+	fmt.Printf("服务器网络: %s\n", cfg.OpenVPNServerNetwork)
+	fmt.Printf("子网掩码: %s\n", cfg.OpenVPNServerNetmask)
+	fmt.Printf("客户端配置目录: %s\n", cfg.OpenVPNClientConfigDir)
+	fmt.Printf("TLS版本: %s\n", cfg.OpenVPNTLSVersion)
+	fmt.Printf("状态日志路径: %s\n", cfg.OpenVPNStatusLogPath)
+	fmt.Printf("OpenVPN日志路径: %s\n", cfg.OpenVPNLogPath)
+	fmt.Println("\n按回车键返回主菜单...")
+	fmt.Scanln()
 }
 
 func Execute() {

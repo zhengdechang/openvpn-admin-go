@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"bufio"
 	"fmt"
 	"math/rand"
 	"net"
@@ -40,54 +41,58 @@ func ServerMenu() {
 		return
 	}
 
-	menuItems := []string{
-		"启动服务器",
-		"停止服务器",
-		"重启服务器",
-		"查看服务器状态",
-		"更新服务器配置",
-		"返回主菜单",
-	}
-
-	prompt := promptui.Select{
-		Label: "请选择操作",
-		Items: menuItems,
-		Size:  len(menuItems),
-		Templates: &promptui.SelectTemplates{
-			Label:    "{{ . }}",
-			Active:   "➤ {{ . | cyan }}",
-			Inactive: "  {{ . | white }}",
-			Selected: "{{ . | green }}",
-		},
-		HideSelected: true,
-	}
-
 	for {
-		_, result, err := prompt.Run()
+		fmt.Println("\n=== OpenVPN 服务器管理 ===\n")
+		fmt.Println("1. 启动服务器\n")
+		fmt.Println("2. 停止服务器\n")
+		fmt.Println("3. 重启服务器\n")
+		fmt.Println("4. 查看服务器状态\n")
+		fmt.Println("5. 更新服务器配置\n")
+		fmt.Println("0. 返回主菜单\n")
+		fmt.Print("请选择: ")
+
+		reader := bufio.NewReader(os.Stdin)
+		input, err := reader.ReadString('\n')
 		if err != nil {
-			if strings.Contains(err.Error(), "^C") {
-				fmt.Println("\n程序已退出")
-				os.Exit(0)
-			}
-			fmt.Printf("选择失败: %v\n", err)
-			return
+			fmt.Printf("读取输入失败: %v\n", err)
+			continue
 		}
 
-		switch result {
-		case "启动服务器":
+		// 移除输入中的空白字符
+		input = strings.TrimSpace(input)
+		if input == "" {
+			continue
+		}
+
+		// 检查是否是Ctrl+C
+		if input == "^C" {
+			fmt.Println("\n程序已退出")
+			os.Exit(0)
+		}
+
+		choice, err := strconv.Atoi(input)
+		if err != nil {
+			fmt.Println("无效的选择，请输入数字")
+			continue
+		}
+
+		switch choice {
+		case 0:
+			return
+		case 1:
 			startServer(cfg)
-		case "停止服务器":
+		case 2:
 			stopServer()
-		case "重启服务器":
+		case 3:
 			restartServer(cfg)
-		case "查看服务器状态":
+		case 4:
 			checkServerStatus()
-		case "更新服务器配置":
+		case 5:
 			if err := UpdateConfig(); err != nil {
 				fmt.Printf("更新配置失败: %v\n", err)
 			}
-		case "返回主菜单":
-			return
+		default:
+			fmt.Println("无效的选择，请输入0-5之间的数字")
 		}
 	}
 }

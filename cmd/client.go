@@ -1,10 +1,12 @@
 package cmd
 
 import (
+	"bufio"
 	"fmt"
 	"log"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"openvpn-admin-go/constants"
@@ -15,54 +17,60 @@ import (
 
 func ClientMenu() {
 	for {
-		prompt := promptui.Select{
-			Label: "请选择客户端操作",
-			Items: []string{
-				"创建客户端",
-				"删除客户端",
-				"暂停客户端",
-				"恢复客户端",
-				"查看客户端状态",
-				"查看所有客户端",
-				"返回主菜单",
-			},
-			HideSelected: true,
-			Templates: &promptui.SelectTemplates{
-				Label:    "{{ . }}",
-				Active:   "➤ {{ . | cyan }}",
-				Inactive: "  {{ . | white }}",
-				Selected: "{{ . | green }}",
-			},
-		}
+		fmt.Println("\n=== 客户端管理 ===\n")
+		fmt.Println("1. 创建客户端\n")
+		fmt.Println("2. 删除客户端\n")
+		fmt.Println("3. 暂停客户端\n")
+		fmt.Println("4. 恢复客户端\n")
+		fmt.Println("5. 查看客户端状态\n")
+		fmt.Println("6. 查看所有客户端\n")
+		fmt.Println("0. 返回主菜单\n")
+		fmt.Print("请选择操作 (0-6): ")
 
-		_, result, err := prompt.Run()
+		reader := bufio.NewReader(os.Stdin)
+		input, err := reader.ReadString('\n')
 		if err != nil {
-			// 检查是否是Ctrl+C
-			if err.Error() == "^C" {
-				fmt.Println("\n程序已退出")
-				os.Exit(0)
-			}
-			fmt.Printf("选择失败: %v\n", err)
+			fmt.Printf("读取输入失败: %v\n", err)
 			continue
 		}
 
-		switch result {
-		case "创建客户端":
+		// 移除输入中的空白字符
+		input = strings.TrimSpace(input)
+		if input == "" {
+			continue
+		}
+
+		// 检查是否是Ctrl+C
+		if input == "^C" {
+			fmt.Println("\n程序已退出")
+			os.Exit(0)
+		}
+
+		choice, err := strconv.Atoi(input)
+		if err != nil {
+			fmt.Println("无效的选择，请输入数字")
+			continue
+		}
+
+		switch choice {
+		case 0:
+			return
+		case 1:
 			if err := CreateClient(); err != nil {
 				fmt.Printf("创建客户端失败: %v\n", err)
 			}
-		case "删除客户端":
+		case 2:
 			DeleteClient()
-		case "暂停客户端":
+		case 3:
 			PauseClient()
-		case "恢复客户端":
+		case 4:
 			ResumeClient()
-		case "查看客户端状态":
+		case 5:
 			ViewClientStatus()
-		case "查看所有客户端":
+		case 6:
 			ListClients()
-		case "返回主菜单":
-			return
+		default:
+			fmt.Println("无效的选择，请输入0-6之间的数字")
 		}
 	}
 }
