@@ -142,25 +142,17 @@ func ConfigureServer(port int, protocol, network, netmask string) error {
 
 // ApplyServerConfig 根据自定义内容写入配置并重启服务
 func ApplyServerConfig(content string) error {
-   // 写入配置文件
-   if err := os.WriteFile(constants.ServerConfigPath, []byte(content), 0644); err != nil {
-       return fmt.Errorf("写入配置文件失败: %v", err)
-   }
-   // 重启服务
-   if err := RestartServer(); err != nil {
-       return fmt.Errorf("重启服务失败: %v", err)
-   }
-   // Update config.json to reflect the changes applied to server.conf
-   // This helps keep config.json somewhat in sync, although server.conf is parsed by LoadConfig.
-   cfg, err := LoadConfig() // This will parse the server.conf that was just written.
-   if err == nil {
-       // SaveConfig will write to config.json and regenerate server.conf again (idempotent)
-       // This ensures that if server.conf had settings not covered by config.json's struct,
-       // they are still part of the active config loaded, and then config.json is updated
-       // with the parts that are covered.
-       _ = SaveConfig(cfg) // Ignoring error from this SaveConfig for now, as primary action was direct write.
-   }
-   return nil
+	// 1. Write the input content string to constants.ServerConfigPath
+	if err := os.WriteFile(constants.ServerConfigPath, []byte(content), 0644); err != nil {
+		return fmt.Errorf("写入 server.conf 失败: %v", err)
+	}
+
+	// 4. Call RestartServer() to apply the changes.
+	if err := RestartServer(); err != nil {
+		return fmt.Errorf("重启服务失败: %v", err)
+	}
+
+	return nil
 }
 
 // getEnvOrDefault 从环境变量获取值，如果不存在则返回默认值
