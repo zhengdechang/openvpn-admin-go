@@ -37,140 +37,190 @@ func LoadConfig() (*Config, error) {
 	cfg := &Config{}
 	var err error
 
-	// 检查配置文件是否存在，如果不存在则创建
-	if _, err := os.Stat(constants.ServerConfigPath); os.IsNotExist(err) {
-		// 创建配置文件目录
-		configDir := filepath.Dir(constants.ServerConfigPath)
-		if err := os.MkdirAll(configDir, 0755); err != nil {
-			return nil, fmt.Errorf("创建配置目录失败: %v", err)
-		}
+	// 1. Apply hardcoded defaults first
+	cfg.OpenVPNPort = constants.DefaultOpenVPNPort
+	cfg.OpenVPNProto = constants.DefaultOpenVPNProto
+	cfg.OpenVPNSyncCerts = false // Default, not in constants.go but implied
+	cfg.OpenVPNUseCRL = false    // Default, not in constants.go but implied
+	cfg.OpenVPNServerHostname = "" // No explicit default in constants.go, empty means not set
+	cfg.OpenVPNServerNetwork = constants.DefaultOpenVPNServerNetwork
+	cfg.OpenVPNServerNetmask = constants.DefaultOpenVPNServerNetmask
+	cfg.OpenVPNRoutes = []string{} // Initialize as empty slice
+	cfg.OpenVPNClientConfigDir = constants.ClientConfigDir
+	cfg.OpenVPNTLSVersion = constants.DefaultOpenVPNTLSVersion
+	cfg.OpenVPNTLSKey = constants.DefaultOpenVPNTLSKey // This seems to be a filename, path is separate
+	cfg.OpenVPNTLSKeyPath = constants.ServerTLSKeyPath
+	cfg.OpenVPNClientToClient = false // Default
+	cfg.DNSServerIP = ""           // No explicit default
+	cfg.DNSServerDomain = ""       // No explicit default
+	cfg.OpenVPNStatusLogPath = constants.DefaultOpenVPNStatusLogPath
+	cfg.OpenVPNLogPath = constants.DefaultOpenVPNLogPath
 
-	
-		// 生成默认配置文件
-		configContent, err := cfg.GenerateServerConfig()
+	// Temporary store for routes from server.conf
+	var serverConfRoutes []string
+
+	// 2. Parse server.conf and override defaults
+	// We will skip the auto-generation of server.conf for now to focus on loading logic.
+	// It can be added back later, using the fully resolved config.
+	if _, err := os.Stat(constants.ServerConfigPath); err == nil {
+		configContent, err := os.ReadFile(constants.ServerConfigPath)
 		if err != nil {
-			return nil, fmt.Errorf("生成默认配置文件失败: %v", err)
+			return nil, fmt.Errorf("读取服务端配置文件失败: %v", err)
 		}
 
-		// 写入配置文件
-		if err := os.WriteFile(constants.ServerConfigPath, []byte(configContent), 0644); err != nil {
-			return nil, fmt.Errorf("写入配置文件失败: %v", err)
-		}
-
-		return cfg, nil
-	}
-
-	// 读取服务端配置文件
-	configContent, err := os.ReadFile(constants.ServerConfigPath)
-	if err != nil {
-		return nil, fmt.Errorf("读取服务端配置文件失败: %v", err)
-	}
-
-	// 解析配置文件
-	lines := strings.Split(string(configContent), "\n")
-	for _, line := range lines {
-		fields := strings.Fields(line)
-		if len(fields) < 2 {
-			continue
-		}
-		switch fields[0] {
-		case "port":
-			cfg.OpenVPNPort, err = strconv.Atoi(fields[1])
-			if err != nil {
-				return nil, fmt.Errorf("解析端口失败: %v", err)
+		lines := strings.Split(string(configContent), "\n")
+		for _, line := range lines {
+			fields := strings.Fields(line)
+			if len(fields) < 2 {
+				continue
 			}
-		case "proto":
-			cfg.OpenVPNProto = fields[1]
-		case "server":
-			if len(fields) >= 3 {
-				cfg.OpenVPNServerNetwork = fields[1]
-				cfg.OpenVPNServerNetmask = fields[2]
+			key := fields[0]
+			value := ""
+			if len(fields) > 1 {
+				value = fields[1]
 			}
-		case "push":
-			if strings.HasPrefix(fields[1], "route") {
-				route := strings.Join(fields[2:], " ")
-				cfg.OpenVPNRoutes = append(cfg.OpenVPNRoutes, route)
+
+			switch key {
+			case "port":
+				if p, convErr := strconv.Atoi(value); convErr == nil {
+					cfg.OpenVPNPort = p
+				} else {
+					// Log or handle malformed port in server.conf?
+					// For now, default remains if parsing fails.
+				}
+			case "proto":
+				cfg.OpenVPNProto = value
+			case "server":
+				if len(fields) >= 3 {
+					cfg.OpenVPNServerNetwork = fields[1]
+					cfg.OpenVPNServerNetmask = fields[2]
+				}
+			case "push":
+				// Example: push "route 192.168.1.0 255.255.255.0"
+				// Need to handle quotes if present in actual server.conf
+				if strings.HasPrefix(value, "\"route") || strings.HasPrefix(value, "route") {
+					routeParts := fields[1:] // fields are [push, "route, 1.2.3.4, 255.255.255.0"] or [push, route, ...]
+					if len(routeParts) > 0 && (strings.HasPrefix(routeParts[0], "\"route") || routeParts[0] == "route") {
+						var route string
+						if strings.HasPrefix(routeParts[0], "\"route") { // "route 1.2.3.4 255.255.255.0"
+							// Combine all parts starting from fields[1] and remove quotes
+							combined := strings.Join(fields[1:], " ")
+							route = strings.Trim(strings.TrimPrefix(combined, "route"), "\" ")
+						} else { // route 1.2.3.4 255.255.255.0
+							route = strings.Join(fields[2:], " ")
+						}
+                         if route != "" {
+						    serverConfRoutes = append(serverConfRoutes, route)
+                        }
+					}
+				} else if strings.HasPrefix(value, "\"dhcp-option DNS") { // push "dhcp-option DNS 8.8.8.8"
+					// This is an example, current code doesn't parse DNS from server.conf
+					// For now, we are only concerned with "route"
+				}
+			// Add other server.conf specific directives here if needed
+			// e.g. client-to-client, tls-version, etc.
+			// For now, assuming they are primarily managed by env vars or have simple defaults.
+			}
+		}
+	} // else, if server.conf doesn't exist, we just proceed with defaults and then env vars.
+
+	// 3. Apply Environment Variables, overriding defaults or server.conf values
+
+	// Integer values
+	if valStr, exists := os.LookupEnv("OPENVPN_PORT"); exists {
+		if valInt, err := strconv.Atoi(valStr); err == nil {
+			cfg.OpenVPNPort = valInt
+		}
+		// Else: log malformed env var? For now, previous value (default/server.conf) is kept.
+	}
+
+	// String values
+	if val, exists := os.LookupEnv("OPENVPN_PROTO"); exists {
+		cfg.OpenVPNProto = val
+	}
+	if val, exists := os.LookupEnv("OPENVPN_SERVER_HOSTNAME"); exists {
+		cfg.OpenVPNServerHostname = val
+	}
+	if val, exists := os.LookupEnv("OPENVPN_SERVER_NETWORK"); exists {
+		cfg.OpenVPNServerNetwork = val
+	}
+	if val, exists := os.LookupEnv("OPENVPN_SERVER_NETMASK"); exists {
+		cfg.OpenVPNServerNetmask = val
+	}
+	if val, exists := os.LookupEnv("OPENVPN_CLIENT_CONFIG_DIR"); exists {
+		cfg.OpenVPNClientConfigDir = val
+	}
+	if val, exists := os.LookupEnv("OPENVPN_TLS_VERSION"); exists {
+		cfg.OpenVPNTLSVersion = val
+	}
+	if val, exists := os.LookupEnv("OPENVPN_TLS_KEY"); exists { // This is likely the filename, e.g., "ta.key"
+		cfg.OpenVPNTLSKey = val
+	}
+	if val, exists := os.LookupEnv("OPENVPN_TLS_KEY_PATH"); exists { // Full path to the key
+		cfg.OpenVPNTLSKeyPath = val
+	}
+	if val, exists := os.LookupEnv("OPENVPN_STATUS_LOG_PATH"); exists {
+		cfg.OpenVPNStatusLogPath = val
+	}
+	if val, exists := os.LookupEnv("OPENVPN_LOG_PATH"); exists {
+		cfg.OpenVPNLogPath = val
+	}
+	if val, exists := os.LookupEnv("DNS_SERVER_IP"); exists {
+		cfg.DNSServerIP = val
+	}
+	if val, exists := os.LookupEnv("DNS_SERVER_DOMAIN"); exists {
+		cfg.DNSServerDomain = val
+	}
+
+	// Boolean values
+	if valStr, exists := os.LookupEnv("OPENVPN_SYNC_CERTS"); exists {
+		if valBool, err := strconv.ParseBool(valStr); err == nil {
+			cfg.OpenVPNSyncCerts = valBool
+		}
+	}
+	if valStr, exists := os.LookupEnv("OPENVPN_USE_CRL"); exists {
+		if valBool, err := strconv.ParseBool(valStr); err == nil {
+			cfg.OpenVPNUseCRL = valBool
+		}
+	}
+	if valStr, exists := os.LookupEnv("OPENVPN_CLIENT_TO_CLIENT"); exists {
+		if valBool, err := strconv.ParseBool(valStr); err == nil {
+			cfg.OpenVPNClientToClient = valBool
+		}
+	}
+
+	// Handle routes: append env var routes to server.conf routes
+	cfg.OpenVPNRoutes = serverConfRoutes // Start with routes from server.conf
+	if routesStr, exists := os.LookupEnv("OPENVPN_ROUTES"); exists {
+		if routesStr != "" {
+			envRoutes := strings.Split(routesStr, ",")
+			for _, route := range envRoutes {
+				trimmedRoute := strings.TrimSpace(route)
+				if trimmedRoute != "" {
+					// Avoid duplicates if desired, though current task is just to append
+					cfg.OpenVPNRoutes = append(cfg.OpenVPNRoutes, trimmedRoute)
+				}
 			}
 		}
 	}
 
-	// 从环境变量加载其他配置
-	cfg.OpenVPNPort, _ = strconv.Atoi(getEnv("OPENVPN_PORT", strconv.Itoa(constants.DefaultOpenVPNPort)))
-	cfg.OpenVPNProto = getEnv("OPENVPN_PROTO", constants.DefaultOpenVPNProto)
-	cfg.OpenVPNServerNetwork = getEnv("OPENVPN_SERVER_NETWORK", constants.DefaultOpenVPNServerNetwork)
-	cfg.OpenVPNServerNetmask = getEnv("OPENVPN_SERVER_NETMASK", constants.DefaultOpenVPNServerNetmask)
-	cfg.OpenVPNServerHostname = getEnv("OPENVPN_SERVER_HOSTNAME", "")
-	cfg.OpenVPNClientToClient = getEnvBool("OPENVPN_CLIENT_TO_CLIENT", false)
-	cfg.OpenVPNClientConfigDir = getEnv("OPENVPN_CLIENT_CONFIG_DIR", constants.ClientConfigDir)
-	cfg.OpenVPNTLSVersion = getEnv("OPENVPN_TLS_VERSION", constants.DefaultOpenVPNTLSVersion)
-	cfg.OpenVPNTLSKey = getEnv("OPENVPN_TLS_KEY", constants.DefaultOpenVPNTLSKey)
-	cfg.OpenVPNTLSKeyPath = getEnv("OPENVPN_TLS_KEY_PATH", constants.ServerTLSKeyPath)
-	cfg.OpenVPNStatusLogPath = getEnv("OPENVPN_STATUS_LOG_PATH", constants.DefaultOpenVPNStatusLogPath)
-	cfg.OpenVPNLogPath = getEnv("OPENVPN_LOG_PATH", constants.DefaultOpenVPNLogPath)
-
-	// 设置默认值
-	if cfg.OpenVPNPort == 0 {
-		cfg.OpenVPNPort = constants.DefaultOpenVPNPort
-	}
-	if cfg.OpenVPNProto == "" {
-		cfg.OpenVPNProto = constants.DefaultOpenVPNProto
-	}
-	if cfg.OpenVPNServerNetwork == "" {
-		cfg.OpenVPNServerNetwork = constants.DefaultOpenVPNServerNetwork
-	}
-	if cfg.OpenVPNServerNetmask == "" {
-		cfg.OpenVPNServerNetmask = constants.DefaultOpenVPNServerNetmask
-	}
-
-	// 加载路由配置
-	if routes, exists := os.LookupEnv("OPENVPN_ROUTES"); exists {
-		cfg.OpenVPNRoutes = strings.Split(routes, ",")
-	}
-
-	// 只在环境变量存在时设置 DNS 配置
-	if dnsIP, exists := os.LookupEnv("DNS_SERVER_IP"); exists {
-		cfg.DNSServerIP = dnsIP
-	}
-	if dnsDomain, exists := os.LookupEnv("DNS_SERVER_DOMAIN"); exists {
-		cfg.DNSServerDomain = dnsDomain
-	}
+	// The section that created a default server.conf if it didn't exist has been removed.
+	// This should be handled by the caller or a separate setup function,
+	// ensuring it uses the fully resolved configuration.
+	// For example, after LoadConfig returns, the caller could check if server.conf
+	// exists and if not, call SaveConfig (or a modified GenerateServerConfig)
+	// to write it out based on the fully resolved cfg.
 
 	return cfg, nil
 }
 
 // GenerateServerConfig 生成 OpenVPN 服务器配置
 func (c *Config) GenerateServerConfig() (string, error) {
-	config, err := RenderServerConfig(c)
+	config, err := RenderServerConfig(c) // RenderServerConfig is not part of this refactoring scope
 	if err != nil {
 		return "", fmt.Errorf("生成服务器配置失败: %v", err)
 	}
 	return config, nil
-}
-
-// getEnv 获取环境变量，如果不存在则返回默认值
-func getEnv(key, defaultValue string) string {
-	if value, exists := os.LookupEnv(key); exists {
-		return value
-	}
-	return defaultValue
-}
-
-// getEnvBool 获取布尔类型的环境变量
-func getEnvBool(key string, defaultValue bool) bool {
-	if value, exists := os.LookupEnv(key); exists {
-		if b, err := strconv.ParseBool(value); err == nil {
-			return b
-		}
-	}
-	return defaultValue
-}
-
-// getEnvList 获取字符串列表类型的环境变量
-func getEnvList(key string, defaultValue []string) []string {
-	if value, exists := os.LookupEnv(key); exists {
-		return strings.Split(value, ",")
-	}
-	return defaultValue
 }
 
 // SaveConfig 保存配置到文件

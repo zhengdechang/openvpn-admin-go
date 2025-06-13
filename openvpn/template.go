@@ -40,7 +40,9 @@ func RenderServerConfig(cfg *Config) (string, error) {
 		"server_key_path":         constants.ServerKeyPath,
 		"dh_path":                 constants.ServerDHPath,
 		"ipp_path":                constants.ServerIPPPath,
-		"tls_key_path":            constants.ServerTLSKeyPath,
+		// Use the OpenVPNTLSKeyPath from the Config struct, which would have been loaded
+		// from server.conf, environment variables, or defaults, in that order.
+		"tls_key_path":            cfg.OpenVPNTLSKeyPath,
 		// Use the values from the Config struct
 		"OpenVPNStatusLogPath":    cfg.OpenVPNStatusLogPath,
 		"OpenVPNLogPath":          cfg.OpenVPNLogPath,
