@@ -23,11 +23,6 @@ const (
 	DefaultOpenVPNStatusLogPath = "/etc/openvpn/status.log"
 	DefaultOpenVPNLogPath       = "/etc/openvpn/openvpn.log"
 
-	// 服务器状态日志路径
-	// ServerStatusLogPath is now set from config in openvpn/config.go
-	// This line is kept for compatibility but should be removed in the future.
-	ServerStatusLogPath = DefaultOpenVPNStatusLogPath
-
 	// 服务器 IP 分配文件路径
 	ServerIPPPath = "/etc/openvpn/server/ipp.txt"
 
@@ -41,6 +36,7 @@ const (
 	DefaultOpenVPNServerNetmask = "255.255.255.0"
 	DefaultOpenVPNTLSVersion    = "1.2"
 	DefaultOpenVPNTLSKey        = "ta.key"
+	DefaultOPENVPN_SERVER_HOSTNAME = "192.168.2.1"
 )
 
 // openssl 扩展文件

@@ -27,6 +27,7 @@ type User struct {
    DepartmentID       string    `gorm:"size:36"`
    CreatorID          string    `gorm:"size:36"`
    FixedIP            string    `gorm:"size:45"` // IPv4 or IPv6 address
+   Subnet             string    `gorm:"size:45"` // Subnet in CIDR format (e.g., 10.10.120.0/23)
    CreatedAt          time.Time
    UpdatedAt          time.Time
 

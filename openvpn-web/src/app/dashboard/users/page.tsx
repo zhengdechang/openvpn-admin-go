@@ -54,6 +54,7 @@ const initialEditFormState: UserUpdateRequest = {
   role: UserRole.USER,
   departmentId: "",
   fixedIp: "", // Initialize with empty string
+  subnet: "", // Initialize with empty string
   password: "", // For password changes
 };
 
@@ -73,6 +74,7 @@ export default function UsersPage() {
     role: UserRole.USER,
     departmentId: "",
     fixedIp: "",
+    subnet: "", // Initialize with empty string
   });
   const [addUserDialogOpen, setAddUserDialogOpen] = useState(false);
 
@@ -136,10 +138,11 @@ export default function UsersPage() {
           currentUser?.role === UserRole.ADMIN ||
           currentUser?.role === UserRole.SUPERADMIN
         ) &&
-        payload.fixedIp
+        (payload.fixedIp || payload.subnet)
       ) {
-        // Non-admins cannot set fixed IP on creation, clear it if set by mistake in form state
+        // Non-admins cannot set fixed IP or subnet on creation, clear them if set by mistake in form state
         payload.fixedIp = "";
+        payload.subnet = "";
       }
       // Ensure departmentId is set if manager is creating user
       if (currentUser?.role === UserRole.MANAGER && !payload.departmentId) {
@@ -150,10 +153,14 @@ export default function UsersPage() {
       if (payload.fixedIp === "") {
         payload.fixedIp = null;
       }
+      // If subnet is empty string, set it to null
+      if (payload.subnet === "") {
+        payload.subnet = null;
+      }
 
       await userManagementAPI.create(
         payload as Partial<AdminUser> & { password: string }
-      ); // API expects password to be there for create
+      );
       toast.success(t("dashboard.users.createSuccess"));
       setAddUserDialogOpen(false);
       fetchAll();
@@ -183,6 +190,7 @@ export default function UsersPage() {
       role: userToEdit.role,
       departmentId: userToEdit.departmentId || "",
       fixedIp: userToEdit.fixedIp || "",
+      subnet: userToEdit.subnet || "",
       password: "",
     });
     setEditUserDialogOpen(true);
@@ -203,27 +211,32 @@ export default function UsersPage() {
         currentUser?.role === UserRole.SUPERADMIN
       )
     ) {
-      // If user is not admin/superadmin, don't send fixedIp (even if it was populated in form)
-      // This prevents non-privileged users from trying to set it via manipulated client state,
-      // though backend RBAC should be the primary enforcer.
+      // If user is not admin/superadmin, don't send fixedIp or subnet
       delete updatePayload.fixedIp;
-    } else if (updatePayload.fixedIp === "") {
+      delete updatePayload.subnet;
+    } else {
       // If fixedIp is empty string, set it to null
-      updatePayload.fixedIp = null;
+      if (updatePayload.fixedIp === "") {
+        updatePayload.fixedIp = null;
+      }
+      // If subnet is empty string, set it to null
+      if (updatePayload.subnet === "") {
+        updatePayload.subnet = null;
+      }
     }
 
     try {
       await userManagementAPI.update(editingUser.id, updatePayload);
       toast.success(
         t("dashboard.users.editUserSuccess", "User updated successfully!")
-      ); // Added fallback translation
+      );
       setEditUserDialogOpen(false);
       fetchAll();
     } catch (error: any) {
       toast.error(
         error?.response?.data?.error ||
           t("dashboard.users.editUserError", "Failed to update user.")
-      ); // Added fallback
+      );
     }
   };
 
@@ -257,6 +270,7 @@ export default function UsersPage() {
                     role: initialRole,
                     departmentId: initialDeptId,
                     fixedIp: "",
+                    subnet: "", // Initialize with empty string
                   });
                   setAddUserDialogOpen(true);
                 }}
@@ -317,29 +331,48 @@ export default function UsersPage() {
                 </div>
 
                 {canEditFixedIp && (
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="add-fixedIp" className="text-right">
-                      {t(
-                        "dashboard.users.fixedIpLabel",
-                        "Fixed VPN IP (Optional)"
-                      )}
-                    </Label>
-                    <Input
-                      id="add-fixedIp"
-                      value={addUserForm.fixedIp || ""}
-                      onChange={(e) =>
-                        setAddUserForm({
-                          ...addUserForm,
-                          fixedIp: e.target.value,
-                        })
-                      }
-                      placeholder={t(
-                        "dashboard.users.fixedIpPlaceholder",
-                        "e.g., 10.8.0.100 or empty"
-                      )}
-                      className="col-span-3"
-                    />
-                  </div>
+                  <>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="add-fixedIp" className="text-right">
+                        {t("dashboard.users.fixedIpLabel", "Fixed VPN IP (Optional)")}
+                      </Label>
+                      <Input
+                        id="add-fixedIp"
+                        value={addUserForm.fixedIp || ""}
+                        onChange={(e) =>
+                          setAddUserForm({
+                            ...addUserForm,
+                            fixedIp: e.target.value,
+                          })
+                        }
+                        placeholder={t(
+                          "dashboard.users.fixedIpPlaceholder",
+                          "e.g., 10.8.0.100 or empty"
+                        )}
+                        className="col-span-3"
+                      />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="add-subnet" className="text-right">
+                        {t("dashboard.users.subnetLabel", "Subnet (Optional)")}
+                      </Label>
+                      <Input
+                        id="add-subnet"
+                        value={addUserForm.subnet || ""}
+                        onChange={(e) =>
+                          setAddUserForm({
+                            ...addUserForm,
+                            subnet: e.target.value,
+                          })
+                        }
+                        placeholder={t(
+                          "dashboard.users.subnetPlaceholder",
+                          "e.g., 10.10.120.0/23 or empty"
+                        )}
+                        className="col-span-3"
+                      />
+                    </div>
+                  </>
                 )}
 
                 <div className="grid grid-cols-4 items-center gap-4">
@@ -487,24 +520,48 @@ export default function UsersPage() {
             </div>
 
             {canEditFixedIp && (
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="edit-fixedIp" className="text-right">
-                  {t("dashboard.users.fixedIpLabel", "Fixed VPN IP")}
-                </Label>
-                <Input
-                  id="edit-fixedIp"
-                  value={editForm.fixedIp || ""}
-                  onChange={(e) =>
-                    setEditForm({ ...editForm, fixedIp: e.target.value })
-                  }
-                  className="col-span-3"
-                  placeholder={t(
-                    "dashboard.users.fixedIpPlaceholder",
-                    "e.g., 10.8.0.100 or empty"
-                  )}
-                  disabled={!canEditFixedIp} // Technically redundant if block is conditional, but good for clarity
-                />
-              </div>
+              <>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="edit-fixedIp" className="text-right">
+                    {t("dashboard.users.fixedIpLabel", "Fixed VPN IP (Optional)")}
+                  </Label>
+                  <Input
+                    id="edit-fixedIp"
+                    value={editForm.fixedIp || ""}
+                    onChange={(e) =>
+                      setEditForm({
+                        ...editForm,
+                        fixedIp: e.target.value,
+                      })
+                    }
+                    placeholder={t(
+                      "dashboard.users.fixedIpPlaceholder",
+                      "e.g., 10.8.0.100 or empty"
+                    )}
+                    className="col-span-3"
+                  />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="edit-subnet" className="text-right">
+                    {t("dashboard.users.subnetLabel", "Subnet (Optional)")}
+                  </Label>
+                  <Input
+                    id="edit-subnet"
+                    value={editForm.subnet || ""}
+                    onChange={(e) =>
+                      setEditForm({
+                        ...editForm,
+                        subnet: e.target.value,
+                      })
+                    }
+                    placeholder={t(
+                      "dashboard.users.subnetPlaceholder",
+                      "e.g., 10.10.120.0/23 or empty"
+                    )}
+                    className="col-span-3"
+                  />
+                </div>
+              </>
             )}
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="edit-department" className="text-right">
@@ -606,6 +663,9 @@ export default function UsersPage() {
                         {t("dashboard.users.columnFixedIp", "Fixed IP")}
                       </TableHead>
                       <TableHead className="w-[120px]">
+                        {t("dashboard.users.columnSubnet", "Subnet")}
+                      </TableHead>
+                      <TableHead className="w-[120px]">
                         {t("dashboard.users.columnConnectionIp", "Connection IP")}
                       </TableHead>
                       <TableHead className="w-[120px]">
@@ -635,7 +695,10 @@ export default function UsersPage() {
                           {depts.find((d) => d.id === u.departmentId)?.name ||
                             t("dashboard.users.emptyDepartment")}
                         </TableCell>
-                        <TableCell>{u.fixedIp || t("common.na")}</TableCell>
+                        <TableCell>{u.fixedIp || "-"} </TableCell>
+                        <TableCell>
+                          {u.subnet || "-"}
+                        </TableCell>
                         <TableCell>
                           {u.connectionIp || t("common.na")}
                         </TableCell>

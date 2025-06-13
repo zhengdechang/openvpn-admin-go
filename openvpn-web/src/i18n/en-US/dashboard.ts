@@ -101,6 +101,8 @@ const translation = {
     statusOffline: "Offline",
     fixedIpLabel: "Fixed VPN IP",
     fixedIpPlaceholder: "e.g., 10.8.0.100 or empty to remove",
+    subnetLabel: "Client Subnet (Optional)",
+    subnetPlaceholder: "e.g., 10.10.120.0/23 or empty",
     columnFixedIp: "Fixed IP",
     columnConnectionIp: "Connection IP",
     columnAllocatedVpnIp: "VPN IP",

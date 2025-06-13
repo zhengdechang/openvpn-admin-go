@@ -81,13 +81,13 @@ func UpdateServerConfig() error {
 	}
 
 	// 创建日志目录
-	logDir := filepath.Dir(constants.ServerStatusLogPath)
+	logDir := filepath.Dir(constants.DefaultOpenVPNStatusLogPath)
 	if err := os.MkdirAll(logDir, 0755); err != nil {
 		return fmt.Errorf("创建日志目录失败: %v", err)
 	}
 
 	// 创建状态日志文件
-	if err := os.WriteFile(constants.ServerStatusLogPath, []byte{}, 0644); err != nil {
+	if err := os.WriteFile(constants.DefaultOpenVPNStatusLogPath, []byte{}, 0644); err != nil {
 		return fmt.Errorf("创建状态日志文件失败: %v", err)
 	}
 
@@ -124,39 +124,27 @@ func ConfigureServer(port int, protocol, network, netmask string) error {
    if err := SaveConfig(cfg); err != nil {
        return fmt.Errorf("保存配置失败: %v", err)
    }
-   // 重启服务以应用更改
-   if err := RestartServer(); err != nil {
-       return fmt.Errorf("重启服务失败: %v", err)
+   // 重新写入 server.conf 并更新所有客户端、重启服务
+   if err := UpdateServerConfig(); err != nil {
+       return fmt.Errorf("更新服务器配置失败: %v", err)
    }
-   // TODO: Consider if client configs need regeneration here or if it's handled elsewhere.
-   // The old UpdateServerConfig did regenerate all client configs.
-   // If direct server parameter changes (port, proto, network) affect client configs,
-   // that logic might need to be triggered here as well.
-   // For now, focusing on server config persistence.
-   // Note: UpdateServerConfig() also handles client config regeneration.
-   // Since SaveConfig() now writes server.conf, if client configs depend on parameters
-   // changed in ConfigureServer, they should be regenerated.
-   // A call to a simplified client regeneration function might be needed if UpdateServerConfig() is too broad.
    return nil
 }
 
 // ApplyServerConfig 根据自定义内容写入配置并重启服务
 func ApplyServerConfig(content string) error {
-	// 1. Write the input content string to constants.ServerConfigPath
-	if err := os.WriteFile(constants.ServerConfigPath, []byte(content), 0644); err != nil {
-		return fmt.Errorf("写入 server.conf 失败: %v", err)
-	}
-
-	// 4. Call RestartServer() to apply the changes.
-	if err := RestartServer(); err != nil {
-		return fmt.Errorf("重启服务失败: %v", err)
-	}
-
-	return nil
+   // 写入配置文件
+   if err := os.WriteFile(constants.ServerConfigPath, []byte(content), 0644); err != nil {
+       return fmt.Errorf("写入配置文件失败: %v", err)
+   }
+   // 重启服务
+   if err := RestartServer(); err != nil {
+       return fmt.Errorf("重启服务失败: %v", err)
+   }
+   return nil
 }
 
 // getEnvOrDefault 从环境变量获取值，如果不存在则返回默认值
-// This function seems unused in this file now. Consider removing if not used elsewhere.
 func getEnvOrDefault(key, defaultValue string) string {
 	if value := os.Getenv(key); value != "" {
 		return value

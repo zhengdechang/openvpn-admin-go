@@ -3,6 +3,7 @@ package controller
 import (
    "net/http"
    "os"
+   "fmt"
 
    "github.com/gin-gonic/gin"
    "openvpn-admin-go/middleware"
@@ -27,6 +28,8 @@ func (c *LogController) GetServerLogs(ctx *gin.Context) {
        ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to load OpenVPN config"})
        return
    }
+
+   fmt.Printf("OpenVPNStatusLogPath: %s\n", cfg.OpenVPNStatusLogPath)
 
    if cfg.OpenVPNStatusLogPath == "" {
        ctx.JSON(http.StatusInternalServerError, gin.H{"error": "OpenVPN status log path not configured"})
@@ -56,6 +59,8 @@ func (c *LogController) GetClientLogs(ctx *gin.Context) {
        ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to load OpenVPN config"})
        return
    }
+
+   fmt.Printf("OpenVPNLogPath: %s\n", cfg.OpenVPNLogPath)
 
    if cfg.OpenVPNLogPath == "" {
        ctx.JSON(http.StatusInternalServerError, gin.H{"error": "OpenVPN client log path not configured"})

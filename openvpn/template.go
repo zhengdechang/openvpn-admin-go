@@ -46,6 +46,7 @@ func RenderServerConfig(cfg *Config) (string, error) {
 		// Use the values from the Config struct
 		"OpenVPNStatusLogPath":    cfg.OpenVPNStatusLogPath,
 		"OpenVPNLogPath":          cfg.OpenVPNLogPath,
+		"OpenVPNClientConfigDir":  cfg.OpenVPNClientConfigDir,
 	}
 
 	var buf bytes.Buffer

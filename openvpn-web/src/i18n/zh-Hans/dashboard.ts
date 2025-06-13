@@ -101,6 +101,8 @@ const translation = {
     fixedIpLabel: "固定VPN IP",
     columnConnectionIp: "连接 IP",
     fixedIpPlaceholder: "例如，10.8.0.100 或者空白表示删除",
+    subnetLabel: "客户端子网（可选）",
+    subnetPlaceholder: "例如，10.10.120.0/23 或者空白",
     editUserDescription: "在这里对用户个人资料进行更改。完成后点击保存。",
     editUserSuccess: "用户更新成功！",
     passwordOptionalPlaceholder: "密码（可选）",

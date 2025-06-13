@@ -27,6 +27,7 @@ func (c *ClientController) CreateUser(ctx *gin.Context) {
 		Role         string  `json:"role" binding:"required,oneof=superadmin admin manager user"`
 		DepartmentID string  `json:"departmentId"`
 		FixedIP      *string `json:"fixedIp" binding:"omitempty,ip|cidrv4|cidrv6"`
+		Subnet       *string `json:"subnet" binding:"omitempty,cidrv4"`
 	}
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -42,8 +43,12 @@ func (c *ClientController) CreateUser(ctx *gin.Context) {
 			ctx.JSON(http.StatusForbidden, gin.H{"error": "manager can only assign user role"})
 			return
 		}
-		if req.FixedIP != nil && strings.TrimSpace(*req.FixedIP) != "" { // Check against trimmed value
+		if req.FixedIP != nil && strings.TrimSpace(*req.FixedIP) != "" {
 			ctx.JSON(http.StatusForbidden, gin.H{"error": "manager cannot set fixed IP"})
+			return
+		}
+		if req.Subnet != nil && strings.TrimSpace(*req.Subnet) != "" {
+			ctx.JSON(http.StatusForbidden, gin.H{"error": "manager cannot set subnet"})
 			return
 		}
 	}
@@ -71,6 +76,28 @@ func (c *ClientController) CreateUser(ctx *gin.Context) {
 				return
 			}
 			user.FixedIP = trimmedFixedIP
+			// 在创建用户时就设置固定IP
+			if err := openvpn.SetClientFixedIP(user.Name, trimmedFixedIP); err != nil {
+				ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to set fixed IP in OpenVPN config: " + err.Error()})
+				return
+			}
+		}
+	}
+
+	// Handle Subnet assignment on creation
+	if req.Subnet != nil {
+		trimmedSubnet := strings.TrimSpace(*req.Subnet)
+		if trimmedSubnet != "" {
+			if !(claims.Role == string(model.RoleSuperAdmin) || claims.Role == string(model.RoleAdmin)) {
+				ctx.JSON(http.StatusForbidden, gin.H{"error": "only superadmin or admin can set subnet during creation"})
+				return
+			}
+			user.Subnet = trimmedSubnet
+			// 在创建用户时就设置子网
+			if err := openvpn.SetClientSubnet(user.Name, trimmedSubnet); err != nil {
+				ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to set subnet in OpenVPN config: " + err.Error()})
+				return
+			}
 		}
 	}
 
@@ -91,19 +118,14 @@ func (c *ClientController) CreateUser(ctx *gin.Context) {
 		return
 	}
 
-	// If fixed IP was set for the user, apply it via CCD
-	if user.FixedIP != "" {
-		if err := openvpn.SetClientFixedIP(user.Name, user.FixedIP); err != nil {
-			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "user created, but failed to set fixed IP in OpenVPN config: " + err.Error()})
-			return
-		}
-	}
-
 	// Create OpenVPN client certs
 	if err := openvpn.CreateClient(user.Name); err != nil {
 		// If cert creation fails, and fixed IP was set, should we try to remove CCD?
 		if user.FixedIP != "" {
 			openvpn.RemoveClientFixedIP(user.Name) // Attempt to clean up CCD
+		}
+		if user.Subnet != "" {
+			openvpn.RemoveClientSubnet(user.Name) // Attempt to clean up CCD
 		}
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create OpenVPN client certificate: " + err.Error()})
 		return
@@ -116,6 +138,7 @@ func (c *ClientController) CreateUser(ctx *gin.Context) {
 		"role":         user.Role,
 		"departmentId": user.DepartmentID,
 		"fixedIp":      user.FixedIP,
+		"subnet":       user.Subnet,
 	}})
 }
 
@@ -148,6 +171,7 @@ func (c *ClientController) ListUsers(ctx *gin.Context) {
 			"creatorId":          u.CreatorID,
 			"lastConnectionTime": u.LastConnectionTime,
 			"fixedIp":            u.FixedIP,
+			"subnet":             u.Subnet,
 			"createdAt":          u.CreatedAt,
 			"updatedAt":          u.UpdatedAt,
 			"isOnline":           u.IsOnline,
@@ -209,6 +233,7 @@ func (c *ClientController) GetUser(ctx *gin.Context) {
 		"role":               u.Role,
 		"departmentId":       u.DepartmentID,
 		"fixedIp":            u.FixedIP,
+		"subnet":             u.Subnet,
 		"isOnline":           isOnline,
 		"connectionIp":       connectionIp,
 		"allocatedVpnIp":     allocatedVpnIp,
@@ -223,93 +248,127 @@ func (c *ClientController) GetUser(ctx *gin.Context) {
 func (c *ClientController) UpdateUser(ctx *gin.Context) {
 	claims := ctx.MustGet("claims").(*middleware.Claims)
 	id := ctx.Param("id")
-	var u model.User
-	if err := database.DB.First(&u, "id = ?", id).Error; err != nil {
-		ctx.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
-		return
-	}
-	// RBAC: Managers can only update users in their own department.
-	// Users cannot update other users, only their own profile (but this endpoint is admin-focused).
-	if claims.Role == string(model.RoleManager) && u.DepartmentID != claims.DeptID {
-		ctx.JSON(http.StatusForbidden, gin.H{"error": "manager can only update users in own department"})
-		return
-	}
-	if claims.Role == string(model.RoleUser) && u.ID != claims.UserID { // Should not happen if routes are correct
-		ctx.JSON(http.StatusForbidden, gin.H{"error": "user can only update their own profile via dedicated endpoint"})
-		return
-	}
-
 	var req struct {
-		Name         *string `json:"name"`
-		Email        *string `json:"email" binding:"omitempty,email"`
-		Role         *string `json:"role" binding:"omitempty,oneof=superadmin admin manager user"`
-		DepartmentID *string `json:"departmentId"`
+		Name         string  `json:"name"`
+		Email        string  `json:"email" binding:"omitempty,email"`
+		Password     string  `json:"password" binding:"omitempty,min=6"`
+		Role         string  `json:"role" binding:"omitempty,oneof=superadmin admin manager user"`
+		DepartmentID string  `json:"departmentId"`
 		FixedIP      *string `json:"fixedIp" binding:"omitempty,ip|cidrv4|cidrv6"`
+		Subnet       *string `json:"subnet" binding:"omitempty,cidrv4"`
 	}
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
+	var user model.User
+	if err := database.DB.First(&user, "id = ?", id).Error; err != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
+		return
+	}
+
+	// 权限检查
 	if claims.Role == string(model.RoleManager) {
-		if req.DepartmentID != nil && *req.DepartmentID != claims.DeptID {
+		if user.DepartmentID != claims.DeptID {
 			ctx.JSON(http.StatusForbidden, gin.H{"error": "manager can only update users in own department"})
 			return
 		}
-		if req.Role != nil && *req.Role != string(model.RoleUser) {
+		if req.Role != "" && req.Role != string(model.RoleUser) {
 			ctx.JSON(http.StatusForbidden, gin.H{"error": "manager can only assign user role"})
 			return
 		}
-		if req.FixedIP != nil && strings.TrimSpace(*req.FixedIP) != "" { // Check against trimmed value
+		if req.FixedIP != nil && strings.TrimSpace(*req.FixedIP) != "" {
 			ctx.JSON(http.StatusForbidden, gin.H{"error": "manager cannot set fixed IP"})
+			return
+		}
+		if req.Subnet != nil && strings.TrimSpace(*req.Subnet) != "" {
+			ctx.JSON(http.StatusForbidden, gin.H{"error": "manager cannot set subnet"})
 			return
 		}
 	}
 
-	if req.Name != nil {
-		u.Name = *req.Name
+	// 更新用户信息
+	updates := make(map[string]interface{})
+	if req.Name != "" {
+		updates["name"] = req.Name
 	}
-	if req.Email != nil {
-		u.Email = *req.Email
+	if req.Email != "" {
+		updates["email"] = req.Email
 	}
-	if req.Role != nil {
-		u.Role = model.Role(*req.Role)
+	if req.Password != "" {
+		hash, err := common.HashPassword(req.Password)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "hash password failed"})
+			return
+		}
+		updates["password_hash"] = hash
 	}
-	if req.DepartmentID != nil {
-		u.DepartmentID = *req.DepartmentID
+	if req.Role != "" {
+		updates["role"] = req.Role
 	}
+	if req.DepartmentID != "" {
+		updates["department_id"] = req.DepartmentID
+	}
+
+	// 处理固定IP更新
 	if req.FixedIP != nil {
 		trimmedFixedIP := strings.TrimSpace(*req.FixedIP)
 		if trimmedFixedIP != "" {
 			if !(claims.Role == string(model.RoleSuperAdmin) || claims.Role == string(model.RoleAdmin)) {
-				ctx.JSON(http.StatusForbidden, gin.H{"error": "only superadmin or admin can set fixed IP during update"})
+				ctx.JSON(http.StatusForbidden, gin.H{"error": "only superadmin or admin can set fixed IP"})
 				return
 			}
-			u.FixedIP = trimmedFixedIP
+			updates["fixed_ip"] = trimmedFixedIP
+			if err := openvpn.SetClientFixedIP(user.Name, trimmedFixedIP); err != nil {
+				ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to set fixed IP in OpenVPN config: " + err.Error()})
+				return
+			}
+		} else {
+			updates["fixed_ip"] = ""
+			if err := openvpn.RemoveClientFixedIP(user.Name); err != nil {
+				ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to remove fixed IP in OpenVPN config: " + err.Error()})
+				return
+			}
 		}
 	}
 
-	if err := database.DB.Save(&u).Error; err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update user in database: " + err.Error()})
+	// 处理子网更新
+	if req.Subnet != nil {
+		trimmedSubnet := strings.TrimSpace(*req.Subnet)
+		if trimmedSubnet != "" {
+			if !(claims.Role == string(model.RoleSuperAdmin) || claims.Role == string(model.RoleAdmin)) {
+				ctx.JSON(http.StatusForbidden, gin.H{"error": "only superadmin or admin can set subnet"})
+				return
+			}
+			updates["subnet"] = trimmedSubnet
+			if err := openvpn.SetClientSubnet(user.Name, trimmedSubnet); err != nil {
+				ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to set subnet in OpenVPN config: " + err.Error()})
+				return
+			}
+		} else {
+			updates["subnet"] = ""
+			if err := openvpn.RemoveClientSubnet(user.Name); err != nil {
+				ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to remove subnet in OpenVPN config: " + err.Error()})
+				return
+			}
+		}
+	}
+
+	if err := database.DB.Model(&user).Updates(updates).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update user: " + err.Error()})
 		return
 	}
 
-	// If fixed IP was set for the user, apply it via CCD
-	if u.FixedIP != "" {
-		if err := openvpn.SetClientFixedIP(u.Name, u.FixedIP); err != nil {
-			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "user updated, but failed to set fixed IP in OpenVPN config: " + err.Error()})
-			return
-		}
-	}
-
 	ctx.JSON(http.StatusOK, gin.H{"data": gin.H{
-		"id":           u.ID,
-		"name":         u.Name,
-		"email":        u.Email,
-		"role":         u.Role,
-		"departmentId": u.DepartmentID,
-		"fixedIp":      u.FixedIP,
-		"updatedAt":    u.UpdatedAt,
+		"id":           user.ID,
+		"name":         user.Name,
+		"email":        user.Email,
+		"role":         user.Role,
+		"departmentId": user.DepartmentID,
+		"fixedIp":      user.FixedIP,
+		"subnet":       user.Subnet,
+		"updatedAt":    user.UpdatedAt,
 	}})
 }
 

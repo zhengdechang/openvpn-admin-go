@@ -199,16 +199,17 @@ export interface AdminUser {
   email: string;
   role: UserRole;
   departmentId?: string;
-  departmentName?: string; // Assuming this might exist or be useful
+  departmentName?: string;
   creatorId?: string;
-  creatorName?: string; // Assuming this might exist
+  creatorName?: string;
   lastConnectionTime?: string | null;
-  isOnline?: boolean;        // Should exist, now more accurate
-  fixedIp?: string | null;   // Should exist
-  connectionIp?: string | null; // Add this
-  allocatedVpnIp?: string | null; // Add this
-  bytesReceived?: number; // Added this line
-  bytesSent?: number; // Added this line
+  isOnline?: boolean;
+  fixedIp?: string | null;
+  subnet?: string | null;
+  connectionIp?: string | null;
+  allocatedVpnIp?: string | null;
+  bytesReceived?: number;
+  bytesSent?: number;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -236,10 +237,11 @@ export interface LiveClientConnection {
 
 // User Update payload type
 export interface UserUpdateRequest {
-    name?: string;
-    email?: string;
-    password?: string;
-    role?: UserRole;
-    departmentId?: string;
-    fixedIp?: string | null; // Added this line
+  name?: string;
+  email?: string;
+  password?: string;
+  role?: UserRole;
+  departmentId?: string;
+  fixedIp?: string | null;
+  subnet?: string | null;
 }

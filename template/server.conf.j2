@@ -6,6 +6,7 @@ cert {{ .server_cert_path }}
 key {{ .server_key_path }}
 dh {{ .dh_path }}
 server {{ .openvpn_server_network }} {{ .openvpn_server_netmask }}
+client-config-dir {{ .OpenVPNClientConfigDir }}/ccd
 {{if .openvpn_client_to_client}}
 client-to-client
 {{end}}
