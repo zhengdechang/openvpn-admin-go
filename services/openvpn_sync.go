@@ -69,7 +69,7 @@ func RunSyncCycle(db *gorm.DB, statusLogPath string) {
 	}
 
 	// --- Step 3: Process users who were in DB as online but are no longer in status log (disconnected) ---
-	now := time.Now()
+
 	for _, dbUser := range dbOnlineUsers {
 		if _, found := processedUserNames[dbUser.Name]; !found {
 			log.Printf("User '%s' disconnected.", dbUser.Name)

@@ -15,5 +15,6 @@ func SetupLogRoutes(r *gin.RouterGroup) {
    logs.Use(middleware.JWTAuthMiddleware())
    {
        logs.GET("/server", logCtrl.GetServerLogs)
+       logs.GET("/client", logCtrl.GetClientLogs)
    }
 }

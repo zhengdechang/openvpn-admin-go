@@ -13,7 +13,6 @@ import (
 const (
 	logHeaderTimeLayout      = "Mon Jan 02 15:04:05 2006" // Adjusted for "Thu Sep 14 10:00:00 2023"
 	onlineThresholdDuration    = 5 * time.Minute
-	jancsitechPrefix         = "Jancsitech-"
 	clientListHeader         = "HEADER,CLIENT_LIST,Common Name,Real Address,Virtual Address,Virtual IPv6 Address,Bytes Received,Bytes Sent,Connected Since,Connected Since (time_t),Username,Client ID,Peer ID,Data Channel Cipher"
 	routingTableHeader       = "HEADER,ROUTING_TABLE,Virtual Address,Common Name,Real Address,Last Ref,Last Ref (time_t)"
 	// Expected field counts for CSV data lines (e.g., "CLIENT_LIST,..."), not including the initial "HEADER" field if it were on the same line.
@@ -220,28 +219,10 @@ func ParseStatusLog(logPath string) ([]OpenVPNClientStatus, time.Time, error) {
 }
 
 // GetStatusFilePath returns the path to the OpenVPN status file.
-// This should ideally come from configuration.
-// NOTE: LoadConfig and its related types (Config) are not defined in this snippet.
-// Assuming LoadConfig() exists elsewhere and returns a struct with OpenVPNStatusLogPath.
-// For this refactoring, we'll keep its usage but acknowledge its external dependency.
 func GetStatusFilePath() string {
-	// Placeholder for actual config loading logic if not available
-	// return "/var/log/openvpn/status.log" // Original fallback
-
-	// Assuming LoadConfig() might be in a different file/package or needs to be defined.
-	// For now, let's use a simple default to avoid compilation errors if LoadConfig is missing.
-	// This part might need adjustment based on the actual project structure.
-	type TempConfig struct {
-		OpenVPNStatusLogPath string
-	}
-	var cfg TempConfig // Simplified
-	// cfg, err := LoadConfig() // This line would be used if LoadConfig() is available
-	// if err != nil {
-	//  return "/var/log/openvpn/status.log"
-	// }
-	// Simulate config loaded for now, replace with actual LoadConfig() if it exists.
-	if cfg.OpenVPNStatusLogPath == "" { // If not loaded or empty
-		return "/var/log/openvpn/status.log" // Default path
+	cfg, err := LoadConfig()
+	if err != nil {
+		return ""
 	}
 	return cfg.OpenVPNStatusLogPath
 }
@@ -250,6 +231,9 @@ func GetStatusFilePath() string {
 // It uses GetStatusFilePath to determine the log file location.
 func ParseAllClientStatuses() ([]OpenVPNClientStatus, error) {
 	logPath := GetStatusFilePath()
+	if logPath == "" {
+		return nil, fmt.Errorf("status log path not configured")
+	}
 	clients, _, err := ParseStatusLog(logPath) // Discard logUpdateTime for now
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse status log: %w", err)

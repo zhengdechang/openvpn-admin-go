@@ -20,7 +20,6 @@ type Config struct {
 	OpenVPNServerHostname  string   `json:"openvpn_server_hostname"`
 	OpenVPNServerNetwork   string   `json:"openvpn_server_network"`
 	OpenVPNServerNetmask   string   `json:"openvpn_server_netmask"`
-	OpenVPNServerIP        string   `json:"openvpn_server_ip"`
 	OpenVPNRoutes          []string `json:"openvpn_routes"`
 	OpenVPNClientConfigDir string   `json:"openvpn_client_config_dir"`
 	OpenVPNTLSVersion      string   `json:"openvpn_tls_version"`
@@ -46,21 +45,7 @@ func LoadConfig() (*Config, error) {
 			return nil, fmt.Errorf("创建配置目录失败: %v", err)
 		}
 
-		// 设置默认配置
-		cfg.OpenVPNPort = 4500
-		cfg.OpenVPNProto = "tcp6"
-		cfg.OpenVPNServerNetwork = "10.8.0.0"
-		cfg.OpenVPNServerNetmask = "255.255.255.0"
-		cfg.OpenVPNServerHostname = getEnv("OPENVPN_SERVER_HOSTNAME", "network.jancsitech.net")
-		cfg.OpenVPNServerIP = getEnv("OPENVPN_SERVER_IP", "172.16.10.10")
-		cfg.OpenVPNClientToClient = getEnvBool("OPENVPN_CLIENT_TO_CLIENT", false)
-		cfg.OpenVPNClientConfigDir = getEnv("OPENVPN_CLIENT_CONFIG_DIR", constants.ClientConfigDir)
-		cfg.OpenVPNTLSVersion = getEnv("OPENVPN_TLS_VERSION", "1.2")
-		cfg.OpenVPNTLSKey = getEnv("OPENVPN_TLS_KEY", "ta.key")
-		cfg.OpenVPNTLSKeyPath = getEnv("OPENVPN_TLS_KEY_PATH", constants.ServerTLSKeyPath)
-		cfg.OpenVPNStatusLogPath = getEnv("OPENVPN_STATUS_LOG_PATH", constants.DefaultOpenVPNStatusLogPath)
-		cfg.OpenVPNLogPath = getEnv("OPENVPN_LOG_PATH", constants.DefaultOpenVPNLogPath)
-
+	
 		// 生成默认配置文件
 		configContent, err := cfg.GenerateServerConfig()
 		if err != nil {
@@ -109,30 +94,33 @@ func LoadConfig() (*Config, error) {
 		}
 	}
 
-	// 设置默认值
-	if cfg.OpenVPNPort == 0 {
-		cfg.OpenVPNPort = 4500
-	}
-	if cfg.OpenVPNProto == "" {
-		cfg.OpenVPNProto = "tcp6"
-	}
-	if cfg.OpenVPNServerNetwork == "" {
-		cfg.OpenVPNServerNetwork = "10.8.0.0"
-	}
-	if cfg.OpenVPNServerNetmask == "" {
-		cfg.OpenVPNServerNetmask = "255.255.255.0"
-	}
-
 	// 从环境变量加载其他配置
-	cfg.OpenVPNServerHostname = getEnv("OPENVPN_SERVER_HOSTNAME", "network.jancsitech.net")
-	cfg.OpenVPNServerIP = getEnv("OPENVPN_SERVER_IP", "172.16.10.10")
+	cfg.OpenVPNPort, _ = strconv.Atoi(getEnv("OPENVPN_PORT", strconv.Itoa(constants.DefaultOpenVPNPort)))
+	cfg.OpenVPNProto = getEnv("OPENVPN_PROTO", constants.DefaultOpenVPNProto)
+	cfg.OpenVPNServerNetwork = getEnv("OPENVPN_SERVER_NETWORK", constants.DefaultOpenVPNServerNetwork)
+	cfg.OpenVPNServerNetmask = getEnv("OPENVPN_SERVER_NETMASK", constants.DefaultOpenVPNServerNetmask)
+	cfg.OpenVPNServerHostname = getEnv("OPENVPN_SERVER_HOSTNAME", "")
 	cfg.OpenVPNClientToClient = getEnvBool("OPENVPN_CLIENT_TO_CLIENT", false)
 	cfg.OpenVPNClientConfigDir = getEnv("OPENVPN_CLIENT_CONFIG_DIR", constants.ClientConfigDir)
-	cfg.OpenVPNTLSVersion = getEnv("OPENVPN_TLS_VERSION", "1.2")
-	cfg.OpenVPNTLSKey = getEnv("OPENVPN_TLS_KEY", "ta.key")
+	cfg.OpenVPNTLSVersion = getEnv("OPENVPN_TLS_VERSION", constants.DefaultOpenVPNTLSVersion)
+	cfg.OpenVPNTLSKey = getEnv("OPENVPN_TLS_KEY", constants.DefaultOpenVPNTLSKey)
 	cfg.OpenVPNTLSKeyPath = getEnv("OPENVPN_TLS_KEY_PATH", constants.ServerTLSKeyPath)
 	cfg.OpenVPNStatusLogPath = getEnv("OPENVPN_STATUS_LOG_PATH", constants.DefaultOpenVPNStatusLogPath)
 	cfg.OpenVPNLogPath = getEnv("OPENVPN_LOG_PATH", constants.DefaultOpenVPNLogPath)
+
+	// 设置默认值
+	if cfg.OpenVPNPort == 0 {
+		cfg.OpenVPNPort = constants.DefaultOpenVPNPort
+	}
+	if cfg.OpenVPNProto == "" {
+		cfg.OpenVPNProto = constants.DefaultOpenVPNProto
+	}
+	if cfg.OpenVPNServerNetwork == "" {
+		cfg.OpenVPNServerNetwork = constants.DefaultOpenVPNServerNetwork
+	}
+	if cfg.OpenVPNServerNetmask == "" {
+		cfg.OpenVPNServerNetmask = constants.DefaultOpenVPNServerNetmask
+	}
 
 	// 加载路由配置
 	if routes, exists := os.LookupEnv("OPENVPN_ROUTES"); exists {

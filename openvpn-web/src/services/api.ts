@@ -323,6 +323,11 @@ export const openvpnAPI = {
     const response = await api.get<{ logs: string }>("/api/logs/server");
     return response.data.logs;
   },
+  // 获取客户端日志
+  getClientLogs: async (): Promise<string> => {
+    const response = await api.get<{ logs: string }>("/api/logs/client");
+    return response.data.logs;
+  },
   // 获取实时客户端连接
   getLiveClientConnections: async (): Promise<LiveClientConnection[]> => {
     const response = await api.get<LiveClientConnection[]>("/api/client/status/live");

@@ -34,6 +34,13 @@ const (
 	// 客户端配置目录
 	ClientConfigDir = "/etc/openvpn/client"
 
+	// OpenVPN 默认配置值
+	DefaultOpenVPNPort          = 4500
+	DefaultOpenVPNProto         = "tcp6"
+	DefaultOpenVPNServerNetwork = "10.8.0.0"
+	DefaultOpenVPNServerNetmask = "255.255.255.0"
+	DefaultOpenVPNTLSVersion    = "1.2"
+	DefaultOpenVPNTLSKey        = "ta.key"
 )
 
 // openssl 扩展文件
