@@ -1,3 +1,5 @@
+[中文文档](./README_zh.md)
+
 # openvpn-admin-go
 
 This project is the backend for a web-based OpenVPN management panel. It is built with Go and provides a RESTful API for the frontend (openvpn-web) to consume. The primary goal of this project is to simplify the management of OpenVPN servers, users, and their configurations through a user-friendly web interface.
@@ -11,6 +13,27 @@ This project is the backend for a web-based OpenVPN management panel. It is buil
 - **Server Status Monitoring:** Monitor the status of OpenVPN servers, including active connections and traffic.
 - **Client Connection Monitoring:** View currently connected clients and their session details.
 - **Log Viewing:** Access and view server and client logs for troubleshooting and monitoring.
+
+## Management Interfaces
+
+### Command-line Interface (CLI)
+
+The application can be managed via a command-line interface (CLI). The main entry point for the CLI is `cmd/main.go`. It supports various commands for server and client management, including managing users, departments, and configurations.
+
+To see a list of available commands and options, you can run:
+```bash
+go run cmd/main.go --help
+```
+Or, if you have built the executable:
+```bash
+./your-executable-name --help
+```
+
+### Web Service Interface
+
+The application also provides a web-based management interface. The `openvpn-admin-go` project itself serves as the backend API. The frontend user interface, which consumes this API, is the `openvpn-web` project, typically found in the `openvpn-web/` directory.
+
+The web interface allows for similar management tasks as the CLI but provides a graphical user interface for easier interaction.
 
 ## Installation and Setup
 
