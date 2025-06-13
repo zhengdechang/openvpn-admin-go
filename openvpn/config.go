@@ -35,7 +35,29 @@ type Config struct {
 // LoadConfig 从服务端配置文件加载配置
 func LoadConfig() (*Config, error) {
 	cfg := &Config{}
-	var err error
+
+		// 检查配置文件是否存在，如果不存在则创建
+	if _, err := os.Stat(constants.ServerConfigPath); os.IsNotExist(err) {
+		// 创建配置文件目录
+		configDir := filepath.Dir(constants.ServerConfigPath)
+		if err := os.MkdirAll(configDir, 0755); err != nil {
+			return nil, fmt.Errorf("创建配置目录失败: %v", err)
+		}
+
+	
+		// 生成默认配置文件
+		configContent, err := cfg.GenerateServerConfig()
+		if err != nil {
+			return nil, fmt.Errorf("生成默认配置文件失败: %v", err)
+		}
+
+		// 写入配置文件
+		if err := os.WriteFile(constants.ServerConfigPath, []byte(configContent), 0644); err != nil {
+			return nil, fmt.Errorf("写入配置文件失败: %v", err)
+		}
+
+		return cfg, nil
+	}
 
 	// 1. Apply hardcoded defaults first
 	cfg.OpenVPNPort = constants.DefaultOpenVPNPort

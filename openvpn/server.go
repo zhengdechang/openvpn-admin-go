@@ -147,22 +147,6 @@ func ApplyServerConfig(content string) error {
 		return fmt.Errorf("写入 server.conf 失败: %v", err)
 	}
 
-	// 2. Call LoadConfig() to get a fully resolved cfg *Config object
-	cfg, err := LoadConfig()
-	if err != nil {
-		// Even if LoadConfig fails, server.conf was overwritten.
-		// Depending on desired behavior, one might try to restore the old server.conf
-		// or simply report the error. For now, report and stop.
-		return fmt.Errorf("加载配置失败 (server.conf 可能已更改): %v", err)
-	}
-
-	// 3. Call SaveConfig(cfg) with the loaded configuration.
-	// This will rewrite server.conf based on the complete cfg (standardizing it)
-	// and also update config.json.
-	if err := SaveConfig(cfg); err != nil {
-		return fmt.Errorf("保存标准化配置失败: %v", err)
-	}
-
 	// 4. Call RestartServer() to apply the changes.
 	if err := RestartServer(); err != nil {
 		return fmt.Errorf("重启服务失败: %v", err)
