@@ -415,6 +415,14 @@ export const userManagementAPI = {
     const response = await api.delete(`/api/client/${id}`);
     return response.data;
   },
+  async pauseUser(username: string): Promise<ApiResponse<any>> {
+    const response = await api.post(`/api/client/${username}/pause`);
+    return response.data;
+  },
+  async resumeUser(username: string): Promise<ApiResponse<any>> {
+    const response = await api.post(`/api/client/${username}/resume`);
+    return response.data;
+  },
 };
 
 // 标签API

@@ -84,6 +84,30 @@ export default function UsersPage() {
   const [editForm, setEditForm] =
     useState<UserUpdateRequest>(initialEditFormState);
 
+  // Define handlePauseUser function
+  const handlePauseUser = async (username: string) => {
+    if (!confirm(t("dashboard.users.pauseConfirm", `Are you sure you want to pause user ${username}?`))) return;
+    try {
+      await userManagementAPI.pauseUser(username);
+      toast.success(t("dashboard.users.pauseSuccess", `User ${username} paused successfully.`));
+      fetchAll(); // Refresh the user list to show updated status
+    } catch (error: any) {
+      toast.error(error?.response?.data?.error || t("dashboard.users.pauseError", `Failed to pause user ${username}.`));
+    }
+  };
+
+  // Define handleResumeUser function
+  const handleResumeUser = async (username: string) => {
+    if (!confirm(t("dashboard.users.resumeConfirm", `Are you sure you want to resume user ${username}?`))) return;
+    try {
+      await userManagementAPI.resumeUser(username);
+      toast.success(t("dashboard.users.resumeSuccess", `User ${username} resumed successfully.`));
+      fetchAll(); // Refresh the user list
+    } catch (error: any) {
+      toast.error(error?.response?.data?.error || t("dashboard.users.resumeError", `Failed to resume user ${username}.`));
+    }
+  };
+
   const fetchAll = useCallback(async () => {
     setLoading(true);
     try {
@@ -677,10 +701,13 @@ export default function UsersPage() {
                       <TableHead className="w-[100px]">
                         {t("dashboard.users.columnOnlineStatus")}
                       </TableHead>
+                      <TableHead className="w-[100px]">
+                        {t("dashboard.users.columnAccessState", "Access State")}
+                      </TableHead>
                       <TableHead className="w-[120px]">{t("dashboard.users.columnCreator")}</TableHead>
                       <TableHead className="w-[120px]">{t("dashboard.users.columnBytesReceived", "Bytes Received")}</TableHead>
                       <TableHead className="w-[120px]">{t("dashboard.users.columnBytesSent", "Bytes Sent")}</TableHead>
-                      <TableHead className="w-[250px] sticky right-0 bg-background shadow-[-4px_0_8px_rgba(0,0,0,0.2)]">
+                      <TableHead className="w-[300px] sticky right-0 bg-background shadow-[-4px_0_8px_rgba(0,0,0,0.2)]"> {/* Increased width for new buttons */}
                         {t("dashboard.users.columnActions")}
                       </TableHead>
                     </TableRow>
@@ -721,10 +748,36 @@ export default function UsersPage() {
                           {users.find((creator) => creator.id === u.creatorId)
                             ?.name || t("common.na")}
                         </TableCell>
+                        <TableCell>
+                          {u.isPaused ? t("dashboard.users.statusPaused", "Paused") : t("dashboard.users.statusActive", "Active")}
+                        </TableCell>
                         <TableCell>{formatBytes(u.bytesReceived)}</TableCell>
                         <TableCell>{formatBytes(u.bytesSent)}</TableCell>
                         <TableCell className="sticky right-0 bg-background shadow-[-4px_0_8px_rgba(0,0,0,0.1)]">
                           <div className="flex items-center justify-center gap-1">
+                            {canManageUsers && (
+                              <>
+                                {u.isPaused ? (
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="h-8 px-2"
+                                    onClick={() => handleResumeUser(u.name)}
+                                  >
+                                    {t("dashboard.users.resumeButton", "Resume")}
+                                  </Button>
+                                ) : (
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="h-8 px-2"
+                                    onClick={() => handlePauseUser(u.name)}
+                                  >
+                                    {t("dashboard.users.pauseButton", "Pause")}
+                                  </Button>
+                                )}
+                              </>
+                            )}
                             {(currentUser?.role === UserRole.ADMIN ||
                               currentUser?.role === UserRole.SUPERADMIN ||
                               (currentUser?.role === UserRole.MANAGER &&
