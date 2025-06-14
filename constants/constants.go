@@ -38,7 +38,7 @@ const (
 	DefaultOpenVPNTLSKey        = "ta.key"
 	DefaultOPENVPN_SERVER_HOSTNAME = "192.168.2.1"
 	DefaultOpenVPNManagementPort = 7505
-	DefaultOpenVPNBlacklistFile = "/etc/openvpn/blacklist.txt"
+	DefaultOpenVPNBlacklistFile = "/etc/openvpn/server/blacklist.txt"
 )
 
 // openssl 扩展文件

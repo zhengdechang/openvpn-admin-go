@@ -8,7 +8,7 @@ The OpenVPN Client Blacklist feature provides a mechanism to automatically disco
 
 The feature leverages OpenVPN's `auth-user-pass-verify` directive, which delegates the authentication decision to an external script.
 
-1.  **Script Execution:** OpenVPN is configured to use the custom script `/app/scripts/auth-blacklist.sh` for user authentication.
+1.  **Script Execution:** OpenVPN is configured to use the custom script `/etc/openvpn/server/auth-blacklist.sh` for user authentication.
 2.  **Username Check:** When a client attempts to connect, OpenVPN executes this script, passing the client's username (and password, though the password is not used by this script for blacklist logic).
 3.  **Blacklist Lookup:** The script reads the username and checks for its presence in the configured blacklist file.
 4.  **User Blacklisted:** If the username is found in the blacklist file:
@@ -25,7 +25,7 @@ The feature is active by default when OpenVPN is configured to use the `auth-bla
     *   **OpenVPN Script Variable:** `OPENVPN_BLACKLIST_FILE` (used by `auth-blacklist.sh`)
     *   **Set by OpenVPN `server.conf` via:** `setenv OPENVPN_BLACKLIST_FILE {{ .OpenVPNBlacklistFile }}`
     *   **Sourced from Go Application Config:** The `{{ .OpenVPNBlacklistFile }}` template variable corresponds to the `openvpn_blacklist_file` field in the application's `config.json` or the `OPENVPN_BLACKLIST_FILE` environment variable supplied to the Go application.
-    *   **Default Value in Script:** `/etc/openvpn/blacklist.txt`
+    *   **Default Value in Script:** `/etc/openvpn/server/blacklist.txt`
     *   **Format:** A plain text file where each line contains a single OpenVPN username to be blacklisted.
 
 *   **OpenVPN Management Port:**
@@ -46,7 +46,7 @@ Reviewing this log can be helpful for troubleshooting or monitoring the feature'
 
 To blacklist an OpenVPN user:
 1.  Access the server where OpenVPN is running.
-2.  Open the blacklist file (default: `/etc/openvpn/blacklist.txt`) with a text editor.
+2.  Open the blacklist file (default: `/etc/openvpn/server/blacklist.txt`) with a text editor.
 3.  Add the OpenVPN username of the client you wish to blacklist to a new line in the file.
 4.  Save the file.
 
@@ -60,14 +60,14 @@ When documenting the main application's `config.json` (or its equivalent configu
 
 *   `openvpn_blacklist_file`
     *   **Type:** `string`
-    *   **Description:** Specifies the full path to the OpenVPN client blacklist file. This file contains a list of usernames (one per line) that should be temporarily denied access and disconnected. The `auth-blacklist.sh` script reads this path from the `OPENVPN_BLACKLIST_FILE` environment variable, which is set by OpenVPN via the `setenv` directive in its configuration.
-    *   **Default:** If not specified, the `auth-blacklist.sh` script will use its internal default of `/etc/openvpn/blacklist.txt`.
+    *   **Description:** Specifies the full path to the OpenVPN client blacklist file. This file contains a list of usernames (one per line) that should be temporarily denied access and disconnected. The `/etc/openvpn/server/auth-blacklist.sh` script reads this path from the `OPENVPN_BLACKLIST_FILE` environment variable, which is set by OpenVPN via the `setenv` directive in its configuration.
+    *   **Default:** If not specified, the `auth-blacklist.sh` script will use its internal default of `/etc/openvpn/server/blacklist.txt`.
     *   **Example:** `"/etc/openvpn/user_blacklist.txt"`
 
 *   `openvpn_management_port`
     *   **Type:** `int`
-    *   **Description:** Defines the TCP port on which the OpenVPN server's management interface should listen (and to which the `auth-blacklist.sh` script will connect on `127.0.0.1`). This port is used by the script to send commands to disconnect users. The script reads this port from the `OPENVPN_MANAGEMENT_PORT` environment variable, set by OpenVPN via the `setenv` directive.
-    *   **Default:** If not specified, the `auth-blacklist.sh` script will use its internal default of `7505`.
+    *   **Description:** Defines the TCP port on which the OpenVPN server's management interface should listen (and to which the `/etc/openvpn/server/auth-blacklist.sh` script will connect on `127.0.0.1`). This port is used by the script to send commands to disconnect users. The script reads this port from the `OPENVPN_MANAGEMENT_PORT` environment variable, set by OpenVPN via the `setenv` directive.
+    *   **Default:** If not specified, the `/etc/openvpn/server/auth-blacklist.sh` script will use its internal default of `7505`.
     *   **Example:** `7506`
 
 These settings allow administrators to customize the location of the blacklist file and the OpenVPN management port to suit their environment.

@@ -21,6 +21,7 @@ FROM ubuntu:22.04
 RUN apt-get update && apt-get install -y \
     ca-certificates \
     tzdata \
+    netcat-openbsd \
     && rm -rf /var/lib/apt/lists/*
 
 # Create app directory
@@ -31,6 +32,11 @@ COPY --from=builder /app/openvpn /openvpn-admin/openvpn
 
 # Copy configuration files
 COPY --from=builder /app/.env /openvpn-admin/.env
+
+# Create templates directory and copy source blacklist script and file
+RUN mkdir -p /openvpn-admin/templates
+COPY scripts/auth-blacklist.sh /openvpn-admin/templates/auth-blacklist.sh
+COPY scripts/blacklist.txt /openvpn-admin/templates/blacklist.txt
 
 # Set the entrypoint
 ENTRYPOINT ["/openvpn-admin/openvpn"] 
