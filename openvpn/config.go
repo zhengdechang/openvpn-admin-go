@@ -60,13 +60,7 @@ func LoadConfig() (*Config, error) {
 		cfg.OpenVPNTLSKeyPath = getEnv("OPENVPN_TLS_KEY_PATH", constants.ServerTLSKeyPath)
 		cfg.OpenVPNStatusLogPath = getEnv("OPENVPN_STATUS_LOG_PATH", constants.DefaultOpenVPNStatusLogPath)
 		cfg.OpenVPNLogPath = getEnv("OPENVPN_LOG_PATH", constants.DefaultOpenVPNLogPath)
-		// cfg.OpenVPNManagementPort = getEnvInt("OPENVPN_MANAGEMENT_PORT", constants.DefaultOpenVPNManagementPort)
-		// 如果 OPENVPN_MANAGEMENT_PORT 环境变量被显式设置为 "0"，则回退到 DefaultOpenVPNManagementPort
-		if openVPNManagementPort := getEnvInt("OPENVPN_MANAGEMENT_PORT", constants.DefaultOpenVPNManagementPort); openVPNManagementPort == 0 {
-			cfg.OpenVPNManagementPort = constants.DefaultOpenVPNManagementPort
-		} else {
-			cfg.OpenVPNManagementPort = openVPNManagementPort
-		}
+		cfg.OpenVPNManagementPort = getEnvInt("OPENVPN_MANAGEMENT_PORT", constants.DefaultOpenVPNManagementPort)
 		cfg.OpenVPNBlacklistFile = getEnv("OPENVPN_BLACKLIST_FILE", constants.DefaultOpenVPNBlacklistFile)
 
 		// 生成默认配置文件
@@ -140,16 +134,8 @@ func LoadConfig() (*Config, error) {
 	cfg.OpenVPNTLSKeyPath = getEnv("OPENVPN_TLS_KEY_PATH", constants.ServerTLSKeyPath)
 	cfg.OpenVPNStatusLogPath = getEnv("OPENVPN_STATUS_LOG_PATH", constants.DefaultOpenVPNStatusLogPath)
 	cfg.OpenVPNLogPath = getEnv("OPENVPN_LOG_PATH", constants.DefaultOpenVPNLogPath)
-	// cfg.OpenVPNManagementPort = getEnvInt("OPENVPN_MANAGEMENT_PORT", cfg.OpenVPNManagementPort)
-	// 如果 OPENVPN_MANAGEMENT_PORT 环境变量被显式设置为 "0"，则回退到 DefaultOpenVPNManagementPort
-	managementPortEnvValue, envExists := os.LookupEnv("OPENVPN_MANAGEMENT_PORT")
-	if envExists && managementPortEnvValue == "0" {
-		cfg.OpenVPNManagementPort = constants.DefaultOpenVPNManagementPort
-	} else {
-		// If env var is not "0" or not set, getEnvInt handles parsing or fallback to cfg.OpenVPNManagementPort (from file).
-		cfg.OpenVPNManagementPort = getEnvInt("OPENVPN_MANAGEMENT_PORT", cfg.OpenVPNManagementPort)
-	}
-	cfg.OpenVPNBlacklistFile = getEnv("OPENVPN_BLACKLIST_FILE", cfg.OpenVPNBlacklistFile)
+	cfg.OpenVPNManagementPort = getEnvInt("OPENVPN_MANAGEMENT_PORT", constants.DefaultOpenVPNManagementPort)
+	cfg.OpenVPNBlacklistFile = getEnv("OPENVPN_BLACKLIST_FILE", constants.DefaultOpenVPNBlacklistFile)
 
 	// 加载路由配置
 	if routes, exists := os.LookupEnv("OPENVPN_ROUTES"); exists {

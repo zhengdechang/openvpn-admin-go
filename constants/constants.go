@@ -48,6 +48,10 @@ var OpenSSLExtFiles = []string{
 	"openssl-client.ext",
 }
 
+var BlacklistFile = []string{
+	"auth-blacklist.sh",
+	"blacklist.txt",
+}
 
 // GetClientConfigPath 获取客户端配置文件路径
 func GetClientConfigPath(username string) string {

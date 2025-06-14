@@ -2,11 +2,9 @@ package cmd
 
 import (
 	"fmt"
-	"io"
 	"log"
 	"os"
 	"os/signal"
-	"path/filepath"
 	"syscall"
 
 	"github.com/spf13/cobra"
@@ -48,11 +46,6 @@ var rootCmd = &cobra.Command{
 			fmt.Println("\n程序已退出")
 			os.Exit(0)
 		}()
-
-		// Ensure OpenVPN scripts are in place
-		if err := ensureOpenVPNScripts(); err != nil {
-			log.Fatalf("Failed to ensure OpenVPN scripts: %v", err)
-		}
 
 		// 加载配置
 		cfg, err := openvpn.LoadConfig()
@@ -112,86 +105,7 @@ func ShowConfig(cfg *openvpn.Config) {
 	fmt.Scanln()
 }
 
-const (
-	sourceScriptDir     = "/openvpn-admin/templates/"
-	sourceScriptName    = "auth-blacklist.sh"
-	sourceBlacklistName = "blacklist.txt"
 
-	targetDir           = "/etc/openvpn/server/"
-	targetScriptName    = "auth-blacklist.sh"
-	targetBlacklistName = "blacklist.txt"
-)
-
-func ensureOpenVPNScripts() error {
-	sourceScriptPath := filepath.Join(sourceScriptDir, sourceScriptName)
-	sourceBlacklistPath := filepath.Join(sourceScriptDir, sourceBlacklistName)
-
-	targetScriptPath := filepath.Join(targetDir, targetScriptName)
-	targetBlacklistPath := filepath.Join(targetDir, targetBlacklistName)
-
-	// Ensure target directory exists
-	if err := os.MkdirAll(targetDir, 0755); err != nil {
-		return fmt.Errorf("failed to create target directory %s: %w", targetDir, err)
-	}
-
-	// Check and copy auth-blacklist.sh
-	if _, err := os.Stat(targetScriptPath); os.IsNotExist(err) {
-		log.Printf("Target script %s not found, attempting to copy from %s", targetScriptPath, sourceScriptPath)
-		if errCopy := copyFile(sourceScriptPath, targetScriptPath); errCopy != nil {
-			return fmt.Errorf("failed to copy script from %s to %s: %w", sourceScriptPath, targetScriptPath, errCopy)
-		}
-		log.Printf("Successfully copied script to %s", targetScriptPath)
-		if errChmod := os.Chmod(targetScriptPath, 0755); errChmod != nil {
-			return fmt.Errorf("failed to set script %s executable: %w", targetScriptPath, errChmod)
-		}
-		log.Printf("Successfully set script %s executable", targetScriptPath)
-	} else if err != nil {
-		return fmt.Errorf("failed to stat target script %s: %w", targetScriptPath, err)
-	} else {
-		log.Printf("Target script %s already exists.", targetScriptPath)
-	}
-
-	// Check and copy blacklist.txt
-	if _, err := os.Stat(targetBlacklistPath); os.IsNotExist(err) {
-		log.Printf("Target blacklist %s not found, attempting to copy from %s", targetBlacklistPath, sourceBlacklistPath)
-		if errCopy := copyFile(sourceBlacklistPath, targetBlacklistPath); errCopy != nil {
-			return fmt.Errorf("failed to copy blacklist file from %s to %s: %w", sourceBlacklistPath, targetBlacklistPath, errCopy)
-		}
-		log.Printf("Successfully copied blacklist file to %s", targetBlacklistPath)
-	} else if err != nil {
-		return fmt.Errorf("failed to stat target blacklist %s: %w", targetBlacklistPath, err)
-	} else {
-		log.Printf("Target blacklist %s already exists.", targetBlacklistPath)
-	}
-
-	return nil
-}
-
-// copyFile utility function
-func copyFile(src, dst string) error {
-	sourceFileStat, err := os.Stat(src)
-	if err != nil {
-		return err
-	}
-
-	if !sourceFileStat.Mode().IsRegular() {
-		return fmt.Errorf("%s is not a regular file", src)
-	}
-
-	source, err := os.Open(src)
-	if err != nil {
-		return err
-	}
-	defer source.Close()
-
-	destination, err := os.Create(dst)
-	if err != nil {
-		return err
-	}
-	defer destination.Close()
-	_, err = io.Copy(destination, source)
-	return err
-}
 
 func Execute() {
 	// webCmd is added to rootCmd in cmd/web.go's init()
