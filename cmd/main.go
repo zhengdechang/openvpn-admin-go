@@ -105,6 +105,8 @@ func ShowConfig(cfg *openvpn.Config) {
 	fmt.Scanln()
 }
 
+
+
 func Execute() {
 	// webCmd is added to rootCmd in cmd/web.go's init()
 	rootCmd.AddCommand(logCmd)

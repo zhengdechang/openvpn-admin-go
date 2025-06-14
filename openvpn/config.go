@@ -30,6 +30,8 @@ type Config struct {
 	DNSServerDomain        string   `json:"dns_server_domain"`
 	OpenVPNStatusLogPath   string   `json:"openvpn_status_log_path"`
 	OpenVPNLogPath         string   `json:"openvpn_log_path"`
+	OpenVPNManagementPort  int      `json:"openvpn_management_port,omitempty"`
+	OpenVPNBlacklistFile   string   `json:"openvpn_blacklist_file,omitempty"`
 }
 
 // LoadConfig 从服务端配置文件加载配置
@@ -58,6 +60,8 @@ func LoadConfig() (*Config, error) {
 		cfg.OpenVPNTLSKeyPath = getEnv("OPENVPN_TLS_KEY_PATH", constants.ServerTLSKeyPath)
 		cfg.OpenVPNStatusLogPath = getEnv("OPENVPN_STATUS_LOG_PATH", constants.DefaultOpenVPNStatusLogPath)
 		cfg.OpenVPNLogPath = getEnv("OPENVPN_LOG_PATH", constants.DefaultOpenVPNLogPath)
+		cfg.OpenVPNManagementPort = getEnvInt("OPENVPN_MANAGEMENT_PORT", constants.DefaultOpenVPNManagementPort)
+		cfg.OpenVPNBlacklistFile = getEnv("OPENVPN_BLACKLIST_FILE", constants.DefaultOpenVPNBlacklistFile)
 
 		// 生成默认配置文件
 		configContent, err := cfg.GenerateServerConfig()
@@ -130,6 +134,8 @@ func LoadConfig() (*Config, error) {
 	cfg.OpenVPNTLSKeyPath = getEnv("OPENVPN_TLS_KEY_PATH", constants.ServerTLSKeyPath)
 	cfg.OpenVPNStatusLogPath = getEnv("OPENVPN_STATUS_LOG_PATH", constants.DefaultOpenVPNStatusLogPath)
 	cfg.OpenVPNLogPath = getEnv("OPENVPN_LOG_PATH", constants.DefaultOpenVPNLogPath)
+	cfg.OpenVPNManagementPort = getEnvInt("OPENVPN_MANAGEMENT_PORT", constants.DefaultOpenVPNManagementPort)
+	cfg.OpenVPNBlacklistFile = getEnv("OPENVPN_BLACKLIST_FILE", constants.DefaultOpenVPNBlacklistFile)
 
 	// 加载路由配置
 	if routes, exists := os.LookupEnv("OPENVPN_ROUTES"); exists {
@@ -160,6 +166,16 @@ func (c *Config) GenerateServerConfig() (string, error) {
 func getEnv(key, defaultValue string) string {
 	if value, exists := os.LookupEnv(key); exists {
 		return value
+	}
+	return defaultValue
+}
+
+// getEnvInt 获取整数类型的环境变量
+func getEnvInt(key string, defaultValue int) int {
+	if value, exists := os.LookupEnv(key); exists {
+		if i, err := strconv.Atoi(value); err == nil {
+			return i
+		}
 	}
 	return defaultValue
 }

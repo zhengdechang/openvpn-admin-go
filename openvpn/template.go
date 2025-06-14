@@ -47,6 +47,8 @@ func RenderServerConfig(cfg *Config) (string, error) {
 		"OpenVPNStatusLogPath":    cfg.OpenVPNStatusLogPath,
 		"OpenVPNLogPath":          cfg.OpenVPNLogPath,
 		"OpenVPNClientConfigDir":  cfg.OpenVPNClientConfigDir,
+		"OpenVPNManagementPort":   cfg.OpenVPNManagementPort,
+		"OpenVPNBlacklistFile":    cfg.OpenVPNBlacklistFile,
 	}
 
 	var buf bytes.Buffer

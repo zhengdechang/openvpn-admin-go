@@ -37,6 +37,8 @@ const (
 	DefaultOpenVPNTLSVersion    = "1.2"
 	DefaultOpenVPNTLSKey        = "ta.key"
 	DefaultOPENVPN_SERVER_HOSTNAME = "192.168.2.1"
+	DefaultOpenVPNManagementPort = 7505
+	DefaultOpenVPNBlacklistFile = "/etc/openvpn/server/blacklist.txt"
 )
 
 // openssl 扩展文件
@@ -46,6 +48,10 @@ var OpenSSLExtFiles = []string{
 	"openssl-client.ext",
 }
 
+var BlacklistFile = []string{
+	"auth-blacklist.sh",
+	"blacklist.txt",
+}
 
 // GetClientConfigPath 获取客户端配置文件路径
 func GetClientConfigPath(username string) string {

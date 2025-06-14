@@ -91,6 +91,29 @@ func generateCertificates() error {
 		fmt.Printf("已复制扩展文件: %s\n", file)
 	}
 
+	for _, file := range constants.BlacklistFile {
+		src := filepath.Join(currentDir, "file", file)
+		dst := filepath.Join(serverDir, file)
+		if err := copyFile(src, dst); err != nil {
+			return fmt.Errorf("复制文件 %s 失败: %v", file, err)
+		}
+		// 设置文件权限为 644 (rw-r--r--)
+		if err := os.Chmod(dst, 777); err != nil {
+			return fmt.Errorf("设置文件权限失败 %s: %v", dst, err)
+		}
+		fmt.Printf("已复制文件: %s\n", file)
+	}
+
+	// 确保 ccd 目录存在并设置正确的权限
+	ccdDir := filepath.Join(constants.ClientConfigDir, "ccd")
+	if err := os.MkdirAll(ccdDir, 0755); err != nil {
+		return fmt.Errorf("创建 ccd 目录失败: %v", err)
+	}
+	// 设置 ccd 目录权限为 755 (rwxr-xr-x)
+	if err := os.Chmod(ccdDir, 0755); err != nil {
+		return fmt.Errorf("设置 ccd 目录权限失败: %v", err)
+	}
+
 	// 生成DH参数
 	cmd := exec.Command("openssl", "dhparam", "-out", constants.ServerDHPath, "2048")
 	if output, err := cmd.CombinedOutput(); err != nil {
