@@ -33,6 +33,15 @@ user nobody
 group nogroup
 persist-key
 persist-tun
+
+# Management Interface for blacklist script
+management 127.0.0.1 {{ .OpenVPNManagementPort }}
+script-security 2
+# Pass necessary environment variables to the auth script
+setenv OPENVPN_BLACKLIST_FILE {{ .OpenVPNBlacklistFile }}
+setenv OPENVPN_MANAGEMENT_PORT {{ .OpenVPNManagementPort }}
+auth-user-pass-verify /app/scripts/auth-blacklist.sh via-file
+
 status {{ .OpenVPNStatusLogPath }}
 log-append {{ .OpenVPNLogPath }}
 verb 3
