@@ -114,6 +114,14 @@ const translation = {
     downloadConfigButtonShort: "DL Cfg",
     editUserSuccess: "User updated successfully!",
     editUserError: "Failed to update user.",
+    statusPaused: "Paused",
+    statusActive: "Active",
+    pauseButton: "Pause",
+    resumeButton:"Resume",
+    columnAccessState: "Access State",
+    columnSubnet: "Subnet",
+    columnBytesReceived: "Bytes Received",
+    columnBytesSent:"Bytes Sent"
   },
   logs: {
     titleServer: "Logs",

@@ -701,10 +701,10 @@ export default function UsersPage() {
                       <TableHead className="w-[100px]">
                         {t("dashboard.users.columnOnlineStatus")}
                       </TableHead>
+                        <TableHead className="w-[120px]">{t("dashboard.users.columnCreator")}</TableHead>
                       <TableHead className="w-[100px]">
                         {t("dashboard.users.columnAccessState", "Access State")}
                       </TableHead>
-                      <TableHead className="w-[120px]">{t("dashboard.users.columnCreator")}</TableHead>
                       <TableHead className="w-[120px]">{t("dashboard.users.columnBytesReceived", "Bytes Received")}</TableHead>
                       <TableHead className="w-[120px]">{t("dashboard.users.columnBytesSent", "Bytes Sent")}</TableHead>
                       <TableHead className="w-[300px] sticky right-0 bg-background shadow-[-4px_0_8px_rgba(0,0,0,0.2)]"> {/* Increased width for new buttons */}
