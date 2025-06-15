@@ -111,7 +111,15 @@ const translation = {
     roleLabel: "角色",
     editUserError: "更新用户失败。",
     downloadConfigButtonShort: "下载配置",
-    columnFixedIp: "固定IP"
+    columnFixedIp: "固定IP",
+    statusPaused: "暂停",
+    pauseButton: "暂停",
+    columnAccessState: "访问状态",
+    statusActive: "可访问",
+    columnSubnet: "子网",
+    columnBytesReceived: "接收的字节",
+    columnBytesSent: "发送的字节",
+    resumeButton: "恢复"
   },
   logs: {
     titleServer: "日志",

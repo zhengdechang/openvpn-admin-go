@@ -182,6 +182,7 @@ func (c *ClientController) ListUsers(ctx *gin.Context) {
 			"onlineDuration":     u.OnlineDuration,
 			"connectedSince":     u.ConnectedSince,
 			"lastRef":            u.LastRef,
+			"isPaused":           u.IsPaused,
 		}
 		resp = append(resp, userData)
 	}
@@ -241,6 +242,7 @@ func (c *ClientController) GetUser(ctx *gin.Context) {
 		"creatorId":          u.CreatorID,
 		"createdAt":          u.CreatedAt,
 		"updatedAt":          u.UpdatedAt,
+		"isPaused":           u.IsPaused,
 	}})
 }
 
@@ -411,6 +413,80 @@ func (c *ClientController) DeleteUser(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusOK, gin.H{"message": "user deleted successfully"})
+}
+
+// PauseClient pauses a VPN client
+func (c *ClientController) PauseClient(ctx *gin.Context) {
+	username := ctx.Param("username")
+	if username == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "username is required"})
+		return
+	}
+
+	// Permission Check (Example: Only admin/superadmin can pause)
+	// claims := ctx.MustGet("claims").(*middleware.Claims)
+	// if claims.Role != string(model.RoleAdmin) && claims.Role != string(model.RoleSuperAdmin) {
+	// 	ctx.JSON(http.StatusForbidden, gin.H{"error": "permission denied"})
+	// 	return
+	// }
+
+	var user model.User
+	if err := database.DB.Where("name = ?", username).First(&user).Error; err != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
+		return
+	}
+
+	if err := openvpn.PauseClient(username); err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to pause client in OpenVPN: " + err.Error()})
+		return
+	}
+
+	user.IsPaused = true
+	if err := database.DB.Save(&user).Error; err != nil {
+		// Attempt to resume client if DB update fails
+		openvpn.ResumeClient(username) // Best effort, ignore error here
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update user status in database: " + err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"message": "Client paused successfully"})
+}
+
+// ResumeClient resumes a VPN client
+func (c *ClientController) ResumeClient(ctx *gin.Context) {
+	username := ctx.Param("username")
+	if username == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "username is required"})
+		return
+	}
+
+	// Permission Check (Example: Only admin/superadmin can resume)
+	// claims := ctx.MustGet("claims").(*middleware.Claims)
+	// if claims.Role != string(model.RoleAdmin) && claims.Role != string(model.RoleSuperAdmin) {
+	// 	ctx.JSON(http.StatusForbidden, gin.H{"error": "permission denied"})
+	// 	return
+	// }
+
+	var user model.User
+	if err := database.DB.Where("name = ?", username).First(&user).Error; err != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
+		return
+	}
+
+	if err := openvpn.ResumeClient(username); err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to resume client in OpenVPN: " + err.Error()})
+		return
+	}
+
+	user.IsPaused = false
+	if err := database.DB.Save(&user).Error; err != nil {
+		// Attempt to pause client again if DB update fails
+		openvpn.PauseClient(username) // Best effort, ignore error here
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update user status in database: " + err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"message": "Client resumed successfully"})
 }
 
 // GetClientConfig 获取客户端配置

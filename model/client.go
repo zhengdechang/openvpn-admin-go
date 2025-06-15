@@ -41,6 +41,7 @@ type User struct {
    ConnectedSince     *time.Time
    LastRef            *time.Time
    OnlineDuration     int64     `gorm:"default:0"` // Duration in seconds
+   IsPaused           bool      `gorm:"default:false"`
 }
 
 // BeforeCreate 在创建记录前生成 UUID

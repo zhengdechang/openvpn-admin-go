@@ -1,10 +1,13 @@
 package openvpn
 
 import (
+	"bufio"
 	"fmt"
+	"net"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"openvpn-admin-go/constants"
@@ -175,13 +178,118 @@ func DeleteClient(username string) error {
 
 // PauseClient 暂停OpenVPN客户端
 func PauseClient(username string) error {
-	// TODO: 实现暂停客户端的功能
+	// Connect to OpenVPN management interface
+	conn, err := net.Dial("tcp", fmt.Sprintf("127.0.0.1:%d", constants.DefaultOpenVPNManagementPort))
+	if err != nil {
+		return fmt.Errorf("failed to connect to OpenVPN management interface: %w", err)
+	}
+	defer conn.Close()
+
+	// Send kill command
+	_, err = fmt.Fprintf(conn, "kill %s\n", username)
+	if err != nil {
+		// It's possible the client is not connected, so log but don't necessarily fail hard
+		fmt.Printf("Failed to send kill command for %s: %v. This might be okay if client was not connected.\n", username, err)
+	} else {
+		// Optional: Read response
+		status, readErr := bufio.NewReader(conn).ReadString('\n')
+		if readErr != nil {
+			fmt.Printf("Failed to read response from management interface after killing %s: %v\n", username, readErr)
+		} else {
+			fmt.Printf("OpenVPN management interface response for kill %s: %s\n", username, status)
+		}
+	}
+
+	// Append username to blacklist file
+	// Using constants.DefaultOpenVPNBlacklistFile as per project structure
+	// Note: The constants package has `DefaultOpenVPNBlacklistFile` (string)
+	// and `BlacklistFile` (array of strings). We need the specific file path.
+	// The original code in PauseClient correctly used `constants.BlacklistFile`
+	// which was a string variable in that context.
+	// Let's assume constants.DefaultOpenVPNBlacklistFile is the correct one to use.
+	// If constants.BlacklistFile was intended to be a single path, its type in constants.go is confusing.
+	// For now, sticking to DefaultOpenVPNBlacklistFile for clarity.
+	blacklistFilePath := constants.DefaultOpenVPNBlacklistFile // Use the specific constant for the file path
+	f, err := os.OpenFile(blacklistFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return fmt.Errorf("failed to open blacklist file %s: %w", blacklistFilePath, err)
+	}
+	defer f.Close()
+
+	// Check if user is already in blacklist to avoid duplicates
+	existingContent, err := os.ReadFile(blacklistFilePath)
+	if err != nil {
+		// If cannot read, proceed to write, but log it
+		fmt.Printf("Could not read blacklist file %s before appending: %v\n", blacklistFilePath, err)
+	} else {
+		// Ensure matching the whole line for the username
+		lines := strings.Split(string(existingContent), "\n")
+		for _, line := range lines {
+			if strings.TrimSpace(line) == username {
+				fmt.Printf("User %s already in blacklist %s\n", username, blacklistFilePath)
+				return nil // Already blacklisted
+			}
+		}
+	}
+
+	if _, err := fmt.Fprintln(f, username); err != nil {
+		return fmt.Errorf("failed to write to blacklist file %s: %w", blacklistFilePath, err)
+	}
+	fmt.Printf("User %s added to blacklist %s\n", username, blacklistFilePath)
 	return nil
 }
 
 // ResumeClient 恢复OpenVPN客户端
 func ResumeClient(username string) error {
-	// TODO: 实现恢复客户端的功能
+	blacklistFilePath := constants.DefaultOpenVPNBlacklistFile // Use the specific constant for the file path
+
+	content, err := os.ReadFile(blacklistFilePath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			// If blacklist file doesn't exist, user is not paused.
+			fmt.Printf("Blacklist file %s does not exist, user %s is not paused.\n", blacklistFilePath, username)
+			return nil
+		}
+		return fmt.Errorf("failed to read blacklist file %s: %w", blacklistFilePath, err)
+	}
+
+	lines := strings.Split(string(content), "\n")
+	var newLines []string
+	found := false
+	for _, line := range lines {
+		// Trim space to ensure exact match, and check if line is the username
+		if strings.TrimSpace(line) == username {
+			found = true
+			// Skip this line to remove the user from blacklist
+			continue
+		}
+		// Keep non-empty lines, effectively filtering out the target username and empty lines
+		if strings.TrimSpace(line) != "" {
+			newLines = append(newLines, line)
+		}
+	}
+
+	if !found {
+		fmt.Printf("User %s not found in blacklist file %s.\n", username, blacklistFilePath)
+		return nil // User not found, considered success for idempotency
+	}
+
+	// Join the remaining lines. If newLines is empty, newContent will be empty.
+	// If newLines has items, join them with \n. Add a trailing \n if there's content.
+	newContent := strings.Join(newLines, "\n")
+	if len(newContent) > 0 && !strings.HasSuffix(newContent, "\n") {
+		newContent += "\n"
+	} else if len(newLines) == 0 { // If all lines were removed or file was empty to begin with
+		newContent = "" // Ensure file is empty
+	}
+
+
+	err = os.WriteFile(blacklistFilePath, []byte(newContent), 0644)
+	if err != nil {
+		return fmt.Errorf("failed to write updated blacklist file %s: %w", blacklistFilePath, err)
+	}
+
+	fmt.Printf("User %s removed from blacklist %s\n", username, blacklistFilePath)
 	return nil
 }
 

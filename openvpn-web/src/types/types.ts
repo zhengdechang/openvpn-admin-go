@@ -212,6 +212,7 @@ export interface AdminUser {
   bytesSent?: number;
   createdAt?: string;
   updatedAt?: string;
+  isPaused?: boolean;
 }
 
 // 服务器状态
