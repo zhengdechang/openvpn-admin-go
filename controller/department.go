@@ -6,10 +6,32 @@ import (
    "github.com/gin-gonic/gin"
    "openvpn-admin-go/database"
    "openvpn-admin-go/model"
+   "math"    // For pagination
+   "strconv" // For pagination
 )
 
 // DepartmentController 管理部门
 type DepartmentController struct{}
+
+// Helper function to recursively load children for a department
+func loadChildren(db *gorm.DB, department *model.Department) error {
+	if department == nil {
+		return nil
+	}
+	var children []model.Department
+	// Preload Head for children as well
+	if err := db.Order("name asc").Preload("Head").Where("parent_id = ?", department.ID).Find(&children).Error; err != nil {
+		return err
+	}
+	department.Children = children // Assign loaded children
+
+	for i := range department.Children {
+		if err := loadChildren(db, &department.Children[i]); err != nil {
+			return err
+		}
+	}
+	return nil
+}
 
 // CreateDepartment 创建部门
 func (c *DepartmentController) CreateDepartment(ctx *gin.Context) {
@@ -34,20 +56,61 @@ func (c *DepartmentController) CreateDepartment(ctx *gin.Context) {
    ctx.JSON(http.StatusOK, dep)
 }
 
-// ListDepartments 列出所有部门
+// ListDepartments 列出所有部门 (paginated for top-level)
 func (c *DepartmentController) ListDepartments(ctx *gin.Context) {
-   var deps []model.Department
-   // 预加载负责人信息
-   // 预加载负责人、上级部门及子部门信息
-   if err := database.DB.
-       Preload("Head").
-       Preload("Parent").
-       Preload("Children").
-       Find(&deps).Error; err != nil {
-       ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-       return
-   }
-   ctx.JSON(http.StatusOK, deps)
+	// Pagination parameters
+	pageQuery := ctx.DefaultQuery("page", "1")
+	pageSizeQuery := ctx.DefaultQuery("pageSize", "10")
+
+	page, err := strconv.Atoi(pageQuery)
+	if err != nil || page < 1 {
+		page = 1
+	}
+
+	pageSize, err := strconv.Atoi(pageSizeQuery)
+	if err != nil || pageSize < 1 || pageSize > 100 { // Max pageSize 100
+		pageSize = 10
+	}
+
+	offset := (page - 1) * pageSize
+	var topLevelDepartments []model.Department
+	var totalItems int64
+
+	db := database.DB
+
+	// Count total top-level departments
+	if err := db.Model(&model.Department{}).Where("parent_id IS NULL OR parent_id = ?", "").Count(&totalItems).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to count top-level departments: " + err.Error()})
+		return
+	}
+
+	// Fetch paginated top-level departments
+	// Ordered by name for consistency
+	if err := db.Order("name asc").Preload("Head").Where("parent_id IS NULL OR parent_id = ?", "").Offset(offset).Limit(pageSize).Find(&topLevelDepartments).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to list top-level departments: " + err.Error()})
+		return
+	}
+
+	// For each top-level department, load its children recursively
+	for i := range topLevelDepartments {
+		if err := loadChildren(db, &topLevelDepartments[i]); err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load department hierarchy: " + err.Error()})
+			return
+		}
+	}
+
+	totalPages := int(math.Ceil(float64(totalItems) / float64(pageSize)))
+	if totalPages == 0 && totalItems > 0 {
+		totalPages = 1
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"totalItems":  totalItems,
+		"totalPages":  totalPages,
+		"currentPage": page,
+		"pageSize":    pageSize,
+		"departments": topLevelDepartments,
+	})
 }
 
 // GetDepartment 获取部门详情
@@ -55,13 +118,16 @@ func (c *DepartmentController) GetDepartment(ctx *gin.Context) {
    id := ctx.Param("id")
    var dep model.Department
    // 加载部门及负责人、上级和子部门信息
-   if err := database.DB.
-       Preload("Head").
-       Preload("Parent").
-       Preload("Children").
-       First(&dep, "id = ?", id).Error; err != nil {
+   // For GetDepartment, we want the full hierarchy including parents, so existing preloads are fine.
+   // However, to be consistent with how ListDepartments now loads children, we can use our loadChildren helper.
+   if err := database.DB.Preload("Head").Preload("Parent").First(&dep, "id = ?", id).Error; err != nil {
        ctx.JSON(http.StatusNotFound, gin.H{"error": "department not found"})
        return
+   }
+   // Manually load children for this specific department
+   if err := loadChildren(database.DB, &dep); err != nil {
+	   ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load department children: " + err.Error()})
+	   return
    }
    ctx.JSON(http.StatusOK, dep)
 }

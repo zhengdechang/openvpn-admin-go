@@ -13,6 +13,8 @@ import (
 	"strings" // Added
 	"openvpn-admin-go/common" // Added
 	"openvpn-admin-go/constants" // Added
+	"math"                       // Added for pagination
+	"strconv"                    // Added for pagination
 )
 
 type ClientController struct{}
@@ -145,22 +147,54 @@ func (c *ClientController) CreateUser(ctx *gin.Context) {
 // ListUsers 列出用户列表 (manager 仅本部门)
 func (c *ClientController) ListUsers(ctx *gin.Context) {
 	claims := ctx.MustGet("claims").(*middleware.Claims)
-	var users []model.User
-	db := database.DB
-	// 部门负责人仅查看本部门用户；普通用户仅查看自身
-	if claims.Role == string(model.RoleManager) {
-		db = db.Where("department_id = ?", claims.DeptID)
-	} else if claims.Role == string(model.RoleUser) {
-		db = db.Where("id = ?", claims.UserID)
+
+	// Pagination parameters
+	pageQuery := ctx.DefaultQuery("page", "1")
+	pageSizeQuery := ctx.DefaultQuery("pageSize", "10")
+
+	page, err := strconv.Atoi(pageQuery)
+	if err != nil || page < 1 {
+		page = 1
 	}
 
-	// Added Order by created_at desc
-	if err := db.Order("created_at desc").Find(&users).Error; err != nil {
+	pageSize, err := strconv.Atoi(pageSizeQuery)
+	if err != nil || pageSize < 1 || pageSize > 100 { // Max pageSize 100
+		pageSize = 10
+	}
+
+	offset := (page - 1) * pageSize
+
+	var users []model.User
+	var totalItems int64
+	db := database.DB
+
+	// Apply role-based filtering
+	query := db.Model(&model.User{})
+	if claims.Role == string(model.RoleManager) {
+		query = query.Where("department_id = ?", claims.DeptID)
+	} else if claims.Role == string(model.RoleUser) {
+		query = query.Where("id = ?", claims.UserID)
+	}
+
+	// Get total count of items matching the filter
+	if err := query.Count(&totalItems).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to count users: " + err.Error()})
+		return
+	}
+
+	// Get paginated users
+	if err := query.Order("created_at desc").Offset(offset).Limit(pageSize).Find(&users).Error; err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to list users: " + err.Error()})
 		return
 	}
 
-	var resp []gin.H
+	totalPages := int(math.Ceil(float64(totalItems) / float64(pageSize)))
+	if totalPages == 0 && totalItems > 0 { // Ensure at least one page if items exist
+		totalPages = 1
+	}
+
+
+	var respUsers []gin.H
 	for _, u := range users {
 		userData := gin.H{
 			"id":                 u.ID,
@@ -184,9 +218,16 @@ func (c *ClientController) ListUsers(ctx *gin.Context) {
 			"lastRef":            u.LastRef,
 			"isPaused":           u.IsPaused,
 		}
-		resp = append(resp, userData)
+		respUsers = append(respUsers, userData)
 	}
-	ctx.JSON(http.StatusOK, resp)
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"totalItems":  totalItems,
+		"totalPages":  totalPages,
+		"currentPage": page,
+		"pageSize":    pageSize,
+		"users":       respUsers,
+	})
 }
 
 // GetUser 获取单个用户 (manager 仅本部门)

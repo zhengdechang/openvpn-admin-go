@@ -65,6 +65,12 @@ export default function UsersPage() {
   const [depts, setDepts] = useState<Department[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1); // Initialize to 1 to avoid "Page 1 of 0"
+  const [totalItems, setTotalItems] = useState(0);
+  const [pageSize, setPageSize] = useState(10); // Default page size
+
   // Form state for adding a new user
   const [addUserForm, setAddUserForm] = useState<UserUpdateRequest>({
     // Using UserUpdateRequest for consistency
@@ -90,7 +96,7 @@ export default function UsersPage() {
     try {
       await userManagementAPI.pauseUser(username);
       toast.success(t("dashboard.users.pauseSuccess", `User ${username} paused successfully.`));
-      fetchAll(); // Refresh the user list to show updated status
+      fetchAll(currentPage, pageSize); // Refresh the user list to show updated status
     } catch (error: any) {
       toast.error(error?.response?.data?.error || t("dashboard.users.pauseError", `Failed to pause user ${username}.`));
     }
@@ -102,31 +108,37 @@ export default function UsersPage() {
     try {
       await userManagementAPI.resumeUser(username);
       toast.success(t("dashboard.users.resumeSuccess", `User ${username} resumed successfully.`));
-      fetchAll(); // Refresh the user list
+      fetchAll(currentPage, pageSize); // Refresh the user list
     } catch (error: any) {
       toast.error(error?.response?.data?.error || t("dashboard.users.resumeError", `Failed to resume user ${username}.`));
     }
   };
 
-  const fetchAll = useCallback(async () => {
+  const fetchAll = useCallback(async (page: number, size: number) => {
     setLoading(true);
     try {
-      const [u, d] = await Promise.all([
-        userManagementAPI.list(),
-        departmentAPI.list(),
-      ]);
-      setUsers(u);
-      setDepts(d);
-    } catch {
-      toast.error(t("dashboard.users.loadError"));
+      // Assuming userManagementAPI.list is updated to accept page and size
+      // And returns an object like { users: AdminUser[], totalItems: number, totalPages: number, currentPage: number, pageSize: number }
+      const usersResponse = await userManagementAPI.list(page, size);
+      const departmentsResponse = await departmentAPI.list(); // Assuming this doesn't need pagination if it's for dropdowns etc.
+
+      setUsers(usersResponse.users);
+      setTotalItems(usersResponse.totalItems);
+      setTotalPages(usersResponse.totalPages > 0 ? usersResponse.totalPages : 1); // Ensure totalPages is at least 1
+      setCurrentPage(usersResponse.currentPage);
+      // setPageSize(usersResponse.pageSize); // Optional: if backend dictates pageSize and it can change
+
+      setDepts(departmentsResponse);
+    } catch (error: any) {
+      toast.error(error?.response?.data?.error || t("dashboard.users.loadError", "Failed to load user data."));
     } finally {
       setLoading(false);
     }
-  }, [t]); // Added t
+  }, [t]); // Removed currentPage, pageSize from here, they are passed as args. fetchAll in useEffect will have correct closure.
 
   useEffect(() => {
-    fetchAll();
-  }, [fetchAll]);
+    fetchAll(currentPage, pageSize);
+  }, [currentPage, pageSize, fetchAll]); // fetchAll is now a dependency here.
 
   const handleDownload = async (username: string, os: string) => {
     try {
@@ -187,7 +199,8 @@ export default function UsersPage() {
       );
       toast.success(t("dashboard.users.createSuccess"));
       setAddUserDialogOpen(false);
-      fetchAll();
+      setCurrentPage(1); // Reset to first page
+      fetchAll(1, pageSize); // Go to first page after creating a user
     } catch (error: any) {
       toast.error(
         error?.response?.data?.error || t("dashboard.users.createError")
@@ -200,7 +213,12 @@ export default function UsersPage() {
     try {
       await userManagementAPI.delete(id);
       toast.success(t("dashboard.users.deleteSuccess"));
-      fetchAll();
+      // After deleting, refetch the current page.
+      // A more robust solution might involve checking if the current page becomes empty
+      // and then navigating to the previous page or page 1.
+      // For now, just refetch current. If it's the last item, it might show an empty page
+      // until the user navigates. Or, if totalItems changes enough, totalPages might decrease.
+      fetchAll(currentPage, pageSize);
     } catch {
       toast.error(t("dashboard.users.deleteError"));
     }
@@ -255,7 +273,7 @@ export default function UsersPage() {
         t("dashboard.users.editUserSuccess", "User updated successfully!")
       );
       setEditUserDialogOpen(false);
-      fetchAll();
+      fetchAll(currentPage, pageSize); // Refresh current page
     } catch (error: any) {
       toast.error(
         error?.response?.data?.error ||
@@ -830,9 +848,193 @@ export default function UsersPage() {
                         </TableCell>
                       </TableRow>
                     ))}
+                  <TableBody>
+                    {users && users.length > 0 ? (
+                      users.map((u: AdminUser) => (
+                        <TableRow key={u.id}>
+                          <TableCell>{u.name}</TableCell>
+                          <TableCell>{u.email}</TableCell>
+                          <TableCell>{u.role}</TableCell>
+                          <TableCell>
+                            {depts.find((d) => d.id === u.departmentId)?.name ||
+                              t("dashboard.users.emptyDepartment")}
+                          </TableCell>
+                          <TableCell>{u.fixedIp || "-"} </TableCell>
+                          <TableCell>
+                            {u.subnet || "-"}
+                          </TableCell>
+                          <TableCell>
+                            {u.connectionIp || t("common.na")}
+                          </TableCell>
+                          <TableCell>
+                            {u.allocatedVpnIp || t("common.na")}
+                          </TableCell>
+                          <TableCell>
+                            {u.lastConnectionTime
+                              ? new Date(u.lastConnectionTime).toLocaleString()
+                              : t("common.na")}
+                          </TableCell>
+                          <TableCell>
+                            {typeof u.isOnline === "boolean"
+                              ? u.isOnline
+                                ? t("dashboard.users.statusOnline")
+                                : t("dashboard.users.statusOffline")
+                              : t("common.na")}
+                          </TableCell>
+                          <TableCell>
+                            {/* Attempt to find creator name. This might be an issue if creator is not in current page of users.
+                                A better approach would be to have creatorName directly in AdminUser if frequently needed,
+                                or fetch separately if essential and not available. For now, leave as is. */}
+                            {users.find((creator) => creator.id === u.creatorId)
+                              ?.name || u.creatorId || t("common.na")}
+                          </TableCell>
+                          <TableCell>
+                            {u.isPaused ? t("dashboard.users.statusPaused", "Paused") : t("dashboard.users.statusActive", "Active")}
+                          </TableCell>
+                          <TableCell>{formatBytes(u.bytesReceived)}</TableCell>
+                          <TableCell>{formatBytes(u.bytesSent)}</TableCell>
+                          <TableCell className="sticky right-0 bg-background shadow-[-4px_0_8px_rgba(0,0,0,0.1)]">
+                            <div className="flex items-center justify-center gap-1">
+                              {canManageUsers && (
+                                <>
+                                  {u.isPaused ? (
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      className="h-8 px-2"
+                                      onClick={() => handleResumeUser(u.name)}
+                                    >
+                                      {t("dashboard.users.resumeButton", "Resume")}
+                                    </Button>
+                                  ) : (
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      className="h-8 px-2"
+                                      onClick={() => handlePauseUser(u.name)}
+                                    >
+                                      {t("dashboard.users.pauseButton", "Pause")}
+                                    </Button>
+                                  )}
+                                </>
+                              )}
+                              {(currentUser?.role === UserRole.ADMIN ||
+                                currentUser?.role === UserRole.SUPERADMIN ||
+                                (currentUser?.role === UserRole.MANAGER &&
+                                  currentUser.departmentId === u.departmentId)) && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="h-8 px-2"
+                                  onClick={() => handleEditClick(u)}
+                                >
+                                  {t("common.edit")}
+                                </Button>
+                              )}
+                              {(currentUser?.role === UserRole.SUPERADMIN ||
+                                (currentUser?.role === UserRole.ADMIN &&
+                                  u.role !== UserRole.SUPERADMIN) ||
+                                (currentUser?.role === UserRole.MANAGER &&
+                                  u.departmentId === currentUser.departmentId &&
+                                  u.role !== UserRole.SUPERADMIN &&
+                                  u.role !== UserRole.ADMIN)) &&
+                                u.id !== currentUser?.id && (
+                                  <Button
+                                    size="sm"
+                                    variant="destructive"
+                                    className="h-8 px-2"
+                                    onClick={() => handleDelete(u.id)}
+                                  >
+                                    {t("dashboard.users.deleteButton")}
+                                  </Button>
+                                )}
+                              <select
+                                className="border px-1 py-1 rounded-md text-sm h-8"
+                                defaultValue=""
+                                onChange={(e) => handleDownload(u.name, e.target.value)}
+                              >
+                                <option value="" disabled>
+                                  {t("dashboard.users.downloadConfigButtonShort", "DL")}
+                                </option>
+                                <option value="windows">
+                                  {t("dashboard.users.osWindows")}
+                                </option>
+                                <option value="macos">
+                                  {t("dashboard.users.osMacOS")}
+                                </option>
+                                <option value="linux">
+                                  {t("dashboard.users.osLinux")}
+                                </option>
+                              </select>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={15} className="text-center"> {/* Ensure colSpan matches number of columns */}
+                          {t("dashboard.users.noUsersFound", "No users found.")}
+                        </TableCell>
+                      </TableRow>
+                    )}
                   </TableBody>
                 </Table>
               </div>
+
+              {/* Pagination Controls START */}
+              {!loading && totalItems > 0 && (
+                <div className="flex items-center justify-between mt-4 p-2 border-t">
+                  <div className="text-sm text-muted-foreground space-x-2">
+                    <span>
+                      {t("dashboard.users.paginationItems", { totalItems: totalItems, context: totalItems === 1 ? "single" : "plural"})}
+                    </span>
+                    <span>|</span>
+                    <span>
+                      {t("dashboard.users.paginationPageInfo", { currentPage, totalPages })}
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Label htmlFor="pageSizeSelect" className="sr-only"> {/*Hidden label for accessibility*/}
+                      {t("dashboard.users.pageSizeLabel", { count: pageSize})}
+                    </Label>
+                    <select
+                      id="pageSizeSelect"
+                      value={pageSize}
+                      onChange={(e) => {
+                        setPageSize(Number(e.target.value));
+                        setCurrentPage(1); // Reset to first page when page size changes
+                      }}
+                      className="border px-2 py-1.5 rounded-md text-sm h-8 bg-background focus:ring-ring focus:border-input" // Styled like shadcn input
+                    >
+                      {[10, 20, 30, 50, 100].map(size => (
+                        <option key={size} value={size}>
+                          {t("dashboard.users.pageSizeOption", { count: size, context: "perPage"})}
+                        </option>
+                      ))}
+                    </select>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                      disabled={currentPage === 1}
+                      className="h-8 px-2"
+                    >
+                      {t("dashboard.users.previousButton", "Previous")}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                      disabled={currentPage === totalPages || totalPages === 0}
+                      className="h-8 px-2"
+                    >
+                      {t("dashboard.users.nextButton", "Next")}
+                    </Button>
+                  </div>
+                </div>
+              )}
+              {/* Pagination Controls END */}
+
             </div>
           )}
         </CardContent>

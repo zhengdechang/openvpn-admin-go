@@ -319,14 +319,34 @@ export const openvpnAPI = {
     return response.data;
   },
   // 获取服务器日志
-  getServerLogs: async (): Promise<string> => {
-    const response = await api.get<{ logs: string }>("/api/logs/server");
-    return response.data.logs;
+  getServerLogs: async (page?: number, pageSize?: number): Promise<{ logs: string[]; totalItems: number; totalPages: number; currentPage: number; pageSize: number }> => {
+    const params = new URLSearchParams();
+    if (page !== undefined) {
+      params.append("page", String(page));
+    }
+    if (pageSize !== undefined) {
+      params.append("pageSize", String(pageSize));
+    }
+    const queryString = params.toString();
+    const url = queryString ? `/api/logs/server?${queryString}` : "/api/logs/server";
+
+    const response = await api.get<{ logs: string[]; totalItems: number; totalPages: number; currentPage: number; pageSize: number }>(url);
+    return response.data;
   },
   // 获取客户端日志
-  getClientLogs: async (): Promise<string> => {
-    const response = await api.get<{ logs: string }>("/api/logs/client");
-    return response.data.logs;
+  getClientLogs: async (page?: number, pageSize?: number): Promise<{ logs: string[]; totalItems: number; totalPages: number; currentPage: number; pageSize: number }> => {
+    const params = new URLSearchParams();
+    if (page !== undefined) {
+      params.append("page", String(page));
+    }
+    if (pageSize !== undefined) {
+      params.append("pageSize", String(pageSize));
+    }
+    const queryString = params.toString();
+    const url = queryString ? `/api/logs/client?${queryString}` : "/api/logs/client";
+
+    const response = await api.get<{ logs: string[]; totalItems: number; totalPages: number; currentPage: number; pageSize: number }>(url);
+    return response.data;
   },
   // 获取实时客户端连接
   getLiveClientConnections: async (): Promise<LiveClientConnection[]> => {
@@ -371,8 +391,20 @@ export const serverAPI = {
 
 // 部门管理 API
 export const departmentAPI = {
-  list: async (): Promise<Department[]> => {
-    const response = await api.get<Department[]>("/api/departments");
+  list: async (page?: number, pageSize?: number): Promise<{ departments: Department[]; totalItems: number; totalPages: number; currentPage: number; pageSize: number }> => {
+    const params = new URLSearchParams();
+    if (page !== undefined) {
+      params.append("page", String(page));
+    }
+    if (pageSize !== undefined) {
+      params.append("pageSize", String(pageSize));
+    }
+    const queryString = params.toString();
+    const url = queryString ? `/api/departments?${queryString}` : "/api/departments";
+
+    // Assuming the backend returns the structured response:
+    // { departments: Department[], totalItems: number, totalPages: number, currentPage: number, pageSize: number }
+    const response = await api.get<{ departments: Department[]; totalItems: number; totalPages: number; currentPage: number; pageSize: number }>(url);
     return response.data;
   },
   create: async (data: { name: string; headId?: string; parentId?: string }): Promise<any> => {
@@ -394,8 +426,21 @@ export const departmentAPI = {
 
 // 用户管理 API
 export const userManagementAPI = {
-  list: async (): Promise<AdminUser[]> => {
-    const response = await api.get<AdminUser[]>("/api/client");
+  list: async (page?: number, pageSize?: number): Promise<{ users: AdminUser[]; totalItems: number; totalPages: number; currentPage: number; pageSize: number }> => {
+    const params = new URLSearchParams();
+    if (page !== undefined) {
+      params.append("page", String(page));
+    }
+    if (pageSize !== undefined) {
+      params.append("pageSize", String(pageSize));
+    }
+    const queryString = params.toString();
+    const url = queryString ? `/api/client?${queryString}` : "/api/client";
+
+    // Assuming the backend directly returns the structured response:
+    // { users: AdminUser[], totalItems: number, totalPages: number, currentPage: number, pageSize: number }
+    // The .data property of the axios response will contain this object.
+    const response = await api.get<{ users: AdminUser[]; totalItems: number; totalPages: number; currentPage: number; pageSize: number }>(url);
     return response.data;
   },
   create: async (
