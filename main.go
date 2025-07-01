@@ -1,114 +1,26 @@
 package main
 
 import (
-   "bufio"
 	"fmt"
 	"log"
 	"os"
 	"os/signal"
-	"strings"
 	"syscall"
 
 	"openvpn-admin-go/cmd"
-   "openvpn-admin-go/database"
-   "openvpn-admin-go/model"
-   "openvpn-admin-go/common"
-   "openvpn-admin-go/openvpn"
-   "openvpn-admin-go/constants"
-   "path/filepath"
-   "openvpn-admin-go/services" // Added for OpenVPN Sync Service
-   "openvpn-admin-go/utils"    // Added for config utils
+	"openvpn-admin-go/common"
+	"openvpn-admin-go/constants"
+	"openvpn-admin-go/database"
+	"openvpn-admin-go/model"
+	"openvpn-admin-go/openvpn"
+	"openvpn-admin-go/services" // Added for OpenVPN Sync Service
+	"openvpn-admin-go/utils"    // Added for config utils
+	"path/filepath"
 )
-
-// loadEnv 从.env文件加载环境变量
-func loadEnv() error {
-	// Check if .env file exists. If not, copy from .env.example
-	if _, err := os.Stat(".env"); os.IsNotExist(err) {
-		log.Println(".env file not found. Attempting to copy from .env.example...")
-		sourceFile, err := os.Open(".env.example")
-		if err != nil {
-			return fmt.Errorf("无法打开 .env.example 文件: %v", err)
-		}
-		defer sourceFile.Close()
-
-		destinationFile, err := os.Create(".env")
-		if err != nil {
-			return fmt.Errorf("无法创建 .env 文件: %v", err)
-		}
-		defer destinationFile.Close()
-
-		_, err = bufio.NewReader(sourceFile).WriteTo(destinationFile)
-		if err != nil {
-			return fmt.Errorf("无法从 .env.example 复制到 .env: %v", err)
-		}
-		log.Println(".env file copied successfully from .env.example.")
-	}
-
-	file, err := os.Open(".env")
-	if err != nil {
-		return fmt.Errorf("无法打开.env文件: %v", err)
-	}
-	defer file.Close()
-
-	requiredVars := map[string]bool{
-		"OPENVPN_PORT":            true,
-		"OPENVPN_PROTO":           true,
-		"OPENVPN_SERVER_NETWORK":  true,
-		"OPENVPN_SERVER_NETMASK":  true,
-		"OPENVPN_SERVER_HOSTNAME": true,
-	}
-
-	loadedVars := make(map[string]bool)
-
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		line := scanner.Text()
-		// 跳过注释和空行
-		if strings.HasPrefix(line, "#") || len(strings.TrimSpace(line)) == 0 {
-			continue
-		}
-
-		parts := strings.SplitN(line, "=", 2)
-		if len(parts) != 2 {
-			continue
-		}
-
-		key := strings.TrimSpace(parts[0])
-		value := strings.TrimSpace(parts[1])
-
-		// 设置环境变量
-		if err := os.Setenv(key, value); err != nil {
-			return fmt.Errorf("设置环境变量失败 %s: %v", key, err)
-		}
-
-		loadedVars[key] = true
-	}
-
-	if err := scanner.Err(); err != nil {
-		return fmt.Errorf("读取.env文件失败: %v", err)
-	}
-
-	// 检查必需的环境变量是否都已加载
-	var missingVars []string
-	for varName := range requiredVars {
-		if !loadedVars[varName] {
-			missingVars = append(missingVars, varName)
-		}
-	}
-
-	if len(missingVars) > 0 {
-		return fmt.Errorf("缺少必需的环境变量: %s", strings.Join(missingVars, ", "))
-	}
-
-	return nil
-}
 
 // InitCore initializes core application services.
 func InitCore() error {
-	// 加载环境变量
-	if err := loadEnv(); err != nil {
-		return fmt.Errorf("加载环境变量失败: %v\n请确保.env文件存在且包含所有必需的配置项。", err)
-	}
+	// 不再需要加载环境变量，配置将从 JSON 文件或常量中加载
 
 	// 设置Ctrl+C信号处理
 	sigChan := make(chan os.Signal, 1)
@@ -203,15 +115,13 @@ func InitCore() error {
 		// However, InitCore is already designed to return an error.
 		return fmt.Errorf("无法加载 OpenVPN 配置以启动同步服务: %v", err)
 	}
-	statusLogPath := cfg.OpenVPNStatusLogPath // Use configured path
+	statusLogPath := cfg.OpenVPNStatusLogPath      // Use configured path
 	syncInterval := utils.GetOpenVPNSyncInterval() // Assuming this handles its own config or defaults
 	log.Printf("Starting OpenVPN Sync Service: LogPath='%s', Interval=%s", statusLogPath, syncInterval)
 	go services.StartOpenVPNSyncService(database.DB, statusLogPath, syncInterval)
 
 	return nil
 }
-
-
 
 func main() {
 	// Assign the public functions to the variables in the cmd package.

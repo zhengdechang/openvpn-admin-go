@@ -1,3 +1,8 @@
+/*
+ * @Description:
+ * @Author: Devin
+ * @Date: 2025-07-01 14:40:50
+ */
 package constants
 
 import "path/filepath"
@@ -29,17 +34,31 @@ const (
 	// 客户端配置目录
 	ClientConfigDir = "/etc/openvpn/client"
 
+	// 配置文件路径
+	ConfigJSONPath = "/etc/openvpn/server/config.json"
+
 	// OpenVPN 默认配置值
-	DefaultOpenVPNPort          = 4500
-	DefaultOpenVPNProto         = "tcp6"
-	DefaultOpenVPNServerNetwork = "10.8.0.0"
-	DefaultOpenVPNServerNetmask = "255.255.255.0"
-	DefaultOpenVPNTLSVersion    = "1.2"
-	DefaultOpenVPNTLSKey        = "ta.key"
+	DefaultOpenVPNPort             = 4500
+	DefaultOpenVPNProto            = "tcp6"
+	DefaultOpenVPNServerNetwork    = "10.8.0.0"
+	DefaultOpenVPNServerNetmask    = "255.255.255.0"
+	DefaultOpenVPNTLSVersion       = "1.2"
+	DefaultOpenVPNTLSKey           = "ta.key"
 	DefaultOPENVPN_SERVER_HOSTNAME = "192.168.2.1"
-	DefaultOpenVPNManagementPort = 7505
-	DefaultOpenVPNBlacklistFile = "/etc/openvpn/server/blacklist.txt"
+	DefaultOpenVPNManagementPort   = 7505
+	DefaultOpenVPNBlacklistFile    = "/etc/openvpn/server/blacklist.txt"
+	DefaultOpenVPNSyncCerts        = true
+	DefaultOpenVPNUseCRL           = true
+	DefaultOpenVPNClientToClient   = false
+	DefaultOpenVPNClientConfigDir  = "/etc/openvpn/client"
+	DefaultOpenVPNTLSKeyPath       = "/etc/openvpn/server/tls-auth.key"
 )
+
+// 默认路由配置
+var DefaultOpenVPNRoutes = []string{
+	"10.10.100.0 255.255.255.0",
+	"10.10.98.0 255.255.255.0",
+}
 
 // openssl 扩展文件
 var OpenSSLExtFiles = []string{
