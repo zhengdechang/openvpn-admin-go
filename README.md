@@ -1,102 +1,364 @@
 [中文文档](./README_zh.md)
 
-# openvpn-admin-go
+# OpenVPN Admin Go
 
-This project is the backend for a web-based OpenVPN management panel. It is built with Go and provides a RESTful API for the frontend (openvpn-web) to consume. The primary goal of this project is to simplify the management of OpenVPN servers, users, and their configurations through a user-friendly web interface.
+A comprehensive OpenVPN management system built with Go backend and Next.js frontend. This project provides a complete solution for managing OpenVPN servers, users, certificates, and monitoring connections through an intuitive web interface.
 
-## Features
+## 🚀 Features
 
-- **User Authentication and Management:** Secure user registration and login for administrators and regular users.
-- **Department Management:** Organize users into departments for better access control and management.
-- **OpenVPN Server Configuration Management:** Easily create, update, and delete OpenVPN server configurations.
-- **OpenVPN Client Configuration Generation and Management:** Generate client configuration files (e.g., .ovpn) and manage client access.
-- **Server Status Monitoring:** Monitor the status of OpenVPN servers, including active connections and traffic.
-- **Client Connection Monitoring:** View currently connected clients and their session details.
-- **Log Viewing:** Access and view server and client logs for troubleshooting and monitoring.
+### Core Management
 
-## Management Interfaces
+- **🔐 User Authentication & Authorization:** Multi-role user system (SuperAdmin, Admin, Manager, User) with JWT-based authentication
+- **🏢 Department Management:** Hierarchical organization structure for better user management and access control
+- **⚙️ OpenVPN Server Management:** Complete server lifecycle management including start, stop, restart, and configuration updates
+- **👥 Client Management:** Automated client certificate generation, configuration file creation, and access control
+- **📊 Real-time Monitoring:** Live connection status, traffic monitoring, and session tracking
+- **📝 Comprehensive Logging:** Server and client log access with real-time updates
 
-### Command-line Interface (CLI)
+### Advanced Features
 
-The application can be managed via a command-line interface (CLI). The main entry point for the CLI is `cmd/main.go`. It supports various commands for server and client management, including managing users, departments, and configurations.
+- **🌐 Fixed IP Assignment:** Assign static IP addresses to specific clients
+- **🔒 Client Access Control:** Pause/resume client access without certificate revocation
+- **📋 Certificate Management:** Automated certificate generation, renewal, and revocation
+- **🔄 Real-time Synchronization:** Automatic synchronization of OpenVPN status with database
+- **🎯 Subnet Management:** Configure client-specific subnet routing
+- **📈 Usage Analytics:** Track connection duration, data transfer, and usage patterns
 
-To see a list of available commands and options, you can run:
+## 🏗️ Architecture
+
+This project consists of two main components:
+
+### Backend (openvpn-admin-go)
+
+- **Language:** Go 1.21+
+- **Framework:** Gin (HTTP router)
+- **Database:** SQLite with GORM ORM
+- **Authentication:** JWT tokens
+- **OpenVPN Integration:** Direct system integration with OpenVPN service
+
+### Frontend (openvpn-web)
+
+- **Framework:** Next.js 14 with TypeScript
+- **UI Library:** Tailwind CSS + Radix UI components
+- **State Management:** Zustand
+- **Internationalization:** i18next
+- **API Client:** Axios
+
+## 🖥️ Management Interfaces
+
+### 1. Interactive CLI Menu
+
+The application provides an intuitive command-line interface with interactive menus:
+
 ```bash
+# Start the interactive CLI
+go run main.go
+
+# Or use specific commands
 go run cmd/main.go --help
 ```
-Or, if you have built the executable:
-```bash
-./your-executable-name --help
+
+**Available CLI Operations:**
+
+- Server management (start/stop/restart/configure)
+- Client management (create/delete/pause/resume)
+- Web service management
+- Configuration viewing
+- Log monitoring
+
+### 2. Web Dashboard
+
+Modern web interface accessible at `http://localhost:8085` (default):
+
+**Key Features:**
+
+- Responsive design for desktop and mobile
+- Real-time connection monitoring
+- Drag-and-drop certificate management
+- Multi-language support (English/Chinese)
+- Role-based access control
+
+## 📦 Installation and Setup
+
+### Prerequisites
+
+- **Go 1.21+** - Backend development
+- **Node.js 18+** - Frontend development
+- **OpenVPN** - VPN server software
+- **Linux System** - Ubuntu/Debian/CentOS (systemd required)
+- **Root/Sudo Access** - For OpenVPN service management
+
+### Quick Start
+
+1. **Clone the Repository:**
+
+   ```bash
+   git clone <your-repository-url>
+   cd openvpn-admin-go
+   ```
+
+2. **Backend Setup:**
+
+   ```bash
+   # Install Go dependencies
+   go mod tidy
+
+   # Create environment file
+   cp .env.example .env
+   # Edit .env with your configuration
+
+   # Run the application (will auto-install dependencies)
+   go run main.go
+   ```
+
+3. **Frontend Setup:**
+
+   ```bash
+   cd openvpn-web
+
+   # Install Node.js dependencies
+   npm install
+
+   # Start development server
+   npm run dev
+   ```
+
+4. **Access the Application:**
+   - **CLI Interface:** Run `go run main.go` for interactive menu
+   - **Web Interface:** Open `http://localhost:3000` (frontend) or `http://localhost:8085` (backend API)
+   - **Default Login:** `superadmin@gmail.com` / `superadmin`
+
+### Environment Configuration
+
+Create a `.env` file in the project root:
+
+```env
+# Database Configuration
+DB_PATH=data/db.sqlite3
+
+# JWT Configuration
+JWT_SECRET=your-super-secret-jwt-key
+
+# OpenVPN Configuration
+OPENVPN_SERVER_HOSTNAME=your-server-ip-or-domain
+OPENVPN_PORT=1194
+OPENVPN_PROTO=udp
+OPENVPN_SERVER_NETWORK=10.8.0.0
+OPENVPN_SERVER_NETMASK=255.255.255.0
+OPENVPN_CLIENT_CONFIG_DIR=/etc/openvpn/clients
+OPENVPN_STATUS_LOG_PATH=/var/log/openvpn/status.log
+OPENVPN_LOG_PATH=/var/log/openvpn/openvpn.log
+
+# Optional: LevelDB for additional storage
+LEVELDB_PATH=/var/lib/openvpn-manager
 ```
 
-### Web Service Interface
+## 📁 Project Structure
 
-The application also provides a web-based management interface. The `openvpn-admin-go` project itself serves as the backend API. The frontend user interface, which consumes this API, is the `openvpn-web` project, typically found in the `openvpn-web/` directory.
+### Backend Structure
 
-The web interface allows for similar management tasks as the CLI but provides a graphical user interface for easier interaction.
+```
+openvpn-admin-go/
+├── cmd/                    # CLI commands and entry points
+│   ├── main.go            # Main CLI interface with interactive menu
+│   ├── server.go          # Server management commands
+│   ├── client.go          # Client management commands
+│   ├── web.go             # Web service management
+│   └── environment.go     # Environment setup and validation
+├── controller/            # HTTP request handlers
+│   ├── auth.go           # Authentication endpoints
+│   ├── client.go         # Client management API
+│   ├── server.go         # Server management API
+│   ├── department.go     # Department management API
+│   └── log.go            # Log access API
+├── model/                # Data models and database schemas
+│   ├── client.go         # User and client models
+│   ├── department.go     # Department model
+│   ├── server.go         # Server configuration model
+│   └── status.go         # Connection status and logging models
+├── openvpn/              # OpenVPN integration layer
+│   ├── config.go         # Configuration management
+│   ├── server.go         # Server operations
+│   ├── client.go         # Client certificate and config generation
+│   ├── status_parser.go  # Status log parsing
+│   └── ccd.go            # Client-specific configurations
+├── router/               # API route definitions
+├── middleware/           # HTTP middleware (JWT, RBAC)
+├── database/             # Database connection and migrations
+├── services/             # Background services (sync, monitoring)
+├── utils/                # Utility functions
+├── constants/            # Application constants
+├── template/             # OpenVPN configuration templates
+└── main.go              # Application entry point
+```
 
-## Installation and Setup
+### Frontend Structure
 
-1.  **Prerequisites:**
-    *   Go 1.18 or higher.
+```
+openvpn-web/
+├── src/
+│   ├── app/              # Next.js App Router pages
+│   │   ├── dashboard/    # Main application dashboard
+│   │   ├── auth/         # Authentication pages
+│   │   └── page.tsx      # Landing page
+│   ├── components/       # Reusable React components
+│   │   ├── ui/           # Base UI components (buttons, inputs, etc.)
+│   │   └── layout/       # Layout components
+│   ├── services/         # API client and service functions
+│   ├── types/            # TypeScript type definitions
+│   ├── lib/              # Utility libraries and configurations
+│   └── i18n/             # Internationalization files
+├── public/               # Static assets
+└── package.json          # Dependencies and scripts
+```
 
-2.  **Clone the Repository:**
-    ```bash
-    git clone https://github.com/your-username/openvpn-admin-go.git
-    # (Replace with the actual repository URL if different)
-    cd openvpn-admin-go
-    ```
+## 🔌 API Endpoints
 
-3.  **Install Dependencies:**
-    ```bash
-    go mod tidy
-    ```
+The RESTful API provides comprehensive management capabilities:
 
-4.  **Configure the Application:**
-    *   Copy the example environment file:
-        ```bash
-        cp .env.example .env
-        ```
-    *   Edit the `.env` file and set the necessary variables, including:
-        *   `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME` for database connection.
-        *   `JWT_SECRET` for signing JWT tokens.
-        *   Other relevant settings for your environment.
+### Authentication & User Management
 
-5.  **Run the Application:**
-    ```bash
-    go run main.go
-    ```
-    Alternatively, if your main package is in a `cmd` directory:
-    ```bash
-    go run cmd/main.go
-    ```
+- `POST /api/user/register` - User registration
+- `POST /api/user/login` - User authentication
+- `GET /api/user/me` - Get current user profile
+- `PATCH /api/user/me` - Update user profile
+- `POST /api/user/logout` - User logout
+- `GET /api/user/refresh` - Refresh JWT token
 
-## Project Structure
+### Client Management
 
-Here's an overview of the key directories and their purpose:
+- `GET /api/client` - List all clients/users
+- `POST /api/client` - Create new client
+- `GET /api/client/:id` - Get client details
+- `PUT /api/client/:id` - Update client
+- `DELETE /api/client/:id` - Delete client
+- `GET /api/client/config/:username` - Download client configuration
+- `POST /api/client/:username/pause` - Pause client access
+- `POST /api/client/:username/resume` - Resume client access
 
-*   `cmd/`: Contains the main application entry point(s).
-*   `common/`: Utility functions and helpers shared across the project.
-*   `constants/`: Project-wide constants, such as configuration keys or default values.
-*   `controller/`: Handles incoming HTTP requests, processes them, and interacts with services.
-*   `database/`: Database connection management, migrations, and query builders.
-*   `middleware/`: HTTP middleware for tasks like authentication, logging, and CORS.
-*   `model/`: Data structures and types representing application entities (e.g., User, OpenVPN Server).
-*   `openvpn/`: Core logic for interacting with OpenVPN servers (e.g., managing configurations, monitoring status).
-*   `router/`: Defines API routes and maps them to controller handlers.
-*   `services/`: Business logic and coordination between controllers and data layers (database, OpenVPN).
-*   `template/`: HTML templates or other template files, if any (e.g., for client configuration files).
+### Server Management
 
-## API Endpoints
+- `GET /api/server/status` - Get server status
+- `POST /api/server/start` - Start OpenVPN server
+- `POST /api/server/stop` - Stop OpenVPN server
+- `POST /api/server/restart` - Restart OpenVPN server
+- `PUT /api/server/update` - Update server configuration
 
-The RESTful API allows the frontend (openvpn-web) and other clients to interact with the backend. The API routes are defined in the `router/` directory. Endpoints are generally grouped by functionality:
+### Department Management
 
-*   **Authentication:** Endpoints for user login, registration, and token management.
-*   **Users:** Managing user accounts and profiles.
-*   **Departments:** Managing departments for user organization.
-*   **Servers:** CRUD operations for OpenVPN server configurations.
-*   **Clients:** Generating and managing client VPN configurations.
-*   **Status & Monitoring:** Endpoints for checking server status and connected clients.
-*   **Logs:** Accessing server and client logs.
+- `GET /api/departments` - List departments
+- `POST /api/departments` - Create department
+- `PUT /api/departments/:id` - Update department
+- `DELETE /api/departments/:id` - Delete department
 
-For detailed information on specific endpoints, please refer to the code within the `router/` directory and the corresponding controller handlers.
+### Monitoring & Logs
+
+- `GET /api/logs/server` - Get server logs
+- `GET /api/logs/client` - Get client logs
+- `GET /api/client/status/live` - Get live connection status
+
+## 🔐 User Roles & Permissions
+
+| Role           | Permissions                                               |
+| -------------- | --------------------------------------------------------- |
+| **SuperAdmin** | Full system access, user management, server configuration |
+| **Admin**      | User management, department management, client operations |
+| **Manager**    | Client management within assigned department              |
+| **User**       | View own profile, download own VPN configuration          |
+
+## 🚀 Deployment
+
+### Production Deployment
+
+1. **Build the applications:**
+
+   ```bash
+   # Backend
+   go build -o openvpn-admin main.go
+
+   # Frontend
+   cd openvpn-web
+   npm run build
+   ```
+
+2. **Configure systemd service:**
+
+   ```bash
+   sudo cp openvpn-admin /usr/local/bin/
+   sudo systemctl enable openvpn-admin
+   sudo systemctl start openvpn-admin
+   ```
+
+3. **Setup reverse proxy (nginx):**
+
+   ```nginx
+   server {
+       listen 80;
+       server_name your-domain.com;
+
+       location /api/ {
+           proxy_pass http://localhost:8085;
+       }
+
+       location / {
+           proxy_pass http://localhost:3000;
+       }
+   }
+   ```
+
+### Docker Deployment
+
+```bash
+# Build and run with Docker Compose
+docker-compose up -d
+```
+
+## 🛠️ Development
+
+### Backend Development
+
+```bash
+# Run with hot reload
+go run main.go
+
+# Run tests
+go test ./...
+
+# Format code
+go fmt ./...
+```
+
+### Frontend Development
+
+```bash
+cd openvpn-web
+
+# Development server
+npm run dev
+
+# Type checking
+npm run type-check
+
+# Linting
+npm run lint
+```
+
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📞 Support
+
+For support and questions:
+
+- Create an issue on GitHub
+- Check the documentation in the `docs/` directory
+- Review the example configurations in the `examples/` directory
