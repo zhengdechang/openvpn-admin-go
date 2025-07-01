@@ -14,11 +14,12 @@ import {
   Department,
   LiveClientConnection, // Added import for live connections
   UserUpdateRequest, // Added for user update payload
+  ConfigItem, // Added for config item management
 } from "@/types";
 import Cookies from "js-cookie";
 import { useUserStore } from "@/store";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 // 创建axios实例
 const api = axios.create({
@@ -29,49 +30,52 @@ const api = axios.create({
 });
 
 // 请求拦截器添加token
-api.interceptors.request.use(async (config) => {
-  const excludedUrls = [
-    "/api/user/login",
-    "/api/user/register",
-    "/api/user/refresh",
-    "/api/user/verify-email",
-    "/api/user/forgot-password",
-    "/api/user/reset-password",
-  ];
+api.interceptors.request.use(
+  async (config) => {
+    const excludedUrls = [
+      "/api/user/login",
+      "/api/user/register",
+      "/api/user/refresh",
+      "/api/user/verify-email",
+      "/api/user/forgot-password",
+      "/api/user/reset-password",
+    ];
 
-  // Check if the current request URL is one of the excluded URLs
-  if (config.url && !excludedUrls.some(url => config.url!.includes(url))) {
-    try {
-      console.log("Attempting to refresh token for URL:", config.url);
-      const refreshResponse = await userAPI.refreshToken(); // userAPI is defined in the same file
-      if (!refreshResponse.success) {
-        console.warn("Token refresh failed, clearing login info.");
-        useUserStore.getState().clearLoginInfo(); // useUserStore needs to be imported
-        // Optional: redirect to login or throw an error to stop the request
-        // For now, letting it proceed will likely result in a 401, handled by response interceptor
-      } else {
-        console.log("Token refreshed successfully.");
+    // Check if the current request URL is one of the excluded URLs
+    if (config.url && !excludedUrls.some((url) => config.url!.includes(url))) {
+      try {
+        console.log("Attempting to refresh token for URL:", config.url);
+        const refreshResponse = await userAPI.refreshToken(); // userAPI is defined in the same file
+        if (!refreshResponse.success) {
+          console.warn("Token refresh failed, clearing login info.");
+          useUserStore.getState().clearLoginInfo(); // useUserStore needs to be imported
+          // Optional: redirect to login or throw an error to stop the request
+          // For now, letting it proceed will likely result in a 401, handled by response interceptor
+        } else {
+          console.log("Token refreshed successfully.");
+        }
+      } catch (error) {
+        console.error("Error during token refresh:", error);
+        useUserStore.getState().clearLoginInfo();
+        // Optional: redirect or throw
       }
-    } catch (error) {
-      console.error("Error during token refresh:", error);
-      useUserStore.getState().clearLoginInfo();
-      // Optional: redirect or throw
     }
-  }
 
-  // Re-read token from cookies as refreshToken might have updated it
-  const token = Cookies.get("token");
-  if (token) {
-    config.headers["Authorization"] = `Bearer ${token}`;
-  } else {
-    // If no token (e.g., after clearLoginInfo), remove auth header
-    delete config.headers["Authorization"];
+    // Re-read token from cookies as refreshToken might have updated it
+    const token = Cookies.get("token");
+    if (token) {
+      config.headers["Authorization"] = `Bearer ${token}`;
+    } else {
+      // If no token (e.g., after clearLoginInfo), remove auth header
+      delete config.headers["Authorization"];
+    }
+    return config;
+  },
+  (error) => {
+    // Do something with request error
+    return Promise.reject(error);
   }
-  return config;
-}, (error) => {
-  // Do something with request error
-  return Promise.reject(error);
-});
+);
 
 // 响应拦截器：处理 401 错误
 api.interceptors.response.use(
@@ -82,12 +86,16 @@ api.interceptors.response.use(
       // This avoids redundant calls if the request interceptor already cleared it
       const { isLogin } = useUserStore.getState();
       if (isLogin) {
-        console.warn("Response interceptor: Unauthorized (401) and user was still logged in. Clearing login info...");
+        console.warn(
+          "Response interceptor: Unauthorized (401) and user was still logged in. Clearing login info..."
+        );
         useUserStore.getState().clearLoginInfo();
         // Consider redirecting to login page here as a fallback
         // window.location.href = '/auth/login'; // or use Next.js router if available outside component context
       } else {
-        console.warn("Response interceptor: Unauthorized (401), but user info already cleared.");
+        console.warn(
+          "Response interceptor: Unauthorized (401), but user info already cleared."
+        );
       }
     }
     return Promise.reject(error); // 继续抛出错误，供业务代码处理
@@ -222,7 +230,11 @@ export const userAPI = {
   },
 
   // 更新用户信息
-  updateMe: async (userData: { name?: string; email?: string; password?: string }): Promise<ApiResponse<User>> => {
+  updateMe: async (userData: {
+    name?: string;
+    email?: string;
+    password?: string;
+  }): Promise<ApiResponse<User>> => {
     try {
       const response = await api.patch("/api/user/me", userData);
       return response.data;
@@ -266,7 +278,9 @@ export const userAPI = {
   async getLiveClientConnections(): Promise<LiveClientConnection[]> {
     // The actual backend endpoint is /api/client/status/live
     // The `/api` prefix is handled by the baseURL of the axios instance `api`
-    const response = await api.get<LiveClientConnection[]>("/api/client/status/live");
+    const response = await api.get<LiveClientConnection[]>(
+      "/api/client/status/live"
+    );
     return response.data; // Assuming the backend directly returns the array
   },
 };
@@ -296,7 +310,10 @@ export const openvpnAPI = {
     return response.data;
   },
   // 获取客户端配置，可根据 os 参数区分下载类型
-  getClientConfig: async (username: string, os?: string): Promise<{ config: string }> => {
+  getClientConfig: async (
+    username: string,
+    os?: string
+  ): Promise<{ config: string }> => {
     const response = await api.get<{ config: string }>(
       `/api/client/config/${username}`,
       { params: { os } }
@@ -330,7 +347,9 @@ export const openvpnAPI = {
   },
   // 获取实时客户端连接
   getLiveClientConnections: async (): Promise<LiveClientConnection[]> => {
-    const response = await api.get<LiveClientConnection[]>("/api/client/status/live");
+    const response = await api.get<LiveClientConnection[]>(
+      "/api/client/status/live"
+    );
     return response.data;
   },
 };
@@ -367,6 +386,21 @@ export const serverAPI = {
     const response = await api.put("/api/server/port", { port });
     return response.data;
   },
+  // 配置项管理
+  getConfigItems: async (): Promise<{ items: ConfigItem[] }> => {
+    const response = await api.get<{ items: ConfigItem[] }>(
+      "/api/server/config/items"
+    );
+    return response.data;
+  },
+  updateConfigItem: async (key: string, value: any): Promise<any> => {
+    const response = await api.put(`/api/server/config/item/${key}`, { value });
+    return response.data;
+  },
+  updateConfigItems: async (items: Record<string, any>): Promise<any> => {
+    const response = await api.put("/api/server/config/items", { items });
+    return response.data;
+  },
 };
 
 // 部门管理 API
@@ -375,7 +409,11 @@ export const departmentAPI = {
     const response = await api.get<Department[]>("/api/departments");
     return response.data;
   },
-  create: async (data: { name: string; headId?: string; parentId?: string }): Promise<any> => {
+  create: async (data: {
+    name: string;
+    headId?: string;
+    parentId?: string;
+  }): Promise<any> => {
     const response = await api.post("/api/departments", data);
     return response.data;
   },
@@ -407,7 +445,8 @@ export const userManagementAPI = {
   update: async (
     id: string,
     data: UserUpdateRequest // Changed to use UserUpdateRequest
-  ): Promise<AdminUser> => { // Changed return type
+  ): Promise<AdminUser> => {
+    // Changed return type
     const response = await api.put<AdminUser>(`/api/client/${id}`, data); // Assuming backend returns AdminUser
     return response.data;
   },
