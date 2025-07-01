@@ -35,21 +35,19 @@ export default function ConfigManager() {
   }, []);
 
   const handleValueChange = (key: string, value: any) => {
-    setChangedItems(prev => ({
+    setChangedItems((prev) => ({
       ...prev,
-      [key]: value
+      [key]: value,
     }));
-    
+
     // 更新本地显示的值
-    setConfigItems(prev => 
-      prev.map(item => 
-        item.key === key ? { ...item, value } : item
-      )
+    setConfigItems((prev) =>
+      prev.map((item) => (item.key === key ? { ...item, value } : item))
     );
   };
 
   const handleEditToggle = (key: string) => {
-    setEditingItems(prev => {
+    setEditingItems((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(key)) {
         newSet.delete(key);
@@ -109,11 +107,7 @@ export default function ConfigManager() {
         <div className="flex items-center justify-between">
           <CardTitle>服务器配置管理</CardTitle>
           <div className="flex items-center space-x-2">
-            <Button
-              variant="outline"
-              onClick={handleRefresh}
-              disabled={saving}
-            >
+            <Button variant="outline" onClick={handleRefresh} disabled={saving}>
               <RefreshCw className="h-4 w-4 mr-2" />
               刷新
             </Button>
@@ -123,7 +117,11 @@ export default function ConfigManager() {
               className={hasChanges ? "bg-green-600 hover:bg-green-700" : ""}
             >
               <Save className="h-4 w-4 mr-2" />
-              {saving ? "保存中..." : `保存所有更改${hasChanges ? ` (${Object.keys(changedItems).length})` : ""}`}
+              {saving
+                ? "保存中..."
+                : `保存所有更改${
+                    hasChanges ? ` (${Object.keys(changedItems).length})` : ""
+                  }`}
             </Button>
           </div>
         </div>
@@ -134,15 +132,17 @@ export default function ConfigManager() {
         )}
       </CardHeader>
       <CardContent className="space-y-4">
-        {configItems.map((item) => (
-          <ConfigItemComponent
-            key={item.key}
-            item={item}
-            onValueChange={handleValueChange}
-            isEditing={editingItems.has(item.key)}
-            onEditToggle={handleEditToggle}
-          />
-        ))}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {configItems.map((item) => (
+            <ConfigItemComponent
+              key={item.key}
+              item={item}
+              onValueChange={handleValueChange}
+              isEditing={editingItems.has(item.key)}
+              onEditToggle={handleEditToggle}
+            />
+          ))}
+        </div>
       </CardContent>
     </Card>
   );

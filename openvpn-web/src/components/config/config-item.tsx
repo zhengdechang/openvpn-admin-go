@@ -83,7 +83,7 @@ export default function ConfigItemComponent({
             value={localValue || ""}
             onChange={(e) => setLocalValue(e.target.value)}
             placeholder={item.description}
-            className="flex-1"
+            className="w-full text-sm"
           />
         );
       case "number":
@@ -93,7 +93,7 @@ export default function ConfigItemComponent({
             value={localValue || ""}
             onChange={(e) => setLocalValue(parseInt(e.target.value) || 0)}
             placeholder={item.description}
-            className="flex-1"
+            className="w-full text-sm"
           />
         );
       case "boolean":
@@ -106,7 +106,7 @@ export default function ConfigItemComponent({
       case "select":
         return (
           <Select value={localValue || ""} onValueChange={setLocalValue}>
-            <SelectTrigger className="flex-1">
+            <SelectTrigger className="w-full text-sm">
               <SelectValue placeholder={item.description} />
             </SelectTrigger>
             <SelectContent>
@@ -120,32 +120,35 @@ export default function ConfigItemComponent({
         );
       case "array":
         return (
-          <div className="flex-1 space-y-2">
-            {arrayItems.map((arrayItem, index) => (
-              <div key={index} className="flex items-center space-x-2">
-                <Input
-                  value={arrayItem}
-                  onChange={(e) => updateArrayItem(index, e.target.value)}
-                  placeholder="输入路由 (例如: 192.168.1.0 255.255.255.0)"
-                  className="flex-1"
-                />
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => removeArrayItem(index)}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-            ))}
+          <div className="w-full h-full flex flex-col">
+            <div className="flex-1 overflow-y-auto space-y-1 max-h-16">
+              {arrayItems.map((arrayItem, index) => (
+                <div key={index} className="flex items-center space-x-1">
+                  <Input
+                    value={arrayItem}
+                    onChange={(e) => updateArrayItem(index, e.target.value)}
+                    placeholder="输入路由"
+                    className="flex-1 text-xs h-7"
+                  />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => removeArrayItem(index)}
+                    className="h-7 w-7 p-0"
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                </div>
+              ))}
+            </div>
             <Button
               variant="outline"
               size="sm"
               onClick={addArrayItem}
-              className="w-full"
+              className="w-full text-xs h-7 mt-1"
             >
-              <Plus className="h-4 w-4 mr-2" />
-              添加路由
+              <Plus className="h-3 w-3 mr-1" />
+              添加
             </Button>
           </div>
         );
@@ -164,43 +167,45 @@ export default function ConfigItemComponent({
         );
       case "array":
         return (
-          <div className="space-y-1">
+          <div className="flex flex-wrap gap-1 max-h-16 overflow-y-auto">
             {Array.isArray(item.value) && item.value.length > 0 ? (
               item.value.map((arrayItem, index) => (
-                <Badge key={index} variant="outline">
+                <Badge key={index} variant="outline" className="text-xs">
                   {arrayItem}
                 </Badge>
               ))
             ) : (
-              <span className="text-gray-500">无</span>
+              <span className="text-gray-500 text-sm">无</span>
             )}
           </div>
         );
       default:
-        return <span>{item.value || "未设置"}</span>;
+        return <span className="text-sm">{item.value || "未设置"}</span>;
     }
   };
 
   return (
-    <div className="border rounded-lg p-4 space-y-3 hover:bg-gray-50 transition-colors">
-      <div className="flex items-center justify-between">
-        <div>
-          <h3 className="font-medium">{item.label}</h3>
-          <p className="text-sm text-gray-600">{item.description}</p>
+    <div className="border rounded-lg p-4 hover:bg-gray-50 transition-colors h-40 flex flex-col">
+      <div className="flex items-start justify-between mb-3">
+        <div className="flex-1 min-w-0">
+          <h3 className="font-medium text-sm truncate">{item.label}</h3>
+          <p className="text-xs text-gray-600 line-clamp-2">
+            {item.description}
+          </p>
           {item.required && (
             <Badge variant="destructive" className="text-xs mt-1">
               必填
             </Badge>
           )}
         </div>
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-1 ml-2 flex-shrink-0">
           {isEditing ? (
             <>
               <Button variant="outline" size="sm" onClick={handleCancel}>
-                <Cancel className="h-4 w-4" />
+                <Cancel className="h-3 w-3" />
               </Button>
               <Button size="sm" onClick={handleSave}>
-                <Check className="h-4 w-4" />
+                <Check className="h-3 w-3" />
               </Button>
             </>
           ) : (
@@ -209,13 +214,13 @@ export default function ConfigItemComponent({
               size="sm"
               onClick={() => onEditToggle(item.key)}
             >
-              <Edit2 className="h-4 w-4" />
+              <Edit2 className="h-3 w-3" />
             </Button>
           )}
         </div>
       </div>
       <div
-        className="flex items-center space-x-2 cursor-pointer"
+        className="flex-1 w-full cursor-pointer flex items-center"
         onDoubleClick={() => !isEditing && onEditToggle(item.key)}
         title={!isEditing ? "双击编辑" : ""}
       >

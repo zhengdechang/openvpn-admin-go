@@ -289,22 +289,6 @@ func (c *ServerController) GetConfigItems(ctx *gin.Context) {
 			Validation:  "netmask",
 		},
 		{
-			Key:         "openvpn_sync_certs",
-			Value:       cfg.OpenVPNSyncCerts,
-			Type:        "boolean",
-			Label:       "同步证书",
-			Description: "是否自动同步客户端证书",
-			Required:    false,
-		},
-		{
-			Key:         "openvpn_use_crl",
-			Value:       cfg.OpenVPNUseCRL,
-			Type:        "boolean",
-			Label:       "使用CRL",
-			Description: "是否使用证书撤销列表",
-			Required:    false,
-		},
-		{
 			Key:         "openvpn_client_to_client",
 			Value:       cfg.OpenVPNClientToClient,
 			Type:        "boolean",
@@ -487,18 +471,6 @@ func updateSingleConfigItem(cfg *openvpn.Config, key string, value interface{}) 
 			cfg.OpenVPNServerNetmask = netmask
 		} else {
 			return fmt.Errorf("子网掩码必须是字符串")
-		}
-	case "openvpn_sync_certs":
-		if sync, ok := value.(bool); ok {
-			cfg.OpenVPNSyncCerts = sync
-		} else {
-			return fmt.Errorf("同步证书必须是布尔值")
-		}
-	case "openvpn_use_crl":
-		if useCRL, ok := value.(bool); ok {
-			cfg.OpenVPNUseCRL = useCRL
-		} else {
-			return fmt.Errorf("使用CRL必须是布尔值")
 		}
 	case "openvpn_client_to_client":
 		if clientToClient, ok := value.(bool); ok {

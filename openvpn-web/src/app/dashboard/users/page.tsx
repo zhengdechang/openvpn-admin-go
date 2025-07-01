@@ -39,12 +39,12 @@ import { toast } from "sonner";
 
 // Helper function to format bytes into a readable string
 const formatBytes = (bytes?: number, decimals = 2): string => {
-  if (bytes === undefined || bytes === null || bytes === 0) return '0 Bytes';
+  if (bytes === undefined || bytes === null || bytes === 0) return "0 Bytes";
   const k = 1024;
   const dm = decimals < 0 ? 0 : decimals;
-  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+  const sizes = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
 };
 
 // Define initial state for the edit form
@@ -86,25 +86,57 @@ export default function UsersPage() {
 
   // Define handlePauseUser function
   const handlePauseUser = async (username: string) => {
-    if (!confirm(t("dashboard.users.pauseConfirm", `Are you sure you want to pause user ${username}?`))) return;
+    if (
+      !confirm(
+        t(
+          "dashboard.users.pauseConfirm",
+          `Are you sure you want to pause user ${username}?`
+        )
+      )
+    )
+      return;
     try {
       await userManagementAPI.pauseUser(username);
-      toast.success(t("dashboard.users.pauseSuccess", `User ${username} paused successfully.`));
+      toast.success(
+        t(
+          "dashboard.users.pauseSuccess",
+          `User ${username} paused successfully.`
+        )
+      );
       fetchAll(); // Refresh the user list to show updated status
     } catch (error: any) {
-      toast.error(error?.response?.data?.error || t("dashboard.users.pauseError", `Failed to pause user ${username}.`));
+      toast.error(
+        error?.response?.data?.error ||
+          t("dashboard.users.pauseError", `Failed to pause user ${username}.`)
+      );
     }
   };
 
   // Define handleResumeUser function
   const handleResumeUser = async (username: string) => {
-    if (!confirm(t("dashboard.users.resumeConfirm", `Are you sure you want to resume user ${username}?`))) return;
+    if (
+      !confirm(
+        t(
+          "dashboard.users.resumeConfirm",
+          `Are you sure you want to resume user ${username}?`
+        )
+      )
+    )
+      return;
     try {
       await userManagementAPI.resumeUser(username);
-      toast.success(t("dashboard.users.resumeSuccess", `User ${username} resumed successfully.`));
+      toast.success(
+        t(
+          "dashboard.users.resumeSuccess",
+          `User ${username} resumed successfully.`
+        )
+      );
       fetchAll(); // Refresh the user list
     } catch (error: any) {
-      toast.error(error?.response?.data?.error || t("dashboard.users.resumeError", `Failed to resume user ${username}.`));
+      toast.error(
+        error?.response?.data?.error ||
+          t("dashboard.users.resumeError", `Failed to resume user ${username}.`)
+      );
     }
   };
 
@@ -358,7 +390,10 @@ export default function UsersPage() {
                   <>
                     <div className="grid grid-cols-4 items-center gap-4">
                       <Label htmlFor="add-fixedIp" className="text-right">
-                        {t("dashboard.users.fixedIpLabel", "Fixed VPN IP (Optional)")}
+                        {t(
+                          "dashboard.users.fixedIpLabel",
+                          "Fixed VPN IP (Optional)"
+                        )}
                       </Label>
                       <Input
                         id="add-fixedIp"
@@ -547,7 +582,10 @@ export default function UsersPage() {
               <>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="edit-fixedIp" className="text-right">
-                    {t("dashboard.users.fixedIpLabel", "Fixed VPN IP (Optional)")}
+                    {t(
+                      "dashboard.users.fixedIpLabel",
+                      "Fixed VPN IP (Optional)"
+                    )}
                   </Label>
                   <Input
                     id="edit-fixedIp"
@@ -679,10 +717,18 @@ export default function UsersPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-[150px]">{t("dashboard.users.columnName")}</TableHead>
-                      <TableHead className="w-[200px]">{t("dashboard.users.columnEmail")}</TableHead>
-                      <TableHead className="w-[100px]">{t("dashboard.users.columnRole")}</TableHead>
-                      <TableHead className="w-[150px]">{t("dashboard.users.columnDepartment")}</TableHead>
+                      <TableHead className="w-[150px]">
+                        {t("dashboard.users.columnName")}
+                      </TableHead>
+                      <TableHead className="w-[200px]">
+                        {t("dashboard.users.columnEmail")}
+                      </TableHead>
+                      <TableHead className="w-[100px]">
+                        {t("dashboard.users.columnRole")}
+                      </TableHead>
+                      <TableHead className="w-[150px]">
+                        {t("dashboard.users.columnDepartment")}
+                      </TableHead>
                       <TableHead className="w-[120px]">
                         {t("dashboard.users.columnFixedIp", "Fixed IP")}
                       </TableHead>
@@ -690,7 +736,10 @@ export default function UsersPage() {
                         {t("dashboard.users.columnSubnet", "Subnet")}
                       </TableHead>
                       <TableHead className="w-[120px]">
-                        {t("dashboard.users.columnConnectionIp", "Connection IP")}
+                        {t(
+                          "dashboard.users.columnConnectionIp",
+                          "Connection IP"
+                        )}
                       </TableHead>
                       <TableHead className="w-[120px]">
                         {t("dashboard.users.columnAllocatedVpnIp", "VPN IP")}
@@ -701,13 +750,30 @@ export default function UsersPage() {
                       <TableHead className="w-[100px]">
                         {t("dashboard.users.columnOnlineStatus")}
                       </TableHead>
-                        <TableHead className="w-[120px]">{t("dashboard.users.columnCreator")}</TableHead>
+                      <TableHead className="w-[120px]">
+                        {t("dashboard.users.columnCreator")}
+                      </TableHead>
                       <TableHead className="w-[100px]">
                         {t("dashboard.users.columnAccessState", "Access State")}
                       </TableHead>
-                      <TableHead className="w-[120px]">{t("dashboard.users.columnBytesReceived", "Bytes Received")}</TableHead>
-                      <TableHead className="w-[120px]">{t("dashboard.users.columnBytesSent", "Bytes Sent")}</TableHead>
-                      <TableHead className="w-[300px] sticky right-0 bg-background shadow-[-4px_0_8px_rgba(0,0,0,0.2)]"> {/* Increased width for new buttons */}
+                      <TableHead className="w-[120px]">
+                        {t(
+                          "dashboard.users.columnBytesReceived",
+                          "Bytes Received"
+                        )}
+                      </TableHead>
+                      <TableHead className="w-[120px]">
+                        {t("dashboard.users.columnBytesSent", "Bytes Sent")}
+                      </TableHead>
+                      <TableHead
+                        className="w-[300px] sticky right-0"
+                        style={{
+                          backgroundColor: "#ffffff",
+                          boxShadow: "inset 10px 0 0px -9px #0505050f",
+                        }}
+                      >
+                        {" "}
+                        {/* Increased width for new buttons */}
                         {t("dashboard.users.columnActions")}
                       </TableHead>
                     </TableRow>
@@ -723,9 +789,7 @@ export default function UsersPage() {
                             t("dashboard.users.emptyDepartment")}
                         </TableCell>
                         <TableCell>{u.fixedIp || "-"} </TableCell>
-                        <TableCell>
-                          {u.subnet || "-"}
-                        </TableCell>
+                        <TableCell>{u.subnet || "-"}</TableCell>
                         <TableCell>
                           {u.connectionIp || t("common.na")}
                         </TableCell>
@@ -749,11 +813,19 @@ export default function UsersPage() {
                             ?.name || t("common.na")}
                         </TableCell>
                         <TableCell>
-                          {u.isPaused ? t("dashboard.users.statusPaused", "Paused") : t("dashboard.users.statusActive", "Active")}
+                          {u.isPaused
+                            ? t("dashboard.users.statusPaused", "Paused")
+                            : t("dashboard.users.statusActive", "Active")}
                         </TableCell>
                         <TableCell>{formatBytes(u.bytesReceived)}</TableCell>
                         <TableCell>{formatBytes(u.bytesSent)}</TableCell>
-                        <TableCell className="sticky right-0 bg-background shadow-[-4px_0_8px_rgba(0,0,0,0.1)]">
+                        <TableCell
+                          className="sticky right-0"
+                          style={{
+                            backgroundColor: "#ffffff",
+                            boxShadow: "inset 10px 0 0px -9px #0505050f",
+                          }}
+                        >
                           <div className="flex items-center justify-center gap-1">
                             {canManageUsers && (
                               <>
@@ -764,7 +836,10 @@ export default function UsersPage() {
                                     className="h-8 px-2"
                                     onClick={() => handleResumeUser(u.name)}
                                   >
-                                    {t("dashboard.users.resumeButton", "Resume")}
+                                    {t(
+                                      "dashboard.users.resumeButton",
+                                      "Resume"
+                                    )}
                                   </Button>
                                 ) : (
                                   <Button
@@ -781,7 +856,8 @@ export default function UsersPage() {
                             {(currentUser?.role === UserRole.ADMIN ||
                               currentUser?.role === UserRole.SUPERADMIN ||
                               (currentUser?.role === UserRole.MANAGER &&
-                                currentUser.departmentId === u.departmentId)) && (
+                                currentUser.departmentId ===
+                                  u.departmentId)) && (
                               <Button
                                 size="sm"
                                 variant="outline"
@@ -811,10 +887,15 @@ export default function UsersPage() {
                             <select
                               className="border px-1 py-1 rounded-md text-sm h-8"
                               defaultValue=""
-                              onChange={(e) => handleDownload(u.name, e.target.value)}
+                              onChange={(e) =>
+                                handleDownload(u.name, e.target.value)
+                              }
                             >
                               <option value="" disabled>
-                                {t("dashboard.users.downloadConfigButtonShort", "DL")}
+                                {t(
+                                  "dashboard.users.downloadConfigButtonShort",
+                                  "DL"
+                                )}
                               </option>
                               <option value="windows">
                                 {t("dashboard.users.osWindows")}
