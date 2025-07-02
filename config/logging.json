@@ -1,0 +1,26 @@
+{
+  "level": "info",
+  "log_file_path": "logs/web.log",
+  "enable_api": true,
+  "max_file_size": 104857600,
+  "max_backups": 5,
+  "max_age": 30,
+  "api": {
+    "enable_request_body": false,
+    "enable_response_body": false,
+    "max_body_size": 1024,
+    "skip_paths": [
+      "/api/health",
+      "/api/ping",
+      "/favicon.ico"
+    ],
+    "sensitive_paths": [
+      "/api/auth/login",
+      "/api/auth/logout",
+      "/api/users",
+      "/api/client",
+      "/api/server",
+      "/api/departments"
+    ]
+  }
+}

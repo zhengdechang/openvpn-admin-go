@@ -2,16 +2,17 @@ package cmd
 
 import (
 	"fmt"
-	"log"
+	"openvpn-admin-go/logging"
 	"openvpn-admin-go/router"
-	"github.com/gin-gonic/gin"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strconv"
 	"syscall"
 	"time"
+
+	"github.com/gin-gonic/gin"
 	"github.com/manifoldco/promptui"
-	"os/exec"
 	"github.com/spf13/cobra"
 )
 
@@ -169,9 +170,9 @@ func startWebServer() error {
 			if process, _ := os.FindProcess(pid); process != nil && process.Signal(syscall.Signal(0)) == nil {
 				return fmt.Errorf("Web 服务器似乎已在运行 (PID: %d, PID 文件: %s). 请先停止它", pid, pidFile)
 			}
-			log.Printf("发现陈旧的 PID 文件 (%s, PID: %d), 但进程未运行. 将覆盖 PID 文件.", pidFile, pid)
+			logging.Warn("发现陈旧的 PID 文件 (%s, PID: %d), 但进程未运行. 将覆盖 PID 文件.", pidFile, pid)
 		} else {
-			log.Printf("PID 文件 (%s) 内容无效, 将覆盖.", pidFile)
+			logging.Warn("PID 文件 (%s) 内容无效, 将覆盖.", pidFile)
 		}
 	}
 
@@ -218,6 +219,10 @@ func startWebServer() error {
 func runWebServer(port int) error {
 	// Setup Gin router
 	r := gin.Default()
+
+	// 添加日志中间件
+	r.Use(logging.GinLoggingMiddleware())
+
 	api := r.Group("/api")
 	{
 		router.SetupUserRoutes(api)
@@ -228,6 +233,7 @@ func runWebServer(port int) error {
 	}
 
 	serverAddr := fmt.Sprintf(":%d", port)
+	logging.Info("Web 服务器正在监听 %s...", serverAddr)
 	fmt.Printf("Web 服务器正在监听 %s...\n", serverAddr)
 	return r.Run(serverAddr)
 }
@@ -252,27 +258,27 @@ func stopWebServer() error {
 	process, err := os.FindProcess(pid)
 	if err != nil {
 		if rmErr := os.Remove(pidFile); rmErr == nil {
-			log.Printf("已删除陈旧/无效的 PID 文件: %s", pidFile)
+			logging.Info("已删除陈旧/无效的 PID 文件: %s", pidFile)
 		}
 		return fmt.Errorf("获取进程句柄失败 (PID: %d): %v. 可能进程已不存在", pid, err)
 	}
 
-	log.Printf("正在向 PID %d 发送 SIGTERM 信号...", pid)
+	logging.Info("正在向 PID %d 发送 SIGTERM 信号...", pid)
 	if err := process.Signal(syscall.SIGTERM); err != nil {
 		if checkErr := process.Signal(syscall.Signal(0)); checkErr != nil {
-			log.Printf("进程 (PID: %d) 似乎未在运行: %v", pid, checkErr)
+			logging.Warn("进程 (PID: %d) 似乎未在运行: %v", pid, checkErr)
 			if rmErr := os.Remove(pidFile); rmErr == nil {
-				log.Printf("已删除陈旧的 PID 文件: %s", pidFile)
+				logging.Info("已删除陈旧的 PID 文件: %s", pidFile)
 			}
 		} else {
 			return fmt.Errorf("发送 SIGTERM 信号失败 (PID: %d): %v", pid, err)
 		}
 	} else {
-		log.Printf("已成功向 PID %d 发送 SIGTERM 信号.", pid)
+		logging.Info("已成功向 PID %d 发送 SIGTERM 信号.", pid)
 		time.Sleep(100 * time.Millisecond)
 		if _, statErr := os.Stat(pidFile); statErr == nil {
 			if rmErr := os.Remove(pidFile); rmErr == nil {
-				log.Println("由停止命令删除的 PID 文件.")
+				logging.Info("由停止命令删除的 PID 文件.")
 			}
 		}
 	}
@@ -281,20 +287,20 @@ func stopWebServer() error {
 }
 
 func restartWebServer() error {
-	log.Println("正在重启 Web 服务器...")
-	
+	logging.Info("正在重启 Web 服务器...")
+
 	if err := stopWebServer(); err != nil {
-		log.Printf("停止服务时出错: %v", err)
+		logging.Error("停止服务时出错: %v", err)
 	}
-	
-	log.Println("等待服务器关闭 (2 秒)...")
+
+	logging.Info("等待服务器关闭 (2 秒)...")
 	time.Sleep(2 * time.Second)
-	
+
 	if err := startWebServer(); err != nil {
 		return fmt.Errorf("启动服务时出错: %v", err)
 	}
-	
-	log.Println("Web 服务器重启过程已启动.")
+
+	logging.Info("Web 服务器重启过程已启动.")
 	return nil
 }
 
@@ -305,10 +311,10 @@ func init() {
 		Short: "运行 Web 服务器",
 		Run: func(cmd *cobra.Command, args []string) {
 			if err := runWebServer(webPort); err != nil {
-				log.Fatalf("Web 服务器错误: %v", err)
+				logging.Fatal("Web 服务器错误: %v", err)
 			}
 		},
 	}
 	webServerCmd.Flags().IntVarP(&webPort, "port", "p", 8085, "Web 服务器监听的端口")
 	rootCmd.AddCommand(webServerCmd)
-} 
+}

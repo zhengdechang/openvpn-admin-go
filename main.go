@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -11,6 +10,7 @@ import (
 	"openvpn-admin-go/common"
 	"openvpn-admin-go/constants"
 	"openvpn-admin-go/database"
+	"openvpn-admin-go/logging"
 	"openvpn-admin-go/model"
 	"openvpn-admin-go/openvpn"
 	"openvpn-admin-go/services" // Added for OpenVPN Sync Service
@@ -33,12 +33,28 @@ func InitCore() error {
 
 	fmt.Println("OpenVPN 管理工具启动中...")
 
+	// 初始化日志系统
+	logConfigPath := "config/logging.json"
+	if err := logging.InitFromConfig(logConfigPath); err != nil {
+		fmt.Printf("日志系统初始化失败: %v\n", err)
+		// 使用默认配置继续运行
+		defaultConfig := logging.Config{
+			LogLevel:    logging.INFO,
+			LogFilePath: "logs/web.log",
+			EnableAPI:   true,
+		}
+		if err := logging.Init(defaultConfig); err != nil {
+			return fmt.Errorf("日志系统初始化失败: %v", err)
+		}
+	}
+	logging.Info("OpenVPN 管理工具启动中...")
+
 	// 获取当前工作目录
 	dir, err := os.Getwd()
 	if err != nil {
 		return fmt.Errorf("获取工作目录失败: %v", err)
 	}
-	fmt.Printf("当前工作目录: %s\n", dir)
+	logging.Info("当前工作目录: %s", dir)
 
 	// 检查环境
 	fmt.Println("正在检查运行环境...")
@@ -75,7 +91,7 @@ func InitCore() error {
 		if err := database.DB.Where("email = ?", "superadmin@gmail.com").First(&existing).Error; err != nil {
 			hash, errHash := common.HashPassword("superadmin")
 			if errHash != nil {
-				log.Printf("默认超级管理员密码哈希失败: %v", errHash) // Log and continue
+				logging.Error("默认超级管理员密码哈希失败: %v", errHash) // Log and continue
 				return
 			}
 			super := model.User{
@@ -85,9 +101,9 @@ func InitCore() error {
 				Role:         model.RoleSuperAdmin,
 			}
 			if errCreate := database.DB.Create(&super).Error; errCreate != nil {
-				log.Printf("创建默认超级管理员失败: %v", errCreate) // Log and continue
+				logging.Error("创建默认超级管理员失败: %v", errCreate) // Log and continue
 			} else {
-				log.Println("已创建默认超级管理员: superadmin@gmail.com / superadmin")
+				logging.Info("已创建默认超级管理员: superadmin@gmail.com / superadmin")
 			}
 		}
 	}()
@@ -95,13 +111,13 @@ func InitCore() error {
 	func() {
 		var users []model.User
 		if err := database.DB.Find(&users).Error; err != nil {
-			log.Printf("查询用户列表失败: %v", err) // Log and continue
+			logging.Error("查询用户列表失败: %v", err) // Log and continue
 		} else {
 			for _, u := range users {
 				clientPath := filepath.Join(constants.ClientConfigDir, u.ID+".ovpn")
 				if _, errStat := os.Stat(clientPath); os.IsNotExist(errStat) {
 					if errCreate := openvpn.CreateClient(u.ID); errCreate != nil {
-						log.Printf("创建 OpenVPN 客户端 %s 失败: %v", u.ID, errCreate) // Log and continue
+						logging.Error("创建 OpenVPN 客户端 %s 失败: %v", u.ID, errCreate) // Log and continue
 					}
 				}
 			}
@@ -117,7 +133,7 @@ func InitCore() error {
 	}
 	statusLogPath := cfg.OpenVPNStatusLogPath      // Use configured path
 	syncInterval := utils.GetOpenVPNSyncInterval() // Assuming this handles its own config or defaults
-	log.Printf("Starting OpenVPN Sync Service: LogPath='%s', Interval=%s", statusLogPath, syncInterval)
+	logging.Info("Starting OpenVPN Sync Service: LogPath='%s', Interval=%s", statusLogPath, syncInterval)
 	go services.StartOpenVPNSyncService(database.DB, statusLogPath, syncInterval)
 
 	return nil
@@ -127,7 +143,7 @@ func main() {
 	// Assign the public functions to the variables in the cmd package.
 	cmd.CoreInitializer = InitCore
 	if err := cmd.CoreInitializer(); err != nil {
-		log.Fatalf("核心初始化失败: %v", err)
+		logging.Fatal("核心初始化失败: %v", err)
 	}
 	cmd.Execute()
 }

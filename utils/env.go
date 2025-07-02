@@ -1,10 +1,10 @@
 package utils
 
 import (
+	"openvpn-admin-go/logging"
 	"os"
 	"strconv"
 	"time"
-	"log"
 )
 
 // GetEnvOrDefault 从环境变量获取值，如果不存在则返回默认值
@@ -29,12 +29,12 @@ func GetOpenVPNSyncInterval() time.Duration {
 
 	intervalSeconds, err := strconv.Atoi(intervalStr)
 	if err != nil {
-		log.Printf("Warning: Could not parse OPENVPN_SYNC_INTERVAL_SECONDS value '%s' as integer: %v. Using default %d seconds.", intervalStr, err, defaultIntervalSeconds)
+		logging.Warn("Could not parse OPENVPN_SYNC_INTERVAL_SECONDS value '%s' as integer: %v. Using default %d seconds.", intervalStr, err, defaultIntervalSeconds)
 		return time.Duration(defaultIntervalSeconds) * time.Second
 	}
 
 	if intervalSeconds <= 0 {
-		log.Printf("Warning: OPENVPN_SYNC_INTERVAL_SECONDS must be positive. Using default %d seconds.", defaultIntervalSeconds)
+		logging.Warn("OPENVPN_SYNC_INTERVAL_SECONDS must be positive. Using default %d seconds.", defaultIntervalSeconds)
 		return time.Duration(defaultIntervalSeconds) * time.Second
 	}
 

@@ -341,9 +341,28 @@ export const openvpnAPI = {
     return response.data.logs;
   },
   // 获取客户端日志
-  getClientLogs: async (): Promise<string> => {
-    const response = await api.get<{ logs: string }>("/api/logs/client");
-    return response.data.logs;
+  getClientLogs: async (
+    offset?: number,
+    limit?: number
+  ): Promise<{
+    logs: string;
+    totalLines: number;
+    offset: number;
+    limit: number;
+    hasMore: boolean;
+  }> => {
+    const params = new URLSearchParams();
+    if (offset !== undefined) params.append("offset", offset.toString());
+    if (limit !== undefined) params.append("limit", limit.toString());
+
+    const response = await api.get<{
+      logs: string;
+      totalLines: number;
+      offset: number;
+      limit: number;
+      hasMore: boolean;
+    }>(`/api/logs/client?${params.toString()}`);
+    return response.data;
   },
   // 获取实时客户端连接
   getLiveClientConnections: async (): Promise<LiveClientConnection[]> => {

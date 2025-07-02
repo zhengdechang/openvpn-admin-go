@@ -2,17 +2,19 @@ package controller
 
 import (
 	"net/http"
-	"openvpn-admin-go/database" // Added
+	"os"            // Added
+	"path/filepath" // Added
+	"strings"       // Added
+
+	"openvpn-admin-go/common"    // Added
+	"openvpn-admin-go/constants" // Added
+	"openvpn-admin-go/database"  // Added
+	"openvpn-admin-go/logging"
 	"openvpn-admin-go/middleware"
 	"openvpn-admin-go/model"
 	"openvpn-admin-go/openvpn"
 
 	"github.com/gin-gonic/gin"
-	"os" // Added
-	"path/filepath" // Added
-	"strings" // Added
-	"openvpn-admin-go/common" // Added
-	"openvpn-admin-go/constants" // Added
 )
 
 type ClientController struct{}
@@ -224,7 +226,7 @@ func (c *ClientController) GetUser(ctx *gin.Context) {
 		allocatedVpnIp = liveStatus.VirtualAddress
 	} else if err != nil {
 		// Log error getting individual client status, but don't fail the request
-		// log.Printf("Warning: Failed to get live status for user %s: %v", u.ID, err)
+		logging.Warn("Failed to get live status for user %s: %v", u.ID, err)
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{"data": gin.H{
@@ -400,12 +402,12 @@ func (c *ClientController) DeleteUser(ctx *gin.Context) {
 	// Remove Fixed IP config if it exists
 	if u.FixedIP != "" {
 		if err := openvpn.RemoveClientFixedIP(u.Name); err != nil {
-			// log.Printf("Warning: failed to remove fixed IP for user %s during deletion: %v", u.Name, err)
+			logging.Warn("failed to remove fixed IP for user %s during deletion: %v", u.Name, err)
 		}
 	}
 	// Remove OpenVPN client certificate and other related configs
 	if err := openvpn.DeleteClient(u.Name); err != nil {
-		// log.Printf("Warning: failed to delete OpenVPN client data for user %s during deletion: %v", u.Name, err)
+		logging.Warn("failed to delete OpenVPN client data for user %s during deletion: %v", u.Name, err)
 	}
 
 	if err := database.DB.Delete(&model.User{}, "id = ?", id).Error; err != nil {
@@ -492,7 +494,7 @@ func (c *ClientController) ResumeClient(ctx *gin.Context) {
 // GetClientConfig 获取客户端配置
 func (c *ClientController) GetClientConfig(ctx *gin.Context) {
 	username := ctx.Param("username") // Changed from username to userId
-	if username == "" { // Basic validation
+	if username == "" {               // Basic validation
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "userId is required"})
 		return
 	}
@@ -528,4 +530,3 @@ func (c *ClientController) GetClientConfig(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, gin.H{"config": config})
 }
-

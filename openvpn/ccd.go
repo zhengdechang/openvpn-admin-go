@@ -1,12 +1,13 @@
 package openvpn
 
 import (
+	"encoding/binary"
 	"fmt"
+	"openvpn-admin-go/logging"
 	"os"
 	"path/filepath"
-	"strings" // Required for netmask validation if added, or general string ops
 	"strconv"
-	"encoding/binary"
+	"strings" // Required for netmask validation if added, or general string ops
 	// "log" // For logging errors if necessary
 )
 
@@ -43,7 +44,7 @@ func SetClientFixedIP(commonName string, ipAddress string) error {
 		return fmt.Errorf("failed to create ccd directory '%s': %w", ccdDir, err)
 	}
 
-	ccdFilePath := filepath.Join(cfg.OpenVPNClientConfigDir,"ccd", commonName)
+	ccdFilePath := filepath.Join(cfg.OpenVPNClientConfigDir, "ccd", commonName)
 	newConfig := fmt.Sprintf("ifconfig-push %s %s", ipAddress, cfg.OpenVPNServerNetmask)
 
 	// 读取现有文件内容
@@ -92,7 +93,7 @@ func SetClientFixedIP(commonName string, ipAddress string) error {
 		return fmt.Errorf("failed to write client fixed IP config file '%s': %w", ccdFilePath, err)
 	}
 
-	// log.Printf("Successfully set fixed IP for %s to %s in %s", commonName, ipAddress, ccdFilePath)
+	logging.Info("Successfully set fixed IP for %s to %s in %s", commonName, ipAddress, ccdFilePath)
 	return nil
 }
 
@@ -111,7 +112,7 @@ func RemoveClientFixedIP(commonName string) error {
 	if cfg.OpenVPNClientConfigDir == "" {
 		// If the directory isn't set, there's nothing to remove.
 		// Depending on desired strictness, this could be an error or a silent success.
-		// log.Printf("OpenVPNClientConfigDir is not set, skipping removal for %s", commonName)
+		logging.Debug("OpenVPNClientConfigDir is not set, skipping removal for %s", commonName)
 		return nil
 	}
 
@@ -120,7 +121,7 @@ func RemoveClientFixedIP(commonName string) error {
 	// Check if the file exists before trying to remove it
 	if _, err := os.Stat(ccdFilePath); os.IsNotExist(err) {
 		// File doesn't exist, so consider it successfully "removed"
-		// log.Printf("CCD file for %s does not exist at %s, no action needed.", commonName, ccdFilePath)
+		logging.Debug("CCD file for %s does not exist at %s, no action needed.", commonName, ccdFilePath)
 		return nil
 	} else if err != nil {
 		// Other error during stat
@@ -132,7 +133,7 @@ func RemoveClientFixedIP(commonName string) error {
 		return fmt.Errorf("failed to remove client fixed IP config file '%s': %w", ccdFilePath, err)
 	}
 
-	// log.Printf("Successfully removed fixed IP config for %s from %s", commonName, ccdFilePath)
+	logging.Info("Successfully removed fixed IP config for %s from %s", commonName, ccdFilePath)
 	return nil
 }
 
@@ -149,7 +150,7 @@ func GetClientFixedIP(commonName string) (string, error) {
 	}
 
 	if cfg.OpenVPNClientConfigDir == "" {
-		// log.Printf("OpenVPNClientConfigDir is not set, cannot get fixed IP for %s", commonName)
+		logging.Debug("OpenVPNClientConfigDir is not set, cannot get fixed IP for %s", commonName)
 		return "", nil // Or return an error: fmt.Errorf("OpenVPNClientConfigDir is not set")
 	}
 
@@ -178,11 +179,11 @@ func GetClientFixedIP(commonName string) (string, error) {
 				// TODO: Validate that parts[1] is a valid IP address
 				return parts[1], nil
 			}
-			// log.Printf("Malformed ifconfig-push line in %s for %s: %s", ccdFilePath, commonName, line)
+			logging.Warn("Malformed ifconfig-push line in %s for %s: %s", ccdFilePath, commonName, line)
 		}
 	}
 
-	// log.Printf("No ifconfig-push directive found in %s for %s", ccdFilePath, commonName)
+	logging.Debug("No ifconfig-push directive found in %s for %s", ccdFilePath, commonName)
 	return "", nil // No ifconfig-push line found
 }
 
