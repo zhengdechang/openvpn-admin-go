@@ -7,9 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Save, RefreshCw } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import ConfigItemComponent from "./config-item";
 
 export default function ConfigManager() {
+  const { t, i18n } = useTranslation();
   const [configItems, setConfigItems] = useState<ConfigItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -19,11 +21,11 @@ export default function ConfigManager() {
   const fetchConfigItems = async () => {
     setLoading(true);
     try {
-      const data = await serverAPI.getConfigItems();
+      const data = await serverAPI.getConfigItems(i18n.language);
       setConfigItems(data.items);
       setChangedItems({});
     } catch (error) {
-      toast.error("获取配置项失败");
+      toast.error(t("dashboard.server.config.fetchError"));
       console.error("Failed to fetch config items:", error);
     } finally {
       setLoading(false);
@@ -33,6 +35,13 @@ export default function ConfigManager() {
   useEffect(() => {
     fetchConfigItems();
   }, []);
+
+  // 当语言变化时重新获取配置项
+  useEffect(() => {
+    if (configItems.length > 0) {
+      fetchConfigItems();
+    }
+  }, [i18n.language]);
 
   const handleValueChange = (key: string, value: any) => {
     setChangedItems((prev) => ({
@@ -60,20 +69,20 @@ export default function ConfigManager() {
 
   const handleSaveAll = async () => {
     if (Object.keys(changedItems).length === 0) {
-      toast.info("没有需要保存的更改");
+      toast.info(t("dashboard.server.config.noChanges"));
       return;
     }
 
     setSaving(true);
     try {
       await serverAPI.updateConfigItems(changedItems);
-      toast.success("配置保存成功");
+      toast.success(t("dashboard.server.config.saveSuccess"));
       setChangedItems({});
       setEditingItems(new Set());
       // 重新获取配置以确保同步
       await fetchConfigItems();
     } catch (error) {
-      toast.error("配置保存失败");
+      toast.error(t("dashboard.server.config.saveError"));
       console.error("Failed to save config items:", error);
     } finally {
       setSaving(false);
@@ -94,7 +103,7 @@ export default function ConfigManager() {
         <CardContent className="p-6">
           <div className="flex items-center justify-center">
             <RefreshCw className="h-6 w-6 animate-spin mr-2" />
-            加载配置项...
+            {t("dashboard.server.config.loading")}
           </div>
         </CardContent>
       </Card>
@@ -105,11 +114,11 @@ export default function ConfigManager() {
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle>服务器配置管理</CardTitle>
+          <CardTitle>{t("dashboard.server.config.title")}</CardTitle>
           <div className="flex items-center space-x-2">
             <Button variant="outline" onClick={handleRefresh} disabled={saving}>
               <RefreshCw className="h-4 w-4 mr-2" />
-              刷新
+              {t("dashboard.server.config.refreshButton")}
             </Button>
             <Button
               onClick={handleSaveAll}
@@ -118,8 +127,8 @@ export default function ConfigManager() {
             >
               <Save className="h-4 w-4 mr-2" />
               {saving
-                ? "保存中..."
-                : `保存所有更改${
+                ? t("dashboard.server.config.saving")
+                : `${t("dashboard.server.config.saveAllButton")}${
                     hasChanges ? ` (${Object.keys(changedItems).length})` : ""
                   }`}
             </Button>
@@ -127,7 +136,9 @@ export default function ConfigManager() {
         </div>
         {hasChanges && (
           <div className="text-sm text-orange-600 bg-orange-50 p-2 rounded">
-            您有 {Object.keys(changedItems).length} 项未保存的更改
+            {t("dashboard.server.config.unsavedChanges", {
+              count: Object.keys(changedItems).length,
+            })}
           </div>
         )}
       </CardHeader>

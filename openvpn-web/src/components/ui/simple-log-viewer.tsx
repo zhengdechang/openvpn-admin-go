@@ -115,7 +115,7 @@ const SimpleLogViewer: React.FC<SimpleLogViewerProps> = ({
         className="h-full overflow-auto"
         onScroll={handleScroll}
       >
-        <pre className="whitespace-pre-wrap break-all text-xs font-mono text-gray-800 dark:text-gray-200">
+        <pre className="whitespace-pre-wrap break-all">
           {logs || t("dashboard.logs.noClientLogs")}
         </pre>
         {loadingMore && hasMore && (

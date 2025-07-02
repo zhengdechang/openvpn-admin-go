@@ -89,7 +89,7 @@ export default function ServerPage() {
       {/* 服务器控制 */}
       <Card>
         <CardHeader>
-          <CardTitle>服务器控制</CardTitle>
+          <CardTitle>{t("dashboard.server.controlCardTitle")}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-x-2">

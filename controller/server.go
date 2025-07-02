@@ -232,8 +232,123 @@ type ConfigItem struct {
 	Validation  string      `json:"validation,omitempty"` // 验证规则
 }
 
+// ConfigItemI18n 配置项国际化信息
+type ConfigItemI18n struct {
+	Label       map[string]string `json:"label"`
+	Description map[string]string `json:"description"`
+}
+
+// getConfigItemI18n 获取配置项的国际化信息
+func getConfigItemI18n() map[string]ConfigItemI18n {
+	return map[string]ConfigItemI18n{
+		"openvpn_port": {
+			Label: map[string]string{
+				"zh-Hans": "OpenVPN端口",
+				"en-US":   "OpenVPN Port",
+			},
+			Description: map[string]string{
+				"zh-Hans": "OpenVPN服务监听端口",
+				"en-US":   "OpenVPN service listening port",
+			},
+		},
+		"openvpn_proto": {
+			Label: map[string]string{
+				"zh-Hans": "协议类型",
+				"en-US":   "Protocol Type",
+			},
+			Description: map[string]string{
+				"zh-Hans": "OpenVPN使用的协议",
+				"en-US":   "Protocol used by OpenVPN",
+			},
+		},
+		"openvpn_server_hostname": {
+			Label: map[string]string{
+				"zh-Hans": "服务器主机名",
+				"en-US":   "Server Hostname",
+			},
+			Description: map[string]string{
+				"zh-Hans": "客户端连接的服务器地址",
+				"en-US":   "Server address for client connections",
+			},
+		},
+		"openvpn_server_network": {
+			Label: map[string]string{
+				"zh-Hans": "服务器网络",
+				"en-US":   "Server Network",
+			},
+			Description: map[string]string{
+				"zh-Hans": "VPN内部网络地址",
+				"en-US":   "VPN internal network address",
+			},
+		},
+		"openvpn_server_netmask": {
+			Label: map[string]string{
+				"zh-Hans": "子网掩码",
+				"en-US":   "Subnet Mask",
+			},
+			Description: map[string]string{
+				"zh-Hans": "VPN内部网络子网掩码",
+				"en-US":   "VPN internal network subnet mask",
+			},
+		},
+		"openvpn_client_to_client": {
+			Label: map[string]string{
+				"zh-Hans": "客户端互通",
+				"en-US":   "Client-to-Client",
+			},
+			Description: map[string]string{
+				"zh-Hans": "允许客户端之间直接通信",
+				"en-US":   "Allow direct communication between clients",
+			},
+		},
+		"openvpn_routes": {
+			Label: map[string]string{
+				"zh-Hans": "路由配置",
+				"en-US":   "Route Configuration",
+			},
+			Description: map[string]string{
+				"zh-Hans": "推送给客户端的路由列表",
+				"en-US":   "Routes pushed to clients",
+			},
+		},
+		"dns_server_ip": {
+			Label: map[string]string{
+				"zh-Hans": "DNS服务器IP",
+				"en-US":   "DNS Server IP",
+			},
+			Description: map[string]string{
+				"zh-Hans": "推送给客户端的DNS服务器地址",
+				"en-US":   "DNS server address pushed to clients",
+			},
+		},
+		"dns_server_domain": {
+			Label: map[string]string{
+				"zh-Hans": "DNS域名",
+				"en-US":   "DNS Domain",
+			},
+			Description: map[string]string{
+				"zh-Hans": "推送给客户端的DNS域名",
+				"en-US":   "DNS domain pushed to clients",
+			},
+		},
+		"openvpn_management_port": {
+			Label: map[string]string{
+				"zh-Hans": "管理端口",
+				"en-US":   "Management Port",
+			},
+			Description: map[string]string{
+				"zh-Hans": "OpenVPN管理接口端口",
+				"en-US":   "OpenVPN management interface port",
+			},
+		},
+	}
+}
+
 // GetConfigItems 获取配置项列表
 func (c *ServerController) GetConfigItems(ctx *gin.Context) {
+	// 获取语言参数
+	lang := ctx.DefaultQuery("lang", "zh-Hans")
+
 	// 加载当前配置
 	cfg, err := openvpn.LoadConfig()
 	if err != nil {
@@ -241,14 +356,17 @@ func (c *ServerController) GetConfigItems(ctx *gin.Context) {
 		return
 	}
 
+	// 获取国际化信息
+	i18nData := getConfigItemI18n()
+
 	// 构建配置项列表
 	items := []ConfigItem{
 		{
 			Key:         "openvpn_port",
 			Value:       cfg.OpenVPNPort,
 			Type:        "number",
-			Label:       "OpenVPN端口",
-			Description: "OpenVPN服务监听端口",
+			Label:       i18nData["openvpn_port"].Label[lang],
+			Description: i18nData["openvpn_port"].Description[lang],
 			Required:    true,
 			Validation:  "min:1,max:65535",
 		},
@@ -256,8 +374,8 @@ func (c *ServerController) GetConfigItems(ctx *gin.Context) {
 			Key:         "openvpn_proto",
 			Value:       cfg.OpenVPNProto,
 			Type:        "select",
-			Label:       "协议类型",
-			Description: "OpenVPN使用的协议",
+			Label:       i18nData["openvpn_proto"].Label[lang],
+			Description: i18nData["openvpn_proto"].Description[lang],
 			Options:     []string{"tcp", "tcp6", "udp", "udp6"},
 			Required:    true,
 		},
@@ -265,8 +383,8 @@ func (c *ServerController) GetConfigItems(ctx *gin.Context) {
 			Key:         "openvpn_server_hostname",
 			Value:       cfg.OpenVPNServerHostname,
 			Type:        "text",
-			Label:       "服务器主机名",
-			Description: "客户端连接的服务器地址",
+			Label:       i18nData["openvpn_server_hostname"].Label[lang],
+			Description: i18nData["openvpn_server_hostname"].Description[lang],
 			Required:    true,
 			Validation:  "ip_or_hostname",
 		},
@@ -274,8 +392,8 @@ func (c *ServerController) GetConfigItems(ctx *gin.Context) {
 			Key:         "openvpn_server_network",
 			Value:       cfg.OpenVPNServerNetwork,
 			Type:        "text",
-			Label:       "服务器网络",
-			Description: "VPN内部网络地址",
+			Label:       i18nData["openvpn_server_network"].Label[lang],
+			Description: i18nData["openvpn_server_network"].Description[lang],
 			Required:    true,
 			Validation:  "ip",
 		},
@@ -283,8 +401,8 @@ func (c *ServerController) GetConfigItems(ctx *gin.Context) {
 			Key:         "openvpn_server_netmask",
 			Value:       cfg.OpenVPNServerNetmask,
 			Type:        "text",
-			Label:       "子网掩码",
-			Description: "VPN内部网络子网掩码",
+			Label:       i18nData["openvpn_server_netmask"].Label[lang],
+			Description: i18nData["openvpn_server_netmask"].Description[lang],
 			Required:    true,
 			Validation:  "netmask",
 		},
@@ -292,24 +410,24 @@ func (c *ServerController) GetConfigItems(ctx *gin.Context) {
 			Key:         "openvpn_client_to_client",
 			Value:       cfg.OpenVPNClientToClient,
 			Type:        "boolean",
-			Label:       "客户端互通",
-			Description: "允许客户端之间直接通信",
+			Label:       i18nData["openvpn_client_to_client"].Label[lang],
+			Description: i18nData["openvpn_client_to_client"].Description[lang],
 			Required:    false,
 		},
 		{
 			Key:         "openvpn_routes",
 			Value:       cfg.OpenVPNRoutes,
 			Type:        "array",
-			Label:       "路由配置",
-			Description: "推送给客户端的路由列表",
+			Label:       i18nData["openvpn_routes"].Label[lang],
+			Description: i18nData["openvpn_routes"].Description[lang],
 			Required:    false,
 		},
 		{
 			Key:         "dns_server_ip",
 			Value:       cfg.DNSServerIP,
 			Type:        "text",
-			Label:       "DNS服务器IP",
-			Description: "推送给客户端的DNS服务器地址",
+			Label:       i18nData["dns_server_ip"].Label[lang],
+			Description: i18nData["dns_server_ip"].Description[lang],
 			Required:    false,
 			Validation:  "ip",
 		},
@@ -317,16 +435,16 @@ func (c *ServerController) GetConfigItems(ctx *gin.Context) {
 			Key:         "dns_server_domain",
 			Value:       cfg.DNSServerDomain,
 			Type:        "text",
-			Label:       "DNS域名",
-			Description: "推送给客户端的DNS域名",
+			Label:       i18nData["dns_server_domain"].Label[lang],
+			Description: i18nData["dns_server_domain"].Description[lang],
 			Required:    false,
 		},
 		{
 			Key:         "openvpn_management_port",
 			Value:       cfg.OpenVPNManagementPort,
 			Type:        "number",
-			Label:       "管理端口",
-			Description: "OpenVPN管理接口端口",
+			Label:       i18nData["openvpn_management_port"].Label[lang],
+			Description: i18nData["openvpn_management_port"].Description[lang],
 			Required:    false,
 			Validation:  "min:1,max:65535",
 		},

@@ -406,9 +406,12 @@ export const serverAPI = {
     return response.data;
   },
   // 配置项管理
-  getConfigItems: async (): Promise<{ items: ConfigItem[] }> => {
+  getConfigItems: async (lang?: string): Promise<{ items: ConfigItem[] }> => {
+    const params = new URLSearchParams();
+    if (lang) params.append("lang", lang);
+
     const response = await api.get<{ items: ConfigItem[] }>(
-      "/api/server/config/items"
+      `/api/server/config/items?${params.toString()}`
     );
     return response.data;
   },

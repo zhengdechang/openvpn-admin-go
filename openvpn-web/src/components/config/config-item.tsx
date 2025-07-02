@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { X, Plus, Edit2, Check, X as Cancel } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface ConfigItemComponentProps {
   item: ConfigItem;
@@ -28,6 +29,7 @@ export default function ConfigItemComponent({
   isEditing,
   onEditToggle,
 }: ConfigItemComponentProps) {
+  const { t } = useTranslation();
   const [localValue, setLocalValue] = useState(item.value);
   const [arrayItems, setArrayItems] = useState<string[]>(
     Array.isArray(item.value) ? item.value : []
@@ -148,12 +150,12 @@ export default function ConfigItemComponent({
               className="w-full text-xs h-7 mt-1"
             >
               <Plus className="h-3 w-3 mr-1" />
-              添加
+              {t("dashboard.server.config.addButton")}
             </Button>
           </div>
         );
       default:
-        return <span>不支持的类型</span>;
+        return <span>{t("dashboard.server.config.unsupportedType")}</span>;
     }
   };
 
@@ -222,7 +224,7 @@ export default function ConfigItemComponent({
       <div
         className="flex-1 w-full cursor-pointer flex items-center"
         onDoubleClick={() => !isEditing && onEditToggle(item.key)}
-        title={!isEditing ? "双击编辑" : ""}
+        title={!isEditing ? t("dashboard.server.config.doubleClickToEdit") : ""}
       >
         {renderEditableValue()}
       </div>
