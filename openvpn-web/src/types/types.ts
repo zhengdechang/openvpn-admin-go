@@ -246,3 +246,15 @@ export interface UserUpdateRequest {
   fixedIp?: string | null;
   subnet?: string | null;
 }
+
+// 配置项类型
+export interface ConfigItem {
+  key: string;
+  value: any;
+  type: "text" | "number" | "boolean" | "select" | "array";
+  label: string;
+  description: string;
+  options?: string[];
+  required: boolean;
+  validation?: string;
+}

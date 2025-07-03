@@ -20,7 +20,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import MainLayout from "@/components/layout/main-layout";
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from "react-i18next";
 
 // 登录表单验证
 const loginSchema = z.object({
@@ -55,13 +55,13 @@ export default function LoginPage() {
       if (user) {
         router.push("/dashboard");
       } else {
-        setError(t('login.error.invalid'));
+        setError(t("login.error.invalid"));
       }
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError(t('login.error.unknown'));
+        setError(t("login.error.unknown"));
       }
     } finally {
       setIsLoggingIn(false);
@@ -78,11 +78,13 @@ export default function LoginPage() {
   return (
     <MainLayout className="flex justify-center items-center bg-gradient-to-br from-secondary/30 to-secondary/10 h-full">
       <div className="flex-grow flex h-full items-center justify-center p-4 ">
-        <div className="w-full max-w-lg">
+        <div className="w-full max-w-lg my-10">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-primary">{t('login.title')}</h1>
+            <h1 className="text-3xl font-bold text-primary">
+              {t("login.title")}
+            </h1>
             <div className="h-1 w-16 bg-primary mx-auto my-4"></div>
-            <p className="text-gray-600">{t('login.info.signIn')}</p>
+            <p className="text-gray-600">{t("login.info.signIn")}</p>
           </div>
 
           <Card className="shadow-lg border-t-4 border-t-primary">
@@ -99,12 +101,12 @@ export default function LoginPage() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-base font-medium">
-                          {t('login.email')}
+                          {t("login.email")}
                         </FormLabel>
                         <FormControl>
                           <Input
                             type="email"
-                            placeholder={t('login.emailPlaceholder')}
+                            placeholder={t("login.emailPlaceholder")}
                             {...field}
                           />
                         </FormControl>
@@ -120,12 +122,12 @@ export default function LoginPage() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-base font-medium">
-                          {t('login.password')}
+                          {t("login.password")}
                         </FormLabel>
                         <FormControl>
                           <Input
                             type="password"
-                            placeholder={t('login.passwordPlaceholder')}
+                            placeholder={t("login.passwordPlaceholder")}
                             {...field}
                           />
                         </FormControl>
@@ -140,7 +142,7 @@ export default function LoginPage() {
                       href="/auth/forgotpassword"
                       className="text-sm text-primary hover:underline"
                     >
-                      {t('login.forgotPassword')}
+                      {t("login.forgotPassword")}
                     </Link>
                   </div>
 
@@ -150,19 +152,19 @@ export default function LoginPage() {
                     className="w-full"
                     disabled={isLoggingIn}
                   >
-                    {isLoggingIn ? t('common.loading') : t('login.login')}
+                    {isLoggingIn ? t("common.loading") : t("login.login")}
                   </Button>
 
                   {/* 注册链接 */}
                   <div className="text-center mt-4">
                     <span className="text-gray-600">
-                      {t('login.info.noAccount')}{" "}
+                      {t("login.info.noAccount")}{" "}
                     </span>
                     <Link
                       href="/auth/register"
                       className="text-primary hover:underline"
                     >
-                      {t('login.register')}
+                      {t("login.register")}
                     </Link>
                   </div>
                 </form>

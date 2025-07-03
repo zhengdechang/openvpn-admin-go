@@ -2,14 +2,15 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"os/signal"
 	"syscall"
 
-	"github.com/spf13/cobra"
+	"openvpn-admin-go/logging"
 	"openvpn-admin-go/openvpn"
 	"openvpn-admin-go/utils"
+
+	"github.com/spf13/cobra"
 )
 
 // CoreInitializer is a function variable to hold the core initialization logic from the main package.
@@ -28,7 +29,7 @@ var logCmd = &cobra.Command{
 
 		content, err := os.ReadFile(logPath)
 		if err != nil {
-			log.Fatalf("Error reading log file %s: %v", logPath, err)
+			logging.Fatal("Error reading log file %s: %v", logPath, err)
 		}
 		fmt.Println(string(content))
 	},
@@ -104,8 +105,6 @@ func ShowConfig(cfg *openvpn.Config) {
 	fmt.Println("\n按回车键返回主菜单...")
 	fmt.Scanln()
 }
-
-
 
 func Execute() {
 	// webCmd is added to rootCmd in cmd/web.go's init()

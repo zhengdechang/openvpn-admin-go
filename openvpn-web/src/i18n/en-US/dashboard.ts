@@ -117,11 +117,11 @@ const translation = {
     statusPaused: "Paused",
     statusActive: "Active",
     pauseButton: "Pause",
-    resumeButton:"Resume",
+    resumeButton: "Resume",
     columnAccessState: "Access State",
     columnSubnet: "Subnet",
     columnBytesReceived: "Bytes Received",
-    columnBytesSent:"Bytes Sent"
+    columnBytesSent: "Bytes Sent",
   },
   logs: {
     titleServer: "Logs",
@@ -183,6 +183,22 @@ const translation = {
     restartSuccess: "Restart successful",
     restartError: "Restart failed",
     restartButton: "Restart",
+    controlCardTitle: "Server Control",
+    config: {
+      title: "Server Configuration Management",
+      loading: "Loading configuration items...",
+      fetchError: "Failed to fetch configuration items",
+      saveSuccess: "Configuration saved successfully",
+      saveError: "Failed to save configuration",
+      noChanges: "No changes to save",
+      refreshButton: "Refresh",
+      saveAllButton: "Save All Changes",
+      saving: "Saving...",
+      unsavedChanges: "You have {{count}} unsaved changes",
+      addButton: "Add",
+      unsupportedType: "Unsupported type",
+      doubleClickToEdit: "Double click to edit",
+    },
   },
   departments: {
     title: "Department",
@@ -229,8 +245,6 @@ const translation = {
     newPasswordPlaceholder: "New Password",
     updatePasswordButton: "Update Password",
   },
-}
+};
 
-;
-
-export default translation
+export default translation;

@@ -3,13 +3,13 @@ package cmd
 import (
 	"bufio"
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
 
 	"openvpn-admin-go/constants"
+	"openvpn-admin-go/logging"
 	"openvpn-admin-go/openvpn"
 
 	"github.com/manifoldco/promptui"
@@ -93,12 +93,12 @@ func CreateClient() error {
 func DeleteClient() {
 	username, err := getUsername()
 	if err != nil {
-		log.Printf("获取用户名失败: %v\n", err)
+		logging.Error("获取用户名失败: %v", err)
 		return
 	}
 
 	if err := openvpn.DeleteClient(username); err != nil {
-		log.Printf("删除客户端失败: %v\n", err)
+		logging.Error("删除客户端失败: %v", err)
 	} else {
 		fmt.Printf("客户端 %s 删除成功\n", username)
 	}
@@ -107,12 +107,12 @@ func DeleteClient() {
 func PauseClient() {
 	username, err := getUsername()
 	if err != nil {
-		log.Printf("获取用户名失败: %v\n", err)
+		logging.Error("获取用户名失败: %v", err)
 		return
 	}
 
 	if err := openvpn.PauseClient(username); err != nil {
-		log.Printf("暂停客户端失败: %v\n", err)
+		logging.Error("暂停客户端失败: %v", err)
 	} else {
 		fmt.Printf("客户端 %s 已暂停\n", username)
 	}
@@ -121,12 +121,12 @@ func PauseClient() {
 func ResumeClient() {
 	username, err := getUsername()
 	if err != nil {
-		log.Printf("获取用户名失败: %v\n", err)
+		logging.Error("获取用户名失败: %v", err)
 		return
 	}
 
 	if err := openvpn.ResumeClient(username); err != nil {
-		log.Printf("恢复客户端失败: %v\n", err)
+		logging.Error("恢复客户端失败: %v", err)
 	} else {
 		fmt.Printf("客户端 %s 已恢复\n", username)
 	}
@@ -135,13 +135,13 @@ func ResumeClient() {
 func ViewClientStatus() {
 	username, err := getUsername()
 	if err != nil {
-		log.Printf("获取用户名失败: %v\n", err)
+		logging.Error("获取用户名失败: %v", err)
 		return
 	}
 
 	status, err := openvpn.GetClientStatus(username)
 	if err != nil {
-		log.Printf("获取客户端状态失败: %v\n", err)
+		logging.Error("获取客户端状态失败: %v", err)
 		return
 	}
 
@@ -162,7 +162,7 @@ func ViewClientStatus() {
 func ListClients() {
 	statuses, err := openvpn.GetAllClientStatuses()
 	if err != nil {
-		log.Printf("获取客户端列表失败: %v\n", err)
+		logging.Error("获取客户端列表失败: %v", err)
 		return
 	}
 

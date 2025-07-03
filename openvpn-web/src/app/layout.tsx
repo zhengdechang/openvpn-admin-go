@@ -5,14 +5,11 @@
  */
 import React from "react";
 import "./globals.css";
-import { Inter } from "next/font/google";
 import { AuthProvider } from "@/lib/auth-context";
 import { Toaster } from "sonner";
 import { LoadingScreen } from "@/components/ui/loading";
 import { getLocaleOnServer } from "@/i18n/server";
 import { I18nProvider } from "@/i18n/i18n-provider";
-
-const inter = Inter({ subsets: ["latin"] });
 
 export default async function RootLayout({
   // Make it an async function
@@ -29,25 +26,25 @@ export default async function RootLayout({
         <meta name="description" content="OpenVPN Management System" />
         <title>OpenVPN Management System</title>
       </head>
-      <body className={inter.className} suppressHydrationWarning>
+      <body className="font-sans" suppressHydrationWarning>
         <I18nProvider locale={locale}>
           <LoadingScreen />
           <AuthProvider>
             <div>{children}</div>
             <Toaster
-            position="top-right"
-            expand={true}
-            visibleToasts={6}
-            closeButton={true}
-            richColors={true}
-            toastOptions={{
-              duration: 5000,
-              className: "toast-message",
-              style: {
-                marginBottom: "0.5rem",
-              },
-            }}
-          />
+              position="top-right"
+              expand={true}
+              visibleToasts={6}
+              closeButton={true}
+              richColors={true}
+              toastOptions={{
+                duration: 5000,
+                className: "toast-message",
+                style: {
+                  marginBottom: "0.5rem",
+                },
+              }}
+            />
           </AuthProvider>
         </I18nProvider>
       </body>
