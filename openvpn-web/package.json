@@ -1,11 +1,18 @@
 {
-  "name": "nextjs-template",
-  "version": "0.1.0",
+  "name": "openvpn-web-admin",
+  "version": "1.0.0",
   "private": true,
-  "description": "A modern Next.js template with authentication and UI components",
+  "description": "Modern web interface for OpenVPN Admin Go - Professional OpenVPN management platform",
+  "homepage": "https://github.com/zhengdechang/openvpn-admin-go",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zhengdechang/openvpn-admin-go.git"
+  },
+  "keywords": ["openvpn", "admin", "management", "nextjs", "typescript", "tailwindcss"],
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:export": "next build -c next.config.export.js",
     "start": "next start",
     "lint": "next lint",
     "check-i18n": "node ./src/i18n/check-i18n.js",

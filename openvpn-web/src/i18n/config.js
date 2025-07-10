@@ -12,10 +12,12 @@ const languageKeyMap = LanguagesSupported.reduce((map, language) => {
 }, {})
 
 const LOCALE_COOKIE_NAME = 'locale'
+const LOCALE_STORAGE_KEY = 'locale'
 
 module.exports = {
   defaultLocale,
   locales,
   languageKeyMap,
-  LOCALE_COOKIE_NAME
-} 
+  LOCALE_COOKIE_NAME,
+  LOCALE_STORAGE_KEY
+}

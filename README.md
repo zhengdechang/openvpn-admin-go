@@ -182,6 +182,14 @@ openvpn-admin-go/
 │   ├── client.go         # Client certificate and config generation
 │   ├── status_parser.go  # Status log parsing
 │   └── ccd.go            # Client-specific configurations
+├── docker/               # Docker deployment files
+│   ├── Dockerfile.combined   # Multi-service Docker image
+│   ├── docker-compose.production.yml
+│   ├── .env.docker.example   # Environment template
+│   └── README.md            # Docker deployment guide
+├── .github/workflows/    # CI/CD pipeline configuration
+├── docs/                 # Documentation
+├── scripts/              # Utility scripts
 ├── router/               # API route definitions
 ├── middleware/           # HTTP middleware (JWT, RBAC)
 ├── database/             # Database connection and migrations
@@ -209,6 +217,7 @@ openvpn-web/
 │   ├── lib/              # Utility libraries and configurations
 │   └── i18n/             # Internationalization files
 ├── public/               # Static assets
+├── nginx.conf            # Nginx reverse proxy configuration
 └── package.json          # Dependencies and scripts
 ```
 
@@ -266,6 +275,33 @@ The RESTful API provides comprehensive management capabilities:
 | **Manager**    | Client management within assigned department              |
 | **User**       | View own profile, download own VPN configuration          |
 
+## 🤖 Automated CI/CD
+
+### GitHub Actions Workflow
+
+The project includes automated build and release pipeline:
+
+- **Trigger**: PR merge to `main` branch
+- **Builds**: Multi-platform Go binaries (Linux, Windows, macOS)
+- **Docker**: Combined frontend+backend image
+- **Publishes**: Docker Hub + GitHub Releases
+
+#### Required Secrets
+
+Configure in GitHub repository settings:
+```
+DOCKERHUB_USERNAME=your-dockerhub-username
+DOCKERHUB_TOKEN=your-dockerhub-access-token
+```
+
+#### Automated Releases
+
+Every merge to `main` automatically:
+1. 🔨 Builds Go binaries for all platforms
+2. 🐳 Creates and pushes Docker image
+3. 📦 Creates GitHub release with binaries
+4. 🏷️ Tags with timestamp version
+
 ## 🚀 Deployment
 
 ### Production Deployment
@@ -307,6 +343,48 @@ The RESTful API provides comprehensive management capabilities:
    ```
 
 ### Docker Deployment
+
+#### Quick Start with Pre-built Image
+
+```bash
+# Pull and run the latest image
+docker run -d \
+  --name openvpn-admin \
+  --cap-add NET_ADMIN \
+  --device /dev/net/tun \
+  -p 8085:8085 \
+  -p 3000:3000 \
+  -p 1194:1194/udp \
+  -v openvpn_data:/app/data \
+  -v openvpn_logs:/app/logs \
+  -e JWT_SECRET=your-secret-key \
+  -e OPENVPN_SERVER_HOSTNAME=your-server-ip \
+  zhengdechang/openvpn-admin-go:latest
+```
+
+#### Docker Compose Deployment
+
+```bash
+# Navigate to docker directory
+cd docker
+
+# Copy environment configuration
+cp .env.docker.example .env
+# Edit .env with your settings
+
+# Start services
+docker-compose -f docker-compose.production.yml up -d
+```
+
+#### Service Modes
+
+The Docker image supports different deployment modes:
+
+- **Full Stack** (`SERVICE_MODE=all`): Both frontend and backend (default)
+- **Backend Only** (`SERVICE_MODE=backend`): API server only
+- **Frontend Only** (`SERVICE_MODE=frontend`): Web interface only
+
+#### Build from Source
 
 ```bash
 # Build and run with Docker Compose

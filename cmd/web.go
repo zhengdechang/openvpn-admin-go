@@ -178,6 +178,7 @@ func runWebServer(port int) error {
 
 	api := r.Group("/api")
 	{
+		router.SetupHealthRoutes(api)
 		router.SetupUserRoutes(api)
 		router.SetupManageRoutes(api)
 		router.SetupServerRoutes(api)

@@ -1,6 +1,41 @@
-# openvpn-web
+# OpenVPN Web Admin Interface
 
-This project is the frontend for the `openvpn-admin-go` backend. It is built with Next.js, TypeScript, and Tailwind CSS, providing a modern and user-friendly web interface to manage OpenVPN servers, users, and configurations.
+[![GitHub Repository](https://img.shields.io/badge/GitHub-openvpn--admin--go-blue?style=for-the-badge&logo=github)](https://github.com/zhengdechang/openvpn-admin-go)
+[![Next.js](https://img.shields.io/badge/Next.js-14-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.3-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.3-38B2AC?style=for-the-badge&logo=tailwind-css)](https://tailwindcss.com/)
+
+This project is the modern, responsive frontend interface for the `openvpn-admin-go` backend system. Built with cutting-edge web technologies including Next.js 14, TypeScript, and Tailwind CSS, it provides an intuitive and powerful web interface for comprehensive OpenVPN server management, user administration, and real-time monitoring.
+
+## 🌟 Project Overview
+
+OpenVPN Web Admin Interface is designed to simplify OpenVPN management through a beautiful, user-friendly web dashboard. Whether you're managing a small team or enterprise-level VPN infrastructure, this interface provides all the tools you need in one centralized location.
+
+**🔗 Main Repository:** [openvpn-admin-go](https://github.com/zhengdechang/openvpn-admin-go)
+
+## 🚀 Technology Stack
+
+### Frontend Technologies
+- **⚡ Next.js 14** - React framework with App Router for modern web applications
+- **📘 TypeScript 5.3** - Type-safe JavaScript for better development experience
+- **🎨 Tailwind CSS 3.3** - Utility-first CSS framework for rapid UI development
+- **🧩 Radix UI** - Unstyled, accessible UI components
+- **🌐 i18next** - Internationalization framework (English/Chinese support)
+- **📊 Zustand** - Lightweight state management
+- **🔗 Axios** - HTTP client for API communication
+
+### Backend Integration
+- **🔧 Go Backend** - High-performance backend built with Go
+- **🌐 Gin Framework** - Fast HTTP web framework
+- **💾 SQLite Database** - Lightweight, embedded database
+- **🔐 JWT Authentication** - Secure token-based authentication
+- **🔒 OpenVPN Integration** - Direct system integration with OpenVPN service
+
+### Development Tools
+- **📦 npm/yarn** - Package management
+- **🔍 ESLint** - Code linting and formatting
+- **🐳 Docker** - Containerization support
+- **🔄 Hot Reload** - Development server with instant updates
 
 ## Features
 
@@ -103,3 +138,48 @@ Environment variables are used to configure the application without hardcoding v
     -   **Note**: The `NEXT_PUBLIC_` prefix makes this variable accessible in the browser-side JavaScript code.
 
 Make sure to set all required variables in your `.env` file after copying it from `.env.example` for the application to function correctly.
+
+## 🌐 Nginx Configuration
+
+This directory includes a production-ready Nginx configuration file (`nginx.conf`) that provides:
+
+### Features
+- **Reverse Proxy**: Routes API requests to backend and frontend requests appropriately
+- **Rate Limiting**: Protects against abuse with configurable rate limits
+- **Security Headers**: Adds essential security headers (X-Frame-Options, X-Content-Type-Options, etc.)
+- **Static File Caching**: Optimizes performance with proper cache headers
+- **Gzip Compression**: Reduces bandwidth usage
+- **Health Checks**: Built-in health check endpoint
+
+### Usage
+
+#### With Docker Compose
+The nginx configuration is automatically used when deploying with Docker Compose from the `docker/` directory.
+
+#### Manual Setup
+```bash
+# Copy to nginx sites directory
+sudo cp nginx.conf /etc/nginx/sites-available/openvpn-admin
+sudo ln -s /etc/nginx/sites-available/openvpn-admin /etc/nginx/sites-enabled/
+
+# Test configuration
+sudo nginx -t
+
+# Reload nginx
+sudo systemctl reload nginx
+```
+
+#### Configuration Details
+- **API Routes** (`/api/*`): Proxied to backend with rate limiting (10 req/s)
+- **Login Route** (`/api/user/login`): Special rate limiting (1 req/s)
+- **Frontend Routes** (`/*`): Proxied to Next.js frontend
+- **Static Files**: Cached for 1 year with immutable headers
+- **Health Check** (`/health`): Returns simple health status
+
+### SSL/HTTPS Setup
+The configuration includes commented SSL sections. To enable HTTPS:
+
+1. Obtain SSL certificates (recommended: Let's Encrypt)
+2. Uncomment and configure the HTTPS server block
+3. Update certificate paths
+4. Reload nginx configuration

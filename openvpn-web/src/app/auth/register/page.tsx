@@ -22,8 +22,17 @@ import * as z from "zod";
 import MainLayout from "@/components/layout/main-layout";
 import { useTranslation } from 'react-i18next';
 
-// 注册表单验证
-const registerSchema = z
+
+
+export default function RegisterPage() {
+  const router = useRouter();
+  const { register, loading } = useAuth();
+  const [error, setError] = useState<string | null>(null);
+  const [isRegistering, setIsRegistering] = useState(false);
+  const { t } = useTranslation();
+
+  // 注册表单验证
+  const registerSchema = z
   .object({
     name: z.string().min(2, t('register.validation.nameMinLength')),
     email: z.string().email(t('register.validation.invalidEmail')),
@@ -34,13 +43,6 @@ const registerSchema = z
     message: t('register.validation.passwordsNotMatch'),
     path: ["passwordConfirm"],
   });
-
-export default function RegisterPage() {
-  const router = useRouter();
-  const { register, loading } = useAuth();
-  const [error, setError] = useState<string | null>(null);
-  const [isRegistering, setIsRegistering] = useState(false);
-  const { t } = useTranslation();
 
   // 表单初始化
   const form = useForm<z.infer<typeof registerSchema>>({

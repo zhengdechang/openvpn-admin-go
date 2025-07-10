@@ -3,10 +3,8 @@
  * @Author: Devin
  * @Date: 2025-07-01 14:38:15
  */
-import Cookies from "js-cookie";
-
 import { changeLanguage } from "./i18next-config";
-import { LOCALE_COOKIE_NAME } from "./config";
+import { LOCALE_STORAGE_KEY } from "./config";
 import { LanguagesSupported } from "./language";
 
 export const i18n = {
@@ -17,10 +15,19 @@ export const i18n = {
 export type Locale = (typeof i18n)["locales"][number];
 
 export const setLocaleOnClient = (locale: Locale, reloadPage = false) => {
-  Cookies.set(LOCALE_COOKIE_NAME, locale, { path: "/", expires: 365 });
+  // 使用 localStorage 替代 cookies
+  if (typeof window !== 'undefined') {
+    localStorage.setItem(LOCALE_STORAGE_KEY, locale);
+  }
   changeLanguage(locale);
 };
 
 export const getLocaleOnClient = (): Locale => {
-  return (Cookies.get(LOCALE_COOKIE_NAME) as Locale) || i18n.defaultLocale;
+  if (typeof window !== 'undefined') {
+    const savedLocale = localStorage.getItem(LOCALE_STORAGE_KEY) as Locale;
+    if (savedLocale && i18n.locales.includes(savedLocale)) {
+      return savedLocale;
+    }
+  }
+  return i18n.defaultLocale;
 };

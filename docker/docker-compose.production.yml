@@ -1,0 +1,97 @@
+version: '3.8'
+
+services:
+  # Backend service
+  openvpn-backend:
+    image: ${DOCKERHUB_USERNAME}/openvpn-admin:latest
+    container_name: openvpn-backend
+    restart: unless-stopped
+    command: ["/app/openvpn-admin"]
+
+    # Network configuration
+    network_mode: host
+
+    # Capabilities for OpenVPN
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+
+    # Device access
+    devices:
+      - /dev/net/tun:/dev/net/tun
+
+    # Privileged mode for OpenVPN operations
+    privileged: true
+
+    # Environment variables
+    environment:
+      - GIN_MODE=release
+      - TZ=Asia/Shanghai
+      - DB_PATH=/app/data/db.sqlite3
+      - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key}
+      - OPENVPN_STATUS_LOG_PATH=/var/log/openvpn/status.log
+
+    # Volume mounts
+    volumes:
+      # Application data
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./config:/app/config
+
+      # OpenVPN configuration
+      - ./openvpn/etc:/etc/openvpn
+      - ./openvpn/logs:/var/log/openvpn
+
+      # System access for OpenVPN
+      - /lib/modules:/lib/modules:ro
+
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8085/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+    # Logging
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Frontend service (nginx)
+  openvpn-frontend:
+    image: ${DOCKERHUB_USERNAME}/openvpn-admin:latest
+    container_name: openvpn-frontend
+    restart: unless-stopped
+    command: ["nginx", "-g", "daemon off;"]
+    depends_on:
+      - openvpn-backend
+
+    # Environment variables
+    environment:
+      - NODE_ENV=production
+      - TZ=Asia/Shanghai
+
+    # Port mappings
+    ports:
+      - "80:80"
+
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+    # Logging
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "3"
+
+# All volumes are now mapped to local directories
+

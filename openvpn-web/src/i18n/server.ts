@@ -1,6 +1,7 @@
-import { cookies, headers } from "next/headers";
-import Negotiator from "negotiator";
-import { match } from "@formatjs/intl-localematcher";
+// 静态导出模式下不使用 cookies 和 headers
+// import { cookies, headers } from "next/headers";
+// import Negotiator from "negotiator";
+// import { match } from "@formatjs/intl-localematcher";
 
 import { createInstance } from "i18next";
 import resourcesToBackend from "i18next-resources-to-backend";
@@ -40,15 +41,7 @@ export async function useTranslation(
 }
 
 export const getLocaleOnServer = (): Locale => {
-  const locales: string[] = i18n.locales;
-  const cookieStore = cookies();
-  const localeCookie = cookieStore.get("locale");
-
-  // 严格检查 cookie 中的语言设置
-  if (localeCookie?.value && locales.includes(localeCookie.value as Locale)) {
-    return localeCookie.value as Locale;
-  }
-
-  // 如果没有有效的 cookie，使用浏览器语言
+  // 在静态导出模式下，直接返回默认语言
+  // 客户端会通过 JavaScript 处理语言切换
   return i18n.defaultLocale;
 };
