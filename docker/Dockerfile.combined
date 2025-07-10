@@ -84,7 +84,10 @@ COPY config/ /app/config/
 
 # Create nginx directories and set permissions
 RUN mkdir -p /var/log/nginx /var/lib/nginx/tmp /run/nginx && \
-    chown -R appuser:appuser /var/log/nginx /var/lib/nginx /run/nginx
+    chown -R appuser:appgroup /var/log/nginx /var/lib/nginx /run/nginx
+
+# Set ownership for app directories
+RUN chown -R appuser:appgroup /app
 
 # Set working directory
 WORKDIR /app
