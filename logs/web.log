@@ -1943,3 +1943,1104 @@
 [2025-07-02 18:08:50] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
 [2025-07-02 18:08:50] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
 [2025-07-02 18:08:50] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-03 07:58:26] [INFO] [config.go:195] 日志系统初始化成功 - Level: info, File: logs/web.log, API: true
+[2025-07-03 07:58:26] [INFO] [main.go:50] OpenVPN 管理工具启动中...
+[2025-07-03 07:58:26] [INFO] [main.go:57] 当前工作目录: /home/jancsitech/openvpn-admin-go
+[2025-07-03 07:58:27] [INFO] [main.go:136] Starting OpenVPN Sync Service: LogPath='/etc/openvpn/status.log', Interval=1m0s
+[2025-07-03 07:58:27] [INFO] [openvpn_sync.go:99] Starting OpenVPN Sync Service with interval 1m0s. Log path: /etc/openvpn/status.log
+[2025-07-03 07:58:27] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-03 07:58:27] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-03 07:59:08] [INFO] [config.go:195] 日志系统初始化成功 - Level: info, File: logs/web.log, API: true
+[2025-07-03 07:59:08] [INFO] [main.go:50] OpenVPN 管理工具启动中...
+[2025-07-03 07:59:08] [INFO] [main.go:57] 当前工作目录: /home/jancsitech/openvpn-admin-go
+[2025-07-03 07:59:10] [INFO] [main.go:136] Starting OpenVPN Sync Service: LogPath='/etc/openvpn/status.log', Interval=1m0s
+[2025-07-03 07:59:10] [INFO] [openvpn_sync.go:99] Starting OpenVPN Sync Service with interval 1m0s. Log path: /etc/openvpn/status.log
+[2025-07-03 07:59:10] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-03 07:59:10] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-03 08:02:54] [INFO] [config.go:195] 日志系统初始化成功 - Level: info, File: logs/web.log, API: true
+[2025-07-03 08:02:54] [INFO] [main.go:50] OpenVPN 管理工具启动中...
+[2025-07-03 08:02:54] [INFO] [main.go:57] 当前工作目录: /home/jancsitech/openvpn-admin-go
+[2025-07-03 08:02:55] [INFO] [main.go:136] Starting OpenVPN Sync Service: LogPath='/etc/openvpn/status.log', Interval=1m0s
+[2025-07-03 08:02:55] [INFO] [config.go:195] 日志系统初始化成功 - Level: info, File: logs/web.log, API: true
+[2025-07-03 08:02:55] [INFO] [main.go:50] OpenVPN 管理工具启动中...
+[2025-07-03 08:02:55] [INFO] [openvpn_sync.go:99] Starting OpenVPN Sync Service with interval 1m0s. Log path: /etc/openvpn/status.log
+[2025-07-03 08:02:55] [INFO] [main.go:57] 当前工作目录: /home/jancsitech/openvpn-admin-go
+[2025-07-03 08:02:55] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-03 08:02:55] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-03 08:02:56] [INFO] [main.go:136] Starting OpenVPN Sync Service: LogPath='/etc/openvpn/status.log', Interval=1m0s
+[2025-07-03 08:02:56] [INFO] [openvpn_sync.go:99] Starting OpenVPN Sync Service with interval 1m0s. Log path: /etc/openvpn/status.log
+[2025-07-03 08:02:56] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-03 08:02:56] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-03 08:02:56] [INFO] [web.go:236] Web 服务器正在监听 :8085...
+[2025-07-03 08:03:55] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-03 08:03:55] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-03 08:03:56] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-03 08:03:56] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-03 08:04:13] [INFO] [config.go:195] 日志系统初始化成功 - Level: info, File: logs/web.log, API: true
+[2025-07-03 08:04:13] [INFO] [main.go:50] OpenVPN 管理工具启动中...
+[2025-07-03 08:04:13] [INFO] [main.go:57] 当前工作目录: /home/jancsitech/openvpn-admin-go
+[2025-07-03 08:04:14] [INFO] [main.go:136] Starting OpenVPN Sync Service: LogPath='/etc/openvpn/status.log', Interval=1m0s
+[2025-07-03 08:04:14] [INFO] [config.go:195] 日志系统初始化成功 - Level: info, File: logs/web.log, API: true
+[2025-07-03 08:04:14] [INFO] [openvpn_sync.go:99] Starting OpenVPN Sync Service with interval 1m0s. Log path: /etc/openvpn/status.log
+[2025-07-03 08:04:14] [INFO] [main.go:50] OpenVPN 管理工具启动中...
+[2025-07-03 08:04:14] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-03 08:04:14] [INFO] [main.go:57] 当前工作目录: /home/jancsitech/openvpn-admin-go
+[2025-07-03 08:04:14] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-03 08:04:15] [INFO] [main.go:136] Starting OpenVPN Sync Service: LogPath='/etc/openvpn/status.log', Interval=1m0s
+[2025-07-03 08:04:15] [INFO] [openvpn_sync.go:99] Starting OpenVPN Sync Service with interval 1m0s. Log path: /etc/openvpn/status.log
+[2025-07-03 08:04:15] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-03 08:04:15] [INFO] [web.go:236] Web 服务器正在监听 :8085...
+[2025-07-03 08:04:15] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-03 08:04:27] [INFO] [config.go:195] 日志系统初始化成功 - Level: info, File: logs/web.log, API: true
+[2025-07-03 08:04:27] [INFO] [main.go:50] OpenVPN 管理工具启动中...
+[2025-07-03 08:04:27] [INFO] [main.go:57] 当前工作目录: /home/jancsitech/openvpn-admin-go
+[2025-07-03 08:04:29] [INFO] [main.go:136] Starting OpenVPN Sync Service: LogPath='/etc/openvpn/status.log', Interval=1m0s
+[2025-07-03 08:04:29] [INFO] [openvpn_sync.go:99] Starting OpenVPN Sync Service with interval 1m0s. Log path: /etc/openvpn/status.log
+[2025-07-03 08:04:29] [INFO] [config.go:195] 日志系统初始化成功 - Level: info, File: logs/web.log, API: true
+[2025-07-03 08:04:29] [INFO] [main.go:50] OpenVPN 管理工具启动中...
+[2025-07-03 08:04:29] [INFO] [main.go:57] 当前工作目录: /home/jancsitech/openvpn-admin-go
+[2025-07-03 08:04:29] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-03 08:04:29] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-03 08:04:30] [INFO] [main.go:136] Starting OpenVPN Sync Service: LogPath='/etc/openvpn/status.log', Interval=1m0s
+[2025-07-03 08:04:30] [INFO] [openvpn_sync.go:99] Starting OpenVPN Sync Service with interval 1m0s. Log path: /etc/openvpn/status.log
+[2025-07-03 08:04:30] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-03 08:04:30] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-03 08:04:30] [INFO] [web.go:236] Web 服务器正在监听 :8085...
+[2025-07-03 08:04:53] [INFO] [config.go:195] 日志系统初始化成功 - Level: info, File: logs/web.log, API: true
+[2025-07-03 08:04:53] [INFO] [main.go:50] OpenVPN 管理工具启动中...
+[2025-07-03 08:04:53] [INFO] [main.go:57] 当前工作目录: /home/jancsitech/openvpn-admin-go
+[2025-07-03 08:04:54] [INFO] [main.go:136] Starting OpenVPN Sync Service: LogPath='/etc/openvpn/status.log', Interval=1m0s
+[2025-07-03 08:04:54] [INFO] [openvpn_sync.go:99] Starting OpenVPN Sync Service with interval 1m0s. Log path: /etc/openvpn/status.log
+[2025-07-03 08:04:54] [INFO] [config.go:195] 日志系统初始化成功 - Level: info, File: logs/web.log, API: true
+[2025-07-03 08:04:54] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-03 08:04:54] [INFO] [main.go:50] OpenVPN 管理工具启动中...
+[2025-07-03 08:04:54] [INFO] [main.go:57] 当前工作目录: /home/jancsitech/openvpn-admin-go
+[2025-07-03 08:04:54] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-03 08:04:54] [INFO] [main.go:136] Starting OpenVPN Sync Service: LogPath='/etc/openvpn/status.log', Interval=1m0s
+[2025-07-03 08:04:54] [INFO] [openvpn_sync.go:99] Starting OpenVPN Sync Service with interval 1m0s. Log path: /etc/openvpn/status.log
+[2025-07-03 08:04:54] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-03 08:04:54] [INFO] [web.go:236] Web 服务器正在监听 :8085...
+[2025-07-03 08:04:54] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-03 08:05:07] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 295.808µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-03 08:05:07] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 151.457µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-03 08:05:07] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 102.683µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-03 08:05:07] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 211.425µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-03 08:05:07] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/me, Status: 200, Duration: 508.519µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-03 08:05:07] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/me, Status: 200, Duration: 474.702µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-03 08:05:07] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 117.957µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-03 08:05:07] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 87.232µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-03 08:05:07] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/client, Status: 200, Duration: 897.56µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-03 08:05:07] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 105.407µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-03 08:05:07] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/departments, Status: 200, Duration: 2.757853ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-03 08:05:07] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 147.434µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-03 08:05:07] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/client, Status: 200, Duration: 674.003µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-03 08:05:07] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/departments, Status: 200, Duration: 1.131704ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-03 08:05:10] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 207.471µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-03 08:05:10] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 124.001µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-03 08:05:10] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/departments, Status: 200, Duration: 1.102431ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-03 08:05:10] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 153.078µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-03 08:05:10] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/client, Status: 200, Duration: 627.151µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-03 08:05:10] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 94.477µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-03 08:05:10] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/departments, Status: 200, Duration: 1.165041ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-03 08:05:10] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/client, Status: 200, Duration: 788.621µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-03 08:05:22] [INFO] [config.go:195] 日志系统初始化成功 - Level: info, File: logs/web.log, API: true
+[2025-07-03 08:05:22] [INFO] [main.go:50] OpenVPN 管理工具启动中...
+[2025-07-03 08:05:22] [INFO] [main.go:57] 当前工作目录: /home/jancsitech/openvpn-admin-go
+[2025-07-03 08:05:23] [INFO] [main.go:136] Starting OpenVPN Sync Service: LogPath='/etc/openvpn/status.log', Interval=1m0s
+[2025-07-03 08:05:23] [INFO] [config.go:195] 日志系统初始化成功 - Level: info, File: logs/web.log, API: true
+[2025-07-03 08:05:23] [INFO] [main.go:50] OpenVPN 管理工具启动中...
+[2025-07-03 08:05:23] [INFO] [openvpn_sync.go:99] Starting OpenVPN Sync Service with interval 1m0s. Log path: /etc/openvpn/status.log
+[2025-07-03 08:05:23] [INFO] [main.go:57] 当前工作目录: /home/jancsitech/openvpn-admin-go
+[2025-07-03 08:05:23] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-03 08:05:23] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-03 08:05:24] [INFO] [main.go:136] Starting OpenVPN Sync Service: LogPath='/etc/openvpn/status.log', Interval=1m0s
+[2025-07-03 08:05:24] [INFO] [openvpn_sync.go:99] Starting OpenVPN Sync Service with interval 1m0s. Log path: /etc/openvpn/status.log
+[2025-07-03 08:05:24] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-03 08:05:24] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-03 08:05:24] [INFO] [web.go:236] Web 服务器正在监听 :8085...
+[2025-07-03 08:05:47] [INFO] [logger.go:194] API Request - Method: POST, Path: /api/user/login, Status: 200, Duration: 86.26334ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-03 08:05:47] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 291.086µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-03 08:05:47] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/me, Status: 200, Duration: 570.358µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-03 08:05:50] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 180.919µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-03 08:05:50] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 180.874µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-03 08:05:50] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/client, Status: 200, Duration: 953.185µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-03 08:05:50] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 105.184µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-03 08:05:50] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/departments, Status: 200, Duration: 1.661639ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-03 08:05:50] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 134.653µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-03 08:05:50] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/client, Status: 200, Duration: 723.754µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-03 08:05:50] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/departments, Status: 200, Duration: 1.087366ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-03 08:05:53] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 191.936µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-03 08:05:53] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 89.353µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-03 08:05:53] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/departments, Status: 200, Duration: 1.067136ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-03 08:05:53] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 111.284µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-03 08:05:53] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/client, Status: 200, Duration: 524.499µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-03 08:05:53] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 90.731µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-03 08:05:53] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/departments, Status: 200, Duration: 793.745µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-03 08:05:53] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/client, Status: 200, Duration: 1.649489ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-03 08:06:23] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-03 08:06:23] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-03 08:06:24] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-03 08:06:24] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-03 08:07:23] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-03 08:07:23] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-03 08:07:24] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-03 08:07:24] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-03 08:08:00] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 507.983µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-03 08:08:00] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 200.445µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-03 08:08:00] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/client, Status: 200, Duration: 1.106611ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-03 08:08:01] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 175.248µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-03 08:08:01] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/departments, Status: 200, Duration: 1.610653ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-03 08:08:01] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 183.135µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-03 08:08:01] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/client, Status: 200, Duration: 661.481µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-03 08:08:01] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/departments, Status: 200, Duration: 1.409692ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-03 08:08:06] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 238.473µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-03 08:08:06] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 182.477µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-03 08:08:06] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/departments, Status: 200, Duration: 1.323456ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-03 08:08:06] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 112.891µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-03 08:08:06] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/client, Status: 200, Duration: 845.399µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-03 08:08:06] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 120.307µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-03 08:08:06] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/departments, Status: 200, Duration: 1.097639ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-03 08:08:06] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/client, Status: 200, Duration: 824.529µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-03 08:08:23] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-03 08:08:23] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-03 08:08:24] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-03 08:08:24] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-03 08:09:23] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-03 08:09:23] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-03 08:09:24] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-03 08:09:24] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-03 08:10:23] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-03 08:10:23] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-03 08:10:24] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-03 08:10:24] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-03 08:11:23] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-03 08:11:23] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-03 08:11:24] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-03 08:11:24] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-03 08:12:23] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-03 08:12:23] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-03 08:12:24] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-03 08:12:24] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-03 08:13:23] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-03 08:13:23] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-03 08:13:24] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-03 08:13:24] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-03 08:14:23] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-03 08:14:23] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-03 08:14:24] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-03 08:14:24] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-03 08:15:23] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-03 08:15:23] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-03 08:15:24] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-03 08:15:24] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-03 08:16:23] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-03 08:16:23] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-03 08:16:24] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-03 08:16:24] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-03 08:17:23] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-03 08:17:23] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-03 08:17:24] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-03 08:17:24] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-03 08:18:23] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-03 08:18:23] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-03 08:18:24] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-03 08:18:24] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-03 08:19:23] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-03 08:19:23] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-03 08:19:24] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-03 08:19:24] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-03 08:33:25] [INFO] [config.go:195] 日志系统初始化成功 - Level: info, File: logs/web.log, API: true
+[2025-07-03 08:33:25] [INFO] [main.go:50] OpenVPN 管理工具启动中...
+[2025-07-03 08:33:25] [INFO] [main.go:57] 当前工作目录: /home/jancsitech/openvpn-admin-go
+[2025-07-03 08:33:25] [INFO] [main.go:136] Starting OpenVPN Sync Service: LogPath='/etc/openvpn/status.log', Interval=1m0s
+[2025-07-03 08:33:25] [INFO] [openvpn_sync.go:99] Starting OpenVPN Sync Service with interval 1m0s. Log path: /etc/openvpn/status.log
+[2025-07-03 08:33:25] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-03 08:33:25] [ERROR] [openvpn_sync.go:19] Error parsing OpenVPN status log: failed to open status log file /etc/openvpn/status.log: open /etc/openvpn/status.log: permission denied. Skipping sync cycle.
+[2025-07-03 08:33:36] [INFO] [config.go:195] 日志系统初始化成功 - Level: info, File: logs/web.log, API: true
+[2025-07-03 08:33:36] [INFO] [main.go:50] OpenVPN 管理工具启动中...
+[2025-07-03 08:33:36] [INFO] [main.go:57] 当前工作目录: /home/jancsitech/openvpn-admin-go
+[2025-07-03 08:33:37] [INFO] [main.go:136] Starting OpenVPN Sync Service: LogPath='/etc/openvpn/status.log', Interval=1m0s
+[2025-07-03 08:33:37] [INFO] [openvpn_sync.go:99] Starting OpenVPN Sync Service with interval 1m0s. Log path: /etc/openvpn/status.log
+[2025-07-03 08:33:37] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-03 08:33:37] [ERROR] [openvpn_sync.go:19] Error parsing OpenVPN status log: failed to open status log file /etc/openvpn/status.log: open /etc/openvpn/status.log: permission denied. Skipping sync cycle.
+[2025-07-03 08:33:56] [INFO] [config.go:195] 日志系统初始化成功 - Level: info, File: logs/web.log, API: true
+[2025-07-03 08:33:56] [INFO] [main.go:50] OpenVPN 管理工具启动中...
+[2025-07-03 08:33:56] [INFO] [main.go:57] 当前工作目录: /home/jancsitech/openvpn-admin-go
+[2025-07-03 08:33:56] [INFO] [main.go:136] Starting OpenVPN Sync Service: LogPath='/etc/openvpn/status.log', Interval=1m0s
+[2025-07-03 08:33:56] [INFO] [config.go:195] 日志系统初始化成功 - Level: info, File: logs/web.log, API: true
+[2025-07-03 08:33:56] [INFO] [main.go:50] OpenVPN 管理工具启动中...
+[2025-07-03 08:33:56] [INFO] [openvpn_sync.go:99] Starting OpenVPN Sync Service with interval 1m0s. Log path: /etc/openvpn/status.log
+[2025-07-03 08:33:56] [INFO] [main.go:57] 当前工作目录: /home/jancsitech/openvpn-admin-go
+[2025-07-03 08:33:56] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-03 08:33:56] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-03 08:33:57] [INFO] [main.go:136] Starting OpenVPN Sync Service: LogPath='/etc/openvpn/status.log', Interval=1m0s
+[2025-07-03 08:33:57] [INFO] [config.go:195] 日志系统初始化成功 - Level: info, File: logs/web.log, API: true
+[2025-07-03 08:33:57] [INFO] [openvpn_sync.go:99] Starting OpenVPN Sync Service with interval 1m0s. Log path: /etc/openvpn/status.log
+[2025-07-03 08:33:57] [INFO] [main.go:50] OpenVPN 管理工具启动中...
+[2025-07-03 08:33:57] [INFO] [main.go:57] 当前工作目录: /home/jancsitech/openvpn-admin-go
+[2025-07-03 08:33:57] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-03 08:33:57] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-03 08:33:57] [INFO] [main.go:136] Starting OpenVPN Sync Service: LogPath='/etc/openvpn/status.log', Interval=1m0s
+[2025-07-03 08:33:57] [INFO] [openvpn_sync.go:99] Starting OpenVPN Sync Service with interval 1m0s. Log path: /etc/openvpn/status.log
+[2025-07-03 08:33:57] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-03 08:33:57] [INFO] [web.go:189] Web 服务器正在监听 :8085...
+[2025-07-03 08:33:57] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 02:35:11] [INFO] [config.go:195] 日志系统初始化成功 - Level: info, File: logs/web.log, API: true
+[2025-07-10 02:35:11] [INFO] [main.go:50] OpenVPN 管理工具启动中...
+[2025-07-10 02:35:11] [INFO] [main.go:57] 当前工作目录: /home/jancsitech/openvpn-admin-go
+[2025-07-10 02:35:12] [INFO] [main.go:136] Starting OpenVPN Sync Service: LogPath='/etc/openvpn/status.log', Interval=1m0s
+[2025-07-10 02:35:12] [INFO] [openvpn_sync.go:99] Starting OpenVPN Sync Service with interval 1m0s. Log path: /etc/openvpn/status.log
+[2025-07-10 02:35:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 02:35:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 02:36:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 02:36:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 02:37:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 02:37:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 02:39:11] [INFO] [config.go:195] 日志系统初始化成功 - Level: info, File: logs/web.log, API: true
+[2025-07-10 02:39:11] [INFO] [main.go:50] OpenVPN 管理工具启动中...
+[2025-07-10 02:39:11] [INFO] [main.go:57] 当前工作目录: /home/jancsitech/openvpn-admin-go
+[2025-07-10 02:39:12] [INFO] [main.go:136] Starting OpenVPN Sync Service: LogPath='/etc/openvpn/status.log', Interval=1m0s
+[2025-07-10 02:39:12] [INFO] [openvpn_sync.go:99] Starting OpenVPN Sync Service with interval 1m0s. Log path: /etc/openvpn/status.log
+[2025-07-10 02:39:12] [INFO] [config.go:195] 日志系统初始化成功 - Level: info, File: logs/web.log, API: true
+[2025-07-10 02:39:12] [INFO] [main.go:50] OpenVPN 管理工具启动中...
+[2025-07-10 02:39:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 02:39:12] [INFO] [main.go:57] 当前工作目录: /home/jancsitech/openvpn-admin-go
+[2025-07-10 02:39:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 02:39:13] [INFO] [main.go:136] Starting OpenVPN Sync Service: LogPath='/etc/openvpn/status.log', Interval=1m0s
+[2025-07-10 02:39:13] [INFO] [openvpn_sync.go:99] Starting OpenVPN Sync Service with interval 1m0s. Log path: /etc/openvpn/status.log
+[2025-07-10 02:39:13] [INFO] [config.go:195] 日志系统初始化成功 - Level: info, File: logs/web.log, API: true
+[2025-07-10 02:39:13] [INFO] [main.go:50] OpenVPN 管理工具启动中...
+[2025-07-10 02:39:13] [INFO] [main.go:57] 当前工作目录: /home/jancsitech/openvpn-admin-go
+[2025-07-10 02:39:13] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 02:39:13] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 02:39:13] [INFO] [main.go:136] Starting OpenVPN Sync Service: LogPath='/etc/openvpn/status.log', Interval=1m0s
+[2025-07-10 02:39:13] [INFO] [openvpn_sync.go:99] Starting OpenVPN Sync Service with interval 1m0s. Log path: /etc/openvpn/status.log
+[2025-07-10 02:39:13] [INFO] [web.go:189] Web 服务器正在监听 :8085...
+[2025-07-10 02:39:13] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 02:39:13] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 02:39:15] [INFO] [logger.go:194] API Request - Method: POST, Path: /api/user/login, Status: 200, Duration: 84.216306ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 02:39:15] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 1.143495ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 02:39:16] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/me, Status: 200, Duration: 510.846µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 02:39:22] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 203.59µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 02:39:22] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 108.826µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 02:39:22] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/client, Status: 200, Duration: 861.659µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 02:39:22] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 102.884µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 02:39:22] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/departments, Status: 200, Duration: 1.376099ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 02:39:22] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 113.623µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 02:39:22] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/client, Status: 200, Duration: 590.108µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 02:39:22] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/departments, Status: 200, Duration: 926.09µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 02:40:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 02:40:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 02:40:13] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 02:40:13] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 02:40:13] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 02:40:13] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 02:41:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 02:41:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 02:41:13] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 02:41:13] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 02:41:13] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 02:41:13] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 02:42:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 02:42:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 02:42:13] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 02:42:13] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 02:42:13] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 02:42:13] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 02:43:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 02:43:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 02:43:13] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 02:43:13] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 02:43:13] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 02:43:13] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 02:44:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 02:44:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 02:44:13] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 02:44:13] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 02:44:13] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 02:44:13] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 02:45:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 02:45:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 02:45:13] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 02:45:13] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 02:45:13] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 02:45:13] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 02:46:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 02:46:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 02:46:13] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 02:46:13] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 02:46:13] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 02:46:13] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 02:47:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 02:47:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 02:47:13] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 02:47:13] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 02:47:13] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 02:47:13] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 02:48:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 02:48:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 02:48:13] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 02:48:13] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 02:48:13] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 02:48:13] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 02:49:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 02:49:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 02:49:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 02:49:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 02:49:13] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 02:49:13] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 02:50:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 02:50:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 02:50:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 02:50:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 02:50:13] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 02:50:13] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 02:51:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 02:51:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 02:51:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 02:51:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 02:51:13] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 02:51:13] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 02:52:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 02:52:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 02:52:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 02:52:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 02:52:13] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 02:52:13] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 02:53:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 02:53:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 02:53:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 02:53:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 02:53:13] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 02:53:13] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 02:54:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 02:54:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 02:54:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 02:54:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 02:54:13] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 02:54:13] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 02:55:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 02:55:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 02:55:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 02:55:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 02:55:13] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 02:55:13] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 02:56:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 02:56:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 02:56:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 02:56:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 02:56:13] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 02:56:13] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 02:57:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 02:57:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 02:57:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 02:57:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 02:57:13] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 02:57:13] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 02:58:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 02:58:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 02:58:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 02:58:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 02:58:13] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 02:58:13] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 02:59:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 02:59:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 02:59:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 02:59:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 02:59:13] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 02:59:13] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:00:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:00:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:00:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:00:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:00:13] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:00:13] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:01:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:01:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:01:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:01:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:01:13] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:01:13] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:01:18] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 986.03µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:18] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 141.573µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:18] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/server/config/items, Status: 200, Duration: 1.033353ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:18] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 148.251µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:18] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/server/status, Status: 200, Duration: 18.51497ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:18] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 145.662µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:18] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/server/config/items, Status: 200, Duration: 283.261µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:19] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/server/status, Status: 200, Duration: 13.273117ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:23] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 218.358µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:24] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 167.076µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:24] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/client, Status: 200, Duration: 992.785µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:24] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 155.229µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:24] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/departments, Status: 200, Duration: 1.348074ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:24] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 323.856µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:24] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/client, Status: 200, Duration: 810.421µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:24] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/departments, Status: 200, Duration: 1.530231ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:31] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 164.036µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:31] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 191.392µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:31] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/departments, Status: 200, Duration: 1.25154ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:31] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 205.659µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:31] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/client, Status: 200, Duration: 635.624µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:31] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 244.927µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:31] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/departments, Status: 200, Duration: 1.081958ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:32] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/client, Status: 200, Duration: 951.034µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:32] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 175.37µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:33] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 183.903µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:33] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/client, Status: 200, Duration: 750.127µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:33] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 170.098µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:33] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/departments, Status: 200, Duration: 987.325µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:33] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 162.541µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:33] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/client, Status: 200, Duration: 603.522µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:33] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/departments, Status: 200, Duration: 1.2923ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:36] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 281.567µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:36] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 167.955µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:37] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/departments, Status: 200, Duration: 2.911774ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:37] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 171.095µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:37] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/client, Status: 200, Duration: 633.48µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:37] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 186.949µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:37] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/departments, Status: 200, Duration: 1.209815ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:37] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/client, Status: 200, Duration: 608.683µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:38] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 191.11µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:38] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 235.093µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:38] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/server/config/items, Status: 200, Duration: 364.833µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:38] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 155.258µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:38] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/server/status, Status: 200, Duration: 13.019252ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:39] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 150.106µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:39] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/server/config/items, Status: 200, Duration: 327.079µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:39] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/server/status, Status: 200, Duration: 12.454656ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:43] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 170.709µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:43] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 220.249µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:43] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/client, Status: 200, Duration: 760.027µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:43] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 225.065µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:43] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/departments, Status: 200, Duration: 1.152487ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:43] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 209.374µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:43] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/client, Status: 200, Duration: 998.408µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:44] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/departments, Status: 200, Duration: 1.056001ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:47] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 204.599µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:47] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 156.979µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:47] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/departments, Status: 200, Duration: 1.546748ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:47] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 191.944µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:47] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/client, Status: 200, Duration: 780.814µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:47] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 156.411µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:47] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/departments, Status: 200, Duration: 1.238508ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:48] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/client, Status: 200, Duration: 897.21µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:49] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 266.997µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:49] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 166.459µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:49] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/server/config/items, Status: 200, Duration: 383.876µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:49] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 249.316µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:49] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/server/status, Status: 200, Duration: 14.281815ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:49] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 191.765µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:49] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/server/config/items, Status: 200, Duration: 236.228µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:49] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/server/status, Status: 200, Duration: 11.841545ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:52] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 178.027µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:52] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 129.681µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:52] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/departments, Status: 200, Duration: 1.328549ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:52] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 117.485µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:52] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/client, Status: 200, Duration: 2.462887ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:52] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 134.276µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:53] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/departments, Status: 200, Duration: 1.113016ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:53] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/client, Status: 200, Duration: 741.578µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:57] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 286.029µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:57] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 336.383µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:57] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/client, Status: 200, Duration: 1.224398ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:57] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 147.905µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:57] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/departments, Status: 200, Duration: 1.171242ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:57] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 153.775µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:57] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/client, Status: 200, Duration: 853.543µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:01:57] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/departments, Status: 200, Duration: 1.390431ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:02:01] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 249.34µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:02:01] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 175.364µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:02:01] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/departments, Status: 200, Duration: 1.609004ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:02:01] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 151.777µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:02:01] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/client, Status: 200, Duration: 818.019µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:02:01] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 178.444µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:02:01] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/departments, Status: 200, Duration: 909.085µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:02:01] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/client, Status: 200, Duration: 763.876µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:02:02] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 187.891µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:02:02] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 168.173µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:02:02] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/server/config/items, Status: 200, Duration: 319.674µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:02:02] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 181.569µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:02:02] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/server/status, Status: 200, Duration: 13.224501ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:02:02] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 136.174µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:02:03] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/server/config/items, Status: 200, Duration: 210.85µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:02:03] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/server/status, Status: 200, Duration: 11.324197ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:02:09] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 351.4µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:02:09] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 161.212µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:02:09] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/client, Status: 200, Duration: 1.005114ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:02:09] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 210.258µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:02:09] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/departments, Status: 200, Duration: 1.12713ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:02:09] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 169.883µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:02:09] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/client, Status: 200, Duration: 672.122µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:02:10] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/departments, Status: 200, Duration: 1.858828ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:02:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:02:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:02:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:02:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:02:13] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:02:13] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:02:22] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 589.358µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:02:22] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 153.021µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:02:22] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 140.858µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:02:22] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 127.684µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:02:22] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/me, Status: 200, Duration: 792.682µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:02:22] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 112.453µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:02:22] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/me, Status: 200, Duration: 472.688µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:02:23] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 159.693µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:02:23] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/client, Status: 200, Duration: 868.5µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:02:23] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 152.727µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:02:23] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/departments, Status: 200, Duration: 1.259628ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:02:23] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 211.048µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:02:23] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/client, Status: 200, Duration: 797.918µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:02:23] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/departments, Status: 200, Duration: 1.081389ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:03:03] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 298.48µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:03:04] [INFO] [logger.go:194] API Request - Method: POST, Path: /api/client/devin1/pause, Status: 200, Duration: 115.059769ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:03:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:03:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:03:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:03:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:03:13] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:03:13] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:03:23] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 239.858µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:03:23] [INFO] [logger.go:194] API Request - Method: POST, Path: /api/client/devin2/resume, Status: 200, Duration: 79.181475ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:03:24] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 242.308µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:03:24] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 194.041µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:03:24] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/client, Status: 200, Duration: 730.989µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:03:24] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/departments, Status: 200, Duration: 1.49308ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:03:40] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 296.627µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:03:40] [INFO] [logger.go:194] API Request - Method: POST, Path: /api/client/devin1/resume, Status: 200, Duration: 97.999883ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:03:40] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 102.78µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:03:40] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/client, Status: 200, Duration: 672.79µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:03:40] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 112.03µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:03:40] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/departments, Status: 200, Duration: 1.463339ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:04:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:04:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:04:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:04:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:04:13] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:04:13] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:05:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:05:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:05:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:05:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:05:13] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:05:13] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:06:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:06:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:06:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:06:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:06:13] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:06:13] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:07:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:07:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:07:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:07:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:07:13] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:07:13] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:08:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:08:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:08:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:08:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:08:13] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:08:13] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:09:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:09:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:09:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:09:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:09:13] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:09:13] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:10:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:10:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:10:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:10:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:10:13] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:10:13] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:11:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:11:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:11:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:11:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:11:13] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:11:13] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:12:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:12:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:12:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:12:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:12:13] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:12:13] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:13:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:13:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:13:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:13:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:13:13] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:13:13] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:14:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:14:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:14:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:14:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:14:13] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:14:13] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:15:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:15:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:15:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:15:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:15:13] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:15:13] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:15:55] [INFO] [config.go:195] 日志系统初始化成功 - Level: info, File: logs/web.log, API: true
+[2025-07-10 03:15:55] [INFO] [main.go:53] OpenVPN 管理工具启动中...
+[2025-07-10 03:15:55] [INFO] [main.go:60] 当前工作目录: /home/jancsitech/openvpn-admin-go
+[2025-07-10 03:15:56] [INFO] [main.go:126] 为数据库用户 Super Admin 创建了 OpenVPN 客户端配置
+[2025-07-10 03:15:57] [INFO] [main.go:126] 为数据库用户 test1234 创建了 OpenVPN 客户端配置
+[2025-07-10 03:15:57] [INFO] [main.go:126] 为数据库用户 1231231231 创建了 OpenVPN 客户端配置
+[2025-07-10 03:15:58] [INFO] [main.go:126] 为数据库用户 123 创建了 OpenVPN 客户端配置
+[2025-07-10 03:15:58] [INFO] [main.go:126] 为数据库用户 devin1 创建了 OpenVPN 客户端配置
+[2025-07-10 03:15:59] [INFO] [main.go:126] 为数据库用户 devin2 创建了 OpenVPN 客户端配置
+[2025-07-10 03:15:59] [INFO] [main.go:190] Starting OpenVPN Sync Service: LogPath='/etc/openvpn/status.log', Interval=1m0s
+[2025-07-10 03:15:59] [INFO] [openvpn_sync.go:99] Starting OpenVPN Sync Service with interval 1m0s. Log path: /etc/openvpn/status.log
+[2025-07-10 03:15:59] [INFO] [config.go:195] 日志系统初始化成功 - Level: info, File: logs/web.log, API: true
+[2025-07-10 03:15:59] [INFO] [main.go:53] OpenVPN 管理工具启动中...
+[2025-07-10 03:15:59] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:15:59] [INFO] [main.go:60] 当前工作目录: /home/jancsitech/openvpn-admin-go
+[2025-07-10 03:15:59] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:16:00] [INFO] [main.go:190] Starting OpenVPN Sync Service: LogPath='/etc/openvpn/status.log', Interval=1m0s
+[2025-07-10 03:16:00] [INFO] [openvpn_sync.go:99] Starting OpenVPN Sync Service with interval 1m0s. Log path: /etc/openvpn/status.log
+[2025-07-10 03:16:00] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:16:00] [INFO] [config.go:195] 日志系统初始化成功 - Level: info, File: logs/web.log, API: true
+[2025-07-10 03:16:00] [INFO] [main.go:53] OpenVPN 管理工具启动中...
+[2025-07-10 03:16:00] [INFO] [main.go:60] 当前工作目录: /home/jancsitech/openvpn-admin-go
+[2025-07-10 03:16:00] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:16:01] [INFO] [main.go:190] Starting OpenVPN Sync Service: LogPath='/etc/openvpn/status.log', Interval=1m0s
+[2025-07-10 03:16:01] [INFO] [openvpn_sync.go:99] Starting OpenVPN Sync Service with interval 1m0s. Log path: /etc/openvpn/status.log
+[2025-07-10 03:16:01] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:16:01] [INFO] [web.go:189] Web 服务器正在监听 :8085...
+[2025-07-10 03:16:01] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:16:59] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:16:59] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:17:00] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:17:00] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:17:01] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:17:01] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:17:59] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:17:59] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:18:00] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:18:00] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:18:01] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:18:01] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:18:42] [INFO] [config.go:195] 日志系统初始化成功 - Level: info, File: logs/web.log, API: true
+[2025-07-10 03:18:42] [INFO] [main.go:53] OpenVPN 管理工具启动中...
+[2025-07-10 03:18:42] [INFO] [main.go:60] 当前工作目录: /home/jancsitech/openvpn-admin-go
+[2025-07-10 03:18:44] [INFO] [main.go:126] 为数据库用户 Super Admin 创建了 OpenVPN 客户端配置
+[2025-07-10 03:18:44] [INFO] [main.go:126] 为数据库用户 test1234 创建了 OpenVPN 客户端配置
+[2025-07-10 03:18:45] [INFO] [main.go:126] 为数据库用户 1231231231 创建了 OpenVPN 客户端配置
+[2025-07-10 03:18:45] [INFO] [main.go:126] 为数据库用户 123 创建了 OpenVPN 客户端配置
+[2025-07-10 03:18:45] [INFO] [main.go:126] 为数据库用户 devin1 创建了 OpenVPN 客户端配置
+[2025-07-10 03:18:46] [INFO] [main.go:126] 为数据库用户 devin2 创建了 OpenVPN 客户端配置
+[2025-07-10 03:18:46] [INFO] [main.go:189] Starting OpenVPN Sync Service: LogPath='/etc/openvpn/status.log', Interval=1m0s
+[2025-07-10 03:18:46] [INFO] [config.go:195] 日志系统初始化成功 - Level: info, File: logs/web.log, API: true
+[2025-07-10 03:18:46] [INFO] [openvpn_sync.go:99] Starting OpenVPN Sync Service with interval 1m0s. Log path: /etc/openvpn/status.log
+[2025-07-10 03:18:46] [INFO] [main.go:53] OpenVPN 管理工具启动中...
+[2025-07-10 03:18:46] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:18:46] [INFO] [main.go:60] 当前工作目录: /home/jancsitech/openvpn-admin-go
+[2025-07-10 03:18:46] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:18:47] [INFO] [main.go:189] Starting OpenVPN Sync Service: LogPath='/etc/openvpn/status.log', Interval=1m0s
+[2025-07-10 03:18:47] [INFO] [openvpn_sync.go:99] Starting OpenVPN Sync Service with interval 1m0s. Log path: /etc/openvpn/status.log
+[2025-07-10 03:18:47] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:18:47] [INFO] [config.go:195] 日志系统初始化成功 - Level: info, File: logs/web.log, API: true
+[2025-07-10 03:18:47] [INFO] [main.go:53] OpenVPN 管理工具启动中...
+[2025-07-10 03:18:47] [INFO] [main.go:60] 当前工作目录: /home/jancsitech/openvpn-admin-go
+[2025-07-10 03:18:47] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:18:47] [INFO] [main.go:189] Starting OpenVPN Sync Service: LogPath='/etc/openvpn/status.log', Interval=1m0s
+[2025-07-10 03:18:47] [INFO] [openvpn_sync.go:99] Starting OpenVPN Sync Service with interval 1m0s. Log path: /etc/openvpn/status.log
+[2025-07-10 03:18:47] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:18:47] [INFO] [web.go:189] Web 服务器正在监听 :8085...
+[2025-07-10 03:18:47] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:19:03] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 224.037µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:19:03] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 139.763µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:19:03] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 143.512µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:19:03] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 137.576µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:19:03] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/me, Status: 200, Duration: 378.18µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:19:03] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 95.189µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:19:03] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/me, Status: 200, Duration: 400.492µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:19:03] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 160.263µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:19:03] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/client, Status: 200, Duration: 1.026746ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:19:04] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 149.777µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:19:04] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/departments, Status: 200, Duration: 1.304086ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:19:04] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 113.222µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:19:04] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/client, Status: 200, Duration: 707.039µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:19:04] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/departments, Status: 200, Duration: 1.446641ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:19:08] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 163.515µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:19:08] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/client/config/devin2, Status: 200, Duration: 901.867µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:19:46] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:19:46] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:19:47] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:19:47] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:19:47] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:19:48] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:20:46] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:20:46] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:20:47] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:20:47] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:20:47] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:20:48] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:21:46] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:21:46] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:21:47] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:21:47] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:21:47] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:21:48] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:22:02] [INFO] [config.go:195] 日志系统初始化成功 - Level: info, File: logs/web.log, API: true
+[2025-07-10 03:22:02] [INFO] [main.go:53] OpenVPN 管理工具启动中...
+[2025-07-10 03:22:02] [INFO] [main.go:60] 当前工作目录: /home/jancsitech/openvpn-admin-go
+[2025-07-10 03:22:03] [INFO] [main.go:207] 同步用户 devin1 的固定IP配置: 10.8.0.198 -> 
+[2025-07-10 03:22:03] [INFO] [main.go:217] 同步用户 devin1 的子网配置: 10.10.120.0/23 -> 
+[2025-07-10 03:22:03] [INFO] [main.go:240] Starting OpenVPN Sync Service: LogPath='/etc/openvpn/status.log', Interval=1m0s
+[2025-07-10 03:22:03] [INFO] [config.go:195] 日志系统初始化成功 - Level: info, File: logs/web.log, API: true
+[2025-07-10 03:22:03] [INFO] [openvpn_sync.go:99] Starting OpenVPN Sync Service with interval 1m0s. Log path: /etc/openvpn/status.log
+[2025-07-10 03:22:03] [INFO] [main.go:53] OpenVPN 管理工具启动中...
+[2025-07-10 03:22:03] [INFO] [main.go:60] 当前工作目录: /home/jancsitech/openvpn-admin-go
+[2025-07-10 03:22:03] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:22:03] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:22:04] [INFO] [main.go:240] Starting OpenVPN Sync Service: LogPath='/etc/openvpn/status.log', Interval=1m0s
+[2025-07-10 03:22:04] [INFO] [openvpn_sync.go:99] Starting OpenVPN Sync Service with interval 1m0s. Log path: /etc/openvpn/status.log
+[2025-07-10 03:22:04] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:22:04] [INFO] [config.go:195] 日志系统初始化成功 - Level: info, File: logs/web.log, API: true
+[2025-07-10 03:22:04] [INFO] [main.go:53] OpenVPN 管理工具启动中...
+[2025-07-10 03:22:04] [INFO] [main.go:60] 当前工作目录: /home/jancsitech/openvpn-admin-go
+[2025-07-10 03:22:04] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:22:05] [INFO] [main.go:240] Starting OpenVPN Sync Service: LogPath='/etc/openvpn/status.log', Interval=1m0s
+[2025-07-10 03:22:05] [INFO] [openvpn_sync.go:99] Starting OpenVPN Sync Service with interval 1m0s. Log path: /etc/openvpn/status.log
+[2025-07-10 03:22:05] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:22:05] [INFO] [web.go:189] Web 服务器正在监听 :8085...
+[2025-07-10 03:22:05] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:23:03] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:23:03] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:23:04] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:23:04] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:23:05] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:23:05] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:23:08] [INFO] [config.go:195] 日志系统初始化成功 - Level: info, File: logs/web.log, API: true
+[2025-07-10 03:23:08] [INFO] [main.go:53] OpenVPN 管理工具启动中...
+[2025-07-10 03:23:08] [INFO] [main.go:60] 当前工作目录: /home/jancsitech/openvpn-admin-go
+[2025-07-10 03:23:09] [INFO] [main.go:126] 为数据库用户 Super Admin 创建了 OpenVPN 客户端配置
+[2025-07-10 03:23:10] [INFO] [main.go:126] 为数据库用户 test1234 创建了 OpenVPN 客户端配置
+[2025-07-10 03:23:10] [INFO] [main.go:126] 为数据库用户 1231231231 创建了 OpenVPN 客户端配置
+[2025-07-10 03:23:11] [INFO] [main.go:126] 为数据库用户 123 创建了 OpenVPN 客户端配置
+[2025-07-10 03:23:12] [INFO] [main.go:126] 为数据库用户 devin1 创建了 OpenVPN 客户端配置
+[2025-07-10 03:23:12] [INFO] [main.go:126] 为数据库用户 devin2 创建了 OpenVPN 客户端配置
+[2025-07-10 03:23:12] [INFO] [main.go:240] Starting OpenVPN Sync Service: LogPath='/etc/openvpn/status.log', Interval=1m0s
+[2025-07-10 03:23:12] [INFO] [openvpn_sync.go:99] Starting OpenVPN Sync Service with interval 1m0s. Log path: /etc/openvpn/status.log
+[2025-07-10 03:23:12] [INFO] [config.go:195] 日志系统初始化成功 - Level: info, File: logs/web.log, API: true
+[2025-07-10 03:23:12] [INFO] [main.go:53] OpenVPN 管理工具启动中...
+[2025-07-10 03:23:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:23:12] [INFO] [main.go:60] 当前工作目录: /home/jancsitech/openvpn-admin-go
+[2025-07-10 03:23:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:23:13] [INFO] [main.go:240] Starting OpenVPN Sync Service: LogPath='/etc/openvpn/status.log', Interval=1m0s
+[2025-07-10 03:23:13] [INFO] [openvpn_sync.go:99] Starting OpenVPN Sync Service with interval 1m0s. Log path: /etc/openvpn/status.log
+[2025-07-10 03:23:13] [INFO] [config.go:195] 日志系统初始化成功 - Level: info, File: logs/web.log, API: true
+[2025-07-10 03:23:13] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:23:13] [INFO] [main.go:53] OpenVPN 管理工具启动中...
+[2025-07-10 03:23:13] [INFO] [main.go:60] 当前工作目录: /home/jancsitech/openvpn-admin-go
+[2025-07-10 03:23:13] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:23:14] [INFO] [main.go:240] Starting OpenVPN Sync Service: LogPath='/etc/openvpn/status.log', Interval=1m0s
+[2025-07-10 03:23:14] [INFO] [openvpn_sync.go:99] Starting OpenVPN Sync Service with interval 1m0s. Log path: /etc/openvpn/status.log
+[2025-07-10 03:23:14] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:23:14] [INFO] [web.go:189] Web 服务器正在监听 :8085...
+[2025-07-10 03:23:14] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:24:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:24:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:24:13] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:24:13] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:24:14] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:24:14] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:25:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:25:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:25:13] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:25:13] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:25:14] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:25:14] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:26:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:26:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:26:13] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:26:13] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:26:14] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:26:14] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:27:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:27:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:27:13] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:27:13] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:27:14] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:27:14] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:28:12] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:28:12] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:28:13] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:28:13] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:28:14] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:28:14] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:30:12] [INFO] [config.go:195] 日志系统初始化成功 - Level: info, File: logs/web.log, API: true
+[2025-07-10 03:30:12] [INFO] [main.go:53] OpenVPN 管理工具启动中...
+[2025-07-10 03:30:12] [INFO] [main.go:60] 当前工作目录: /home/jancsitech/openvpn-admin-go
+[2025-07-10 03:30:13] [INFO] [main.go:266] Starting OpenVPN Sync Service: LogPath='/etc/openvpn/status.log', Interval=1m0s
+[2025-07-10 03:30:13] [INFO] [openvpn_sync.go:99] Starting OpenVPN Sync Service with interval 1m0s. Log path: /etc/openvpn/status.log
+[2025-07-10 03:30:13] [INFO] [config.go:195] 日志系统初始化成功 - Level: info, File: logs/web.log, API: true
+[2025-07-10 03:30:13] [INFO] [main.go:53] OpenVPN 管理工具启动中...
+[2025-07-10 03:30:13] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:30:13] [INFO] [main.go:60] 当前工作目录: /home/jancsitech/openvpn-admin-go
+[2025-07-10 03:30:13] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:30:13] [INFO] [main.go:266] Starting OpenVPN Sync Service: LogPath='/etc/openvpn/status.log', Interval=1m0s
+[2025-07-10 03:30:13] [INFO] [openvpn_sync.go:99] Starting OpenVPN Sync Service with interval 1m0s. Log path: /etc/openvpn/status.log
+[2025-07-10 03:30:13] [INFO] [config.go:195] 日志系统初始化成功 - Level: info, File: logs/web.log, API: true
+[2025-07-10 03:30:13] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:30:13] [INFO] [main.go:53] OpenVPN 管理工具启动中...
+[2025-07-10 03:30:13] [INFO] [main.go:60] 当前工作目录: /home/jancsitech/openvpn-admin-go
+[2025-07-10 03:30:14] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:30:14] [INFO] [main.go:266] Starting OpenVPN Sync Service: LogPath='/etc/openvpn/status.log', Interval=1m0s
+[2025-07-10 03:30:14] [INFO] [openvpn_sync.go:99] Starting OpenVPN Sync Service with interval 1m0s. Log path: /etc/openvpn/status.log
+[2025-07-10 03:30:14] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:30:14] [INFO] [web.go:189] Web 服务器正在监听 :8085...
+[2025-07-10 03:30:14] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:30:55] [INFO] [config.go:195] 日志系统初始化成功 - Level: info, File: logs/web.log, API: true
+[2025-07-10 03:30:55] [INFO] [main.go:53] OpenVPN 管理工具启动中...
+[2025-07-10 03:30:55] [INFO] [main.go:60] 当前工作目录: /home/jancsitech/openvpn-admin-go
+[2025-07-10 03:30:56] [INFO] [main.go:126] 为数据库用户 Super Admin 创建了 OpenVPN 客户端配置
+[2025-07-10 03:30:56] [INFO] [main.go:126] 为数据库用户 test1234 创建了 OpenVPN 客户端配置
+[2025-07-10 03:30:57] [INFO] [main.go:126] 为数据库用户 1231231231 创建了 OpenVPN 客户端配置
+[2025-07-10 03:30:57] [INFO] [main.go:126] 为数据库用户 123 创建了 OpenVPN 客户端配置
+[2025-07-10 03:30:58] [INFO] [main.go:126] 为数据库用户 devin1 创建了 OpenVPN 客户端配置
+[2025-07-10 03:30:58] [INFO] [main.go:126] 为数据库用户 devin2 创建了 OpenVPN 客户端配置
+[2025-07-10 03:30:58] [INFO] [main.go:266] Starting OpenVPN Sync Service: LogPath='/etc/openvpn/status.log', Interval=1m0s
+[2025-07-10 03:30:58] [INFO] [openvpn_sync.go:99] Starting OpenVPN Sync Service with interval 1m0s. Log path: /etc/openvpn/status.log
+[2025-07-10 03:30:58] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:30:58] [INFO] [config.go:195] 日志系统初始化成功 - Level: info, File: logs/web.log, API: true
+[2025-07-10 03:30:58] [INFO] [main.go:53] OpenVPN 管理工具启动中...
+[2025-07-10 03:30:58] [INFO] [main.go:60] 当前工作目录: /home/jancsitech/openvpn-admin-go
+[2025-07-10 03:30:58] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:30:59] [INFO] [main.go:266] Starting OpenVPN Sync Service: LogPath='/etc/openvpn/status.log', Interval=1m0s
+[2025-07-10 03:30:59] [INFO] [openvpn_sync.go:99] Starting OpenVPN Sync Service with interval 1m0s. Log path: /etc/openvpn/status.log
+[2025-07-10 03:30:59] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:30:59] [INFO] [config.go:195] 日志系统初始化成功 - Level: info, File: logs/web.log, API: true
+[2025-07-10 03:30:59] [INFO] [main.go:53] OpenVPN 管理工具启动中...
+[2025-07-10 03:30:59] [INFO] [main.go:60] 当前工作目录: /home/jancsitech/openvpn-admin-go
+[2025-07-10 03:30:59] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:31:00] [INFO] [main.go:266] Starting OpenVPN Sync Service: LogPath='/etc/openvpn/status.log', Interval=1m0s
+[2025-07-10 03:31:00] [INFO] [openvpn_sync.go:99] Starting OpenVPN Sync Service with interval 1m0s. Log path: /etc/openvpn/status.log
+[2025-07-10 03:31:00] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:31:00] [INFO] [web.go:189] Web 服务器正在监听 :8085...
+[2025-07-10 03:31:00] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:31:14] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 231.278µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:31:15] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 201.52µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:31:15] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 101.143µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:31:15] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 136.598µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:31:15] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/me, Status: 200, Duration: 502.526µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:31:15] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/me, Status: 200, Duration: 487.224µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:31:15] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 132.484µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:31:15] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 135.711µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:31:15] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/client, Status: 200, Duration: 895.844µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:31:15] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 620.384µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:31:15] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/departments, Status: 200, Duration: 1.283758ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:31:16] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 209.554µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:31:16] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/client, Status: 200, Duration: 697.337µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:31:16] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/departments, Status: 200, Duration: 1.511791ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:31:49] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 187.82µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:31:50] [INFO] [ccd.go:96] Successfully set fixed IP for devin1 to 10.8.0.198 in /etc/openvpn/client/ccd/devin1
+[2025-07-10 03:31:50] [INFO] [logger.go:194] API Request - Method: PUT, Path: /api/client/eca6b6b1-000c-478b-87ab-3e54361324fb, Status: 200, Duration: 67.018559ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:31:50] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 110.291µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:31:50] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 214.012µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:31:50] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/client, Status: 200, Duration: 705.431µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:31:51] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/departments, Status: 200, Duration: 1.178473ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:32:17] [INFO] [config.go:195] 日志系统初始化成功 - Level: info, File: logs/web.log, API: true
+[2025-07-10 03:32:17] [INFO] [main.go:53] OpenVPN 管理工具启动中...
+[2025-07-10 03:32:17] [INFO] [main.go:60] 当前工作目录: /home/jancsitech/openvpn-admin-go
+[2025-07-10 03:32:18] [INFO] [main.go:126] 为数据库用户 Super Admin 创建了 OpenVPN 客户端配置
+[2025-07-10 03:32:18] [INFO] [main.go:126] 为数据库用户 test1234 创建了 OpenVPN 客户端配置
+[2025-07-10 03:32:19] [INFO] [main.go:126] 为数据库用户 1231231231 创建了 OpenVPN 客户端配置
+[2025-07-10 03:32:20] [INFO] [main.go:126] 为数据库用户 123 创建了 OpenVPN 客户端配置
+[2025-07-10 03:32:20] [INFO] [main.go:126] 为数据库用户 devin1 创建了 OpenVPN 客户端配置
+[2025-07-10 03:32:20] [INFO] [main.go:126] 为数据库用户 devin2 创建了 OpenVPN 客户端配置
+[2025-07-10 03:32:20] [INFO] [main.go:219] 同步用户 devin1 的固定IP配置: 10.8.0.198 -> 
+[2025-07-10 03:32:20] [INFO] [main.go:236] 同步用户 devin1 的子网配置: 10.10.120.0/23 -> 
+[2025-07-10 03:32:20] [INFO] [main.go:266] Starting OpenVPN Sync Service: LogPath='/etc/openvpn/status.log', Interval=1m0s
+[2025-07-10 03:32:20] [INFO] [openvpn_sync.go:99] Starting OpenVPN Sync Service with interval 1m0s. Log path: /etc/openvpn/status.log
+[2025-07-10 03:32:20] [INFO] [config.go:195] 日志系统初始化成功 - Level: info, File: logs/web.log, API: true
+[2025-07-10 03:32:20] [INFO] [main.go:53] OpenVPN 管理工具启动中...
+[2025-07-10 03:32:20] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:32:20] [INFO] [main.go:60] 当前工作目录: /home/jancsitech/openvpn-admin-go
+[2025-07-10 03:32:21] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:32:21] [INFO] [main.go:266] Starting OpenVPN Sync Service: LogPath='/etc/openvpn/status.log', Interval=1m0s
+[2025-07-10 03:32:21] [INFO] [openvpn_sync.go:99] Starting OpenVPN Sync Service with interval 1m0s. Log path: /etc/openvpn/status.log
+[2025-07-10 03:32:21] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:32:21] [INFO] [config.go:195] 日志系统初始化成功 - Level: info, File: logs/web.log, API: true
+[2025-07-10 03:32:21] [INFO] [main.go:53] OpenVPN 管理工具启动中...
+[2025-07-10 03:32:21] [INFO] [main.go:60] 当前工作目录: /home/jancsitech/openvpn-admin-go
+[2025-07-10 03:32:22] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:32:23] [INFO] [main.go:266] Starting OpenVPN Sync Service: LogPath='/etc/openvpn/status.log', Interval=1m0s
+[2025-07-10 03:32:23] [INFO] [openvpn_sync.go:99] Starting OpenVPN Sync Service with interval 1m0s. Log path: /etc/openvpn/status.log
+[2025-07-10 03:32:23] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:32:23] [INFO] [web.go:189] Web 服务器正在监听 :8085...
+[2025-07-10 03:32:23] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:32:25] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 182.282µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:32:25] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 200.648µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:32:26] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 118.724µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:32:26] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 144.867µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:32:26] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/me, Status: 200, Duration: 477.725µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:32:26] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 187.38µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:32:26] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/me, Status: 200, Duration: 562.654µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:32:26] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 153.354µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:32:26] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/client, Status: 200, Duration: 769.567µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:32:26] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 144.524µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:32:26] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/departments, Status: 200, Duration: 1.191317ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:32:27] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 155.62µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:32:27] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/client, Status: 200, Duration: 815.132µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:32:27] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/departments, Status: 200, Duration: 2.510939ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:33:21] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:33:21] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:33:22] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:33:22] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:33:23] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:33:23] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:34:30] [INFO] [config.go:195] 日志系统初始化成功 - Level: info, File: logs/web.log, API: true
+[2025-07-10 03:34:30] [INFO] [main.go:53] OpenVPN 管理工具启动中...
+[2025-07-10 03:34:30] [INFO] [main.go:60] 当前工作目录: /home/jancsitech/openvpn-admin-go
+[2025-07-10 03:34:31] [INFO] [main.go:126] 为数据库用户 Super Admin 创建了 OpenVPN 客户端配置
+[2025-07-10 03:34:31] [INFO] [main.go:126] 为数据库用户 test1234 创建了 OpenVPN 客户端配置
+[2025-07-10 03:34:32] [INFO] [main.go:126] 为数据库用户 1231231231 创建了 OpenVPN 客户端配置
+[2025-07-10 03:34:32] [INFO] [main.go:126] 为数据库用户 123 创建了 OpenVPN 客户端配置
+[2025-07-10 03:34:33] [INFO] [main.go:126] 为数据库用户 devin1 创建了 OpenVPN 客户端配置
+[2025-07-10 03:34:34] [INFO] [main.go:126] 为数据库用户 devin2 创建了 OpenVPN 客户端配置
+[2025-07-10 03:34:34] [INFO] [main.go:209] 用户 123 已存在，检查CCD配置是否与数据库一致
+[2025-07-10 03:34:34] [INFO] [main.go:209] 用户 1231231231 已存在，检查CCD配置是否与数据库一致
+[2025-07-10 03:34:34] [INFO] [main.go:209] 用户 Super Admin 已存在，检查CCD配置是否与数据库一致
+[2025-07-10 03:34:34] [INFO] [main.go:209] 用户 devin1 已存在，检查CCD配置是否与数据库一致
+[2025-07-10 03:34:34] [INFO] [main.go:209] 用户 devin2 已存在，检查CCD配置是否与数据库一致
+[2025-07-10 03:34:34] [INFO] [main.go:209] 用户 test1234 已存在，检查CCD配置是否与数据库一致
+[2025-07-10 03:34:34] [INFO] [main.go:242] Starting OpenVPN Sync Service: LogPath='/etc/openvpn/status.log', Interval=1m0s
+[2025-07-10 03:34:34] [INFO] [config.go:195] 日志系统初始化成功 - Level: info, File: logs/web.log, API: true
+[2025-07-10 03:34:34] [INFO] [openvpn_sync.go:99] Starting OpenVPN Sync Service with interval 1m0s. Log path: /etc/openvpn/status.log
+[2025-07-10 03:34:34] [INFO] [main.go:53] OpenVPN 管理工具启动中...
+[2025-07-10 03:34:34] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:34:34] [INFO] [main.go:60] 当前工作目录: /home/jancsitech/openvpn-admin-go
+[2025-07-10 03:34:34] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:34:35] [INFO] [main.go:209] 用户 123 已存在，检查CCD配置是否与数据库一致
+[2025-07-10 03:34:35] [INFO] [main.go:209] 用户 1231231231 已存在，检查CCD配置是否与数据库一致
+[2025-07-10 03:34:35] [INFO] [main.go:209] 用户 Super Admin 已存在，检查CCD配置是否与数据库一致
+[2025-07-10 03:34:35] [INFO] [main.go:209] 用户 devin1 已存在，检查CCD配置是否与数据库一致
+[2025-07-10 03:34:35] [INFO] [main.go:209] 用户 devin2 已存在，检查CCD配置是否与数据库一致
+[2025-07-10 03:34:35] [INFO] [main.go:209] 用户 test1234 已存在，检查CCD配置是否与数据库一致
+[2025-07-10 03:34:35] [INFO] [main.go:242] Starting OpenVPN Sync Service: LogPath='/etc/openvpn/status.log', Interval=1m0s
+[2025-07-10 03:34:35] [INFO] [openvpn_sync.go:99] Starting OpenVPN Sync Service with interval 1m0s. Log path: /etc/openvpn/status.log
+[2025-07-10 03:34:35] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:34:35] [INFO] [config.go:195] 日志系统初始化成功 - Level: info, File: logs/web.log, API: true
+[2025-07-10 03:34:35] [INFO] [main.go:53] OpenVPN 管理工具启动中...
+[2025-07-10 03:34:35] [INFO] [main.go:60] 当前工作目录: /home/jancsitech/openvpn-admin-go
+[2025-07-10 03:34:35] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:34:35] [INFO] [main.go:209] 用户 123 已存在，检查CCD配置是否与数据库一致
+[2025-07-10 03:34:35] [INFO] [main.go:209] 用户 1231231231 已存在，检查CCD配置是否与数据库一致
+[2025-07-10 03:34:35] [INFO] [main.go:209] 用户 Super Admin 已存在，检查CCD配置是否与数据库一致
+[2025-07-10 03:34:35] [INFO] [main.go:209] 用户 devin1 已存在，检查CCD配置是否与数据库一致
+[2025-07-10 03:34:35] [INFO] [main.go:209] 用户 devin2 已存在，检查CCD配置是否与数据库一致
+[2025-07-10 03:34:35] [INFO] [main.go:209] 用户 test1234 已存在，检查CCD配置是否与数据库一致
+[2025-07-10 03:34:35] [INFO] [main.go:242] Starting OpenVPN Sync Service: LogPath='/etc/openvpn/status.log', Interval=1m0s
+[2025-07-10 03:34:35] [INFO] [openvpn_sync.go:99] Starting OpenVPN Sync Service with interval 1m0s. Log path: /etc/openvpn/status.log
+[2025-07-10 03:34:35] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:34:35] [INFO] [web.go:189] Web 服务器正在监听 :8085...
+[2025-07-10 03:34:35] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:35:16] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 572.355µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:35:17] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 217.474µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:35:17] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 170.458µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:35:17] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 136.572µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:35:17] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/me, Status: 200, Duration: 821.829µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:35:17] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 203.176µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:35:17] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/me, Status: 200, Duration: 541.282µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:35:17] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 198.445µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:35:17] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/client, Status: 200, Duration: 1.294336ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:35:18] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 172.57µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:35:18] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/departments, Status: 200, Duration: 1.284312ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:35:18] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 246.46µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:35:18] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/client, Status: 200, Duration: 752.925µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:35:18] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/departments, Status: 200, Duration: 1.299962ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:35:25] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 264.428µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:35:26] [INFO] [ccd.go:96] Successfully set fixed IP for devin1 to 10.8.0.198 in /etc/openvpn/client/ccd/devin1
+[2025-07-10 03:35:26] [INFO] [logger.go:194] API Request - Method: PUT, Path: /api/client/eca6b6b1-000c-478b-87ab-3e54361324fb, Status: 200, Duration: 190.054299ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:35:26] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 263.176µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:35:26] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 154.211µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:35:26] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/client, Status: 200, Duration: 1.123875ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:35:27] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/departments, Status: 200, Duration: 1.322287ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:35:34] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:35:34] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:35:35] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:35:35] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:35:35] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:35:35] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:36:34] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:36:34] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:36:35] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:36:35] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:36:35] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:36:35] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:36:46] [INFO] [config.go:195] 日志系统初始化成功 - Level: info, File: logs/web.log, API: true
+[2025-07-10 03:36:46] [INFO] [main.go:53] OpenVPN 管理工具启动中...
+[2025-07-10 03:36:46] [INFO] [main.go:60] 当前工作目录: /home/jancsitech/openvpn-admin-go
+[2025-07-10 03:36:47] [INFO] [main.go:126] 为数据库用户 Super Admin 创建了 OpenVPN 客户端配置
+[2025-07-10 03:36:48] [INFO] [main.go:126] 为数据库用户 test1234 创建了 OpenVPN 客户端配置
+[2025-07-10 03:36:48] [INFO] [main.go:126] 为数据库用户 1231231231 创建了 OpenVPN 客户端配置
+[2025-07-10 03:36:48] [INFO] [main.go:126] 为数据库用户 123 创建了 OpenVPN 客户端配置
+[2025-07-10 03:36:48] [INFO] [main.go:126] 为数据库用户 devin1 创建了 OpenVPN 客户端配置
+[2025-07-10 03:36:49] [INFO] [main.go:126] 为数据库用户 devin2 创建了 OpenVPN 客户端配置
+[2025-07-10 03:36:49] [INFO] [main.go:209] 用户 123 已存在，检查CCD配置是否与数据库一致
+[2025-07-10 03:36:49] [INFO] [main.go:209] 用户 1231231231 已存在，检查CCD配置是否与数据库一致
+[2025-07-10 03:36:49] [INFO] [main.go:209] 用户 Super Admin 已存在，检查CCD配置是否与数据库一致
+[2025-07-10 03:36:49] [INFO] [main.go:209] 用户 devin1 已存在，检查CCD配置是否与数据库一致
+[2025-07-10 03:36:49] [INFO] [ccd.go:96] Successfully set fixed IP for devin1 to 10.8.0.198 in /etc/openvpn/client/ccd/devin1
+[2025-07-10 03:36:49] [INFO] [main.go:216] 为用户 devin1 确保固定IP配置: 10.8.0.198
+[2025-07-10 03:36:49] [INFO] [main.go:225] 为用户 devin1 确保子网配置: 10.10.120.0/23
+[2025-07-10 03:36:49] [INFO] [main.go:209] 用户 devin2 已存在，检查CCD配置是否与数据库一致
+[2025-07-10 03:36:49] [INFO] [main.go:209] 用户 test1234 已存在，检查CCD配置是否与数据库一致
+[2025-07-10 03:36:49] [INFO] [main.go:242] Starting OpenVPN Sync Service: LogPath='/etc/openvpn/status.log', Interval=1m0s
+[2025-07-10 03:36:49] [INFO] [openvpn_sync.go:99] Starting OpenVPN Sync Service with interval 1m0s. Log path: /etc/openvpn/status.log
+[2025-07-10 03:36:49] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:36:49] [INFO] [config.go:195] 日志系统初始化成功 - Level: info, File: logs/web.log, API: true
+[2025-07-10 03:36:49] [INFO] [main.go:53] OpenVPN 管理工具启动中...
+[2025-07-10 03:36:49] [INFO] [main.go:60] 当前工作目录: /home/jancsitech/openvpn-admin-go
+[2025-07-10 03:36:49] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:36:50] [INFO] [main.go:209] 用户 123 已存在，检查CCD配置是否与数据库一致
+[2025-07-10 03:36:50] [INFO] [main.go:209] 用户 1231231231 已存在，检查CCD配置是否与数据库一致
+[2025-07-10 03:36:50] [INFO] [main.go:209] 用户 Super Admin 已存在，检查CCD配置是否与数据库一致
+[2025-07-10 03:36:50] [INFO] [main.go:209] 用户 devin1 已存在，检查CCD配置是否与数据库一致
+[2025-07-10 03:36:50] [INFO] [ccd.go:96] Successfully set fixed IP for devin1 to 10.8.0.198 in /etc/openvpn/client/ccd/devin1
+[2025-07-10 03:36:50] [INFO] [main.go:216] 为用户 devin1 确保固定IP配置: 10.8.0.198
+[2025-07-10 03:36:50] [INFO] [main.go:225] 为用户 devin1 确保子网配置: 10.10.120.0/23
+[2025-07-10 03:36:50] [INFO] [main.go:209] 用户 devin2 已存在，检查CCD配置是否与数据库一致
+[2025-07-10 03:36:50] [INFO] [main.go:209] 用户 test1234 已存在，检查CCD配置是否与数据库一致
+[2025-07-10 03:36:50] [INFO] [main.go:242] Starting OpenVPN Sync Service: LogPath='/etc/openvpn/status.log', Interval=1m0s
+[2025-07-10 03:36:50] [INFO] [openvpn_sync.go:99] Starting OpenVPN Sync Service with interval 1m0s. Log path: /etc/openvpn/status.log
+[2025-07-10 03:36:50] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:36:50] [INFO] [config.go:195] 日志系统初始化成功 - Level: info, File: logs/web.log, API: true
+[2025-07-10 03:36:50] [INFO] [main.go:53] OpenVPN 管理工具启动中...
+[2025-07-10 03:36:50] [INFO] [main.go:60] 当前工作目录: /home/jancsitech/openvpn-admin-go
+[2025-07-10 03:36:50] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:36:51] [INFO] [main.go:209] 用户 123 已存在，检查CCD配置是否与数据库一致
+[2025-07-10 03:36:51] [INFO] [main.go:209] 用户 1231231231 已存在，检查CCD配置是否与数据库一致
+[2025-07-10 03:36:51] [INFO] [main.go:209] 用户 Super Admin 已存在，检查CCD配置是否与数据库一致
+[2025-07-10 03:36:51] [INFO] [main.go:209] 用户 devin1 已存在，检查CCD配置是否与数据库一致
+[2025-07-10 03:36:51] [INFO] [ccd.go:96] Successfully set fixed IP for devin1 to 10.8.0.198 in /etc/openvpn/client/ccd/devin1
+[2025-07-10 03:36:51] [INFO] [main.go:216] 为用户 devin1 确保固定IP配置: 10.8.0.198
+[2025-07-10 03:36:51] [INFO] [main.go:225] 为用户 devin1 确保子网配置: 10.10.120.0/23
+[2025-07-10 03:36:51] [INFO] [main.go:209] 用户 devin2 已存在，检查CCD配置是否与数据库一致
+[2025-07-10 03:36:51] [INFO] [main.go:209] 用户 test1234 已存在，检查CCD配置是否与数据库一致
+[2025-07-10 03:36:51] [INFO] [main.go:242] Starting OpenVPN Sync Service: LogPath='/etc/openvpn/status.log', Interval=1m0s
+[2025-07-10 03:36:51] [INFO] [openvpn_sync.go:99] Starting OpenVPN Sync Service with interval 1m0s. Log path: /etc/openvpn/status.log
+[2025-07-10 03:36:51] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-10 03:36:51] [INFO] [web.go:189] Web 服务器正在监听 :8085...
+[2025-07-10 03:36:51] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-10 03:36:59] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 235.805µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:36:59] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 174.484µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:37:00] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 98.592µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:37:00] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 100.878µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:37:00] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/me, Status: 200, Duration: 401.507µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:37:00] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 193.636µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:37:00] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/me, Status: 200, Duration: 457.94µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:37:00] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 166.31µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:37:00] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/client, Status: 200, Duration: 798.91µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:37:00] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 139.203µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:37:00] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/departments, Status: 200, Duration: 1.539973ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:37:01] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/user/refresh, Status: 200, Duration: 1.416346ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:37:01] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/client, Status: 200, Duration: 1.392606ms, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+[2025-07-10 03:37:01] [INFO] [logger.go:194] API Request - Method: GET, Path: /api/departments, Status: 200, Duration: 962.253µs, IP: 127.0.0.1, User: anonymous, UserAgent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36

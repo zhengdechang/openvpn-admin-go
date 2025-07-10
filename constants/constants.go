@@ -12,6 +12,8 @@ const (
 	OpenVPNConfigPath = "/etc/openvpn/server/server.conf"
 	// 服务名称
 	ServiceName = "openvpn-server@server.service"
+	// Web 服务名称
+	WebServiceName = "openvpn-admin-web.service"
 
 	// 服务器配置路径
 	ServerConfigPath = "/etc/openvpn/server/server.conf"

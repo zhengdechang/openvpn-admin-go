@@ -367,3 +367,91 @@ func RemoveClientSubnet(commonName string) error {
 
 	return nil
 }
+
+// GetClientSubnet 从客户端配置文件中读取子网配置
+// 返回子网地址（CIDR格式），如果没有找到则返回空字符串
+func GetClientSubnet(commonName string) (string, error) {
+	if commonName == "" {
+		return "", fmt.Errorf("commonName cannot be empty")
+	}
+
+	cfg, err := LoadConfig()
+	if err != nil {
+		return "", fmt.Errorf("failed to load OpenVPN configuration: %w", err)
+	}
+
+	if cfg.OpenVPNClientConfigDir == "" {
+		logging.Debug("OpenVPNClientConfigDir is not set, cannot get subnet for %s", commonName)
+		return "", nil
+	}
+
+	ccdFilePath := filepath.Join(cfg.OpenVPNClientConfigDir, "ccd", commonName)
+
+	if _, err := os.Stat(ccdFilePath); os.IsNotExist(err) {
+		// 文件不存在，没有子网配置
+		return "", nil
+	} else if err != nil {
+		return "", fmt.Errorf("failed to check client subnet config file '%s': %w", ccdFilePath, err)
+	}
+
+	contentBytes, err := os.ReadFile(ccdFilePath)
+	if err != nil {
+		return "", fmt.Errorf("failed to read client subnet config file '%s': %w", ccdFilePath, err)
+	}
+
+	content := string(contentBytes)
+	lines := strings.Split(content, "\n")
+	for _, line := range lines {
+		trimmedLine := strings.TrimSpace(line)
+		if strings.HasPrefix(trimmedLine, "iroute") {
+			parts := strings.Fields(trimmedLine)
+			// Expected: "iroute" "network" "netmask"
+			if len(parts) == 3 {
+				// 将网络地址和子网掩码转换回CIDR格式
+				network := parts[1]
+				netmask := parts[2]
+				cidr, err := netmaskToCIDR(network, netmask)
+				if err != nil {
+					logging.Warn("Failed to convert netmask to CIDR for %s: %v", commonName, err)
+					continue
+				}
+				return cidr, nil
+			}
+			logging.Warn("Malformed iroute line in %s for %s: %s", ccdFilePath, commonName, line)
+		}
+	}
+
+	logging.Debug("No iroute directive found in %s for %s", ccdFilePath, commonName)
+	return "", nil // 没有找到iroute配置
+}
+
+// netmaskToCIDR 将网络地址和子网掩码转换为CIDR格式
+// 例如：将"10.10.120.0 255.255.254.0"转换为"10.10.120.0/23"
+func netmaskToCIDR(network, netmask string) (string, error) {
+	// 解析子网掩码
+	maskParts := strings.Split(netmask, ".")
+	if len(maskParts) != 4 {
+		return "", fmt.Errorf("invalid netmask format: %s", netmask)
+	}
+
+	var maskBits uint32
+	for _, part := range maskParts {
+		octet, err := strconv.Atoi(part)
+		if err != nil || octet < 0 || octet > 255 {
+			return "", fmt.Errorf("invalid netmask octet: %s", part)
+		}
+		maskBits = (maskBits << 8) | uint32(octet)
+	}
+
+	// 计算CIDR位数
+	cidrBits := 0
+	for i := 31; i >= 0; i-- {
+		if (maskBits>>i)&1 == 1 {
+			cidrBits++
+		} else {
+			break
+		}
+	}
+
+	return fmt.Sprintf("%s/%d", network, cidrBits), nil
+}
