@@ -8,9 +8,8 @@ WORKDIR /app/frontend
 COPY openvpn-web/package*.json ./
 COPY openvpn-web/yarn.lock ./
 
-# Install yarn and frontend dependencies
-RUN npm install -g yarn && \
-    yarn install --frozen-lockfile --production=false
+# Install frontend dependencies
+RUN yarn install --frozen-lockfile --production=false
 
 # Copy frontend source code
 COPY openvpn-web/ ./
