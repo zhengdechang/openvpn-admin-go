@@ -77,8 +77,6 @@ COPY --from=backend-builder /app/openvpn-admin /app/
 
 # Copy built frontend (static export)
 COPY --from=frontend-builder /app/frontend/out /app/frontend/out
-COPY --from=frontend-builder /app/frontend/public /app/frontend/public
-
 # Copy configuration files and templates
 COPY template/ /app/template/
 COPY file/ /app/file/
