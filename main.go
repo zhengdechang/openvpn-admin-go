@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 
 	"openvpn-admin-go/cmd"
@@ -16,6 +17,8 @@ import (
 	"openvpn-admin-go/services" // Added for OpenVPN Sync Service
 	"openvpn-admin-go/utils"    // Added for config utils
 	"path/filepath"
+
+	"gorm.io/gorm"
 )
 
 // InitCore initializes core application services.
@@ -107,17 +110,120 @@ func InitCore() error {
 			}
 		}
 	}()
-	// 确保数据库用户在 OpenVPN 客户端存在，不存在则自动创建
+	// 双向同步：确保数据库用户和 OpenVPN 客户端配置保持一致
 	func() {
+		// 第一步：确保数据库用户在 OpenVPN 客户端存在，不存在则自动创建
 		var users []model.User
 		if err := database.DB.Find(&users).Error; err != nil {
 			logging.Error("查询用户列表失败: %v", err) // Log and continue
 		} else {
 			for _, u := range users {
-				clientPath := filepath.Join(constants.ClientConfigDir, u.ID+".ovpn")
+				clientPath := filepath.Join(constants.ClientConfigDir, u.Name+".ovpn")
 				if _, errStat := os.Stat(clientPath); os.IsNotExist(errStat) {
-					if errCreate := openvpn.CreateClient(u.ID); errCreate != nil {
-						logging.Error("创建 OpenVPN 客户端 %s 失败: %v", u.ID, errCreate) // Log and continue
+					if errCreate := openvpn.CreateClient(u.Name); errCreate != nil {
+						logging.Error("创建 OpenVPN 客户端 %s 失败: %v", u.Name, errCreate) // Log and continue
+					} else {
+						logging.Info("为数据库用户 %s 创建了 OpenVPN 客户端配置", u.Name)
+					}
+				}
+			}
+		}
+
+		// 第二步：检查 OpenVPN 客户端配置，如果数据库中没有对应用户则创建
+		if _, err := os.Stat(constants.ClientConfigDir); os.IsNotExist(err) {
+			logging.Warn("OpenVPN 客户端配置目录不存在: %s", constants.ClientConfigDir)
+			return
+		}
+
+		files, err := os.ReadDir(constants.ClientConfigDir)
+		if err != nil {
+			logging.Error("读取 OpenVPN 客户端配置目录失败: %v", err)
+			return
+		}
+
+		for _, file := range files {
+			if !file.IsDir() && strings.HasSuffix(file.Name(), ".ovpn") {
+				// 提取用户名（去掉.ovpn扩展名）
+				userName := strings.TrimSuffix(file.Name(), ".ovpn")
+
+				// 检查数据库中是否存在该用户（按用户名查找）
+				var existingUser model.User
+				if err := database.DB.Where("name = ?", userName).First(&existingUser).Error; err != nil {
+					if err == gorm.ErrRecordNotFound {
+						// 用户不存在，创建新用户
+						hash, errHash := common.HashPassword("changeme123") // 默认密码
+						if errHash != nil {
+							logging.Error("为 OpenVPN 客户端 %s 生成默认密码哈希失败: %v", userName, errHash)
+							continue
+						}
+
+						// 检查是否有固定IP配置
+						fixedIP, errFixedIP := openvpn.GetClientFixedIP(userName)
+						if errFixedIP != nil {
+							logging.Warn("检查 OpenVPN 客户端 %s 固定IP配置失败: %v", userName, errFixedIP)
+						}
+
+						// 检查是否有子网配置
+						subnet, errSubnet := openvpn.GetClientSubnet(userName)
+						if errSubnet != nil {
+							logging.Warn("检查 OpenVPN 客户端 %s 子网配置失败: %v", userName, errSubnet)
+						}
+
+						newUser := model.User{
+							Name:         userName,
+							Email:        userName + "@openvpn.local", // 生成默认邮箱
+							PasswordHash: hash,
+							Role:         model.RoleUser, // 默认角色为普通用户
+							FixedIP:      fixedIP,        // 设置固定IP（如果有）
+							Subnet:       subnet,         // 设置子网（如果有）
+						}
+
+						if errCreate := database.DB.Create(&newUser).Error; errCreate != nil {
+							logging.Error("为 OpenVPN 客户端 %s 创建数据库用户失败: %v", userName, errCreate)
+						} else {
+							logging.Info("为 OpenVPN 客户端 %s 创建了数据库用户，默认密码: changeme123", userName)
+
+							// 如果有固定IP配置，确保CCD配置正确
+							if fixedIP != "" {
+								if errSetIP := openvpn.SetClientFixedIP(userName, fixedIP); errSetIP != nil {
+									logging.Error("为用户 %s 设置固定IP %s 失败: %v", userName, fixedIP, errSetIP)
+								} else {
+									logging.Info("用户 %s 已设置固定IP: %s", userName, fixedIP)
+								}
+							}
+
+							// 如果有子网配置，确保CCD配置正确
+							if subnet != "" {
+								if errSetSubnet := openvpn.SetClientSubnet(userName, subnet); errSetSubnet != nil {
+									logging.Error("为用户 %s 设置子网 %s 失败: %v", userName, subnet, errSetSubnet)
+								} else {
+									logging.Info("用户 %s 已设置子网: %s", userName, subnet)
+								}
+							}
+						}
+					} else {
+						logging.Error("查询用户 %s 时发生错误: %v", userName, err)
+					}
+				} else {
+					// 用户已存在，以数据库为准，确保CCD配置与数据库一致
+					logging.Info("用户 %s 已存在，检查CCD配置是否与数据库一致", userName)
+
+					// 如果数据库中有固定IP配置，确保CCD配置正确
+					if existingUser.FixedIP != "" {
+						if errSetIP := openvpn.SetClientFixedIP(userName, existingUser.FixedIP); errSetIP != nil {
+							logging.Error("为用户 %s 设置固定IP %s 失败: %v", userName, existingUser.FixedIP, errSetIP)
+						} else {
+							logging.Info("为用户 %s 确保固定IP配置: %s", userName, existingUser.FixedIP)
+						}
+					}
+
+					// 如果数据库中有子网配置，确保CCD配置正确
+					if existingUser.Subnet != "" {
+						if errSetSubnet := openvpn.SetClientSubnet(userName, existingUser.Subnet); errSetSubnet != nil {
+							logging.Error("为用户 %s 设置子网 %s 失败: %v", userName, existingUser.Subnet, errSetSubnet)
+						} else {
+							logging.Info("为用户 %s 确保子网配置: %s", userName, existingUser.Subnet)
+						}
 					}
 				}
 			}

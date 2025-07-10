@@ -109,6 +109,29 @@ func ShowConfig(cfg *openvpn.Config) {
 func Execute() {
 	// webCmd is added to rootCmd in cmd/web.go's init()
 	rootCmd.AddCommand(logCmd)
+
+	// 检查是否为开发模式，如果是则默认启动web服务
+	if isDev := os.Getenv("DEV"); isDev == "true" || isDev == "1" {
+		// 在开发模式下，如果没有指定命令参数，则默认启动web服务
+		if len(os.Args) == 1 {
+			fmt.Println("检测到开发模式，自动启动Web服务...")
+			// 设置默认端口
+			webPort = 8085
+			// 初始化核心组件
+			if err := CoreInitializer(); err != nil {
+				fmt.Printf("核心初始化失败: %v\n", err)
+				os.Exit(1)
+			}
+			// 使用 goroutine 启动web服务器
+			go func() {
+				if err := runWebServer(webPort); err != nil {
+					fmt.Printf("Web服务器启动失败: %v\n", err)
+					os.Exit(1)
+				}
+			}()
+		}
+	}
+
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)

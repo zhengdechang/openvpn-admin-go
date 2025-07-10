@@ -2,21 +2,15 @@ package cmd
 
 import (
 	"fmt"
+	"openvpn-admin-go/constants"
 	"openvpn-admin-go/logging"
 	"openvpn-admin-go/router"
-	"os"
 	"os/exec"
-	"path/filepath"
-	"strconv"
-	"syscall"
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
 )
-
-const pidFileName = "web.pid"
 
 var webPort int
 
@@ -55,168 +49,127 @@ func WebMenu() {
 }
 
 func startWebService() {
-	prompt := promptui.Prompt{
-		Label:   "请输入端口号",
-		Default: "8085",
-	}
-
-	portStr, err := prompt.Run()
-	if err != nil {
-		fmt.Printf("输入失败: %v\n", err)
+	// 检查服务状态
+	cmd := exec.Command("systemctl", "is-active", constants.WebServiceName)
+	if err := cmd.Run(); err == nil {
+		fmt.Println("Web 服务已在运行")
 		return
 	}
 
-	port := 8085
-	if portStr != "" {
-		if p, err := strconv.Atoi(portStr); err == nil {
-			port = p
-		}
+	// 启动服务
+	cmd = exec.Command("systemctl", "start", constants.WebServiceName)
+	if err := cmd.Run(); err != nil {
+		fmt.Printf("启动服务失败: %v\n请检查服务状态: systemctl status %s\n", err, constants.WebServiceName)
+		return
 	}
 
-	webPort = port
-	if err := startWebServer(); err != nil {
-		fmt.Printf("启动服务失败: %v\n", err)
+	// 等待服务启动
+	time.Sleep(2 * time.Second)
+
+	// 检查服务状态
+	cmd = exec.Command("systemctl", "is-active", constants.WebServiceName)
+	if err := cmd.Run(); err != nil {
+		fmt.Printf("服务未正常运行: %v\n请检查服务日志: journalctl -u %s\n", err, constants.WebServiceName)
+		return
 	}
+
+	fmt.Println("Web 服务启动成功")
 }
 
 func stopWebService() {
-	if err := stopWebServer(); err != nil {
-		fmt.Printf("停止服务失败: %v\n", err)
+	// 检查服务状态
+	cmd := exec.Command("systemctl", "is-active", constants.WebServiceName)
+	if err := cmd.Run(); err != nil {
+		fmt.Println("Web 服务未运行")
+		return
 	}
+
+	// 停止服务
+	cmd = exec.Command("systemctl", "stop", constants.WebServiceName)
+	if err := cmd.Run(); err != nil {
+		fmt.Printf("停止服务失败: %v\n请检查服务状态: systemctl status %s\n", err, constants.WebServiceName)
+		return
+	}
+
+	// 等待服务完全停止
+	time.Sleep(2 * time.Second)
+
+	// 验证服务已停止
+	cmd = exec.Command("systemctl", "is-active", constants.WebServiceName)
+	if err := cmd.Run(); err == nil {
+		fmt.Println("服务仍在运行")
+		return
+	}
+
+	fmt.Println("Web 服务已停止")
 }
 
 func restartWebService() {
-	if err := restartWebServer(); err != nil {
-		fmt.Printf("重启服务失败: %v\n", err)
+	// 重启服务
+	cmd := exec.Command("systemctl", "restart", constants.WebServiceName)
+	if err := cmd.Run(); err != nil {
+		fmt.Printf("重启服务失败: %v\n请检查服务状态: systemctl status %s\n", err, constants.WebServiceName)
+		return
 	}
+
+	// 等待服务启动
+	time.Sleep(2 * time.Second)
+
+	// 检查服务状态
+	cmd = exec.Command("systemctl", "is-active", constants.WebServiceName)
+	if err := cmd.Run(); err != nil {
+		fmt.Printf("服务未正常运行: %v\n请检查服务日志: journalctl -u %s\n", err, constants.WebServiceName)
+		return
+	}
+
+	fmt.Println("Web 服务重启成功")
 }
 
 func checkWebServiceStatus() {
-	pidDir := os.TempDir()
-	pidFile := filepath.Join(pidDir, pidFileName)
-
-	pidData, err := os.ReadFile(pidFile)
-	if err != nil {
-		if os.IsNotExist(err) {
-			fmt.Println("Web 服务未运行")
-		} else {
-			fmt.Printf("检查服务状态失败: %v\n", err)
-		}
-		return
-	}
-
-	pid, err := strconv.Atoi(string(pidData))
-	if err != nil {
-		fmt.Printf("PID 文件内容无效: %v\n", err)
-		return
-	}
-
-	process, err := os.FindProcess(pid)
-	if err != nil {
-		fmt.Printf("获取进程信息失败: %v\n", err)
-		return
-	}
-
-	if err := process.Signal(syscall.Signal(0)); err != nil {
+	// 检查服务状态
+	cmd := exec.Command("systemctl", "is-active", constants.WebServiceName)
+	if err := cmd.Run(); err != nil {
 		fmt.Println("Web 服务未运行")
 	} else {
-		fmt.Printf("Web 服务正在运行 (PID: %d)\n", pid)
+		fmt.Println("Web 服务正在运行")
+
+		// 获取服务详细状态
+		cmd = exec.Command("systemctl", "status", constants.WebServiceName, "--no-pager", "-l")
+		if output, err := cmd.CombinedOutput(); err == nil {
+			fmt.Printf("\n服务状态详情:\n%s\n", string(output))
+		}
 	}
 	fmt.Println("\n按回车键返回...")
 	fmt.Scanln()
 }
 
 func showWebServiceLogs() {
-	// 获取日志文件路径
-	logFile := filepath.Join(os.TempDir(), "web.log")
-
-	// 检查日志文件是否存在
-	if _, err := os.Stat(logFile); os.IsNotExist(err) {
-		fmt.Println("Web 服务日志文件不存在")
-		fmt.Println("\n按回车键返回...")
-		fmt.Scanln()
-		return
-	}
-
-	// 读取并显示日志内容
-	content, err := os.ReadFile(logFile)
+	// 使用journalctl查看systemd服务日志
+	cmd := exec.Command("journalctl", "-u", constants.WebServiceName, "--no-pager", "-n", "50")
+	output, err := cmd.CombinedOutput()
 	if err != nil {
-		fmt.Printf("读取日志文件失败: %v\n", err)
+		fmt.Printf("获取服务日志失败: %v\n", err)
 		fmt.Println("\n按回车键返回...")
 		fmt.Scanln()
 		return
 	}
 
 	// 显示日志内容
-	fmt.Println("\n=== Web 服务日志 ===")
-	fmt.Println(string(content))
+	fmt.Println("\n=== Web 服务日志 (最近50行) ===")
+	fmt.Println(string(output))
 	fmt.Println("\n按回车键返回...")
 	fmt.Scanln()
 }
 
-// Web Server Functions
-func startWebServer() error {
+// Web Server Functions - 实际的 Web 服务器实现
+
+// runWebServer 实际的 Web 服务器实现
+func runWebServer(port int) error {
+	// 初始化核心服务
 	if err := CoreInitializer(); err != nil {
 		return fmt.Errorf("核心初始化失败: %v", err)
 	}
 
-	pidDir := os.TempDir()
-	pidFile := filepath.Join(pidDir, pidFileName)
-	logFile := filepath.Join(pidDir, "web.log")
-
-	// Check if PID file exists and process is running
-	if pidData, err := os.ReadFile(pidFile); err == nil {
-		if pid, err := strconv.Atoi(string(pidData)); err == nil {
-			if process, _ := os.FindProcess(pid); process != nil && process.Signal(syscall.Signal(0)) == nil {
-				return fmt.Errorf("Web 服务器似乎已在运行 (PID: %d, PID 文件: %s). 请先停止它", pid, pidFile)
-			}
-			logging.Warn("发现陈旧的 PID 文件 (%s, PID: %d), 但进程未运行. 将覆盖 PID 文件.", pidFile, pid)
-		} else {
-			logging.Warn("PID 文件 (%s) 内容无效, 将覆盖.", pidFile)
-		}
-	}
-
-	// 创建日志文件
-	logF, err := os.Create(logFile)
-	if err != nil {
-		return fmt.Errorf("创建日志文件失败: %v", err)
-	}
-	defer logF.Close()
-
-	// 创建新进程
-	cmd := exec.Command(os.Args[0], "web-server", "--port", strconv.Itoa(webPort))
-	cmd.Stdout = logF
-	cmd.Stderr = logF
-
-	if err := cmd.Start(); err != nil {
-		return fmt.Errorf("启动 Web 服务器进程失败: %v", err)
-	}
-
-	// 保存新进程的 PID
-	if err := os.WriteFile(pidFile, []byte(strconv.Itoa(cmd.Process.Pid)), 0644); err != nil {
-		cmd.Process.Kill() // 清理失败的进程
-		return fmt.Errorf("无法写入 PID 文件 %s: %v", pidFile, err)
-	}
-
-	fmt.Printf("Web 服务器正在启动 (PID: %d)...\n", cmd.Process.Pid)
-	fmt.Printf("日志文件位置: %s\n", logFile)
-
-	// 等待一段时间确保服务器启动
-	time.Sleep(2 * time.Second)
-
-	// 检查进程是否还在运行
-	if err := cmd.Process.Signal(syscall.Signal(0)); err != nil {
-		return fmt.Errorf("Web 服务器启动失败")
-	}
-
-	fmt.Printf("Web 服务器已成功启动 (PID: %d)\n", cmd.Process.Pid)
-	fmt.Printf("PID 文件位置: %s\n", pidFile)
-
-	return nil
-}
-
-// 实际的 Web 服务器实现
-func runWebServer(port int) error {
 	// Setup Gin router
 	r := gin.Default()
 
@@ -238,71 +191,7 @@ func runWebServer(port int) error {
 	return r.Run(serverAddr)
 }
 
-func stopWebServer() error {
-	pidDir := os.TempDir()
-	pidFile := filepath.Join(pidDir, pidFileName)
 
-	pidData, err := os.ReadFile(pidFile)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return fmt.Errorf("PID 文件未找到. 服务器可能未运行")
-		}
-		return fmt.Errorf("读取 PID 文件失败 %s: %v", pidFile, err)
-	}
-
-	pid, err := strconv.Atoi(string(pidData))
-	if err != nil {
-		return fmt.Errorf("PID 文件内容无效 %s: %v", pidFile, err)
-	}
-
-	process, err := os.FindProcess(pid)
-	if err != nil {
-		if rmErr := os.Remove(pidFile); rmErr == nil {
-			logging.Info("已删除陈旧/无效的 PID 文件: %s", pidFile)
-		}
-		return fmt.Errorf("获取进程句柄失败 (PID: %d): %v. 可能进程已不存在", pid, err)
-	}
-
-	logging.Info("正在向 PID %d 发送 SIGTERM 信号...", pid)
-	if err := process.Signal(syscall.SIGTERM); err != nil {
-		if checkErr := process.Signal(syscall.Signal(0)); checkErr != nil {
-			logging.Warn("进程 (PID: %d) 似乎未在运行: %v", pid, checkErr)
-			if rmErr := os.Remove(pidFile); rmErr == nil {
-				logging.Info("已删除陈旧的 PID 文件: %s", pidFile)
-			}
-		} else {
-			return fmt.Errorf("发送 SIGTERM 信号失败 (PID: %d): %v", pid, err)
-		}
-	} else {
-		logging.Info("已成功向 PID %d 发送 SIGTERM 信号.", pid)
-		time.Sleep(100 * time.Millisecond)
-		if _, statErr := os.Stat(pidFile); statErr == nil {
-			if rmErr := os.Remove(pidFile); rmErr == nil {
-				logging.Info("由停止命令删除的 PID 文件.")
-			}
-		}
-	}
-	fmt.Println("Web 服务已停止")
-	return nil
-}
-
-func restartWebServer() error {
-	logging.Info("正在重启 Web 服务器...")
-
-	if err := stopWebServer(); err != nil {
-		logging.Error("停止服务时出错: %v", err)
-	}
-
-	logging.Info("等待服务器关闭 (2 秒)...")
-	time.Sleep(2 * time.Second)
-
-	if err := startWebServer(); err != nil {
-		return fmt.Errorf("启动服务时出错: %v", err)
-	}
-
-	logging.Info("Web 服务器重启过程已启动.")
-	return nil
-}
 
 func init() {
 	// 添加 web-server 子命令

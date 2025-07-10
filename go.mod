@@ -1,6 +1,6 @@
 module openvpn-admin-go
 
-go 1.21.10
+go 1.18
 
 require (
 	github.com/bytedance/sonic v1.11.6 // indirect
