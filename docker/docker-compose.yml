@@ -3,7 +3,9 @@ version: '3.8'
 services:
   # Backend service
   openvpn-backend:
-    image: ${DOCKERHUB_USERNAME}/openvpn-admin:latest
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.combined
     container_name: openvpn-backend
     restart: unless-stopped
     command: ["/app/openvpn-admin"]
