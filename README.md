@@ -362,6 +362,62 @@ docker run -d \
   zhengdechang/openvpn-admin-go:latest
 ```
 
+#### Ubuntu 22.04 Docker Deployment
+
+For Ubuntu-based deployment with manual service control:
+
+**Build Ubuntu Image:**
+```bash
+docker build -f docker/Dockerfile.combined -t openvpn-admin:ubuntu .
+```
+
+**Interactive Run (Recommended):**
+```bash
+docker run -it --privileged \
+  -p 8085:8085 \
+  -p 3000:3000 \
+  -p 80:80 \
+  -p 1194:1194/udp \
+  -v ./data:/app/data \
+  -v ./logs:/app/logs \
+  -v ./config:/app/config \
+  -v ./openvpn:/etc/openvpn \
+  openvpn-admin:ubuntu
+```
+
+**Background Run:**
+```bash
+docker run -d --privileged \
+  --name openvpn-admin \
+  -p 8085:8085 \
+  -p 3000:3000 \
+  -p 80:80 \
+  -p 1194:1194/udp \
+  -v ./data:/app/data \
+  -v ./logs:/app/logs \
+  -v ./config:/app/config \
+  -v ./openvpn:/etc/openvpn \
+  openvpn-admin:ubuntu
+
+# Enter container
+docker exec -it openvpn-admin /bin/bash
+```
+
+**Manual Service Start in Container:**
+
+Method 1 - Using startup script (recommended):
+```bash
+sudo start-openvpn-admin.sh
+```
+
+Method 2 - Manual commands:
+```bash
+cd /app
+./openvpn-admin                              # Foreground
+su appuser -c "./openvpn-admin"              # As appuser
+nohup ./openvpn-admin > /app/logs/openvpn-admin.log 2>&1 &  # Background
+```
+
 #### Docker Compose Deployment
 
 ```bash
@@ -389,6 +445,45 @@ The Docker image supports different deployment modes:
 ```bash
 # Build and run with Docker Compose
 docker-compose up -d
+```
+
+#### Docker Environment Variables
+
+Container pre-configured environment variables:
+
+- `GIN_MODE=release`
+- `NODE_ENV=production`
+- `TZ=UTC`
+- `DB_PATH=/app/data/db.sqlite3`
+- `OPENVPN_CONFIG_DIR=/etc/openvpn`
+
+#### Docker Troubleshooting
+
+**View Logs:**
+```bash
+# Application logs
+tail -f /app/logs/openvpn-admin.log
+
+# Nginx logs
+tail -f /var/log/nginx/error.log
+```
+
+**Check Service Status:**
+```bash
+# Check processes
+ps aux | grep openvpn-admin
+
+# Check ports
+netstat -tlnp | grep 8085
+```
+
+**Restart Services:**
+```bash
+# Stop service
+pkill openvpn-admin
+
+# Restart
+start-openvpn-admin.sh
 ```
 
 ## 🛠️ Development

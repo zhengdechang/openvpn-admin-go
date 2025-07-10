@@ -36,29 +36,34 @@ RUN go mod download
 COPY . .
 
 # Build the Go binary
-RUN CGO_ENABLED=1 GOOS=linux go build -ldflags="-s -w" -o openvpn-admin main.go
+RUN CGO_ENABLED=1 GOOS=linux go build -ldflags="-s -w" -o openvpn-admin main.go && \
+    ls -la openvpn-admin && \
+    file openvpn-admin
 
 # Final runtime stage
-FROM alpine:3.18
+FROM ubuntu:22.04
+
+# Set environment to avoid interactive prompts
+ENV DEBIAN_FRONTEND=noninteractive
 
 # Install runtime dependencies
-RUN apk add --no-cache \
+RUN apt-get update && apt-get install -y \
     ca-certificates \
-    sqlite \
+    sqlite3 \
     openvpn \
     openssl \
     iptables \
     bash \
     curl \
     tzdata \
-    su-exec \
     python3 \
     nginx \
-    python3
+    sudo \
+    && rm -rf /var/lib/apt/lists/*
 
 # Create app user
-RUN addgroup -g 1001 -S appgroup && \
-    adduser -u 1001 -S appuser -G appgroup
+RUN groupadd -g 1001 appgroup && \
+    useradd -u 1001 -g appgroup -m -s /bin/bash appuser
 
 # Create necessary directories
 RUN mkdir -p /app/data \
@@ -72,7 +77,10 @@ RUN mkdir -p /app/data \
              /etc/supervisor/conf.d
 
 # Copy built backend binary
-COPY --from=backend-builder /app/openvpn-admin /app/
+COPY --from=backend-builder /app/openvpn-admin /app/openvpn-admin
+
+# Make binary executable and verify it exists
+RUN chmod +x /app/openvpn-admin && ls -la /app/openvpn-admin
 
 # Copy built frontend (static export)
 COPY --from=frontend-builder /app/frontend/out /app/frontend/out
@@ -81,6 +89,7 @@ COPY template/ /app/template/
 COPY file/ /app/file/
 COPY docker/nginx/ /etc/nginx/
 COPY config/ /app/config/
+
 
 # Create nginx directories and set permissions
 RUN mkdir -p /var/log/nginx /var/lib/nginx/tmp /run/nginx && \
@@ -109,5 +118,5 @@ ENV GIN_MODE=release \
     DB_PATH=/app/data/db.sqlite3 \
     OPENVPN_CONFIG_DIR=/etc/openvpn
 
-# Default command (can be overridden in docker-compose)
-CMD ["/app/openvpn-admin"]
+# Default command - start bash shell for manual execution
+CMD ["/bin/bash"]
