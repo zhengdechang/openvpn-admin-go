@@ -178,13 +178,31 @@ func startWebService(port int) {
 			fmt.Printf("安装Web服务失败: %v\n", err)
 			return
 		}
+
+		// 重新加载 systemd 配置
+		fmt.Println("重新加载 systemd 配置...")
+		cmd := exec.Command("systemctl", "daemon-reload")
+		if err := cmd.Run(); err != nil {
+			fmt.Printf("重新加载 systemd 配置失败: %v\n", err)
+			return
+		}
 	}
 
 	// 检查服务状态
 	cmd := exec.Command("systemctl", "is-active", constants.WebServiceName)
-	if err := cmd.Run(); err == nil {
+	output, err := cmd.Output()
+	status := strings.TrimSpace(string(output))
+
+	if err == nil && status == "active" {
 		fmt.Println("Web 服务已在运行")
 		return
+	} else if status == "failed" {
+		fmt.Printf("检测到服务状态为 failed，正在重新启动...\n")
+		// 重置失败状态
+		resetCmd := exec.Command("systemctl", "reset-failed", constants.WebServiceName)
+		resetCmd.Run() // 忽略错误
+	} else {
+		fmt.Printf("当前服务状态: %s，正在启动...\n", status)
 	}
 
 	// 启动服务
@@ -199,12 +217,21 @@ func startWebService(port int) {
 
 	// 检查服务状态
 	cmd = exec.Command("systemctl", "is-active", constants.WebServiceName)
-	if err := cmd.Run(); err != nil {
-		fmt.Printf("服务未正常运行: %v\n请检查服务日志: journalctl -u %s\n", err, constants.WebServiceName)
-		return
-	}
+	output, err = cmd.Output()
+	finalStatus := strings.TrimSpace(string(output))
 
-	fmt.Println("Web 服务启动成功")
+	if err == nil && finalStatus == "active" {
+		fmt.Println("Web 服务启动成功")
+	} else {
+		fmt.Printf("服务未正常运行，当前状态: %s\n", finalStatus)
+		fmt.Printf("请检查服务日志: systemctl status %s\n", constants.WebServiceName)
+
+		// 显示详细状态信息
+		statusCmd := exec.Command("systemctl", "status", constants.WebServiceName, "--no-pager", "-l")
+		if statusOutput, statusErr := statusCmd.Output(); statusErr == nil {
+			fmt.Printf("\n服务状态详情:\n%s\n", string(statusOutput))
+		}
+	}
 }
 
 func stopWebService() {
@@ -248,6 +275,14 @@ func restartWebService(port int) {
 	fmt.Printf("正在重新安装Web服务（端口: %d）...\n", port)
 	if err := installWebService(port); err != nil {
 		fmt.Printf("重新安装Web服务失败: %v\n", err)
+		return
+	}
+
+	// 重新加载 systemd 配置
+	fmt.Println("重新加载 systemd 配置...")
+	cmd = exec.Command("systemctl", "daemon-reload")
+	if err := cmd.Run(); err != nil {
+		fmt.Printf("重新加载 systemd 配置失败: %v\n", err)
 		return
 	}
 
@@ -312,12 +347,7 @@ func showWebServiceLogs() {
 
 // runWebServer 实际的 Web 服务器实现
 func runWebServer(port int) error {
-	// 初始化核心服务
-	if err := CoreInitializer(); err != nil {
-		return fmt.Errorf("核心初始化失败: %v", err)
-	}
-
-	// 启动 OpenVPN 同步服务（在核心初始化完成后）
+	// 启动 OpenVPN 同步服务（核心已在 main 中初始化）
 	cfg, err := openvpn.LoadConfig()
 	if err != nil {
 		return fmt.Errorf("无法加载 OpenVPN 配置以启动同步服务: %v", err)
@@ -349,23 +379,42 @@ func runWebServer(port int) error {
 	return r.Run(serverAddr)
 }
 
-
+// isRunningInSystemd 检查是否在 systemd 服务中运行
+func isRunningInSystemd() bool {
+	// 检查是否有 systemd 相关的环境变量
+	if os.Getenv("INVOCATION_ID") != "" {
+		return true
+	}
+	// 检查父进程是否为 systemd
+	if _, err := os.Stat("/run/systemd/system"); err == nil {
+		return true
+	}
+	return false
+}
 
 func init() {
-	// 添加 web-server 子命令
+	// 添加 web 子命令
 	webServerCmd := &cobra.Command{
 		Use:   "web",
 		Short: "运行 Web 服务器",
 		Run: func(cmd *cobra.Command, args []string) {
 			// 检查是否为开发模式
 			if isDev := os.Getenv("DEV"); isDev == "true" || isDev == "1" {
-				// 开发模式：直接运行web服务器
+				// 开发模式：直接运行web服务器（核心已在 main 中初始化）
 				if err := runWebServer(webPort); err != nil {
 					logging.Fatal("Web 服务器错误: %v", err)
 				}
 			} else {
-				// 生产模式：使用systemd服务
-				startWebService(webPort)
+				// 生产模式：检查是否在 systemd 服务中运行
+				if os.Getenv("SYSTEMD_EXEC_PID") != "" || isRunningInSystemd() {
+					// 在 systemd 服务中运行，直接启动 web 服务器
+					if err := runWebServer(webPort); err != nil {
+						logging.Fatal("Web 服务器错误: %v", err)
+					}
+				} else {
+					// 不在 systemd 中，启动 systemd 服务
+					startWebService(webPort)
+				}
 			}
 		},
 	}

@@ -1,0 +1,37 @@
+[Unit]
+Description=OpenVPN Admin Web Service
+Documentation=https://github.com/zhengdechang/openvpn-admin-go
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+User=root
+Group=root
+WorkingDirectory={{ .WorkingDirectory }}
+ExecStart={{ .BinaryPath }} web --port {{ .Port }}
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=openvpn-admin-web
+
+# Security settings (relaxed for container environment)
+NoNewPrivileges=false
+PrivateTmp=false
+ProtectSystem=false
+ProtectHome=false
+ReadWritePaths=/etc/openvpn {{ .ConfigDirectory }} /app/data /app/logs
+CapabilityBoundingSet=CAP_NET_BIND_SERVICE
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+
+# Resource limits
+LimitNOFILE=65536
+LimitNPROC=4096
+
+# Environment
+Environment=GIN_MODE=release
+
+[Install]
+WantedBy=multi-user.target
