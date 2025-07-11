@@ -6,10 +6,6 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export const getPolicyFileUrl = (fileId: string): string => {
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL
-  return `${baseUrl}/api/policy/download/${fileId}`;
-};
 
 /**
  * 解析 DOCX 文件并提取纯文本

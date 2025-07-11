@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # Backend service
   openvpn-backend:
@@ -44,8 +42,7 @@ services:
       - ./config:/app/config
 
       # OpenVPN configuration
-      - ./openvpn/etc:/etc/openvpn
-      - ./openvpn/logs:/var/log/openvpn
+      - ./openvpn:/etc/openvpn
 
       # System access for OpenVPN
       - /lib/modules:/lib/modules:ro
@@ -74,14 +71,13 @@ services:
     depends_on:
       - openvpn-backend
 
+    # Network configuration
+    network_mode: host
+
     # Environment variables
     environment:
       - NODE_ENV=production
       - TZ=Asia/Shanghai
-
-    # Port mappings
-    ports:
-      - "9009:80"
 
     # Health check
     healthcheck:

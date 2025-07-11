@@ -16,7 +16,6 @@ import (
 	"strconv"
 	"strings"
 	"text/template"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/cobra"
@@ -80,6 +79,8 @@ func WebMenu() {
 	}
 }
 
+
+
 // installWebService 安装web服务的systemd服务文件
 func installWebService(port int) error {
 	// 检查是否以root权限运行
@@ -137,15 +138,15 @@ func installWebService(port int) error {
 	}
 
 	// 重新加载systemd配置
-	cmd = exec.Command("systemctl", "daemon-reload")
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("重新加载systemd配置失败: %v", err)
+	reloadOutput := utils.ExecCommandWithResult("systemctl daemon-reload")
+	if strings.Contains(reloadOutput, "Failed") || strings.Contains(reloadOutput, "failed") {
+		return fmt.Errorf("重新加载systemd配置失败: %s", reloadOutput)
 	}
 
 	// 启用服务
-	cmd = exec.Command("systemctl", "enable", constants.WebServiceName)
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("启用web服务失败: %v", err)
+	enableOutput := utils.ExecCommandWithResult(fmt.Sprintf("systemctl enable %s", constants.WebServiceName))
+	if strings.Contains(enableOutput, "Failed") || strings.Contains(enableOutput, "failed") {
+		return fmt.Errorf("启用web服务失败: %s", enableOutput)
 	}
 
 	fmt.Printf("Web服务已安装: %s\n", servicePath)
@@ -181,96 +182,25 @@ func startWebService(port int) {
 
 		// 重新加载 systemd 配置
 		fmt.Println("重新加载 systemd 配置...")
-		cmd := exec.Command("systemctl", "daemon-reload")
-		if err := cmd.Run(); err != nil {
-			fmt.Printf("重新加载 systemd 配置失败: %v\n", err)
+		reloadOutput := utils.ExecCommandWithResult("systemctl daemon-reload")
+		if strings.Contains(reloadOutput, "Failed") || strings.Contains(reloadOutput, "failed") {
+			fmt.Printf("重新加载 systemd 配置失败: %s\n", reloadOutput)
 			return
 		}
 	}
 
-	// 检查服务状态
-	cmd := exec.Command("systemctl", "is-active", constants.WebServiceName)
-	output, err := cmd.Output()
-	status := strings.TrimSpace(string(output))
-
-	if err == nil && status == "active" {
-		fmt.Println("Web 服务已在运行")
-		return
-	} else if status == "failed" {
-		fmt.Printf("检测到服务状态为 failed，正在重新启动...\n")
-		// 重置失败状态
-		resetCmd := exec.Command("systemctl", "reset-failed", constants.WebServiceName)
-		resetCmd.Run() // 忽略错误
-	} else {
-		fmt.Printf("当前服务状态: %s，正在启动...\n", status)
-	}
-
 	// 启动服务
-	cmd = exec.Command("systemctl", "start", constants.WebServiceName)
-	if err := cmd.Run(); err != nil {
-		fmt.Printf("启动服务失败: %v\n请检查服务状态: systemctl status %s\n", err, constants.WebServiceName)
-		return
-	}
-
-	// 等待服务启动
-	time.Sleep(2 * time.Second)
-
-	// 检查服务状态
-	cmd = exec.Command("systemctl", "is-active", constants.WebServiceName)
-	output, err = cmd.Output()
-	finalStatus := strings.TrimSpace(string(output))
-
-	if err == nil && finalStatus == "active" {
-		fmt.Println("Web 服务启动成功")
-	} else {
-		fmt.Printf("服务未正常运行，当前状态: %s\n", finalStatus)
-		fmt.Printf("请检查服务日志: systemctl status %s\n", constants.WebServiceName)
-
-		// 显示详细状态信息
-		statusCmd := exec.Command("systemctl", "status", constants.WebServiceName, "--no-pager", "-l")
-		if statusOutput, statusErr := statusCmd.Output(); statusErr == nil {
-			fmt.Printf("\n服务状态详情:\n%s\n", string(statusOutput))
-		}
-	}
+	fmt.Printf("正在启动Web服务（端口: %d）...\n", port)
+	utils.SystemctlStart(constants.WebServiceName)
 }
 
 func stopWebService() {
-	// 检查服务状态
-	cmd := exec.Command("systemctl", "is-active", constants.WebServiceName)
-	if err := cmd.Run(); err != nil {
-		fmt.Println("Web 服务未运行")
-		return
-	}
-
 	// 停止服务
-	cmd = exec.Command("systemctl", "stop", constants.WebServiceName)
-	if err := cmd.Run(); err != nil {
-		fmt.Printf("停止服务失败: %v\n请检查服务状态: systemctl status %s\n", err, constants.WebServiceName)
-		return
-	}
-
-	// 等待服务完全停止
-	time.Sleep(2 * time.Second)
-
-	// 验证服务已停止
-	cmd = exec.Command("systemctl", "is-active", constants.WebServiceName)
-	if err := cmd.Run(); err == nil {
-		fmt.Println("服务仍在运行")
-		return
-	}
-
-	fmt.Println("Web 服务已停止")
+	fmt.Println("正在停止Web服务...")
+	utils.SystemctlStop(constants.WebServiceName)
 }
 
 func restartWebService(port int) {
-	// 先停止服务
-	fmt.Println("正在停止Web服务...")
-	cmd := exec.Command("systemctl", "stop", constants.WebServiceName)
-	cmd.Run() // 忽略错误，因为服务可能未运行
-
-	// 等待服务完全停止
-	time.Sleep(2 * time.Second)
-
 	// 重新安装服务（使用新端口）
 	fmt.Printf("正在重新安装Web服务（端口: %d）...\n", port)
 	if err := installWebService(port); err != nil {
@@ -280,57 +210,32 @@ func restartWebService(port int) {
 
 	// 重新加载 systemd 配置
 	fmt.Println("重新加载 systemd 配置...")
-	cmd = exec.Command("systemctl", "daemon-reload")
-	if err := cmd.Run(); err != nil {
-		fmt.Printf("重新加载 systemd 配置失败: %v\n", err)
-		return
-	}
+	utils.ExecCommandWithResult("systemctl daemon-reload")
 
-	// 启动服务
-	fmt.Println("正在启动Web服务...")
-	cmd = exec.Command("systemctl", "start", constants.WebServiceName)
-	if err := cmd.Run(); err != nil {
-		fmt.Printf("启动服务失败: %v\n请检查服务状态: systemctl status %s\n", err, constants.WebServiceName)
-		return
-	}
-
-	// 等待服务启动
-	time.Sleep(2 * time.Second)
-
-	// 检查服务状态
-	cmd = exec.Command("systemctl", "is-active", constants.WebServiceName)
-	if err := cmd.Run(); err != nil {
-		fmt.Printf("服务未正常运行: %v\n请检查服务日志: journalctl -u %s\n", err, constants.WebServiceName)
-		return
-	}
-
-	fmt.Printf("Web 服务重启成功（端口: %d）\n", port)
+	// 重启服务
+	fmt.Println("正在重启Web服务...")
+	utils.SystemctlRestart(constants.WebServiceName)
 }
 
 func checkWebServiceStatus() {
-	// 检查服务状态
-	cmd := exec.Command("systemctl", "is-active", constants.WebServiceName)
-	if err := cmd.Run(); err != nil {
-		fmt.Println("Web 服务未运行")
+	// 获取服务状态
+	fmt.Println("=== Web 服务状态 ===")
+	statusOutput := utils.SystemctlStatus(constants.WebServiceName)
+	if statusOutput != "" {
+		fmt.Printf("%s\n", statusOutput)
 	} else {
-		fmt.Println("Web 服务正在运行")
-
-		// 获取服务详细状态
-		cmd = exec.Command("systemctl", "status", constants.WebServiceName, "--no-pager", "-l")
-		if output, err := cmd.CombinedOutput(); err == nil {
-			fmt.Printf("\n服务状态详情:\n%s\n", string(output))
-		}
+		fmt.Println("无法获取服务状态")
 	}
+
 	fmt.Println("\n按回车键返回...")
 	fmt.Scanln()
 }
 
 func showWebServiceLogs() {
 	// 使用journalctl查看systemd服务日志
-	cmd := exec.Command("journalctl", "-u", constants.WebServiceName, "--no-pager", "-n", "50")
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		fmt.Printf("获取服务日志失败: %v\n", err)
+	output := utils.ExecCommandWithResult(fmt.Sprintf("journalctl -u %s --no-pager -n 50", constants.WebServiceName))
+	if output == "" {
+		fmt.Println("获取服务日志失败或日志为空")
 		fmt.Println("\n按回车键返回...")
 		fmt.Scanln()
 		return
@@ -338,7 +243,7 @@ func showWebServiceLogs() {
 
 	// 显示日志内容
 	fmt.Println("\n=== Web 服务日志 (最近50行) ===")
-	fmt.Println(string(output))
+	fmt.Println(output)
 	fmt.Println("\n按回车键返回...")
 	fmt.Scanln()
 }
@@ -398,23 +303,11 @@ func init() {
 		Use:   "web",
 		Short: "运行 Web 服务器",
 		Run: func(cmd *cobra.Command, args []string) {
-			// 检查是否为开发模式
-			if isDev := os.Getenv("DEV"); isDev == "true" || isDev == "1" {
-				// 开发模式：直接运行web服务器（核心已在 main 中初始化）
-				if err := runWebServer(webPort); err != nil {
-					logging.Fatal("Web 服务器错误: %v", err)
-				}
-			} else {
-				// 生产模式：检查是否在 systemd 服务中运行
-				if os.Getenv("SYSTEMD_EXEC_PID") != "" || isRunningInSystemd() {
-					// 在 systemd 服务中运行，直接启动 web 服务器
-					if err := runWebServer(webPort); err != nil {
-						logging.Fatal("Web 服务器错误: %v", err)
-					}
-				} else {
-					// 不在 systemd 中，启动 systemd 服务
-					startWebService(webPort)
-				}
+			// 从命令行参数获取端口
+			port, _ := cmd.Flags().GetInt("port")
+			// 直接运行 web 服务器
+			if err := runWebServer(port); err != nil {
+				logging.Fatal("Web 服务器错误: %v", err)
 			}
 		},
 	}

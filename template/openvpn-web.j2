@@ -9,9 +9,7 @@ WorkingDirectory={{ .WorkingDirectory }}
 ExecStart={{ .BinaryPath }} web --port {{ .Port }}
 ExecReload=/bin/kill -HUP $MAINPID
 Restart=on-failure
-RestartSec=5
-StandardOutput=journal
-StandardError=journal
+RestartSec=3s
 
 [Install]
 WantedBy=multi-user.target

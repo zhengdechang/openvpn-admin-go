@@ -19,7 +19,17 @@ import {
 import Cookies from "js-cookie";
 import { useUserStore } from "@/store";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+// 支持运行时动态 API URL
+const getApiBaseUrl = () => {
+  // 在浏览器环境中，使用当前页面的 origin
+  if (typeof window !== 'undefined') {
+    return window.location.origin;
+  }
+  // 服务端渲染时使用构建时环境变量
+  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+};
+
+const API_BASE_URL = getApiBaseUrl();
 
 // 创建axios实例
 const api = axios.create({

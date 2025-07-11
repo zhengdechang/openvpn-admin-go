@@ -8,4 +8,9 @@
 
 # go sum
 go.sum
-logs/*
+logs
+logs/*.log
+*.env
+docker/config/
+docker/data/
+docker/openvpn/
