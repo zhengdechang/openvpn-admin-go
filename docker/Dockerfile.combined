@@ -4,23 +4,24 @@ FROM node:18-alpine AS frontend-builder
 # Set working directory for frontend
 WORKDIR /app/frontend
 
-# Configure yarn for better network handling and performance
-RUN yarn config set network-timeout 300000 && \
-    yarn config set registry https://registry.npmmirror.com && \
-    yarn config set cache-folder /tmp/yarn-cache
+# Configure npm for better network handling and performance
+RUN npm config set registry https://registry.npmjs.org && \
+    npm config set fetch-timeout 600000 && \
+    npm config set fetch-retry-mintimeout 20000 && \
+    npm config set fetch-retry-maxtimeout 120000 && \
+    npm config set fetch-retries 3
 
 # Copy frontend package files
 COPY openvpn-web/package*.json ./
-COPY openvpn-web/yarn.lock ./
 
-# Install frontend dependencies with retry and timeout settings
-RUN yarn install --frozen-lockfile --production=false --network-timeout 300000 --network-concurrency 1
+# Install frontend dependencies
+RUN npm ci --only=production=false
 
 # Copy frontend source code
 COPY openvpn-web/ ./
 
 # Build frontend
-RUN yarn build
+RUN npm run build
 
 # Go backend builder stage
 FROM golang:1.21 AS backend-builder
