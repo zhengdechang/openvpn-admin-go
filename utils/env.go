@@ -18,7 +18,7 @@ func GetEnvOrDefault(key, defaultValue string) string {
 // GetOpenVPNStatusLogPath retrieves the OpenVPN status log path from env or returns a default.
 func GetOpenVPNStatusLogPath() string {
 	// Common locations for OpenVPN status log. Adjust default as needed.
-	return GetEnvOrDefault("OPENVPN_STATUS_LOG_PATH", "/etc/openvpn/openvpn-status.log")
+	return GetEnvOrDefault("OPENVPN_STATUS_LOG_PATH", "/etc/openvpn/status.log")
 }
 
 // GetOpenVPNSyncInterval retrieves the sync interval from env, parses it as seconds,

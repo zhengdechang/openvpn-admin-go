@@ -6,13 +6,13 @@ import (
 	"math/rand"
 	"net"
 	"os"
-	"os/exec"
 	"strconv"
 	"strings"
 	"time"
 
 	"openvpn-admin-go/constants"
 	"openvpn-admin-go/openvpn"
+	"openvpn-admin-go/utils"
 
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
@@ -113,50 +113,26 @@ func startServer(cfg *openvpn.Config) {
 	}
 
 	// 启动服务
-	cmd := exec.Command("sudo", "systemctl", "start", constants.ServiceName)
-	if output, err := cmd.CombinedOutput(); err != nil {
-		fmt.Printf("启动失败: %v\n输出: %s\n", err, string(output))
-		return
-	}
-	fmt.Println("✅ 服务已启动")
+	utils.SystemctlStart(constants.ServiceName)
 }
 
 func stopServer() {
-	cmd := exec.Command("sudo", "systemctl", "stop", constants.ServiceName)
-	if output, err := cmd.CombinedOutput(); err != nil {
-		fmt.Printf("停止失败: %v\n输出: %s\n", err, string(output))
-		return
-	}
-	fmt.Println("✅ 服务已停止")
+	utils.SystemctlStop(constants.ServiceName)
 }
 
 func restartServer(cfg *openvpn.Config) error {
-	// 停止服务
-	cmd := exec.Command("systemctl", "stop", constants.ServiceName)
-	if output, err := cmd.CombinedOutput(); err != nil {
-		return fmt.Errorf("停止服务失败: %v\n输出: %s", err, string(output))
-	}
-
-	// 等待服务完全停止
-	time.Sleep(2 * time.Second)
-
-	// 启动服务
-	cmd = exec.Command("systemctl", "start", constants.ServiceName)
-	if output, err := cmd.CombinedOutput(); err != nil {
-		return fmt.Errorf("启动服务失败: %v\n输出: %s", err, string(output))
-	}
-
+	// 重启服务
+	utils.SystemctlRestart(constants.ServiceName)
 	return nil
 }
 
 func checkServerStatus() {
-	cmd := exec.Command("sudo", "systemctl", "status", constants.ServiceName)
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		fmt.Printf("获取状态失败: %v\n输出: %s\n", err, string(output))
-		return
+	output := utils.SystemctlStatus(constants.ServiceName)
+	if output != "" {
+		fmt.Printf("服务状态:\n%s\n", output)
+	} else {
+		fmt.Println("无法获取服务状态")
 	}
-	fmt.Println(string(output))
 }
 
 func updatePort(cfg *openvpn.Config) error {
@@ -253,9 +229,8 @@ func updateServerIP(cfg *openvpn.Config) error {
 	}
 
 	// 添加配置重载
-	reloadCmd := exec.Command("sudo", "systemctl", "daemon-reload")
-	if output, err := reloadCmd.CombinedOutput(); err != nil {
-		fmt.Printf("配置重载失败: %v\n输出: %s\n", err, string(output))
+	if err := utils.ExecCommand("systemctl daemon-reload"); err != nil {
+		fmt.Printf("配置重载失败: %v\n", err)
 		return err
 	}
 
@@ -353,9 +328,8 @@ func generateTLSKey(cfg *openvpn.Config) error {
 	}
 
 	// 生成tls-auth密钥
-	cmd := exec.Command("openvpn", "--genkey", "secret", constants.ServerTLSKeyPath)
-	if output, err := cmd.CombinedOutput(); err != nil {
-		return fmt.Errorf("生成TLS密钥失败: %v\n输出: %s", err, string(output))
+	if err := utils.ExecCommand(fmt.Sprintf("openvpn --genkey secret %s", constants.ServerTLSKeyPath)); err != nil {
+		return fmt.Errorf("生成TLS密钥失败: %v", err)
 	}
 
 	// 设置适当的权限
@@ -614,10 +588,7 @@ func checkConfig() error {
 // 重启OpenVPN服务
 func restartService() error {
 	// 重启OpenVPN服务
-	cmd := exec.Command("systemctl", "restart", constants.ServiceName)
-	if output, err := cmd.CombinedOutput(); err != nil {
-		return fmt.Errorf("重启服务失败: %v\n输出: %s", err, string(output))
-	}
+	utils.SystemctlRestart(constants.ServiceName)
 	return nil
 }
 
@@ -640,28 +611,16 @@ func RestartService() error {
 		return fmt.Errorf("证书文件缺失")
 	}
 
-	// 先停止服务
-	cmd := exec.Command("systemctl", "stop", constants.ServiceName)
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("停止服务失败: %v\n请检查服务状态: systemctl status %s", err, constants.ServiceName)
-	}
-
-	// 等待服务完全停止
-	time.Sleep(2 * time.Second)
-
-	// 启动服务
-	cmd = exec.Command("systemctl", "start", constants.ServiceName)
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("启动服务失败: %v\n请检查服务状态: systemctl status %s", err, constants.ServiceName)
-	}
+	// 重启服务
+	utils.SystemctlRestart(constants.ServiceName)
 
 	// 等待服务启动
 	time.Sleep(2 * time.Second)
 
 	// 检查服务状态
-	cmd = exec.Command("systemctl", "is-active", constants.ServiceName)
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("服务未正常运行: %v\n请检查服务日志: journalctl -u %s", err, constants.ServiceName)
+	status := utils.ExecCommandWithResult(fmt.Sprintf("systemctl is-active %s", constants.ServiceName))
+	if strings.TrimSpace(status) != "active" {
+		return fmt.Errorf("服务未正常运行，状态: %s\n请检查服务日志: journalctl -u %s", status, constants.ServiceName)
 	}
 
 	fmt.Println("服务重启成功")
@@ -670,23 +629,20 @@ func RestartService() error {
 
 func StopService() error {
 	// 检查服务状态
-	cmd := exec.Command("systemctl", "is-active", constants.ServiceName)
-	if err := cmd.Run(); err != nil {
+	status := utils.ExecCommandWithResult(fmt.Sprintf("systemctl is-active %s", constants.ServiceName))
+	if strings.TrimSpace(status) != "active" {
 		return fmt.Errorf("服务未运行")
 	}
 
 	// 停止服务
-	cmd = exec.Command("systemctl", "stop", constants.ServiceName)
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("停止服务失败: %v\n请检查服务状态: systemctl status %s", err, constants.ServiceName)
-	}
+	utils.SystemctlStop(constants.ServiceName)
 
 	// 等待服务完全停止
 	time.Sleep(2 * time.Second)
 
 	// 验证服务已停止
-	cmd = exec.Command("systemctl", "is-active", constants.ServiceName)
-	if err := cmd.Run(); err == nil {
+	status = utils.ExecCommandWithResult(fmt.Sprintf("systemctl is-active %s", constants.ServiceName))
+	if strings.TrimSpace(status) == "active" {
 		return fmt.Errorf("服务仍在运行")
 	}
 

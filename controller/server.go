@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"openvpn-admin-go/constants"
 	"openvpn-admin-go/openvpn"
+	"openvpn-admin-go/utils"
 	"os"
-	"os/exec"
 	"strings"
 	"time"
 
@@ -73,21 +73,20 @@ func GetServerStatus() (*ServerStatus, error) {
 
 	// 检查服务是否运行
 	// 检查服务是否运行，忽略非零退出码，获取服务状态字符串
-	cmd := exec.Command("systemctl", "is-active", constants.ServiceName)
-	output, _ := cmd.CombinedOutput()
+	output := utils.ExecCommandWithResult(fmt.Sprintf("systemctl is-active %s", constants.ServiceName))
 
 	status := &ServerStatus{
 		Name:        "server",
-		Status:      strings.TrimSpace(string(output)),
+		Status:      strings.TrimSpace(output),
 		LastUpdated: time.Now().Format(time.RFC3339),
 	}
 
 	// 如果服务正在运行，获取更多信息
 	if status.Status == "active" {
 		// 获取服务启动时间
-		cmd = exec.Command("systemctl", "show", constants.ServiceName, "--property=ActiveEnterTimestamp")
-		if output, err := cmd.CombinedOutput(); err == nil {
-			if t0, err := time.Parse("Mon 2006-01-02 15:04:05 MST", strings.TrimSpace(strings.TrimPrefix(string(output), "ActiveEnterTimestamp="))); err == nil {
+		output := utils.ExecCommandWithResult(fmt.Sprintf("systemctl show %s --property=ActiveEnterTimestamp", constants.ServiceName))
+		if output != "" {
+			if t0, err := time.Parse("Mon 2006-01-02 15:04:05 MST", strings.TrimSpace(strings.TrimPrefix(output, "ActiveEnterTimestamp="))); err == nil {
 				status.Uptime = time.Since(t0).String()
 			}
 		}
@@ -157,11 +156,7 @@ func (c *ServerController) StartServer(ctx *gin.Context) {
 // StopServer 停止服务器
 func (c *ServerController) StopServer(ctx *gin.Context) {
 	// 停止服务器
-	cmd := exec.Command("systemctl", "stop", constants.ServiceName)
-	if output, err := cmd.CombinedOutput(); err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("停止服务失败: %v\n输出: %s", err, string(output))})
-		return
-	}
+	utils.SystemctlStop(constants.ServiceName)
 	ctx.JSON(http.StatusOK, gin.H{"message": "Server stopped successfully"})
 }
 

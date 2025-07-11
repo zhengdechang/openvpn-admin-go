@@ -3,11 +3,11 @@ package openvpn
 import (
 	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 
 	"openvpn-admin-go/constants"
+	"openvpn-admin-go/utils"
 )
 
 // GetServerConfigTemplate 获取服务端配置模板
@@ -92,19 +92,14 @@ func UpdateServerConfig() error {
 	}
 
 	// 重启OpenVPN服务
-	if err := exec.Command("systemctl", "restart", constants.ServiceName).Run(); err != nil {
-		return fmt.Errorf("重启OpenVPN服务失败: %v", err)
-	}
+	utils.SystemctlRestart(constants.ServiceName)
 
 	return nil
 }
 
 // RestartServer 重启OpenVPN服务
 func RestartServer() error {
-	cmd := exec.Command("systemctl", "restart", constants.ServiceName)
-	if output, err := cmd.CombinedOutput(); err != nil {
-		return fmt.Errorf("重启服务失败: %v\n输出: %s", err, string(output))
-	}
+	utils.SystemctlRestart(constants.ServiceName)
 	return nil
 }
 

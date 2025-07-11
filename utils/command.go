@@ -26,11 +26,10 @@ func systemctlReplace(out string) (bool, error) {
 }
 
 func systemctlBase(name, operate string) (string, error) {
-	out, err := exec.Command("bash", "-c", fmt.Sprintf("systemctl %s %s", operate, name)).CombinedOutput()
-	if v, _ := systemctlReplace(string(out)); v {
-		out, err = exec.Command("bash", "-c", fmt.Sprintf("systemctl %s %s", operate, name)).CombinedOutput()
-	}
-	return string(out), err
+	command := fmt.Sprintf("systemctl %s %s", operate, name)
+	out := ExecCommandWithResult(command)
+	// ExecCommandWithResult already handles systemctl replacement internally
+	return out, nil
 }
 
 // SystemctlStart 服务启动
