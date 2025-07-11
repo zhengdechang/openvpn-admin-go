@@ -4,8 +4,12 @@ import (
 	"bytes"
 	"fmt"
 	"openvpn-admin-go/constants"
+	"openvpn-admin-go/database"
 	"openvpn-admin-go/logging"
+	"openvpn-admin-go/openvpn"
 	"openvpn-admin-go/router"
+	"openvpn-admin-go/services"
+	"openvpn-admin-go/utils"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -312,6 +316,16 @@ func runWebServer(port int) error {
 	if err := CoreInitializer(); err != nil {
 		return fmt.Errorf("核心初始化失败: %v", err)
 	}
+
+	// 启动 OpenVPN 同步服务（在核心初始化完成后）
+	cfg, err := openvpn.LoadConfig()
+	if err != nil {
+		return fmt.Errorf("无法加载 OpenVPN 配置以启动同步服务: %v", err)
+	}
+	statusLogPath := cfg.OpenVPNStatusLogPath
+	syncInterval := utils.GetOpenVPNSyncInterval()
+	logging.Info("Starting OpenVPN Sync Service: LogPath='%s', Interval=%s", statusLogPath, syncInterval)
+	go services.StartOpenVPNSyncService(database.DB, statusLogPath, syncInterval)
 
 	// Setup Gin router
 	r := gin.Default()
