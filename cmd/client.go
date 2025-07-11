@@ -9,7 +9,9 @@ import (
 	"strings"
 
 	"openvpn-admin-go/constants"
+	"openvpn-admin-go/database"
 	"openvpn-admin-go/logging"
+	"openvpn-admin-go/model"
 	"openvpn-admin-go/openvpn"
 
 	"github.com/manifoldco/promptui"
@@ -91,6 +93,10 @@ func CreateClient() error {
 }
 
 func DeleteClient() {
+	// 先显示所有客户端列表
+	fmt.Println("=== 当前客户端列表 ===")
+	showClientList()
+
 	username, err := getUsername()
 	if err != nil {
 		logging.Error("获取用户名失败: %v", err)
@@ -105,52 +111,119 @@ func DeleteClient() {
 }
 
 func PauseClient() {
+	// 先显示所有客户端列表
+	fmt.Println("=== 当前客户端列表 ===")
+	showClientList()
+
 	username, err := getUsername()
 	if err != nil {
 		logging.Error("获取用户名失败: %v", err)
 		return
 	}
 
-	if err := openvpn.PauseClient(username); err != nil {
-		logging.Error("暂停客户端失败: %v", err)
-	} else {
-		fmt.Printf("客户端 %s 已暂停\n", username)
+	// 首先从数据库查找用户
+	var user model.User
+	if err := database.DB.Where("name = ?", username).First(&user).Error; err != nil {
+		fmt.Printf("数据库中未找到用户 %s: %v\n", username, err)
+		return
 	}
+
+	// 暂停OpenVPN客户端
+	if err := openvpn.PauseClient(username); err != nil {
+		logging.Error("暂停OpenVPN客户端失败: %v", err)
+		return
+	}
+
+	// 更新数据库状态
+	user.IsPaused = true
+	if err := database.DB.Save(&user).Error; err != nil {
+		logging.Error("更新数据库状态失败: %v", err)
+		// 尝试恢复OpenVPN状态
+		openvpn.ResumeClient(username)
+		return
+	}
+
+	fmt.Printf("客户端 %s 已暂停\n", username)
 }
 
 func ResumeClient() {
+	// 先显示所有客户端列表
+	fmt.Println("=== 当前客户端列表 ===")
+	showClientList()
+
 	username, err := getUsername()
 	if err != nil {
 		logging.Error("获取用户名失败: %v", err)
 		return
 	}
 
-	if err := openvpn.ResumeClient(username); err != nil {
-		logging.Error("恢复客户端失败: %v", err)
-	} else {
-		fmt.Printf("客户端 %s 已恢复\n", username)
+	// 首先从数据库查找用户
+	var user model.User
+	if err := database.DB.Where("name = ?", username).First(&user).Error; err != nil {
+		fmt.Printf("数据库中未找到用户 %s: %v\n", username, err)
+		return
 	}
+
+	// 恢复OpenVPN客户端
+	if err := openvpn.ResumeClient(username); err != nil {
+		logging.Error("恢复OpenVPN客户端失败: %v", err)
+		return
+	}
+
+	// 更新数据库状态
+	user.IsPaused = false
+	if err := database.DB.Save(&user).Error; err != nil {
+		logging.Error("更新数据库状态失败: %v", err)
+		// 尝试重新暂停OpenVPN状态
+		openvpn.PauseClient(username)
+		return
+	}
+
+	fmt.Printf("客户端 %s 已恢复\n", username)
 }
 
 func ViewClientStatus() {
+	// 先显示所有客户端列表
+	fmt.Println("=== 当前客户端列表 ===")
+	showClientList()
+
 	username, err := getUsername()
 	if err != nil {
 		logging.Error("获取用户名失败: %v", err)
 		return
 	}
 
+	// 首先从数据库查找用户
+	var user model.User
+	if err := database.DB.Where("name = ?", username).First(&user).Error; err != nil {
+		fmt.Printf("数据库中未找到用户 %s: %v\n", username, err)
+		return
+	}
+
+	fmt.Printf("=== 客户端 %s 详细状态 ===\n", username)
+	fmt.Printf("用户ID: %s\n", user.ID)
+	fmt.Printf("邮箱: %s\n", user.Email)
+	fmt.Printf("角色: %s\n", user.Role)
+	fmt.Printf("部门ID: %s\n", user.DepartmentID)
+	fmt.Printf("固定IP: %s\n", user.FixedIP)
+	fmt.Printf("子网: %s\n", user.Subnet)
+	fmt.Printf("是否暂停: %t\n", user.IsPaused)
+	fmt.Printf("创建时间: %s\n", user.CreatedAt.Format("2006-01-02 15:04:05"))
+
+	// 获取OpenVPN连接状态
 	status, err := openvpn.GetClientStatus(username)
 	if err != nil {
-		logging.Error("获取客户端状态失败: %v", err)
+		fmt.Printf("获取OpenVPN状态失败: %v\n", err)
+		fmt.Println("--- OpenVPN连接状态: 离线 ---")
 		return
 	}
 
 	if status == nil {
-		fmt.Printf("客户端 %s 不存在\n", username)
+		fmt.Println("--- OpenVPN连接状态: 离线 ---")
 		return
 	}
 
-	fmt.Printf("客户端 %s 状态:\n", status.CommonName)
+	fmt.Println("--- OpenVPN连接状态: 在线 ---")
 	fmt.Printf("连接时间: %s\n", status.ConnectedSince.Format("2006-01-02 15:04:05"))
 	fmt.Printf("最后活动: %s\n", status.LastRef.Format("2006-01-02 15:04:05"))
 	fmt.Printf("接收字节: %d\n", status.BytesReceived)
@@ -160,30 +233,123 @@ func ViewClientStatus() {
 }
 
 func ListClients() {
-	statuses, err := openvpn.GetAllClientStatuses()
+	// 首先从数据库获取所有用户
+	fmt.Println("=== 所有客户端列表 ===")
+
+	// 获取数据库中的所有用户
+	users, err := getAllUsersFromDB()
 	if err != nil {
-		logging.Error("获取客户端列表失败: %v", err)
+		logging.Error("获取数据库用户列表失败: %v", err)
 		return
 	}
 
-	if len(statuses) == 0 {
-		fmt.Println("没有找到任何客户端")
+	// 获取OpenVPN状态日志中的连接状态
+	liveStatuses, err := openvpn.GetAllClientStatuses()
+	if err != nil {
+		logging.Warn("获取OpenVPN状态失败: %v", err)
+		liveStatuses = []openvpn.ClientStatus{} // 继续显示数据库中的用户
+	}
+
+	// 创建状态映射
+	statusMap := make(map[string]openvpn.ClientStatus)
+	for _, status := range liveStatuses {
+		statusMap[status.CommonName] = status
+	}
+
+	if len(users) == 0 {
+		fmt.Println("数据库中没有找到任何用户")
 		return
 	}
 
-	fmt.Println("客户端列表:")
 	fmt.Println("----------------------------------------")
-	fmt.Printf("%-20s %-20s %-15s %-15s\n", "用户名", "连接时间", "虚拟地址", "真实地址")
+	fmt.Printf("%-20s %-10s %-15s %-15s %-20s\n", "用户名", "状态", "虚拟地址", "真实地址", "连接时间")
 	fmt.Println("----------------------------------------")
 
-	for _, status := range statuses {
-		fmt.Printf("%-20s %-20s %-15s %-15s\n",
-			status.CommonName,
-			status.ConnectedSince.Format("2006-01-02 15:04:05"),
-			status.VirtualAddress,
-			status.RealAddress)
+	for _, user := range users {
+		status := "离线"
+		virtualAddr := "-"
+		realAddr := "-"
+		connectedTime := "-"
+
+		if liveStatus, exists := statusMap[user.Name]; exists {
+			status = "在线"
+			virtualAddr = liveStatus.VirtualAddress
+			realAddr = liveStatus.RealAddress
+			if !liveStatus.ConnectedSince.IsZero() {
+				connectedTime = liveStatus.ConnectedSince.Format("15:04:05")
+			}
+		} else if user.IsPaused {
+			status = "已暂停"
+		}
+
+		fmt.Printf("%-20s %-10s %-15s %-15s %-20s\n",
+			user.Name,
+			status,
+			virtualAddr,
+			realAddr,
+			connectedTime)
 	}
 	fmt.Println("----------------------------------------")
+	fmt.Printf("总计: %d 个用户，其中 %d 个在线\n", len(users), len(liveStatuses))
+}
+
+// getAllUsersFromDB 从数据库获取所有用户
+func getAllUsersFromDB() ([]model.User, error) {
+	var users []model.User
+	if err := database.DB.Order("created_at desc").Find(&users).Error; err != nil {
+		return nil, fmt.Errorf("查询用户失败: %v", err)
+	}
+	return users, nil
+}
+
+// showClientList 显示简化的客户端列表
+func showClientList() {
+	// 获取数据库中的所有用户
+	users, err := getAllUsersFromDB()
+	if err != nil {
+		fmt.Printf("获取用户列表失败: %v\n", err)
+		return
+	}
+
+	// 获取OpenVPN状态日志中的连接状态
+	liveStatuses, err := openvpn.GetAllClientStatuses()
+	if err != nil {
+		liveStatuses = []openvpn.ClientStatus{} // 继续显示数据库中的用户
+	}
+
+	// 创建状态映射
+	statusMap := make(map[string]openvpn.ClientStatus)
+	for _, status := range liveStatuses {
+		statusMap[status.CommonName] = status
+	}
+
+	if len(users) == 0 {
+		fmt.Println("没有找到任何用户")
+		return
+	}
+
+	fmt.Printf("%-20s %-10s %-15s\n", "用户名", "状态", "虚拟地址")
+	fmt.Println("----------------------------------------")
+
+	for _, user := range users {
+		status := "离线"
+		virtualAddr := "-"
+
+		if liveStatus, exists := statusMap[user.Name]; exists {
+			status = "在线"
+			virtualAddr = liveStatus.VirtualAddress
+		} else if user.IsPaused {
+			status = "已暂停"
+		}
+
+		fmt.Printf("%-20s %-10s %-15s\n",
+			user.Name,
+			status,
+			virtualAddr)
+	}
+	fmt.Println("----------------------------------------")
+	fmt.Printf("总计: %d 个用户\n", len(users))
+	fmt.Println()
 }
 
 func getUsername() (string, error) {

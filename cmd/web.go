@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"bytes"
 	"fmt"
 	"openvpn-admin-go/constants"
 	"openvpn-admin-go/database"
@@ -11,10 +10,8 @@ import (
 	"openvpn-admin-go/services"
 	"openvpn-admin-go/utils"
 	"os"
-	"path/filepath"
 	"strconv"
 	"strings"
-	"text/template"
 
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/cobra"
@@ -80,11 +77,11 @@ func WebMenu() {
 
 
 
-// installWebService 安装web服务的systemd服务文件
+// installWebService 安装web服务的supervisor配置
 func installWebService(port int) error {
-	// 检查是否以root权限运行
-	if os.Geteuid() != 0 {
-		return fmt.Errorf("请使用 sudo 运行程序以安装服务")
+	// 检查 supervisor 是否已安装
+	if !utils.CheckSupervisorInstalled() {
+		return fmt.Errorf("supervisor 未安装，请先安装 supervisor")
 	}
 
 	// 获取当前工作目录
@@ -99,61 +96,55 @@ func installWebService(port int) error {
 		return fmt.Errorf("获取可执行文件路径失败: %v", err)
 	}
 
-	// 模板数据
-	data := map[string]interface{}{
-		"WorkingDirectory": wd,
-		"BinaryPath":       binaryPath,
-		"Port":             port,
-		"ConfigDirectory":  "/etc/openvpn",
+	// 安装 supervisor 主配置文件（如果不存在）
+	if !utils.IsSupervisorConfigExists() {
+		if err := utils.InstallSupervisorMainConfig(); err != nil {
+			return fmt.Errorf("安装 supervisor 主配置失败: %v", err)
+		}
 	}
 
-	// 解析模板
-	templatePath := filepath.Join(wd, "template", "openvpn-web.j2")
-	tmpl, err := template.ParseFiles(templatePath)
-	if err != nil {
-		return fmt.Errorf("解析web服务模板失败: %v", err)
+	// 创建 Web 服务配置
+	webConfig := utils.ServiceConfig{
+		BinaryPath:       binaryPath,
+		WorkingDirectory: wd,
+		Port:             port,
+		DBPath:           "/app/data/db.sqlite3",
+		OpenVPNConfigDir: "/etc/openvpn",
+		AutoStart:        false, // 默认不自动启动
 	}
 
-	// 生成服务文件内容
-	var buf bytes.Buffer
-	if err := tmpl.Execute(&buf, data); err != nil {
-		return fmt.Errorf("渲染web服务模板失败: %v", err)
+	// 安装 Web 服务配置
+	if err := utils.InstallWebServiceConfig(webConfig); err != nil {
+		return fmt.Errorf("安装 Web 服务配置失败: %v", err)
 	}
 
-	// 写入systemd服务文件
-	servicePath := "/etc/systemd/system/" + constants.WebServiceName
-	if err := os.WriteFile(servicePath, buf.Bytes(), 0644); err != nil {
-		return fmt.Errorf("写入服务文件失败: %v", err)
+	// 启动 supervisord（如果未运行）
+	if !utils.IsSupervisordRunning() {
+		if err := utils.StartSupervisord(""); err != nil {
+			return fmt.Errorf("启动 supervisord 失败: %v", err)
+		}
+	} else {
+		// 重新加载配置
+		if err := utils.SupervisorctlReload(); err != nil {
+			return fmt.Errorf("重新加载 supervisor 配置失败: %v", err)
+		}
 	}
 
-	// 重新加载systemd配置
-	reloadOutput := utils.ExecCommandWithResult("systemctl daemon-reload")
-	if strings.Contains(reloadOutput, "Failed") || strings.Contains(reloadOutput, "failed") {
-		return fmt.Errorf("重新加载systemd配置失败: %s", reloadOutput)
-	}
-
-	// 启用服务
-	enableOutput := utils.ExecCommandWithResult(fmt.Sprintf("systemctl enable %s", constants.WebServiceName))
-	if strings.Contains(enableOutput, "Failed") || strings.Contains(enableOutput, "failed") {
-		return fmt.Errorf("启用web服务失败: %s", enableOutput)
-	}
-
-	fmt.Printf("Web服务已安装: %s\n", servicePath)
+	fmt.Printf("Web服务已安装到 supervisor\n")
 	return nil
 }
 
 func startWebService(port int) {
-	// 检查服务文件是否存在以及端口是否匹配
-	servicePath := "/etc/systemd/system/" + constants.WebServiceName
+	// 检查 Web 服务配置是否存在
 	needReinstall := false
 
-	if _, err := os.Stat(servicePath); os.IsNotExist(err) {
-		// 服务文件不存在，需要安装
+	if !utils.IsWebServiceConfigExists() {
+		// 配置文件不存在，需要安装
 		needReinstall = true
-		fmt.Printf("Web服务未安装，正在安装（端口: %d）...\n", port)
+		fmt.Printf("Web服务配置未安装，正在安装（端口: %d）...\n", port)
 	} else {
-		// 服务文件存在，检查端口是否匹配
-		content, err := os.ReadFile(servicePath)
+		// 配置文件存在，检查端口是否匹配
+		content, err := os.ReadFile(constants.SupervisorWebConfigPath)
 		if err == nil {
 			expectedPort := fmt.Sprintf("--port %d", port)
 			if !strings.Contains(string(content), expectedPort) {
@@ -168,25 +159,26 @@ func startWebService(port int) {
 			fmt.Printf("安装Web服务失败: %v\n", err)
 			return
 		}
+	}
 
-		// 重新加载 systemd 配置
-		fmt.Println("重新加载 systemd 配置...")
-		reloadOutput := utils.ExecCommandWithResult("systemctl daemon-reload")
-		if strings.Contains(reloadOutput, "Failed") || strings.Contains(reloadOutput, "failed") {
-			fmt.Printf("重新加载 systemd 配置失败: %s\n", reloadOutput)
+	// 确保 supervisord 正在运行
+	if !utils.IsSupervisordRunning() {
+		fmt.Println("启动 supervisord...")
+		if err := utils.StartSupervisord(""); err != nil {
+			fmt.Printf("启动 supervisord 失败: %v\n", err)
 			return
 		}
 	}
 
-	// 启动服务
+	// 启动 Web 服务
 	fmt.Printf("正在启动Web服务（端口: %d）...\n", port)
-	utils.SystemctlStart(constants.WebServiceName)
+	utils.SupervisorctlStart(constants.SupervisorWebServiceName)
 }
 
 func stopWebService() {
 	// 停止服务
 	fmt.Println("正在停止Web服务...")
-	utils.SystemctlStop(constants.WebServiceName)
+	utils.SupervisorctlStop(constants.SupervisorWebServiceName)
 }
 
 func restartWebService(port int) {
@@ -197,42 +189,47 @@ func restartWebService(port int) {
 		return
 	}
 
-	// 重新加载 systemd 配置
-	fmt.Println("重新加载 systemd 配置...")
-	utils.ExecCommandWithResult("systemctl daemon-reload")
-
 	// 重启服务
 	fmt.Println("正在重启Web服务...")
-	utils.SystemctlRestart(constants.WebServiceName)
+	utils.SupervisorctlRestart(constants.SupervisorWebServiceName)
 }
 
 func checkWebServiceStatus() {
 	// 获取服务状态
 	fmt.Println("=== Web 服务状态 ===")
-	statusOutput := utils.SystemctlStatus(constants.WebServiceName)
+	statusOutput := utils.SupervisorctlStatus(constants.SupervisorWebServiceName)
 	if statusOutput != "" {
 		fmt.Printf("%s\n", statusOutput)
 	} else {
 		fmt.Println("无法获取服务状态")
 	}
 
+	// 同时显示所有服务状态
+	fmt.Println("\n=== 所有服务状态 ===")
+	allStatus := utils.GetAllServiceStatus()
+	fmt.Printf("%s\n", allStatus)
+
 	fmt.Println("\n按回车键返回...")
 	fmt.Scanln()
 }
 
 func showWebServiceLogs() {
-	// 使用journalctl查看systemd服务日志
-	output := utils.ExecCommandWithResult(fmt.Sprintf("journalctl -u %s --no-pager -n 50", constants.WebServiceName))
-	if output == "" {
-		fmt.Println("获取服务日志失败或日志为空")
+	// 使用 supervisor 查看服务日志
+	fmt.Println("\n=== Web 服务日志 (最近50行) ===")
+	output, err := utils.GetServiceLogs(constants.SupervisorWebServiceName, 50)
+	if err != nil {
+		fmt.Printf("获取服务日志失败: %v\n", err)
 		fmt.Println("\n按回车键返回...")
 		fmt.Scanln()
 		return
 	}
 
-	// 显示日志内容
-	fmt.Println("\n=== Web 服务日志 (最近50行) ===")
-	fmt.Println(output)
+	if output == "" {
+		fmt.Println("日志为空")
+	} else {
+		fmt.Println(output)
+	}
+
 	fmt.Println("\n按回车键返回...")
 	fmt.Scanln()
 }

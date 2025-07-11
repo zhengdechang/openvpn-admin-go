@@ -113,21 +113,21 @@ func startServer(cfg *openvpn.Config) {
 	}
 
 	// 启动服务
-	utils.SystemctlStart(constants.ServiceName)
+	utils.SupervisorctlStart(constants.SupervisorOpenVPNServiceName)
 }
 
 func stopServer() {
-	utils.SystemctlStop(constants.ServiceName)
+	utils.SupervisorctlStop(constants.SupervisorOpenVPNServiceName)
 }
 
 func restartServer(cfg *openvpn.Config) error {
 	// 重启服务
-	utils.SystemctlRestart(constants.ServiceName)
+	utils.SupervisorctlRestart(constants.SupervisorOpenVPNServiceName)
 	return nil
 }
 
 func checkServerStatus() {
-	output := utils.SystemctlStatus(constants.ServiceName)
+	output := utils.SupervisorctlStatus(constants.SupervisorOpenVPNServiceName)
 	if output != "" {
 		fmt.Printf("服务状态:\n%s\n", output)
 	} else {
@@ -612,15 +612,14 @@ func RestartService() error {
 	}
 
 	// 重启服务
-	utils.SystemctlRestart(constants.ServiceName)
+	utils.SupervisorctlRestart(constants.SupervisorOpenVPNServiceName)
 
 	// 等待服务启动
 	time.Sleep(2 * time.Second)
 
 	// 检查服务状态
-	status := utils.ExecCommandWithResult(fmt.Sprintf("systemctl is-active %s", constants.ServiceName))
-	if strings.TrimSpace(status) != "active" {
-		return fmt.Errorf("服务未正常运行，状态: %s\n请检查服务日志: journalctl -u %s", status, constants.ServiceName)
+	if !utils.IsServiceRunning(constants.SupervisorOpenVPNServiceName) {
+		return fmt.Errorf("服务未正常运行\n请检查服务日志: supervisorctl tail %s", constants.SupervisorOpenVPNServiceName)
 	}
 
 	fmt.Println("服务重启成功")
@@ -629,20 +628,18 @@ func RestartService() error {
 
 func StopService() error {
 	// 检查服务状态
-	status := utils.ExecCommandWithResult(fmt.Sprintf("systemctl is-active %s", constants.ServiceName))
-	if strings.TrimSpace(status) != "active" {
+	if !utils.IsServiceRunning(constants.SupervisorOpenVPNServiceName) {
 		return fmt.Errorf("服务未运行")
 	}
 
 	// 停止服务
-	utils.SystemctlStop(constants.ServiceName)
+	utils.SupervisorctlStop(constants.SupervisorOpenVPNServiceName)
 
 	// 等待服务完全停止
 	time.Sleep(2 * time.Second)
 
 	// 验证服务已停止
-	status = utils.ExecCommandWithResult(fmt.Sprintf("systemctl is-active %s", constants.ServiceName))
-	if strings.TrimSpace(status) == "active" {
+	if utils.IsServiceRunning(constants.SupervisorOpenVPNServiceName) {
 		return fmt.Errorf("服务仍在运行")
 	}
 

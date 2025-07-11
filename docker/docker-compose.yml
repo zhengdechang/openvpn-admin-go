@@ -1,10 +1,10 @@
 services:
-  # Backend service
-  openvpn-backend:
+  # OpenVPN Admin service with supervisor
+  openvpn-admin:
     build:
       context: ..
       dockerfile: docker/Dockerfile.combined
-    container_name: openvpn-backend
+    container_name: openvpn-admin
     image: ${DOCKERHUB_USERNAME}/openvpn-admin:latest
     restart: unless-stopped
     command: ["/bin/bash"]
@@ -33,6 +33,10 @@ services:
       - DB_PATH=/app/data/db.sqlite3
       - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key}
       - OPENVPN_STATUS_LOG_PATH=/var/log/openvpn/status.log
+      - SERVICE_MODE=${SERVICE_MODE:-all}
+      - WEB_PORT=${WEB_PORT:-8085}
+      - WEB_AUTOSTART=${WEB_AUTOSTART:-true}
+      - OPENVPN_AUTOSTART=${OPENVPN_AUTOSTART:-false}
 
     # Volume mounts
     volumes:
@@ -69,7 +73,7 @@ services:
     restart: unless-stopped
     command: ["nginx", "-g", "daemon off;"]
     depends_on:
-      - openvpn-backend
+      - openvpn-admin
 
     # Network configuration
     network_mode: host

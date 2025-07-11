@@ -14,3 +14,4 @@ logs/*.log
 docker/config/
 docker/data/
 docker/openvpn/
+openvpn-admin

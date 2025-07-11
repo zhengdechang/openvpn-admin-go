@@ -403,19 +403,38 @@ docker run -d --privileged \
 docker exec -it openvpn-admin /bin/bash
 ```
 
-**Manual Service Start in Container:**
+**Service Management with Supervisor:**
 
-Method 1 - Using startup script (recommended):
+The container now uses supervisor for service management instead of systemd. Services are automatically started via the docker-entrypoint.sh script.
+
+Manual service management:
 ```bash
-sudo start-openvpn-admin.sh
+# Check service status
+supervisorctl status
+
+# Start/stop/restart services
+supervisorctl start openvpn-admin-web
+supervisorctl stop openvpn-admin-web
+supervisorctl restart openvpn-admin-web
+
+supervisorctl start openvpn-server
+supervisorctl stop openvpn-server
+supervisorctl restart openvpn-server
+
+# View service logs
+supervisorctl tail openvpn-admin-web
+supervisorctl tail openvpn-server
+
+# Follow logs in real-time
+supervisorctl tail -f openvpn-admin-web
 ```
 
-Method 2 - Manual commands:
+Alternative management using openvpn-admin CLI:
 ```bash
 cd /app
-./openvpn-admin                              # Foreground
-su appuser -c "./openvpn-admin"              # As appuser
-nohup ./openvpn-admin > /app/logs/openvpn-admin.log 2>&1 &  # Background
+./openvpn-admin supervisor-status           # View all service status
+./openvpn-admin supervisor-logs web         # View web service logs
+./openvpn-admin supervisor-logs openvpn     # View OpenVPN service logs
 ```
 
 #### Docker Compose Deployment
@@ -457,6 +476,13 @@ Container pre-configured environment variables:
 - `DB_PATH=/app/data/db.sqlite3`
 - `OPENVPN_CONFIG_DIR=/etc/openvpn`
 
+**Supervisor Service Control Variables:**
+
+- `SERVICE_MODE=all|web|openvpn` - Controls which services to start (default: all)
+- `WEB_PORT=8085` - Web service port (default: 8085)
+- `WEB_AUTOSTART=true|false` - Auto-start web service (default: true)
+- `OPENVPN_AUTOSTART=true|false` - Auto-start OpenVPN service (default: false)
+
 #### Docker Troubleshooting
 
 **View Logs:**
@@ -470,12 +496,95 @@ tail -f /var/log/nginx/error.log
 
 **Check Service Status:**
 ```bash
+# Check supervisor status
+supervisorctl status
+
+# Check specific service
+supervisorctl status openvpn-admin-web
+supervisorctl status openvpn-server
+
 # Check processes
-ps aux | grep openvpn-admin
+ps aux | grep supervisord
+ps aux | grep openvpn
 
 # Check ports
 netstat -tlnp | grep 8085
 ```
+
+## 🔧 Supervisor Service Management
+
+The application uses supervisor for process management in Docker containers, providing better service control and logging compared to systemd.
+
+### Service Architecture
+
+- **supervisord**: Main process manager
+- **openvpn-server**: OpenVPN service process
+- **openvpn-admin-web**: Web interface process
+
+### Configuration Files
+
+- Main config: `/etc/supervisor/supervisord.conf`
+- Service configs: `/etc/supervisor/conf.d/`
+  - `openvpn-server.conf` - OpenVPN service configuration
+  - `openvpn-admin-web.conf` - Web service configuration
+
+### Service Management Commands
+
+```bash
+# View all services status
+supervisorctl status
+
+# Start services
+supervisorctl start openvpn-admin-web
+supervisorctl start openvpn-server
+supervisorctl start all
+
+# Stop services
+supervisorctl stop openvpn-admin-web
+supervisorctl stop openvpn-server
+supervisorctl stop all
+
+# Restart services
+supervisorctl restart openvpn-admin-web
+supervisorctl restart openvpn-server
+
+# Reload configuration
+supervisorctl reread
+supervisorctl update
+
+# View logs
+supervisorctl tail openvpn-admin-web
+supervisorctl tail openvpn-server
+supervisorctl tail -f openvpn-admin-web  # Follow logs
+
+# Shutdown supervisor
+supervisorctl shutdown
+```
+
+### Using OpenVPN-Admin CLI for Supervisor Management
+
+```bash
+# Configure supervisor services
+./openvpn-admin supervisor-config --main-only                    # Install main config only
+./openvpn-admin supervisor-config --service web --port 8085      # Configure web service
+./openvpn-admin supervisor-config --service openvpn --autostart  # Configure OpenVPN service
+
+# View service status
+./openvpn-admin supervisor-status
+
+# View service logs
+./openvpn-admin supervisor-logs web      # Web service logs
+./openvpn-admin supervisor-logs openvpn  # OpenVPN service logs
+```
+
+### Log Files
+
+Supervisor manages centralized logging:
+
+- Supervisor main log: `/var/log/supervisor/supervisord.log`
+- Web service logs: `/var/log/supervisor/openvpn-admin-web.log`
+- OpenVPN service logs: `/var/log/supervisor/openvpn-server.log`
+- Error logs: `/var/log/supervisor/*-error.log`
 
 **Restart Services:**
 ```bash

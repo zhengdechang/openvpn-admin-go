@@ -92,14 +92,14 @@ func UpdateServerConfig() error {
 	}
 
 	// 重启OpenVPN服务
-	utils.SystemctlRestart(constants.ServiceName)
+	utils.SupervisorctlRestart(constants.SupervisorOpenVPNServiceName)
 
 	return nil
 }
 
 // RestartServer 重启OpenVPN服务
 func RestartServer() error {
-	utils.SystemctlRestart(constants.ServiceName)
+	utils.SupervisorctlRestart(constants.SupervisorOpenVPNServiceName)
 	return nil
 }
 
