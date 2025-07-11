@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"net"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 	"time"
 
 	"openvpn-admin-go/constants"
+	"openvpn-admin-go/utils"
 )
 
 // CreateClient 创建新的OpenVPN客户端
@@ -21,10 +21,8 @@ func CreateClient(username string) error {
 	fmt.Printf("检查证书目录: %s\n", constants.ClientConfigDir)
 	if _, err := os.Stat(constants.ClientConfigDir); os.IsNotExist(err) {
 		fmt.Printf("创建证书目录: %s\n", constants.ClientConfigDir)
-		cmd := exec.Command("sudo", "mkdir", "-p", constants.ClientConfigDir)
-		output, err := cmd.CombinedOutput()
-		if err != nil {
-			return fmt.Errorf("创建证书目录失败: %v, 输出: %s", err, string(output))
+		if err := utils.ExecCommand(fmt.Sprintf("mkdir -p %s", constants.ClientConfigDir)); err != nil {
+			return fmt.Errorf("创建证书目录失败: %v", err)
 		}
 		fmt.Println("证书目录创建成功")
 	}
@@ -32,10 +30,8 @@ func CreateClient(username string) error {
 	// 检查并生成TLS密钥
 	if _, err := os.Stat(constants.ServerTLSKeyPath); os.IsNotExist(err) {
 		fmt.Printf("正在生成TLS密钥: %s\n", constants.ServerTLSKeyPath)
-		cmd := exec.Command("sudo", "openvpn", "--genkey", "secret", constants.ServerTLSKeyPath)
-		output, err := cmd.CombinedOutput()
-		if err != nil {
-			return fmt.Errorf("生成TLS密钥失败: %v, 输出: %s", err, string(output))
+		if err := utils.ExecCommand(fmt.Sprintf("openvpn --genkey secret %s", constants.ServerTLSKeyPath)); err != nil {
+			return fmt.Errorf("生成TLS密钥失败: %v", err)
 		}
 		fmt.Println("TLS密钥生成成功")
 	}
@@ -65,47 +61,38 @@ func CreateClient(username string) error {
 	// 生成客户端私钥
 	fmt.Printf("正在为客户端 %s 生成私钥...\n", username)
 	keyPath := filepath.Join(constants.ClientConfigDir, username+".key")
-	cmd := exec.Command("sudo", "openssl", "genrsa", "-out", keyPath, "2048")
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		return fmt.Errorf("生成私钥失败: %v, 输出: %s", err, string(output))
+	if err := utils.ExecCommand(fmt.Sprintf("openssl genrsa -out %s 2048", keyPath)); err != nil {
+		return fmt.Errorf("生成私钥失败: %v", err)
 	}
 	fmt.Println("私钥生成成功")
 
 	// 生成证书签名请求
 	fmt.Printf("正在为客户端 %s 生成证书签名请求...\n", username)
 	csrPath := filepath.Join(constants.ClientConfigDir, username+".csr")
-	cmd = exec.Command("sudo", "openssl", "req", "-new", "-key", keyPath, "-out", csrPath, "-subj", "/CN="+username)
-	output, err = cmd.CombinedOutput()
-	if err != nil {
-		return fmt.Errorf("生成证书签名请求失败: %v, 输出: %s", err, string(output))
+	if err := utils.ExecCommand(fmt.Sprintf("openssl req -new -key %s -out %s -subj '/CN=%s'", keyPath, csrPath, username)); err != nil {
+		return fmt.Errorf("生成证书签名请求失败: %v", err)
 	}
 	fmt.Println("证书签名请求生成成功")
 
 	// 使用CA证书签名
 	fmt.Printf("正在为客户端 %s 签名证书...\n", username)
 	crtPath := filepath.Join(constants.ClientConfigDir, username+".crt")
-	cmd = exec.Command("sudo", "openssl", "x509", "-req", "-in", csrPath, "-CA", constants.ServerCACertPath, "-CAkey", constants.ServerCAKeyPath, "-CAcreateserial", "-out", crtPath, "-days", "3650", "-extfile", clientExtFile)
-	output, err = cmd.CombinedOutput()
-	if err != nil {
-		return fmt.Errorf("签名证书失败: %v, 输出: %s", err, string(output))
+	if err := utils.ExecCommand(fmt.Sprintf("openssl x509 -req -in %s -CA %s -CAkey %s -CAcreateserial -out %s -days 3650 -extfile %s", csrPath, constants.ServerCACertPath, constants.ServerCAKeyPath, crtPath, clientExtFile)); err != nil {
+		return fmt.Errorf("签名证书失败: %v", err)
 	}
 	fmt.Println("证书签名成功")
 
 	// 复制CA证书到客户端目录
 	clientCaPath := filepath.Join(constants.ClientConfigDir, "ca.crt")
 	fmt.Printf("正在复制CA证书到: %s\n", clientCaPath)
-	cmd = exec.Command("sudo", "cp", constants.ServerCACertPath, clientCaPath)
-	output, err = cmd.CombinedOutput()
-	if err != nil {
-		return fmt.Errorf("复制CA证书失败: %v, 输出: %s", err, string(output))
+	if err := utils.ExecCommand(fmt.Sprintf("cp %s %s", constants.ServerCACertPath, clientCaPath)); err != nil {
+		return fmt.Errorf("复制CA证书失败: %v", err)
 	}
 	fmt.Println("CA证书复制成功")
 
 	// 清理临时文件
 	fmt.Printf("清理临时文件: %s\n", csrPath)
-	cmd = exec.Command("sudo", "rm", csrPath)
-	cmd.Run() // 忽略错误，因为文件可能不存在
+	utils.ExecCommand(fmt.Sprintf("rm %s", csrPath)) // 忽略错误，因为文件可能不存在
 
 	// 生成.ovpn配置文件
 	fmt.Printf("正在为客户端 %s 生成配置文件...\n", username)
@@ -131,18 +118,14 @@ func CreateClient(username string) error {
 	}
 
 	fmt.Printf("移动配置文件到: %s\n", ovpnPath)
-	cmd = exec.Command("sudo", "mv", tempFile, ovpnPath)
-	output, err = cmd.CombinedOutput()
-	if err != nil {
-		return fmt.Errorf("移动配置文件失败: %v, 输出: %s", err, string(output))
+	if err := utils.ExecCommand(fmt.Sprintf("mv %s %s", tempFile, ovpnPath)); err != nil {
+		return fmt.Errorf("移动配置文件失败: %v", err)
 	}
 
 	// 设置文件权限
 	fmt.Printf("设置文件权限: %s\n", ovpnPath)
-	cmd = exec.Command("sudo", "chmod", "644", ovpnPath)
-	output, err = cmd.CombinedOutput()
-	if err != nil {
-		return fmt.Errorf("设置文件权限失败: %v, 输出: %s", err, string(output))
+	if err := utils.ExecCommand(fmt.Sprintf("chmod 644 %s", ovpnPath)); err != nil {
+		return fmt.Errorf("设置文件权限失败: %v", err)
 	}
 
 	fmt.Printf("客户端 %s 的证书和配置文件已生成并复制到 %s 目录\n", username, constants.ClientConfigDir)

@@ -11,7 +11,6 @@ import (
 	"openvpn-admin-go/services"
 	"openvpn-admin-go/utils"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -125,16 +124,6 @@ func installWebService(port int) error {
 	servicePath := "/etc/systemd/system/" + constants.WebServiceName
 	if err := os.WriteFile(servicePath, buf.Bytes(), 0644); err != nil {
 		return fmt.Errorf("写入服务文件失败: %v", err)
-	}
-
-	// 创建openvpn-admin用户和组
-	cmd := exec.Command("id", "openvpn-admin")
-	if err := cmd.Run(); err != nil {
-		// 用户不存在，创建用户
-		cmd = exec.Command("useradd", "--system", "--no-create-home", "--shell", "/bin/false", "openvpn-admin")
-		if err := cmd.Run(); err != nil {
-			return fmt.Errorf("创建openvpn-admin用户失败: %v", err)
-		}
 	}
 
 	// 重新加载systemd配置

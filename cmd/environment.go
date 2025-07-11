@@ -3,12 +3,12 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"time"
 
 	"openvpn-admin-go/constants"
 	"openvpn-admin-go/openvpn"
+	"openvpn-admin-go/utils"
 )
 
 func CheckCertFiles() error {
@@ -115,33 +115,28 @@ func generateCertificates() error {
 	}
 
 	// 生成DH参数
-	cmd := exec.Command("openssl", "dhparam", "-out", constants.ServerDHPath, "2048")
-	if output, err := cmd.CombinedOutput(); err != nil {
-		return fmt.Errorf("生成DH参数失败: %v\n输出: %s", err, string(output))
+	if err := utils.ExecCommand(fmt.Sprintf("openssl dhparam -out %s 2048", constants.ServerDHPath)); err != nil {
+		return fmt.Errorf("生成DH参数失败: %v", err)
 	}
 
 	// 生成CA证书
-	cmd = exec.Command("openssl", "req", "-x509", "-newkey", "rsa:2048", "-keyout", constants.ServerCAKeyPath, "-out", constants.ServerCACertPath, "-days", "3650", "-nodes", "-subj", "/CN=OpenVPN-CA")
-	if output, err := cmd.CombinedOutput(); err != nil {
-		return fmt.Errorf("生成CA证书失败: %v\n输出: %s", err, string(output))
+	if err := utils.ExecCommand(fmt.Sprintf("openssl req -x509 -newkey rsa:2048 -keyout %s -out %s -days 3650 -nodes -subj '/CN=OpenVPN-CA'", constants.ServerCAKeyPath, constants.ServerCACertPath)); err != nil {
+		return fmt.Errorf("生成CA证书失败: %v", err)
 	}
 
 	// 生成服务器证书
-	cmd = exec.Command("openssl", "req", "-newkey", "rsa:2048", "-keyout", constants.ServerKeyPath, "-out", filepath.Join(serverDir, "server.csr"), "-nodes", "-subj", "/CN=OpenVPN-Server")
-	if output, err := cmd.CombinedOutput(); err != nil {
-		return fmt.Errorf("生成服务器证书请求失败: %v\n输出: %s", err, string(output))
+	if err := utils.ExecCommand(fmt.Sprintf("openssl req -newkey rsa:2048 -keyout %s -out %s -nodes -subj '/CN=OpenVPN-Server'", constants.ServerKeyPath, filepath.Join(serverDir, "server.csr"))); err != nil {
+		return fmt.Errorf("生成服务器证书请求失败: %v", err)
 	}
 
 	// 签名服务器证书
-	cmd = exec.Command("openssl", "x509", "-req", "-in", filepath.Join(serverDir, "server.csr"), "-CA", constants.ServerCACertPath, "-CAkey", constants.ServerCAKeyPath, "-CAcreateserial", "-out", constants.ServerCertPath, "-days", "3650", "-extfile", filepath.Join(serverDir, "openssl-server.ext"))
-	if output, err := cmd.CombinedOutput(); err != nil {
-		return fmt.Errorf("签名服务器证书失败: %v\n输出: %s", err, string(output))
+	if err := utils.ExecCommand(fmt.Sprintf("openssl x509 -req -in %s -CA %s -CAkey %s -CAcreateserial -out %s -days 3650 -extfile %s", filepath.Join(serverDir, "server.csr"), constants.ServerCACertPath, constants.ServerCAKeyPath, constants.ServerCertPath, filepath.Join(serverDir, "openssl-server.ext"))); err != nil {
+		return fmt.Errorf("签名服务器证书失败: %v", err)
 	}
 
 	// 生成TLS密钥
-	cmd = exec.Command("openvpn", "--genkey", "secret", constants.ServerTLSKeyPath)
-	if output, err := cmd.CombinedOutput(); err != nil {
-		return fmt.Errorf("生成TLS密钥失败: %v\n输出: %s", err, string(output))
+	if err := utils.ExecCommand(fmt.Sprintf("openvpn --genkey secret %s", constants.ServerTLSKeyPath)); err != nil {
+		return fmt.Errorf("生成TLS密钥失败: %v", err)
 	}
 
 	// 清理临时文件
@@ -250,13 +245,11 @@ func InstallEnvironment() error {
 
 	// 安装 OpenVPN 和 OpenSSL
 	fmt.Println("正在安装 OpenVPN 和 OpenSSL...")
-	cmd := exec.Command("apt-get", "update")
-	if err := cmd.Run(); err != nil {
+	if err := utils.ExecCommand("apt-get update"); err != nil {
 		return fmt.Errorf("更新软件包列表失败: %v", err)
 	}
 
-	cmd = exec.Command("apt-get", "install", "-y", "openvpn", "openssl")
-	if err := cmd.Run(); err != nil {
+	if err := utils.ExecCommand("apt-get install -y openvpn openssl"); err != nil {
 		return fmt.Errorf("安装 OpenVPN 和 OpenSSL 失败: %v", err)
 	}
 
@@ -292,23 +285,15 @@ func InstallEnvironment() error {
 
 	// 停止所有正在运行的 OpenVPN 进程
 	fmt.Println("正在停止所有 OpenVPN 进程...")
-	cmd = exec.Command("pkill", "openvpn")
-	cmd.Run() // 忽略错误，因为可能没有进程在运行
+	utils.ExecCommand("pkill openvpn") // 忽略错误，因为可能没有进程在运行
 
 	// 等待进程完全停止
 	time.Sleep(2 * time.Second)
 
 	// 启动 OpenVPN 服务
 	fmt.Println("正在启动 OpenVPN 服务...")
-	cmd = exec.Command("systemctl", "enable", constants.ServiceName)
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("设置 OpenVPN 服务开机自启失败: %v", err)
-	}
-
-	cmd = exec.Command("systemctl", "start", constants.ServiceName)
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("启动 OpenVPN 服务失败: %v", err)
-	}
+	utils.SystemctlEnable(constants.ServiceName)
+	utils.SystemctlStart(constants.ServiceName)
 
 	// 等待服务启动
 	fmt.Println("等待服务启动...")
@@ -320,12 +305,12 @@ func InstallEnvironment() error {
 
 func CheckEnvironment() error {
 	// 检查OpenVPN是否安装
-	if _, err := exec.LookPath("openvpn"); err != nil {
+	if !utils.CheckCommandExists("openvpn") {
 		return fmt.Errorf("未找到OpenVPN，请先安装OpenVPN")
 	}
 
 	// 检查OpenSSL是否安装
-	if _, err := exec.LookPath("openssl"); err != nil {
+	if !utils.CheckCommandExists("openssl") {
 		return fmt.Errorf("未找到OpenSSL，请先安装OpenSSL")
 	}
 
