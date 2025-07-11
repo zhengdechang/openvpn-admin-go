@@ -1,0 +1,16 @@
+[program:openvpn-server]
+command=openvpn --config /etc/openvpn/server/server.conf
+directory=/etc/openvpn/server
+autostart={{ .AutoStart }}
+autorestart=true
+startsecs=3
+startretries=3
+user=root
+redirect_stderr=true
+stdout_logfile=/var/log/supervisor/openvpn-server.log
+stdout_logfile_maxbytes=10MB
+stdout_logfile_backups=5
+stderr_logfile=/var/log/supervisor/openvpn-server-error.log
+stderr_logfile_maxbytes=10MB
+stderr_logfile_backups=5
+priority=100
