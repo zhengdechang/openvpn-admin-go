@@ -7,8 +7,11 @@ services:
       context: ..
       dockerfile: docker/Dockerfile.combined
     container_name: openvpn-backend
+    image: ${DOCKERHUB_USERNAME}/openvpn-admin:latest
     restart: unless-stopped
-    command: ["/app/openvpn-admin"]
+    command: ["/bin/bash"]
+    stdin_open: true
+    tty: true
 
     # Network configuration
     network_mode: host
@@ -78,7 +81,7 @@ services:
 
     # Port mappings
     ports:
-      - "80:80"
+      - "9009:80"
 
     # Health check
     healthcheck:

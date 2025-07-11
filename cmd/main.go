@@ -130,6 +130,13 @@ func Execute() {
 				}
 			}()
 		}
+	} else {
+		// 在生产模式下，如果没有指定命令参数，使用systemd服务启动web服务
+		if len(os.Args) == 1 {
+			fmt.Println("生产模式：启动Web服务...")
+			// 使用systemd服务启动web服务，使用默认端口
+			startWebService(8085)
+		}
 	}
 
 	if err := rootCmd.Execute(); err != nil {

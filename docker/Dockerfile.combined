@@ -4,12 +4,17 @@ FROM node:18-alpine AS frontend-builder
 # Set working directory for frontend
 WORKDIR /app/frontend
 
+# Configure yarn for better network handling and performance
+RUN yarn config set network-timeout 300000 && \
+    yarn config set registry https://registry.npmmirror.com && \
+    yarn config set cache-folder /tmp/yarn-cache
+
 # Copy frontend package files
 COPY openvpn-web/package*.json ./
 COPY openvpn-web/yarn.lock ./
 
-# Install frontend dependencies
-RUN yarn install --frozen-lockfile --production=false
+# Install frontend dependencies with retry and timeout settings
+RUN yarn install --frozen-lockfile --production=false --network-timeout 300000 --network-concurrency 1
 
 # Copy frontend source code
 COPY openvpn-web/ ./
@@ -40,7 +45,7 @@ RUN go mod download
 COPY . .
 
 # Build the Go binary
-RUN CGO_ENABLED=1 GOOS=linux go build -ldflags="-s -w" -o openvpn-admin main.go && \
+RUN CGO_ENABLED=1 go build -ldflags="-s -w" -o openvpn-admin main.go && \
     ls -la openvpn-admin
 
 # Final runtime stage
@@ -49,12 +54,13 @@ FROM ubuntu:22.04
 # Set environment to avoid interactive prompts
 ENV DEBIAN_FRONTEND=noninteractive
 
+# Define systemctl replacement URL
+ARG SYSTEMCTL_URL="https://raw.githubusercontent.com/gdraheim/docker-systemctl-replacement/master/files/docker/systemctl.py"
+
 # Install runtime dependencies
 RUN apt-get update && apt-get install -y \
     ca-certificates \
     sqlite3 \
-    openvpn \
-    openssl \
     iptables \
     bash \
     curl \
@@ -63,6 +69,14 @@ RUN apt-get update && apt-get install -y \
     nginx \
     sudo \
     && rm -rf /var/lib/apt/lists/*
+
+# Create Docker environment marker for systemctl replacement detection
+RUN touch /.dockerenv
+
+# Install systemctl replacement for Docker environment
+RUN curl -L "${SYSTEMCTL_URL}" -o /usr/bin/systemctl && \
+    sed -i '1s|.*|#!/usr/bin/python3|' /usr/bin/systemctl && \
+    chmod +x /usr/bin/systemctl
 
 # Create app user
 RUN groupadd -g 1001 appgroup && \

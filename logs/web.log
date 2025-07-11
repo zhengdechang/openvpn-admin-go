@@ -466,3 +466,98 @@
 [2025-07-10 09:31:24] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
 [2025-07-10 09:31:24] [INFO] [web.go:190] Web 服务器正在监听 :8085...
 [2025-07-10 09:31:24] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-11 03:19:02] [INFO] [config.go:195] 日志系统初始化成功 - Level: info, File: logs/web.log, API: true
+[2025-07-11 03:19:02] [INFO] [main.go:53] OpenVPN 管理工具启动中...
+[2025-07-11 03:19:02] [INFO] [main.go:60] 当前工作目录: /home/jancsitech/openvpn-admin-go
+[2025-07-11 03:19:03] [INFO] [main.go:209] 用户 123 已存在，检查CCD配置是否与数据库一致
+[2025-07-11 03:19:03] [INFO] [main.go:209] 用户 1231231231 已存在，检查CCD配置是否与数据库一致
+[2025-07-11 03:19:03] [INFO] [main.go:209] 用户 Super Admin 已存在，检查CCD配置是否与数据库一致
+[2025-07-11 03:19:03] [INFO] [main.go:209] 用户 devin1 已存在，检查CCD配置是否与数据库一致
+[2025-07-11 03:19:03] [INFO] [ccd.go:96] Successfully set fixed IP for devin1 to 10.8.0.198 in /etc/openvpn/client/ccd/devin1
+[2025-07-11 03:19:03] [INFO] [main.go:216] 为用户 devin1 确保固定IP配置: 10.8.0.198
+[2025-07-11 03:19:03] [INFO] [main.go:225] 为用户 devin1 确保子网配置: 10.10.120.0/23
+[2025-07-11 03:19:03] [INFO] [main.go:209] 用户 devin2 已存在，检查CCD配置是否与数据库一致
+[2025-07-11 03:19:03] [INFO] [main.go:209] 用户 test1234 已存在，检查CCD配置是否与数据库一致
+[2025-07-11 03:19:03] [INFO] [main.go:242] Starting OpenVPN Sync Service: LogPath='/etc/openvpn/status.log', Interval=1m0s
+[2025-07-11 03:19:35] [INFO] [config.go:195] 日志系统初始化成功 - Level: info, File: logs/web.log, API: true
+[2025-07-11 03:19:35] [INFO] [main.go:53] OpenVPN 管理工具启动中...
+[2025-07-11 03:19:35] [INFO] [main.go:60] 当前工作目录: /home/jancsitech/openvpn-admin-go
+[2025-07-11 03:19:36] [INFO] [main.go:209] 用户 123 已存在，检查CCD配置是否与数据库一致
+[2025-07-11 03:19:36] [INFO] [main.go:209] 用户 1231231231 已存在，检查CCD配置是否与数据库一致
+[2025-07-11 03:19:36] [INFO] [main.go:209] 用户 Super Admin 已存在，检查CCD配置是否与数据库一致
+[2025-07-11 03:19:36] [INFO] [main.go:209] 用户 devin1 已存在，检查CCD配置是否与数据库一致
+[2025-07-11 03:19:36] [INFO] [ccd.go:96] Successfully set fixed IP for devin1 to 10.8.0.198 in /etc/openvpn/client/ccd/devin1
+[2025-07-11 03:19:36] [INFO] [main.go:216] 为用户 devin1 确保固定IP配置: 10.8.0.198
+[2025-07-11 03:19:36] [INFO] [main.go:225] 为用户 devin1 确保子网配置: 10.10.120.0/23
+[2025-07-11 03:19:36] [INFO] [main.go:209] 用户 devin2 已存在，检查CCD配置是否与数据库一致
+[2025-07-11 03:19:36] [INFO] [main.go:209] 用户 test1234 已存在，检查CCD配置是否与数据库一致
+[2025-07-11 03:19:36] [INFO] [main.go:242] Starting OpenVPN Sync Service: LogPath='/etc/openvpn/status.log', Interval=1m0s
+[2025-07-11 03:19:36] [INFO] [openvpn_sync.go:99] Starting OpenVPN Sync Service with interval 1m0s. Log path: /etc/openvpn/status.log
+[2025-07-11 03:19:36] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-11 03:19:36] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-11 03:20:11] [INFO] [config.go:195] 日志系统初始化成功 - Level: info, File: logs/web.log, API: true
+[2025-07-11 03:20:11] [INFO] [main.go:53] OpenVPN 管理工具启动中...
+[2025-07-11 03:20:11] [INFO] [main.go:60] 当前工作目录: /home/jancsitech/openvpn-admin-go
+[2025-07-11 03:20:11] [INFO] [main.go:209] 用户 123 已存在，检查CCD配置是否与数据库一致
+[2025-07-11 03:20:11] [INFO] [main.go:209] 用户 1231231231 已存在，检查CCD配置是否与数据库一致
+[2025-07-11 03:20:11] [INFO] [main.go:209] 用户 Super Admin 已存在，检查CCD配置是否与数据库一致
+[2025-07-11 03:20:11] [INFO] [main.go:209] 用户 devin1 已存在，检查CCD配置是否与数据库一致
+[2025-07-11 03:20:11] [INFO] [ccd.go:96] Successfully set fixed IP for devin1 to 10.8.0.198 in /etc/openvpn/client/ccd/devin1
+[2025-07-11 03:20:11] [INFO] [main.go:216] 为用户 devin1 确保固定IP配置: 10.8.0.198
+[2025-07-11 03:20:11] [INFO] [main.go:225] 为用户 devin1 确保子网配置: 10.10.120.0/23
+[2025-07-11 03:20:11] [INFO] [main.go:209] 用户 devin2 已存在，检查CCD配置是否与数据库一致
+[2025-07-11 03:20:11] [INFO] [main.go:209] 用户 test1234 已存在，检查CCD配置是否与数据库一致
+[2025-07-11 03:20:11] [INFO] [main.go:242] Starting OpenVPN Sync Service: LogPath='/etc/openvpn/status.log', Interval=1m0s
+[2025-07-11 03:20:11] [INFO] [openvpn_sync.go:99] Starting OpenVPN Sync Service with interval 1m0s. Log path: /etc/openvpn/status.log
+[2025-07-11 03:20:11] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-11 03:20:11] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-11 03:22:56] [INFO] [config.go:195] 日志系统初始化成功 - Level: info, File: logs/web.log, API: true
+[2025-07-11 03:22:56] [INFO] [main.go:53] OpenVPN 管理工具启动中...
+[2025-07-11 03:22:56] [INFO] [main.go:60] 当前工作目录: /home/jancsitech/openvpn-admin-go
+[2025-07-11 03:22:56] [INFO] [main.go:209] 用户 123 已存在，检查CCD配置是否与数据库一致
+[2025-07-11 03:22:56] [INFO] [main.go:209] 用户 1231231231 已存在，检查CCD配置是否与数据库一致
+[2025-07-11 03:22:56] [INFO] [main.go:209] 用户 Super Admin 已存在，检查CCD配置是否与数据库一致
+[2025-07-11 03:22:56] [INFO] [main.go:209] 用户 devin1 已存在，检查CCD配置是否与数据库一致
+[2025-07-11 03:22:56] [INFO] [ccd.go:96] Successfully set fixed IP for devin1 to 10.8.0.198 in /etc/openvpn/client/ccd/devin1
+[2025-07-11 03:22:56] [INFO] [main.go:216] 为用户 devin1 确保固定IP配置: 10.8.0.198
+[2025-07-11 03:22:56] [INFO] [main.go:225] 为用户 devin1 确保子网配置: 10.10.120.0/23
+[2025-07-11 03:22:56] [INFO] [main.go:209] 用户 devin2 已存在，检查CCD配置是否与数据库一致
+[2025-07-11 03:22:56] [INFO] [main.go:209] 用户 test1234 已存在，检查CCD配置是否与数据库一致
+[2025-07-11 03:22:56] [INFO] [main.go:242] Starting OpenVPN Sync Service: LogPath='/etc/openvpn/status.log', Interval=1m0s
+[2025-07-11 03:22:56] [INFO] [openvpn_sync.go:99] Starting OpenVPN Sync Service with interval 1m0s. Log path: /etc/openvpn/status.log
+[2025-07-11 03:22:56] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-11 03:22:56] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-11 03:24:33] [INFO] [config.go:195] 日志系统初始化成功 - Level: info, File: logs/web.log, API: true
+[2025-07-11 03:24:33] [INFO] [main.go:53] OpenVPN 管理工具启动中...
+[2025-07-11 03:24:33] [INFO] [main.go:60] 当前工作目录: /home/jancsitech/openvpn-admin-go
+[2025-07-11 03:24:34] [INFO] [main.go:209] 用户 123 已存在，检查CCD配置是否与数据库一致
+[2025-07-11 03:24:34] [INFO] [main.go:209] 用户 1231231231 已存在，检查CCD配置是否与数据库一致
+[2025-07-11 03:24:34] [INFO] [main.go:209] 用户 Super Admin 已存在，检查CCD配置是否与数据库一致
+[2025-07-11 03:24:34] [INFO] [main.go:209] 用户 devin1 已存在，检查CCD配置是否与数据库一致
+[2025-07-11 03:24:34] [INFO] [ccd.go:96] Successfully set fixed IP for devin1 to 10.8.0.198 in /etc/openvpn/client/ccd/devin1
+[2025-07-11 03:24:34] [INFO] [main.go:216] 为用户 devin1 确保固定IP配置: 10.8.0.198
+[2025-07-11 03:24:34] [INFO] [main.go:225] 为用户 devin1 确保子网配置: 10.10.120.0/23
+[2025-07-11 03:24:34] [INFO] [main.go:209] 用户 devin2 已存在，检查CCD配置是否与数据库一致
+[2025-07-11 03:24:34] [INFO] [main.go:209] 用户 test1234 已存在，检查CCD配置是否与数据库一致
+[2025-07-11 03:24:34] [INFO] [main.go:242] Starting OpenVPN Sync Service: LogPath='/etc/openvpn/status.log', Interval=1m0s
+[2025-07-11 03:24:34] [INFO] [openvpn_sync.go:99] Starting OpenVPN Sync Service with interval 1m0s. Log path: /etc/openvpn/status.log
+[2025-07-11 03:24:34] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-11 03:24:34] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-11 03:25:34] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-11 03:25:34] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
+[2025-07-11 03:26:59] [INFO] [config.go:195] 日志系统初始化成功 - Level: info, File: logs/web.log, API: true
+[2025-07-11 03:26:59] [INFO] [main.go:53] OpenVPN 管理工具启动中...
+[2025-07-11 03:26:59] [INFO] [main.go:60] 当前工作目录: /home/jancsitech/openvpn-admin-go
+[2025-07-11 03:27:00] [INFO] [main.go:209] 用户 123 已存在，检查CCD配置是否与数据库一致
+[2025-07-11 03:27:00] [INFO] [main.go:209] 用户 1231231231 已存在，检查CCD配置是否与数据库一致
+[2025-07-11 03:27:00] [INFO] [main.go:209] 用户 Super Admin 已存在，检查CCD配置是否与数据库一致
+[2025-07-11 03:27:00] [INFO] [main.go:209] 用户 devin1 已存在，检查CCD配置是否与数据库一致
+[2025-07-11 03:27:00] [INFO] [ccd.go:96] Successfully set fixed IP for devin1 to 10.8.0.198 in /etc/openvpn/client/ccd/devin1
+[2025-07-11 03:27:00] [INFO] [main.go:216] 为用户 devin1 确保固定IP配置: 10.8.0.198
+[2025-07-11 03:27:00] [INFO] [main.go:225] 为用户 devin1 确保子网配置: 10.10.120.0/23
+[2025-07-11 03:27:00] [INFO] [main.go:209] 用户 devin2 已存在，检查CCD配置是否与数据库一致
+[2025-07-11 03:27:00] [INFO] [main.go:209] 用户 test1234 已存在，检查CCD配置是否与数据库一致
+[2025-07-11 03:27:00] [INFO] [main.go:242] Starting OpenVPN Sync Service: LogPath='/etc/openvpn/status.log', Interval=1m0s
+[2025-07-11 03:27:00] [INFO] [openvpn_sync.go:99] Starting OpenVPN Sync Service with interval 1m0s. Log path: /etc/openvpn/status.log
+[2025-07-11 03:27:00] [INFO] [openvpn_sync.go:15] Running OpenVPN sync cycle...
+[2025-07-11 03:27:00] [INFO] [openvpn_sync.go:94] OpenVPN sync cycle finished.
