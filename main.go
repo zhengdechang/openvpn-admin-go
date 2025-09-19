@@ -40,9 +40,10 @@ func InitCore() error {
 		fmt.Printf("日志系统初始化失败: %v\n", err)
 		// 使用默认配置继续运行
 		defaultConfig := logging.Config{
-			LogLevel:    logging.INFO,
-			LogFilePath: "logs/web.log",
-			EnableAPI:   true,
+			LogLevel:      logging.INFO,
+			LogFilePath:   "logs/web.log",
+			EnableAPI:     true,
+			EnableConsole: false,
 		}
 		if err := logging.Init(defaultConfig); err != nil {
 			return fmt.Errorf("日志系统初始化失败: %v", err)
@@ -61,19 +62,13 @@ func InitCore() error {
 	fmt.Println("正在检查运行环境...")
 	if err := cmd.CheckEnvironment(); err != nil {
 		fmt.Printf("环境检查失败: %v\n", err)
-		fmt.Println("是否自动安装所需环境？(y/n)")
-		var choice string
-		fmt.Scanln(&choice)
-		if choice == "y" || choice == "Y" {
-			if errInstall := cmd.InstallEnvironment(); errInstall != nil {
-				return fmt.Errorf("环境安装失败: %v\n请确保您有足够的权限，软件源配置正确，网络连接稳定。\n您可以手动检查并修复问题后重新运行程序。", errInstall)
-			}
-			// 重新检查环境
-			if errCheckAgain := cmd.CheckEnvironment(); errCheckAgain != nil {
-				return fmt.Errorf("环境检查仍然失败: %v\n请手动检查并修复问题后重新运行程序。", errCheckAgain)
-			}
-		} else {
-			return fmt.Errorf("请手动安装所需环境后重新运行程序")
+		fmt.Println("尝试自动安装所需环境...")
+		if errInstall := cmd.InstallEnvironment(); errInstall != nil {
+			return fmt.Errorf("环境自动安装失败: %v\n请确保权限、软件源和网络连接正常，然后重试。", errInstall)
+		}
+		// 重新检查环境
+		if errCheckAgain := cmd.CheckEnvironment(); errCheckAgain != nil {
+			return fmt.Errorf("环境检查仍然失败: %v\n请手动检查并修复问题后重新运行程序。", errCheckAgain)
 		}
 	}
 

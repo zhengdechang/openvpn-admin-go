@@ -310,7 +310,7 @@ Every merge to `main` automatically:
 
    ```bash
    # Backend
-   go build -o openvpn-admin main.go
+   go build -o openvpn-go main.go
 
    # Frontend
    cd openvpn-web
@@ -320,9 +320,9 @@ Every merge to `main` automatically:
 2. **Configure systemd service:**
 
    ```bash
-   sudo cp openvpn-admin /usr/local/bin/
-   sudo systemctl enable openvpn-admin
-   sudo systemctl start openvpn-admin
+   sudo cp openvpn-go /usr/local/bin/
+   sudo systemctl enable openvpn-go
+   sudo systemctl start openvpn-go
    ```
 
 3. **Setup reverse proxy (nginx):**
@@ -354,6 +354,7 @@ docker run -d \
   --device /dev/net/tun \
   -p 8085:8085 \
   -p 3000:3000 \
+  -p 80:80 \
   -p 1194:1194/udp \
   -v openvpn_data:/app/data \
   -v openvpn_logs:/app/logs \
@@ -361,6 +362,18 @@ docker run -d \
   -e OPENVPN_SERVER_HOSTNAME=your-server-ip \
   zhengdechang/openvpn-admin-go:latest
 ```
+
+```bash
+# Enter the container and launch the interactive provisioning menu
+docker exec -it openvpn-admin openvpn-go
+```
+
+> **提示：** `openvpn-go` 提供菜单化流程：
+> 1. 选择“运行环境检查/安装”即可一键拉起 OpenVPN、OpenSSL、Supervisor 及证书模板。
+> 2. 在“Web 服务管理”中可独立启动/停止 `openvpn-go-api`（Gin API，默认 8085 端口）。
+> 3. 同一菜单还支持启动/停止前端 Nginx 服务，统一通过 80 端口对外提供静态资源与 `/api` 反向代理。
+>
+> 后端与前端均可按需启动，满足“新机器 → 拉取镜像 → 进入容器执行菜单 → 选择性启动组件”的部署流程。
 
 #### Ubuntu 22.04 Docker Deployment
 
@@ -413,28 +426,20 @@ Manual service management:
 supervisorctl status
 
 # Start/stop/restart services
-supervisorctl start openvpn-admin-web
-supervisorctl stop openvpn-admin-web
-supervisorctl restart openvpn-admin-web
+supervisorctl start openvpn-go-api
+supervisorctl stop openvpn-go-api
+supervisorctl restart openvpn-go-api
 
 supervisorctl start openvpn-server
 supervisorctl stop openvpn-server
 supervisorctl restart openvpn-server
 
 # View service logs
-supervisorctl tail openvpn-admin-web
+supervisorctl tail openvpn-go-api
 supervisorctl tail openvpn-server
 
 # Follow logs in real-time
-supervisorctl tail -f openvpn-admin-web
-```
-
-Alternative management using openvpn-admin CLI:
-```bash
-cd /app
-./openvpn-admin supervisor-status           # View all service status
-./openvpn-admin supervisor-logs web         # View web service logs
-./openvpn-admin supervisor-logs openvpn     # View OpenVPN service logs
+supervisorctl tail -f openvpn-go-api
 ```
 
 #### Docker Compose Deployment
@@ -478,9 +483,10 @@ Container pre-configured environment variables:
 
 **Supervisor Service Control Variables:**
 
-- `SERVICE_MODE=all|web|openvpn` - Controls which services to start (default: all)
-- `WEB_PORT=8085` - Web service port (default: 8085)
-- `WEB_AUTOSTART=true|false` - Auto-start web service (default: true)
+- `SERVICE_MODE=all|api|backend|frontend` - Controls which services to start (default: all)
+- `WEB_PORT=8085` - API service port (default: 8085)
+- `WEB_AUTOSTART=true|false` - Auto-start API service (default: true)
+- `FRONTEND_AUTOSTART=true|false` - Auto-start Nginx frontend (default: false)
 - `OPENVPN_AUTOSTART=true|false` - Auto-start OpenVPN service (default: false)
 
 #### Docker Troubleshooting
@@ -488,7 +494,7 @@ Container pre-configured environment variables:
 **View Logs:**
 ```bash
 # Application logs
-tail -f /app/logs/openvpn-admin.log
+tail -f /app/logs/web.log
 
 # Nginx logs
 tail -f /var/log/nginx/error.log
@@ -500,7 +506,7 @@ tail -f /var/log/nginx/error.log
 supervisorctl status
 
 # Check specific service
-supervisorctl status openvpn-admin-web
+supervisorctl status openvpn-go-api
 supervisorctl status openvpn-server
 
 # Check processes
@@ -519,14 +525,14 @@ The application uses supervisor for process management in Docker containers, pro
 
 - **supervisord**: Main process manager
 - **openvpn-server**: OpenVPN service process
-- **openvpn-admin-web**: Web interface process
+- **openvpn-go-api**: Web interface process
 
 ### Configuration Files
 
 - Main config: `/etc/supervisor/supervisord.conf`
 - Service configs: `/etc/supervisor/conf.d/`
   - `openvpn-server.conf` - OpenVPN service configuration
-  - `openvpn-admin-web.conf` - Web service configuration
+  - `openvpn-go-api.conf` - Web service configuration
 
 ### Service Management Commands
 
@@ -535,17 +541,17 @@ The application uses supervisor for process management in Docker containers, pro
 supervisorctl status
 
 # Start services
-supervisorctl start openvpn-admin-web
+supervisorctl start openvpn-go-api
 supervisorctl start openvpn-server
 supervisorctl start all
 
 # Stop services
-supervisorctl stop openvpn-admin-web
+supervisorctl stop openvpn-go-api
 supervisorctl stop openvpn-server
 supervisorctl stop all
 
 # Restart services
-supervisorctl restart openvpn-admin-web
+supervisorctl restart openvpn-go-api
 supervisorctl restart openvpn-server
 
 # Reload configuration
@@ -553,28 +559,22 @@ supervisorctl reread
 supervisorctl update
 
 # View logs
-supervisorctl tail openvpn-admin-web
+supervisorctl tail openvpn-go-api
 supervisorctl tail openvpn-server
-supervisorctl tail -f openvpn-admin-web  # Follow logs
+supervisorctl tail -f openvpn-go-api  # Follow logs
 
 # Shutdown supervisor
 supervisorctl shutdown
 ```
 
-### Using OpenVPN-Admin CLI for Supervisor Management
+### Using openvpn-go CLI for Supervisor Management
 
 ```bash
 # Configure supervisor services
-./openvpn-admin supervisor-config --main-only                    # Install main config only
-./openvpn-admin supervisor-config --service web --port 8085      # Configure web service
-./openvpn-admin supervisor-config --service openvpn --autostart  # Configure OpenVPN service
-
-# View service status
-./openvpn-admin supervisor-status
-
-# View service logs
-./openvpn-admin supervisor-logs web      # Web service logs
-./openvpn-admin supervisor-logs openvpn  # OpenVPN service logs
+./openvpn-go supervisor-config --main-only                    # Install main config only
+./openvpn-go supervisor-config --service api --port 8085      # Configure API service
+./openvpn-go supervisor-config --service frontend             # Configure Nginx frontend
+./openvpn-go supervisor-config --service openvpn --autostart  # Configure OpenVPN service
 ```
 
 ### Log Files
@@ -582,17 +582,17 @@ supervisorctl shutdown
 Supervisor manages centralized logging:
 
 - Supervisor main log: `/var/log/supervisor/supervisord.log`
-- Web service logs: `/var/log/supervisor/openvpn-admin-web.log`
+- Web service logs: `/var/log/supervisor/openvpn-go-api.log`
 - OpenVPN service logs: `/var/log/supervisor/openvpn-server.log`
 - Error logs: `/var/log/supervisor/*-error.log`
 
 **Restart Services:**
 ```bash
 # Stop service
-pkill openvpn-admin
+pkill openvpn-go
 
-# Restart
-start-openvpn-admin.sh
+# Restart API via supervisor
+supervisorctl restart openvpn-go-api
 ```
 
 ## 🛠️ Development

@@ -76,7 +76,8 @@ const translation = {
     useFormFieldError: "useFormField should be used within <FormField>",
   },
   refresh: "Refresh",
-  refreshing: "Refreshing..."
+  refreshing: "Refreshing...",
+  clearFilters: "Clear filters"
 }
 
 ;

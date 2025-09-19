@@ -3,12 +3,12 @@ package openvpn
 import (
 	"encoding/binary"
 	"fmt"
+	"net"
 	"openvpn-admin-go/logging"
 	"os"
 	"path/filepath"
 	"strconv"
-	"strings" // Required for netmask validation if added, or general string ops
-	// "log" // For logging errors if necessary
+	"strings"
 )
 
 // SetClientFixedIP creates or updates a client-specific configuration file (CCD)
@@ -24,8 +24,6 @@ func SetClientFixedIP(commonName string, ipAddress string) error {
 		return fmt.Errorf("ipAddress cannot be empty")
 	}
 
-	// TODO: Add IP address format validation for ipAddress
-
 	cfg, err := LoadConfig()
 	if err != nil {
 		return fmt.Errorf("failed to load OpenVPN configuration: %w", err)
@@ -36,6 +34,33 @@ func SetClientFixedIP(commonName string, ipAddress string) error {
 	}
 	if cfg.OpenVPNServerNetmask == "" {
 		return fmt.Errorf("OpenVPNServerNetmask is not set in the configuration")
+	}
+
+	parsedIP := net.ParseIP(ipAddress)
+	if parsedIP == nil {
+		return fmt.Errorf("invalid IP address format: %s", ipAddress)
+	}
+
+	ipv4 := parsedIP.To4()
+	if ipv4 == nil {
+		return fmt.Errorf("only IPv4 addresses are supported for fixed assignments: %s", ipAddress)
+	}
+
+	ipNet, broadcast, err := serverNetwork(cfg)
+	if err != nil {
+		return err
+	}
+
+	if !ipNet.Contains(ipv4) {
+		return fmt.Errorf("fixed IP %s is outside of the server network %s/%s", ipAddress, cfg.OpenVPNServerNetwork, cfg.OpenVPNServerNetmask)
+	}
+
+	if ipv4.Equal(ipNet.IP) {
+		return fmt.Errorf("fixed IP %s cannot be the network address", ipAddress)
+	}
+
+	if broadcast != nil && ipv4.Equal(broadcast) {
+		return fmt.Errorf("fixed IP %s cannot be the broadcast address", ipAddress)
 	}
 
 	// Ensure the CCD directory exists
@@ -176,8 +201,12 @@ func GetClientFixedIP(commonName string) (string, error) {
 			parts := strings.Fields(trimmedLine)
 			// Expected: "ifconfig-push" "ip_address" "netmask"
 			if len(parts) == 3 {
-				// TODO: Validate that parts[1] is a valid IP address
-				return parts[1], nil
+				parsedIP := net.ParseIP(parts[1])
+				if parsedIP == nil || parsedIP.To4() == nil {
+					logging.Warn("Invalid IPv4 address in ifconfig-push directive for %s: %s", commonName, parts[1])
+					continue
+				}
+				return parsedIP.String(), nil
 			}
 			logging.Warn("Malformed ifconfig-push line in %s for %s: %s", ccdFilePath, commonName, line)
 		}
@@ -454,4 +483,34 @@ func netmaskToCIDR(network, netmask string) (string, error) {
 	}
 
 	return fmt.Sprintf("%s/%d", network, cidrBits), nil
+}
+
+func serverNetwork(cfg *Config) (*net.IPNet, net.IP, error) {
+	networkIP := net.ParseIP(cfg.OpenVPNServerNetwork)
+	if networkIP == nil {
+		return nil, nil, fmt.Errorf("invalid OpenVPN server network address: %s", cfg.OpenVPNServerNetwork)
+	}
+
+	ipv4Network := networkIP.To4()
+	if ipv4Network == nil {
+		return nil, nil, fmt.Errorf("OpenVPN server network must be an IPv4 address: %s", cfg.OpenVPNServerNetwork)
+	}
+
+	maskIP := net.ParseIP(cfg.OpenVPNServerNetmask)
+	if maskIP == nil {
+		return nil, nil, fmt.Errorf("invalid OpenVPN server netmask: %s", cfg.OpenVPNServerNetmask)
+	}
+
+	mask := net.IPMask(maskIP.To4())
+	if mask == nil || len(mask) != net.IPv4len {
+		return nil, nil, fmt.Errorf("OpenVPN server netmask must be a valid IPv4 mask: %s", cfg.OpenVPNServerNetmask)
+	}
+
+	ipNet := &net.IPNet{IP: ipv4Network.Mask(mask), Mask: mask}
+	broadcast := make(net.IP, len(ipNet.IP))
+	for i := 0; i < len(ipNet.IP); i++ {
+		broadcast[i] = ipNet.IP[i] | ^mask[i]
+	}
+
+	return ipNet, broadcast, nil
 }

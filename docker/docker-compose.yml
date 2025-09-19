@@ -36,6 +36,7 @@ services:
       - SERVICE_MODE=${SERVICE_MODE:-all}
       - WEB_PORT=${WEB_PORT:-8085}
       - WEB_AUTOSTART=${WEB_AUTOSTART:-true}
+      - FRONTEND_AUTOSTART=${FRONTEND_AUTOSTART:-false}
       - OPENVPN_AUTOSTART=${OPENVPN_AUTOSTART:-false}
 
     # Volume mounts

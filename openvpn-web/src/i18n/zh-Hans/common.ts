@@ -72,7 +72,8 @@ const translation = {
   },
   saveChanges: "保存更改",
   refresh: "刷新",
-  refreshing: "正在刷新..."
+  refreshing: "正在刷新...",
+  clearFilters: "清除筛选"
 }
 
 export default translation

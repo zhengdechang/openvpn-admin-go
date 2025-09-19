@@ -10,15 +10,16 @@ import (
 // LogConfig 日志配置结构
 type LogConfig struct {
 	// 基本配置
-	Level       string `json:"level"`        // 日志级别: debug, info, warn, error, fatal
-	LogFilePath string `json:"log_file_path"` // 日志文件路径
-	EnableAPI   bool   `json:"enable_api"`   // 是否启用API日志记录
-	
+	Level         string `json:"level"`          // 日志级别: debug, info, warn, error, fatal
+	LogFilePath   string `json:"log_file_path"`  // 日志文件路径
+	EnableAPI     bool   `json:"enable_api"`     // 是否启用API日志记录
+	EnableConsole bool   `json:"enable_console"` // 是否输出到控制台
+
 	// 文件配置
 	MaxFileSize int64 `json:"max_file_size"` // 最大文件大小（字节）
 	MaxBackups  int   `json:"max_backups"`   // 最大备份文件数
 	MaxAge      int   `json:"max_age"`       // 最大保存天数
-	
+
 	// API日志配置
 	API APILogConfig `json:"api"`
 }
@@ -35,12 +36,13 @@ type APILogConfig struct {
 // DefaultLogConfig 返回默认的日志配置
 func DefaultLogConfig() LogConfig {
 	return LogConfig{
-		Level:       "info",
-		LogFilePath: "logs/web.log",
-		EnableAPI:   true,
-		MaxFileSize: 100 * 1024 * 1024, // 100MB
-		MaxBackups:  5,
-		MaxAge:      30, // 30天
+		Level:         "info",
+		LogFilePath:   "logs/web.log",
+		EnableAPI:     true,
+		EnableConsole: false,
+		MaxFileSize:   100 * 1024 * 1024, // 100MB
+		MaxBackups:    5,
+		MaxAge:        30, // 30天
 		API: APILogConfig{
 			EnableRequestBody:  false,
 			EnableResponseBody: false,
@@ -182,17 +184,18 @@ func InitFromConfig(configPath string) error {
 
 	// 初始化日志系统
 	logConfig := Config{
-		LogLevel:    level,
-		LogFilePath: config.LogFilePath,
-		EnableAPI:   config.EnableAPI,
-		MaxFileSize: config.MaxFileSize,
+		LogLevel:      level,
+		LogFilePath:   config.LogFilePath,
+		EnableAPI:     config.EnableAPI,
+		MaxFileSize:   config.MaxFileSize,
+		EnableConsole: config.EnableConsole,
 	}
 
 	if err := Init(logConfig); err != nil {
 		return fmt.Errorf("初始化日志系统失败: %v", err)
 	}
 
-	Info("日志系统初始化成功 - Level: %s, File: %s, API: %v", 
+	Info("日志系统初始化成功 - Level: %s, File: %s, API: %v",
 		config.Level, config.LogFilePath, config.EnableAPI)
 
 	return nil
@@ -238,7 +241,7 @@ func UpdateLogLevel(configPath, newLevel string) error {
 // GetCurrentConfig 获取当前运行时配置信息
 func GetCurrentConfig() map[string]interface{} {
 	return map[string]interface{}{
-		"level":      GetLogLevel().String(),
+		"level":       GetLogLevel().String(),
 		"api_enabled": IsAPILoggingEnabled(),
 	}
 }

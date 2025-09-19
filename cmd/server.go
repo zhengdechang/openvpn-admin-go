@@ -42,13 +42,15 @@ func ServerMenu() {
 	}
 
 	for {
-		fmt.Println("\n=== OpenVPN 服务器管理 ===\n")
-		fmt.Println("1. 启动服务器\n")
-		fmt.Println("2. 停止服务器\n")
-		fmt.Println("3. 重启服务器\n")
-		fmt.Println("4. 查看服务器状态\n")
-		fmt.Println("5. 更新服务器配置\n")
-		fmt.Println("0. 返回主菜单\n")
+		fmt.Println()
+		fmt.Println("=== OpenVPN 服务器管理 ===")
+		fmt.Println()
+		fmt.Println("1. 启动服务器")
+		fmt.Println("2. 停止服务器")
+		fmt.Println("3. 重启服务器")
+		fmt.Println("4. 查看服务器状态")
+		fmt.Println("5. 更新服务器配置")
+		fmt.Println("0. 返回主菜单")
 		fmt.Print("请选择: ")
 
 		reader := bufio.NewReader(os.Stdin)

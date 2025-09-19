@@ -276,7 +276,7 @@ func InstallEnvironment() error {
 	if err := generateCertificates(); err != nil {
 		return fmt.Errorf("生成证书失败: %v", err)
 	}
-	
+
 	// 生成Openvpn配置文件
 	fmt.Println("正在生成Openvpn配置文件...")
 	if err := generateOpenVPNConfig(); err != nil {
@@ -338,4 +338,33 @@ func CheckEnvironment() error {
 	}
 
 	return nil
-} 
+}
+
+// RunEnvironmentSetup 交互式执行环境检查与安装
+func RunEnvironmentSetup() {
+	fmt.Println("\n=== 运行环境检查 ===")
+	if err := CheckEnvironment(); err != nil {
+		fmt.Printf("检测到环境缺失: %v\n", err)
+		fmt.Println("正在尝试自动安装必要组件...")
+		if errInstall := InstallEnvironment(); errInstall != nil {
+			fmt.Printf("自动安装失败: %v\n", errInstall)
+			fmt.Println("请手动检查系统依赖或日志后重试。")
+			fmt.Println("\n按回车键返回主菜单...")
+			fmt.Scanln()
+			return
+		}
+
+		// 安装完成后重新验证
+		if errRecheck := CheckEnvironment(); errRecheck != nil {
+			fmt.Printf("环境仍然存在问题: %v\n", errRecheck)
+			fmt.Println("请手动排查后重新运行。")
+		} else {
+			fmt.Println("环境安装并验证完成。")
+		}
+	} else {
+		fmt.Println("环境已就绪，无需额外操作。")
+	}
+
+	fmt.Println("\n按回车键返回主菜单...")
+	fmt.Scanln()
+}
