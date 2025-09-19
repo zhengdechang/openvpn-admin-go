@@ -1,0 +1,16 @@
+[program:openvpn-frontend]
+command={{ .BinaryPath }} -g 'daemon off;' -c /etc/nginx/nginx.conf
+directory={{ .WorkingDirectory }}
+autostart={{ .AutoStart }}
+autorestart=true
+startsecs=3
+startretries=3
+user=root
+redirect_stderr=true
+stdout_logfile=/var/log/supervisor/openvpn-frontend.log
+stdout_logfile_maxbytes=10MB
+stdout_logfile_backups=5
+stderr_logfile=/var/log/supervisor/openvpn-frontend-error.log
+stderr_logfile_maxbytes=10MB
+stderr_logfile_backups=5
+priority=210

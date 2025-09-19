@@ -56,10 +56,11 @@ var (
 
 // Config 日志配置
 type Config struct {
-	LogLevel    LogLevel
-	LogFilePath string
-	EnableAPI   bool
-	MaxFileSize int64 // 最大文件大小（字节）
+	LogLevel      LogLevel
+	LogFilePath   string
+	EnableAPI     bool
+	MaxFileSize   int64 // 最大文件大小（字节）
+	EnableConsole bool  // 是否输出到控制台
 }
 
 // Init 初始化日志系统
@@ -76,11 +77,14 @@ func Init(config Config) error {
 		return fmt.Errorf("打开日志文件失败: %v", err)
 	}
 
-	// 创建多重写入器（同时写入文件和控制台）
-	multiWriter := io.MultiWriter(os.Stdout, logFile)
+	// 根据配置决定输出目的地
+	var writer io.Writer = logFile
+	if config.EnableConsole {
+		writer = io.MultiWriter(logFile, os.Stdout)
+	}
 
 	// 创建日志记录器
-	logger := log.New(multiWriter, "", 0)
+	logger := log.New(writer, "", 0)
 
 	DefaultLogger = &WebLogger{
 		logger:    logger,

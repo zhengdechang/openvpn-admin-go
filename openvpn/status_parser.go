@@ -7,14 +7,13 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
 )
 
 const (
-	logHeaderTimeLayout      = "Mon Jan 02 15:04:05 2006" // Adjusted for "Thu Sep 14 10:00:00 2023"
-	onlineThresholdDuration    = 5 * time.Minute
-	clientListHeader         = "HEADER,CLIENT_LIST,Common Name,Real Address,Virtual Address,Virtual IPv6 Address,Bytes Received,Bytes Sent,Connected Since,Connected Since (time_t),Username,Client ID,Peer ID,Data Channel Cipher"
-	routingTableHeader       = "HEADER,ROUTING_TABLE,Virtual Address,Common Name,Real Address,Last Ref,Last Ref (time_t)"
+	logHeaderTimeLayout     = "Mon Jan 02 15:04:05 2006" // Adjusted for "Thu Sep 14 10:00:00 2023"
+	onlineThresholdDuration = 5 * time.Minute
+	clientListHeader        = "HEADER,CLIENT_LIST,Common Name,Real Address,Virtual Address,Virtual IPv6 Address,Bytes Received,Bytes Sent,Connected Since,Connected Since (time_t),Username,Client ID,Peer ID,Data Channel Cipher"
+	routingTableHeader      = "HEADER,ROUTING_TABLE,Virtual Address,Common Name,Real Address,Last Ref,Last Ref (time_t)"
 	// Expected field counts for CSV data lines (e.g., "CLIENT_LIST,..."), not including the initial "HEADER" field if it were on the same line.
 	clientListFieldsCount   = 13 // CLIENT_LIST + 12 data fields
 	routingTableFieldsCount = 6  // ROUTING_TABLE + 5 data fields
@@ -22,24 +21,24 @@ const (
 
 // OpenVPNClientStatus holds information for each client parsed from the status log.
 type OpenVPNClientStatus struct {
-	CommonName            string    `json:"commonName"`
-	Username              string    `json:"username"`
-	RealAddress           string    `json:"realAddress"`
-	VirtualAddress        string    `json:"virtualAddress"` // Populated from CLIENT_LIST
-	VirtualIPv6Address    string    `json:"virtualIPv6Address"` // Added
-	BytesReceived         int64     `json:"bytesReceived"`
-	BytesSent             int64     `json:"bytesSent"`
-	BytesReceivedFormatted string   `json:"bytesReceivedFormatted"` // New field
-	BytesSentFormatted     string   `json:"bytesSentFormatted"`     // New field
-	ConnectedSince        time.Time `json:"connectedSince"`      // Parsed from "Connected Since (time_t)"
-	ConnectedSinceTimeT   int64     `json:"connectedSinceTimeT"` // Added
-	LastRef               time.Time `json:"lastRef"`             // Parsed from "Last Ref (time_t)"
-	LastRefTimeT          int64     `json:"lastRefTimeT"`        // Added
-	ClientID              string    `json:"clientID"`            // Added
-	PeerID                string    `json:"peerID"`              // Added
-	DataChannelCipher     string    `json:"dataChannelCipher"`   // Added
-	IsOnline              bool      `json:"isOnline"`
-	OnlineDurationSeconds int64     `json:"onlineDurationSeconds"`
+	CommonName             string    `json:"commonName"`
+	Username               string    `json:"username"`
+	RealAddress            string    `json:"realAddress"`
+	VirtualAddress         string    `json:"virtualAddress"`     // Populated from CLIENT_LIST
+	VirtualIPv6Address     string    `json:"virtualIPv6Address"` // Added
+	BytesReceived          int64     `json:"bytesReceived"`
+	BytesSent              int64     `json:"bytesSent"`
+	BytesReceivedFormatted string    `json:"bytesReceivedFormatted"` // New field
+	BytesSentFormatted     string    `json:"bytesSentFormatted"`     // New field
+	ConnectedSince         time.Time `json:"connectedSince"`         // Parsed from "Connected Since (time_t)"
+	ConnectedSinceTimeT    int64     `json:"connectedSinceTimeT"`    // Added
+	LastRef                time.Time `json:"lastRef"`                // Parsed from "Last Ref (time_t)"
+	LastRefTimeT           int64     `json:"lastRefTimeT"`           // Added
+	ClientID               string    `json:"clientID"`               // Added
+	PeerID                 string    `json:"peerID"`                 // Added
+	DataChannelCipher      string    `json:"dataChannelCipher"`      // Added
+	IsOnline               bool      `json:"isOnline"`
+	OnlineDurationSeconds  int64     `json:"onlineDurationSeconds"`
 }
 
 // ParseStatusLog reads and parses an OpenVPN status log file (new format).
@@ -59,7 +58,7 @@ func ParseStatusLog(logPath string) ([]OpenVPNClientStatus, time.Time, error) {
 	clientDataMap := make(map[string]OpenVPNClientStatus)
 	// routingDataMap stores data from ROUTING_TABLE, keyed by Common Name for merging
 	routingDataMap := make(map[string]struct {
-		VirtualAddressFromRoute string    // To differentiate from CLIENT_LIST's VirtualAddress if necessary
+		VirtualAddressFromRoute string // To differentiate from CLIENT_LIST's VirtualAddress if necessary
 		LastRefTime             time.Time
 		LastRefTimeT            int64
 	})
@@ -125,24 +124,24 @@ func ParseStatusLog(logPath string) ([]OpenVPNClientStatus, time.Time, error) {
 				connectedSince := time.Unix(connectedSinceEpoch, 0)
 				username := strings.TrimSpace(parts[9])
 				clientIDStr := strings.TrimSpace(parts[10]) // Client ID
-				peerIDStr := strings.TrimSpace(parts[11])     // Peer ID
+				peerIDStr := strings.TrimSpace(parts[11])   // Peer ID
 				dataChannelCipher := strings.TrimSpace(parts[12])
 
 				clientDataMap[commonName] = OpenVPNClientStatus{
-					CommonName:         commonName,
-					Username:           username, // Directly from log
-					RealAddress:        realAddress,
-					VirtualAddress:     virtualAddress, // Directly from CLIENT_LIST
-					VirtualIPv6Address: virtualIPv6Address,
-					BytesReceived:      bytesReceived,
-					BytesSent:          bytesSent,
+					CommonName:             commonName,
+					Username:               username, // Directly from log
+					RealAddress:            realAddress,
+					VirtualAddress:         virtualAddress, // Directly from CLIENT_LIST
+					VirtualIPv6Address:     virtualIPv6Address,
+					BytesReceived:          bytesReceived,
+					BytesSent:              bytesSent,
 					BytesReceivedFormatted: formatBytes(bytesReceived),
-					BytesSentFormatted:    formatBytes(bytesSent),
-					ConnectedSince:     connectedSince,
-					ConnectedSinceTimeT:connectedSinceEpoch,
-					ClientID:           clientIDStr,
-					PeerID:             peerIDStr,
-					DataChannelCipher:  dataChannelCipher,
+					BytesSentFormatted:     formatBytes(bytesSent),
+					ConnectedSince:         connectedSince,
+					ConnectedSinceTimeT:    connectedSinceEpoch,
+					ClientID:               clientIDStr,
+					PeerID:                 peerIDStr,
+					DataChannelCipher:      dataChannelCipher,
 				}
 			}
 		} else if parsingRoutingTable && strings.HasPrefix(line, "ROUTING_TABLE,") {
@@ -262,12 +261,17 @@ func ParseClientStatus(commonName string) (*OpenVPNClientStatus, error) {
 func formatBytes(bytes int64) string {
 	const unit = 1024
 	if bytes < unit {
-		return fmt.Sprintf("%d B", bytes)
+		return fmt.Sprintf("%dB", bytes)
 	}
-	div, exp := int64(unit), 0
-	for n := bytes / unit; n >= unit; n /= unit {
+
+	value := float64(bytes)
+	div := float64(unit)
+	exp := 0
+	for n := value / unit; n >= unit; n /= unit {
 		div *= unit
 		exp++
 	}
-	return fmt.Sprintf("%.1f %cB", float64(bytes)/float64(div), "KMGTPE"[exp])
+
+	formatted := value / div
+	return fmt.Sprintf("%.1f%c", formatted, "KMGTPE"[exp])
 }

@@ -1,7 +1,7 @@
 // In openvpn-web/src/app/dashboard/users/page.tsx
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react"; // Added useCallback
+import React, { useState, useEffect, useCallback, useMemo } from "react"; // Added useCallback
 import { useAuth } from "@/lib/auth-context";
 import {
   Dialog,
@@ -24,6 +24,7 @@ import {
   UserUpdateRequest,
 } from "@/types/types";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableHeader,
@@ -64,6 +65,9 @@ export default function UsersPage() {
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [depts, setDepts] = useState<Department[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [departmentFilter, setDepartmentFilter] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
 
   // Form state for adding a new user
   const [addUserForm, setAddUserForm] = useState<UserUpdateRequest>({
@@ -304,9 +308,67 @@ export default function UsersPage() {
     currentUser?.role === UserRole.SUPERADMIN ||
     currentUser?.role === UserRole.MANAGER;
 
+  const departmentNameById = useMemo(() => {
+    return depts.reduce<Record<string, string>>((acc, dept) => {
+      acc[dept.id] = dept.name;
+      return acc;
+    }, {});
+  }, [depts]);
+
+  const stats = useMemo(() => {
+    const total = users.length;
+    const online = users.filter((u) => u.isOnline).length;
+    const paused = users.filter((u) => u.isPaused).length;
+    const totalTraffic = users.reduce((sum, u) => {
+      return sum + (u.bytesReceived || 0) + (u.bytesSent || 0);
+    }, 0);
+    return { total, online, paused, totalTraffic };
+  }, [users]);
+
+  const normalizedSearch = searchTerm.trim().toLowerCase();
+
+  const filteredUsers = useMemo(() => {
+    return users
+      .filter((user) => {
+        const matchesSearch =
+          normalizedSearch.length === 0 ||
+          user.name?.toLowerCase().includes(normalizedSearch) ||
+          user.email?.toLowerCase().includes(normalizedSearch);
+        const matchesDepartment =
+          departmentFilter === "all" ||
+          (departmentFilter === "none" && !user.departmentId) ||
+          (user.departmentId || "") === departmentFilter;
+        const matchesStatus =
+          statusFilter === "all" ||
+          (statusFilter === "paused" && user.isPaused) ||
+          (statusFilter === "online" && !user.isPaused && user.isOnline) ||
+          (statusFilter === "offline" &&
+            !user.isPaused &&
+            user.isOnline === false);
+        return matchesSearch && matchesDepartment && matchesStatus;
+      })
+      .sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+  }, [
+    users,
+    normalizedSearch,
+    departmentFilter,
+    statusFilter,
+  ]);
+
+  const hasFilters =
+    normalizedSearch.length > 0 ||
+    departmentFilter !== "all" ||
+    statusFilter !== "all";
+
+  const handleClearFilters = () => {
+    setSearchTerm("");
+    setDepartmentFilter("all");
+    setStatusFilter("all");
+  };
+
   return (
-    <MainLayout className="p-4">
-      <div className="flex justify-between items-center mb-4">
+    <MainLayout className="p-4 space-y-6">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <h1 className="text-2xl font-bold">{t("dashboard.users.pageTitle")}</h1>
         {canManageUsers && (
           <Dialog open={addUserDialogOpen} onOpenChange={setAddUserDialogOpen}>
@@ -515,6 +577,153 @@ export default function UsersPage() {
         )}
       </div>
 
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              {t("dashboard.users.statsTotalUsers")}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-semibold">{stats.total}</p>
+            <p className="text-sm text-muted-foreground">
+              {t("dashboard.users.statsTotalUsersHint", {
+                count: stats.total,
+              })}
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              {t("dashboard.users.statsOnline")}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-semibold">{stats.online}</p>
+            <p className="text-sm text-muted-foreground">
+              {t("dashboard.users.statsOnlineHint", {
+                count: stats.online,
+              })}
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              {t("dashboard.users.statsPaused")}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-semibold">{stats.paused}</p>
+            <p className="text-sm text-muted-foreground">
+              {t("dashboard.users.statsPausedHint", {
+                count: stats.paused,
+              })}
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              {t("dashboard.users.statsTraffic")}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-semibold">
+              {formatBytes(stats.totalTraffic, 1)}
+            </p>
+            <p className="text-sm text-muted-foreground">
+              {t("dashboard.users.statsTrafficHint")}
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div className="grid w-full gap-3 md:grid-cols-2 xl:grid-cols-4 xl:max-w-4xl">
+          <div className="flex flex-col gap-1">
+            <Label htmlFor="user-search">
+              {t("dashboard.users.searchLabel", "Search")}
+            </Label>
+            <Input
+              id="user-search"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder={t(
+                "dashboard.users.searchPlaceholder",
+                "Search by name or email"
+              )}
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <Label htmlFor="user-department-filter">
+              {t("dashboard.users.departmentFilterLabel")}
+            </Label>
+            <select
+              id="user-department-filter"
+              value={departmentFilter}
+              onChange={(e) => setDepartmentFilter(e.target.value)}
+              className="border px-2 py-2 rounded-md"
+            >
+              <option value="all">
+                {t("dashboard.users.filterDepartmentAll")}
+              </option>
+              <option value="none">
+                {t("dashboard.users.filterDepartmentNone")}
+              </option>
+              {depts.map((d) => (
+                <option key={d.id} value={d.id}>
+                  {d.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="flex flex-col gap-1">
+            <Label htmlFor="user-status-filter">
+              {t("dashboard.users.statusFilterLabel")}
+            </Label>
+            <select
+              id="user-status-filter"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="border px-2 py-2 rounded-md"
+            >
+              <option value="all">
+                {t("dashboard.users.filterStatusAll")}
+              </option>
+              <option value="online">
+                {t("dashboard.users.filterStatusOnline")}
+              </option>
+              <option value="offline">
+                {t("dashboard.users.filterStatusOffline")}
+              </option>
+              <option value="paused">
+                {t("dashboard.users.filterStatusPaused")}
+              </option>
+            </select>
+          </div>
+        </div>
+        {hasFilters && (
+          <Button
+            variant="ghost"
+            className="self-start lg:self-auto"
+            onClick={handleClearFilters}
+          >
+            {t("common.clearFilters", "Clear filters")}
+          </Button>
+        )}
+      </div>
+
+      <div className="flex items-center justify-between text-sm text-muted-foreground">
+        <span>
+          {t("dashboard.users.resultsSummary", {
+            count: filteredUsers.length,
+            total: users.length,
+          })}
+        </span>
+      </div>
+
       <Dialog open={editUserDialogOpen} onOpenChange={setEditUserDialogOpen}>
         <DialogContent className="sm:max-w-[525px]">
           <DialogHeader>
@@ -717,200 +926,233 @@ export default function UsersPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-[150px]">
+                      <TableHead className="min-w-[160px]">
                         {t("dashboard.users.columnName")}
                       </TableHead>
-                      <TableHead className="w-[200px]">
+                      <TableHead className="min-w-[200px]">
                         {t("dashboard.users.columnEmail")}
                       </TableHead>
-                      <TableHead className="w-[100px]">
+                      <TableHead className="min-w-[120px]">
                         {t("dashboard.users.columnRole")}
                       </TableHead>
-                      <TableHead className="w-[150px]">
+                      <TableHead className="min-w-[160px]">
                         {t("dashboard.users.columnDepartment")}
                       </TableHead>
-                      <TableHead className="w-[120px]">
+                      <TableHead className="min-w-[120px]">
                         {t("dashboard.users.columnFixedIp", "Fixed IP")}
                       </TableHead>
-                      <TableHead className="w-[120px]">
+                      <TableHead className="min-w-[120px]">
                         {t("dashboard.users.columnSubnet", "Subnet")}
                       </TableHead>
-                      <TableHead className="w-[120px]">
+                      <TableHead className="min-w-[140px]">
                         {t(
                           "dashboard.users.columnConnectionIp",
                           "Connection IP"
                         )}
                       </TableHead>
-                      <TableHead className="w-[120px]">
+                      <TableHead className="min-w-[120px]">
                         {t("dashboard.users.columnAllocatedVpnIp", "VPN IP")}
                       </TableHead>
-                      <TableHead className="w-[180px]">
+                      <TableHead className="min-w-[180px]">
                         {t("dashboard.users.columnLastConnection")}
                       </TableHead>
-                      <TableHead className="w-[100px]">
+                      <TableHead className="min-w-[130px]">
                         {t("dashboard.users.columnOnlineStatus")}
                       </TableHead>
-                      <TableHead className="w-[120px]">
+                      <TableHead className="min-w-[160px]">
                         {t("dashboard.users.columnCreator")}
                       </TableHead>
-                      <TableHead className="w-[100px]">
+                      <TableHead className="min-w-[130px]">
                         {t("dashboard.users.columnAccessState", "Access State")}
                       </TableHead>
-                      <TableHead className="w-[120px]">
+                      <TableHead className="min-w-[140px]">
                         {t(
                           "dashboard.users.columnBytesReceived",
                           "Bytes Received"
                         )}
                       </TableHead>
-                      <TableHead className="w-[120px]">
+                      <TableHead className="min-w-[140px]">
                         {t("dashboard.users.columnBytesSent", "Bytes Sent")}
                       </TableHead>
                       <TableHead
-                        className="w-[300px] sticky right-0"
+                        className="sticky right-0 min-w-[280px]"
                         style={{
                           backgroundColor: "#ffffff",
                           boxShadow: "inset 10px 0 0px -9px #0505050f",
                         }}
                       >
-                        {" "}
-                        {/* Increased width for new buttons */}
                         {t("dashboard.users.columnActions")}
                       </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {users.map((u: AdminUser) => (
-                      <TableRow key={u.id}>
-                        <TableCell>{u.name}</TableCell>
-                        <TableCell>{u.email}</TableCell>
-                        <TableCell>{u.role}</TableCell>
-                        <TableCell>
-                          {depts.find((d) => d.id === u.departmentId)?.name ||
-                            t("dashboard.users.emptyDepartment")}
-                        </TableCell>
-                        <TableCell>{u.fixedIp || "-"} </TableCell>
-                        <TableCell>{u.subnet || "-"}</TableCell>
-                        <TableCell>
-                          {u.connectionIp || t("common.na")}
-                        </TableCell>
-                        <TableCell>
-                          {u.allocatedVpnIp || t("common.na")}
-                        </TableCell>
-                        <TableCell>
-                          {u.lastConnectionTime
-                            ? new Date(u.lastConnectionTime).toLocaleString()
-                            : t("common.na")}
-                        </TableCell>
-                        <TableCell>
-                          {typeof u.isOnline === "boolean"
-                            ? u.isOnline
-                              ? t("dashboard.users.statusOnline")
-                              : t("dashboard.users.statusOffline")
-                            : t("common.na")}
-                        </TableCell>
-                        <TableCell>
-                          {users.find((creator) => creator.id === u.creatorId)
-                            ?.name || t("common.na")}
-                        </TableCell>
-                        <TableCell>
-                          {u.isPaused
-                            ? t("dashboard.users.statusPaused", "Paused")
-                            : t("dashboard.users.statusActive", "Active")}
-                        </TableCell>
-                        <TableCell>{formatBytes(u.bytesReceived)}</TableCell>
-                        <TableCell>{formatBytes(u.bytesSent)}</TableCell>
+                    {filteredUsers.length === 0 ? (
+                      <TableRow>
                         <TableCell
-                          className="sticky right-0"
-                          style={{
-                            backgroundColor: "#ffffff",
-                            boxShadow: "inset 10px 0 0px -9px #0505050f",
-                          }}
+                          colSpan={15}
+                          className="py-10 text-center text-muted-foreground"
                         >
-                          <div className="flex items-center justify-center gap-1">
-                            {canManageUsers && (
-                              <>
-                                {u.isPaused ? (
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    className="h-8 px-2"
-                                    onClick={() => handleResumeUser(u.name)}
-                                  >
-                                    {t(
-                                      "dashboard.users.resumeButton",
-                                      "Resume"
-                                    )}
-                                  </Button>
-                                ) : (
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    className="h-8 px-2"
-                                    onClick={() => handlePauseUser(u.name)}
-                                  >
-                                    {t("dashboard.users.pauseButton", "Pause")}
-                                  </Button>
-                                )}
-                              </>
-                            )}
-                            {(currentUser?.role === UserRole.ADMIN ||
-                              currentUser?.role === UserRole.SUPERADMIN ||
-                              (currentUser?.role === UserRole.MANAGER &&
-                                currentUser.departmentId ===
-                                  u.departmentId)) && (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="h-8 px-2"
-                                onClick={() => handleEditClick(u)}
-                              >
-                                {t("common.edit")}
-                              </Button>
-                            )}
-                            {(currentUser?.role === UserRole.SUPERADMIN ||
-                              (currentUser?.role === UserRole.ADMIN &&
-                                u.role !== UserRole.SUPERADMIN) ||
-                              (currentUser?.role === UserRole.MANAGER &&
-                                u.departmentId === currentUser.departmentId &&
-                                u.role !== UserRole.SUPERADMIN &&
-                                u.role !== UserRole.ADMIN)) &&
-                              u.id !== currentUser?.id && (
-                                <Button
-                                  size="sm"
-                                  variant="destructive"
-                                  className="h-8 px-2"
-                                  onClick={() => handleDelete(u.id)}
-                                >
-                                  {t("dashboard.users.deleteButton")}
-                                </Button>
-                              )}
-                            <select
-                              className="border px-1 py-1 rounded-md text-sm h-8"
-                              defaultValue=""
-                              onChange={(e) =>
-                                handleDownload(u.name, e.target.value)
-                              }
-                            >
-                              <option value="" disabled>
-                                {t(
-                                  "dashboard.users.downloadConfigButtonShort",
-                                  "DL"
-                                )}
-                              </option>
-                              <option value="windows">
-                                {t("dashboard.users.osWindows")}
-                              </option>
-                              <option value="macos">
-                                {t("dashboard.users.osMacOS")}
-                              </option>
-                              <option value="linux">
-                                {t("dashboard.users.osLinux")}
-                              </option>
-                            </select>
-                          </div>
+                          {t("dashboard.users.noResults")}
                         </TableCell>
                       </TableRow>
-                    ))}
+                    ) : (
+                      filteredUsers.map((u: AdminUser) => (
+                        <TableRow key={u.id}>
+                          <TableCell className="font-medium">
+                            {u.name}
+                          </TableCell>
+                          <TableCell>{u.email}</TableCell>
+                          <TableCell>
+                            <Badge variant="secondary" className="capitalize">
+                              {t(
+                                `dashboard.users.role${
+                                  u.role.charAt(0).toUpperCase() + u.role.slice(1)
+                                }`,
+                                u.role
+                              )}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            {u.departmentId
+                              ? departmentNameById[u.departmentId] ||
+                                t("dashboard.users.emptyDepartment")
+                              : t("dashboard.users.emptyDepartment")}
+                          </TableCell>
+                          <TableCell>{u.fixedIp || "-"}</TableCell>
+                          <TableCell>{u.subnet || "-"}</TableCell>
+                          <TableCell>
+                            {u.connectionIp || t("common.na")}
+                          </TableCell>
+                          <TableCell>
+                            {u.allocatedVpnIp || t("common.na")}
+                          </TableCell>
+                          <TableCell>
+                            {u.lastConnectionTime
+                              ? new Date(u.lastConnectionTime).toLocaleString()
+                              : t("common.na")}
+                          </TableCell>
+                          <TableCell>
+                            {typeof u.isOnline === "boolean" ? (
+                              <Badge
+                                variant={u.isOnline ? "default" : "secondary"}
+                              >
+                                {u.isOnline
+                                  ? t("dashboard.users.statusOnline")
+                                  : t("dashboard.users.statusOffline")}
+                              </Badge>
+                            ) : (
+                              t("common.na")
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            {users.find((creator) => creator.id === u.creatorId)
+                              ?.name || t("common.na")}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={u.isPaused ? "destructive" : "default"}>
+                              {u.isPaused
+                                ? t("dashboard.users.statusPaused", "Paused")
+                                : t("dashboard.users.statusActive", "Active")}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>{formatBytes(u.bytesReceived)}</TableCell>
+                          <TableCell>{formatBytes(u.bytesSent)}</TableCell>
+                          <TableCell
+                            className="sticky right-0"
+                            style={{
+                              backgroundColor: "#ffffff",
+                              boxShadow: "inset 10px 0 0px -9px #0505050f",
+                            }}
+                          >
+                            <div className="flex flex-wrap items-center justify-center gap-1">
+                              {canManageUsers && (
+                                <>
+                                  {u.isPaused ? (
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      className="h-8 px-2"
+                                      onClick={() => handleResumeUser(u.name)}
+                                    >
+                                      {t(
+                                        "dashboard.users.resumeButton",
+                                        "Resume"
+                                      )}
+                                    </Button>
+                                  ) : (
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      className="h-8 px-2"
+                                      onClick={() => handlePauseUser(u.name)}
+                                    >
+                                      {t(
+                                        "dashboard.users.pauseButton",
+                                        "Pause"
+                                      )}
+                                    </Button>
+                                  )}
+                                </>
+                              )}
+                              {(currentUser?.role === UserRole.ADMIN ||
+                                currentUser?.role === UserRole.SUPERADMIN ||
+                                (currentUser?.role === UserRole.MANAGER &&
+                                  currentUser.departmentId ===
+                                    u.departmentId)) && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="h-8 px-2"
+                                  onClick={() => handleEditClick(u)}
+                                >
+                                  {t("common.edit")}
+                                </Button>
+                              )}
+                              {(currentUser?.role === UserRole.SUPERADMIN ||
+                                (currentUser?.role === UserRole.ADMIN &&
+                                  u.role !== UserRole.SUPERADMIN) ||
+                                (currentUser?.role === UserRole.MANAGER &&
+                                  u.departmentId === currentUser.departmentId &&
+                                  u.role !== UserRole.SUPERADMIN &&
+                                  u.role !== UserRole.ADMIN)) &&
+                                u.id !== currentUser?.id && (
+                                  <Button
+                                    size="sm"
+                                    variant="destructive"
+                                    className="h-8 px-2"
+                                    onClick={() => handleDelete(u.id)}
+                                  >
+                                    {t("dashboard.users.deleteButton")}
+                                  </Button>
+                                )}
+                              <select
+                                className="border px-1 py-1 rounded-md text-sm h-8"
+                                defaultValue=""
+                                onChange={(e) =>
+                                  handleDownload(u.name, e.target.value)
+                                }
+                              >
+                                <option value="" disabled>
+                                  {t(
+                                    "dashboard.users.downloadConfigButtonShort",
+                                    "DL"
+                                  )}
+                                </option>
+                                <option value="windows">
+                                  {t("dashboard.users.osWindows")}
+                                </option>
+                                <option value="macos">
+                                  {t("dashboard.users.osMacOS")}
+                                </option>
+                                <option value="linux">
+                                  {t("dashboard.users.osLinux")}
+                                </option>
+                              </select>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
                   </TableBody>
                 </Table>
               </div>

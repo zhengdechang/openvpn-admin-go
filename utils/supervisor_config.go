@@ -11,13 +11,13 @@ import (
 
 // SupervisorConfig 包含 supervisor 配置的数据结构
 type SupervisorConfig struct {
-	BinaryPath        string
-	WorkingDirectory  string
-	Port              int
-	DBPath            string
-	OpenVPNConfigDir  string
-	OpenVPNAutoStart  bool
-	WebAutoStart      bool
+	BinaryPath       string
+	WorkingDirectory string
+	Port             int
+	DBPath           string
+	OpenVPNConfigDir string
+	OpenVPNAutoStart bool
+	WebAutoStart     bool
 }
 
 // ServiceConfig 单个服务的配置结构
@@ -99,7 +99,16 @@ func InstallWebServiceConfig(config ServiceConfig) error {
 		config.OpenVPNConfigDir = "/etc/openvpn"
 	}
 
-	return installServiceConfig("openvpn-admin-web.conf.j2", constants.SupervisorWebConfigPath, config)
+	return installServiceConfig("openvpn-go-api.conf.j2", constants.SupervisorWebConfigPath, config)
+}
+
+// InstallFrontendServiceConfig 安装前端 (Nginx) 服务配置
+func InstallFrontendServiceConfig(autoStart bool) error {
+	return installServiceConfig("openvpn-frontend.conf.j2", constants.SupervisorFrontendConfigPath, ServiceConfig{
+		BinaryPath:       "/usr/sbin/nginx",
+		WorkingDirectory: "/app",
+		AutoStart:        autoStart,
+	})
 }
 
 // installServiceConfig 通用的服务配置安装函数
@@ -206,6 +215,11 @@ func RemoveOpenVPNServiceConfig() error {
 	return RemoveServiceConfig(constants.SupervisorOpenVPNConfigPath)
 }
 
+// RemoveFrontendServiceConfig 移除前端服务配置
+func RemoveFrontendServiceConfig() error {
+	return RemoveServiceConfig(constants.SupervisorFrontendConfigPath)
+}
+
 // GetSupervisorConfigPath 获取 supervisor 主配置文件路径
 func GetSupervisorConfigPath() string {
 	return constants.SupervisorConfigPath
@@ -226,6 +240,12 @@ func IsWebServiceConfigExists() bool {
 // IsOpenVPNServiceConfigExists 检查 OpenVPN 服务配置文件是否存在
 func IsOpenVPNServiceConfigExists() bool {
 	_, err := os.Stat(constants.SupervisorOpenVPNConfigPath)
+	return err == nil
+}
+
+// IsFrontendServiceConfigExists 检查前端服务配置文件是否存在
+func IsFrontendServiceConfigExists() bool {
+	_, err := os.Stat(constants.SupervisorFrontendConfigPath)
 	return err == nil
 }
 

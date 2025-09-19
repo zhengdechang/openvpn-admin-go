@@ -62,7 +62,7 @@ init_supervisor_config() {
     if [ ! -f "/etc/supervisor/supervisord.conf" ]; then
         log_info "生成 supervisor 主配置文件..."
         cd /app
-        ./openvpn-admin supervisor-config --main-only
+    /app/openvpn-go supervisor-config --main-only
     fi
     
     log_info "Supervisor 配置初始化完成"
@@ -104,13 +104,19 @@ configure_services() {
     WEB_AUTOSTART=${WEB_AUTOSTART:-false}
     
     log_info "配置 OpenVPN-Admin Web 服务 (端口: $WEB_PORT, 自动启动: $WEB_AUTOSTART)"
-    ./openvpn-admin supervisor-config --service web --port $WEB_PORT --autostart $WEB_AUTOSTART
-    
+    /app/openvpn-go supervisor-config --service web --port $WEB_PORT --autostart $WEB_AUTOSTART
+
     # 配置 OpenVPN 服务
     OPENVPN_AUTOSTART=${OPENVPN_AUTOSTART:-false}
-    
+
     log_info "配置 OpenVPN 服务 (自动启动: $OPENVPN_AUTOSTART)"
-    ./openvpn-admin supervisor-config --service openvpn --autostart $OPENVPN_AUTOSTART
+    /app/openvpn-go supervisor-config --service openvpn --autostart $OPENVPN_AUTOSTART
+
+    # 配置前端服务
+    FRONTEND_AUTOSTART=${FRONTEND_AUTOSTART:-false}
+
+    log_info "配置前端服务 (自动启动: $FRONTEND_AUTOSTART)"
+    /app/openvpn-go supervisor-config --service frontend --autostart $FRONTEND_AUTOSTART
     
     # 重新加载配置
     supervisorctl reread
@@ -130,22 +136,24 @@ start_services() {
     sleep 2
 
     case $SERVICE_MODE in
-        "web"|"frontend")
-            log_info "启动 Web 服务模式"
-            supervisorctl start openvpn-admin-web
+        "web"|"api")
+            log_info "启动 API 服务模式"
+            supervisorctl start openvpn-go-api
             ;;
         "openvpn"|"backend")
             log_info "启动 OpenVPN 服务模式"
             supervisorctl start openvpn-server
             ;;
+        "frontend")
+            log_info "启动前端模式"
+            supervisorctl start openvpn-frontend
+            ;;
         "all"|*)
             log_info "启动所有服务"
-            # 先启动 Web 服务
-            supervisorctl start openvpn-admin-web
-            sleep 3
-            # 如果需要，再启动 OpenVPN 服务
+            supervisorctl start openvpn-go-api || true
+            supervisorctl start openvpn-frontend || true
             if [ "$OPENVPN_AUTOSTART" = "true" ]; then
-                supervisorctl start openvpn-server
+                supervisorctl start openvpn-server || true
             fi
             ;;
     esac

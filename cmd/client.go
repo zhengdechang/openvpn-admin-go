@@ -19,14 +19,16 @@ import (
 
 func ClientMenu() {
 	for {
-		fmt.Println("\n=== 客户端管理 ===\n")
-		fmt.Println("1. 创建客户端\n")
-		fmt.Println("2. 删除客户端\n")
-		fmt.Println("3. 暂停客户端\n")
-		fmt.Println("4. 恢复客户端\n")
-		fmt.Println("5. 查看客户端状态\n")
-		fmt.Println("6. 查看所有客户端\n")
-		fmt.Println("0. 返回主菜单\n")
+		fmt.Println()
+		fmt.Println("=== 客户端管理 ===")
+		fmt.Println()
+		fmt.Println("1. 创建客户端")
+		fmt.Println("2. 删除客户端")
+		fmt.Println("3. 暂停客户端")
+		fmt.Println("4. 恢复客户端")
+		fmt.Println("5. 查看客户端状态")
+		fmt.Println("6. 查看所有客户端")
+		fmt.Println("0. 返回主菜单")
 		fmt.Print("请选择操作 (0-6): ")
 
 		reader := bufio.NewReader(os.Stdin)
