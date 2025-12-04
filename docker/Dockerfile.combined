@@ -39,8 +39,8 @@ RUN go mod download
 COPY . .
 
 # Build the Go binary
-RUN CGO_ENABLED=1 go build -ldflags="-s -w" -o openvpn-admin main.go && \
-    ls -la openvpn-admin
+RUN CGO_ENABLED=1 go build -ldflags="-s -w" -o openvpn-go main.go && \
+    ls -la openvpn-go
 
 # Final runtime stage
 FROM ubuntu:22.04
@@ -99,10 +99,10 @@ RUN mkdir -p /app/data \
              /var/run
 
 # Copy built backend binary
-COPY --from=backend-builder /app/openvpn-admin /app/openvpn-admin
+COPY --from=backend-builder /app/openvpn-go /app/openvpn-go
 
 # Make binary executable and verify it exists
-RUN chmod +x /app/openvpn-admin && ls -la /app/openvpn-admin && echo "Binary verified successfully"
+RUN chmod +x /app/openvpn-go && ls -la /app/openvpn-go && echo "Binary verified successfully"
 
 # Copy built frontend (static export)
 COPY --from=frontend-builder /app/frontend/out /app/frontend/out
@@ -110,6 +110,7 @@ COPY --from=frontend-builder /app/frontend/out /app/frontend/out
 COPY template/ /app/template/
 COPY file/ /app/file/
 COPY docker/nginx/ /etc/nginx/
+COPY docker/docker-entrypoint.sh /usr/local/bin/openvpn-entrypoint.sh
 COPY config/ /app/config/
 
 
@@ -119,7 +120,10 @@ RUN mkdir -p /var/log/nginx /var/lib/nginx/tmp /run/nginx && \
     chown -R appuser:appgroup /var/log/nginx /var/lib/nginx /run/nginx
 
 # Set ownership for app directories and make entrypoint executable
-RUN chown -R appuser:appgroup /app
+RUN chown -R appuser:appgroup /app && \
+    chmod +x /usr/local/bin/openvpn-entrypoint.sh && \
+    ln -sf /app/openvpn-go /usr/local/bin/openvpn-go && \
+    ln -sf /app/openvpn-go /usr/local/bin/openvpn-admin
 
 # Set working directory
 WORKDIR /app
@@ -141,5 +145,6 @@ ENV GIN_MODE=release \
     DB_PATH=/app/data/db.sqlite3 \
     OPENVPN_CONFIG_DIR=/etc/openvpn
 
-# Default command - start bash shell for manual execution
+# Default entrypoint and command
+ENTRYPOINT ["/usr/local/bin/openvpn-entrypoint.sh"]
 CMD ["/bin/bash"]

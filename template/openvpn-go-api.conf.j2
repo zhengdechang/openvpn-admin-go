@@ -1,4 +1,4 @@
-[program:openvpn-admin-web]
+[program:openvpn-go-api]
 command={{ .BinaryPath }} web --port {{ .Port }}
 directory={{ .WorkingDirectory }}
 autostart={{ .AutoStart }}
@@ -8,10 +8,10 @@ startretries=3
 user=nobody
 environment=GIN_MODE="release",DB_PATH="{{ .DBPath }}",OPENVPN_CONFIG_DIR="{{ .OpenVPNConfigDir }}"
 redirect_stderr=true
-stdout_logfile=/var/log/supervisor/openvpn-admin-web.log
+stdout_logfile=/var/log/supervisor/openvpn-go-api.log
 stdout_logfile_maxbytes=10MB
 stdout_logfile_backups=5
-stderr_logfile=/var/log/supervisor/openvpn-admin-web-error.log
+stderr_logfile=/var/log/supervisor/openvpn-go-api-error.log
 stderr_logfile_maxbytes=10MB
 stderr_logfile_backups=5
 priority=200

@@ -36,7 +36,7 @@ var logCmd = &cobra.Command{
 }
 
 var rootCmd = &cobra.Command{
-	Use:   "openvpn-admin",
+	Use:   "openvpn-go",
 	Short: "OpenVPN 管理工具",
 	Run: func(cmd *cobra.Command, args []string) {
 		// 设置 Ctrl+C 处理
@@ -62,11 +62,14 @@ var rootCmd = &cobra.Command{
 
 func MainMenu(cfg *openvpn.Config) {
 	for {
-		fmt.Println("\n=== 欢迎使用 OpenVPN 管理程序 ===\n")
-		fmt.Println("1.服务器管理    2.客户端管理 \n")
-		fmt.Println("3.Web服务管理   4.查看配置 \n")
-		fmt.Println("5.查看日志      0.退出程序 \n")
-		fmt.Print("请选择操作 (0-5): ")
+		fmt.Println()
+		fmt.Println("=== 欢迎使用 OpenVPN 管理程序 ===")
+		fmt.Println()
+		fmt.Println("1.运行环境检查/安装")
+		fmt.Println("2.服务器管理    3.客户端管理")
+		fmt.Println("4.Web服务管理   5.查看配置")
+		fmt.Println("6.查看日志      0.退出程序")
+		fmt.Print("请选择操作 (0-6): ")
 
 		var choice string
 		fmt.Scanln(&choice)
@@ -76,14 +79,16 @@ func MainMenu(cfg *openvpn.Config) {
 			fmt.Println("再见!")
 			return
 		case "1":
-			ServerMenu()
+			RunEnvironmentSetup()
 		case "2":
-			ClientMenu()
+			ServerMenu()
 		case "3":
-			WebMenu()
+			ClientMenu()
 		case "4":
-			ShowConfig(cfg)
+			WebMenu()
 		case "5":
+			ShowConfig(cfg)
+		case "6":
 			logCmd.Run(nil, nil)
 		default:
 			fmt.Println("无效选择，请重试")
@@ -135,7 +140,7 @@ func Execute() {
 		if len(os.Args) == 1 {
 			fmt.Println("生产模式：启动Web服务...")
 			// 使用systemd服务启动web服务，使用默认端口
-			startWebService(8085)
+			startAPIService(8085)
 		}
 	}
 

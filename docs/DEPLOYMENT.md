@@ -43,6 +43,7 @@ docker run -d \
   --device /dev/net/tun \
   -p 8085:8085 \
   -p 3000:3000 \
+  -p 80:80 \
   -p 1194:1194/udp \
   -v openvpn_data:/app/data \
   -v openvpn_logs:/app/logs \
@@ -50,6 +51,19 @@ docker run -d \
   -e OPENVPN_SERVER_HOSTNAME=your-server-ip \
   your-dockerhub-username/openvpn-admin-go:latest
 ```
+
+```bash
+# Run the interactive setup menu
+docker exec -it openvpn-admin openvpn-go
+```
+
+The menu handles:
+
+1. Automatic dependency installation (OpenVPN, OpenSSL, Supervisor, certificate templates).
+2. Starting/stopping the backend API (`openvpn-go-api`) with custom ports.
+3. Starting/stopping the Nginx frontend that serves static assets and proxies `/api` to the backend.
+
+You can start the API, the frontend, or both depending on deployment needs.
 
 ### Service Modes
 
@@ -102,7 +116,9 @@ docker-compose -f docker-compose.production.yml down
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `SERVICE_MODE` | Service mode: `all`, `backend`, `frontend` | `all` |
+| `SERVICE_MODE` | Service mode: `all`, `backend`, `frontend`, `api` | `all` |
+| `WEB_AUTOSTART` | Autostart flag for the API service managed by supervisor | `true` |
+| `FRONTEND_AUTOSTART` | Autostart flag for the Nginx frontend | `false` |
 | `BACKEND_PORT` | Backend API port | `8085` |
 | `FRONTEND_PORT` | Frontend UI port | `3000` |
 | `JWT_SECRET` | JWT signing secret | Required |
@@ -126,7 +142,7 @@ Download from GitHub releases:
 # Linux/macOS
 tar -xzf openvpn-admin-linux-amd64.tar.gz
 chmod +x openvpn-admin-linux-amd64
-./openvpn-admin-linux-amd64
+./openvpn-go-linux-amd64
 
 # Windows
 # Extract openvpn-admin-windows-amd64.zip

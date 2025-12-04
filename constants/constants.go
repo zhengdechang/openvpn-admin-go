@@ -13,12 +13,13 @@ const (
 	// Systemd 服务名称
 	ServiceName = "openvpn-server@server.service"
 	// Web 服务名称
-	WebServiceName = "openvpn-admin-web.service"
+	WebServiceName = "openvpn-go-api.service"
 
 	// Supervisor 服务名称
-	SupervisorOpenVPNServiceName = "openvpn-server"
-	SupervisorWebServiceName     = "openvpn-admin-web"
-	SupervisorServiceGroup       = "openvpn-services"
+	SupervisorOpenVPNServiceName  = "openvpn-server"
+	SupervisorWebServiceName      = "openvpn-go-api"
+	SupervisorFrontendServiceName = "openvpn-frontend"
+	SupervisorServiceGroup        = "openvpn-services"
 
 	// 服务器配置路径
 	ServerConfigPath = "/etc/openvpn/server/server.conf"
@@ -51,7 +52,8 @@ const (
 	SupervisorSocketPath         = "/var/run/supervisor.sock"
 	SupervisorPidPath            = "/var/run/supervisord.pid"
 	SupervisorOpenVPNConfigPath  = "/etc/supervisor/conf.d/openvpn-server.conf"
-	SupervisorWebConfigPath      = "/etc/supervisor/conf.d/openvpn-admin-web.conf"
+	SupervisorWebConfigPath      = "/etc/supervisor/conf.d/openvpn-go-api.conf"
+	SupervisorFrontendConfigPath = "/etc/supervisor/conf.d/openvpn-frontend.conf"
 
 	// OpenVPN 默认配置值
 	DefaultOpenVPNPort             = 4500

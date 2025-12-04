@@ -22,14 +22,20 @@ var webPort int
 // WebMenu displays the web service management menu
 func WebMenu() {
 	for {
-		fmt.Println("\n=== Web 服务管理 ===\n")
-		fmt.Println("1.启动服务\n")
-		fmt.Println("2.停止服务\n")
-		fmt.Println("3.重启服务\n")
-		fmt.Println("4.查看服务状态\n")
-		fmt.Println("5.查看服务日志\n")
-		fmt.Println("0.返回主菜单\n")
-		fmt.Print("请选择操作 (0-5): ")
+		fmt.Println()
+		fmt.Println("=== Web 服务管理 ===")
+		fmt.Println()
+		fmt.Println("1.启动 API 服务")
+		fmt.Println("2.停止 API 服务")
+		fmt.Println("3.查看 API 服务状态")
+		fmt.Println("4.查看 API 服务日志")
+		fmt.Println("5.启动前端 (Nginx)")
+		fmt.Println("6.停止前端 (Nginx)")
+		fmt.Println("7.查看前端状态")
+		fmt.Println("8.查看前端日志")
+		fmt.Println("9.查看所有服务状态")
+		fmt.Println("0.返回主菜单")
+		fmt.Print("请选择操作 (0-9): ")
 
 		var choice string
 		fmt.Scanln(&choice)
@@ -38,7 +44,7 @@ func WebMenu() {
 		case "0":
 			return
 		case "1":
-			fmt.Print("请输入Web服务端口 (默认8085): ")
+			fmt.Print("请输入 API 服务端口 (默认8085): ")
 			var portInput string
 			fmt.Scanln(&portInput)
 			port := 8085 // 默认端口
@@ -49,36 +55,31 @@ func WebMenu() {
 					fmt.Println("端口号无效，使用默认端口8085")
 				}
 			}
-			startWebService(port)
+			startAPIService(port)
 		case "2":
-			stopWebService()
+			stopAPIService()
 		case "3":
-			fmt.Print("请输入Web服务端口 (默认8085): ")
-			var portInput string
-			fmt.Scanln(&portInput)
-			port := 8085 // 默认端口
-			if portInput != "" {
-				if p, err := strconv.Atoi(portInput); err == nil && p > 0 && p <= 65535 {
-					port = p
-				} else {
-					fmt.Println("端口号无效，使用默认端口8085")
-				}
-			}
-			restartWebService(port)
+			checkAPIServiceStatus()
 		case "4":
-			checkWebServiceStatus()
+			showAPIServiceLogs()
 		case "5":
-			showWebServiceLogs()
+			startFrontendService()
+		case "6":
+			stopFrontendService()
+		case "7":
+			checkFrontendStatus()
+		case "8":
+			showFrontendLogs()
+		case "9":
+			printAllServiceStatus()
 		default:
 			fmt.Println("无效选择，请重试")
 		}
 	}
 }
 
-
-
-// installWebService 安装web服务的supervisor配置
-func installWebService(port int) error {
+// installAPIService 安装 API 服务的supervisor配置
+func installAPIService(port int) error {
 	// 检查 supervisor 是否已安装
 	if !utils.CheckSupervisorInstalled() {
 		return fmt.Errorf("supervisor 未安装，请先安装 supervisor")
@@ -103,8 +104,8 @@ func installWebService(port int) error {
 		}
 	}
 
-	// 创建 Web 服务配置
-	webConfig := utils.ServiceConfig{
+	// 创建 API 服务配置
+	apiConfig := utils.ServiceConfig{
 		BinaryPath:       binaryPath,
 		WorkingDirectory: wd,
 		Port:             port,
@@ -113,9 +114,9 @@ func installWebService(port int) error {
 		AutoStart:        false, // 默认不自动启动
 	}
 
-	// 安装 Web 服务配置
-	if err := utils.InstallWebServiceConfig(webConfig); err != nil {
-		return fmt.Errorf("安装 Web 服务配置失败: %v", err)
+	// 安装 API 服务配置
+	if err := utils.InstallWebServiceConfig(apiConfig); err != nil {
+		return fmt.Errorf("安装 API 服务配置失败: %v", err)
 	}
 
 	// 启动 supervisord（如果未运行）
@@ -130,18 +131,18 @@ func installWebService(port int) error {
 		}
 	}
 
-	fmt.Printf("Web服务已安装到 supervisor\n")
+	fmt.Printf("API 服务已安装到 supervisor\n")
 	return nil
 }
 
-func startWebService(port int) {
-	// 检查 Web 服务配置是否存在
+func startAPIService(port int) {
+	// 检查 API 服务配置是否存在
 	needReinstall := false
 
 	if !utils.IsWebServiceConfigExists() {
 		// 配置文件不存在，需要安装
 		needReinstall = true
-		fmt.Printf("Web服务配置未安装，正在安装（端口: %d）...\n", port)
+		fmt.Printf("API 服务配置未安装，正在安装（端口: %d）...\n", port)
 	} else {
 		// 配置文件存在，检查端口是否匹配
 		content, err := os.ReadFile(constants.SupervisorWebConfigPath)
@@ -149,14 +150,14 @@ func startWebService(port int) {
 			expectedPort := fmt.Sprintf("--port %d", port)
 			if !strings.Contains(string(content), expectedPort) {
 				needReinstall = true
-				fmt.Printf("检测到端口变化，正在重新安装Web服务（端口: %d）...\n", port)
+				fmt.Printf("检测到端口变化，正在重新安装 API 服务（端口: %d）...\n", port)
 			}
 		}
 	}
 
 	if needReinstall {
-		if err := installWebService(port); err != nil {
-			fmt.Printf("安装Web服务失败: %v\n", err)
+		if err := installAPIService(port); err != nil {
+			fmt.Printf("安装 API 服务失败: %v\n", err)
 			return
 		}
 	}
@@ -170,33 +171,20 @@ func startWebService(port int) {
 		}
 	}
 
-	// 启动 Web 服务
-	fmt.Printf("正在启动Web服务（端口: %d）...\n", port)
+	// 启动 API 服务
+	fmt.Printf("正在启动 API 服务（端口: %d）...\n", port)
 	utils.SupervisorctlStart(constants.SupervisorWebServiceName)
 }
 
-func stopWebService() {
+func stopAPIService() {
 	// 停止服务
-	fmt.Println("正在停止Web服务...")
+	fmt.Println("正在停止 API 服务...")
 	utils.SupervisorctlStop(constants.SupervisorWebServiceName)
 }
 
-func restartWebService(port int) {
-	// 重新安装服务（使用新端口）
-	fmt.Printf("正在重新安装Web服务（端口: %d）...\n", port)
-	if err := installWebService(port); err != nil {
-		fmt.Printf("重新安装Web服务失败: %v\n", err)
-		return
-	}
-
-	// 重启服务
-	fmt.Println("正在重启Web服务...")
-	utils.SupervisorctlRestart(constants.SupervisorWebServiceName)
-}
-
-func checkWebServiceStatus() {
+func checkAPIServiceStatus() {
 	// 获取服务状态
-	fmt.Println("=== Web 服务状态 ===")
+	fmt.Println("=== API 服务状态 ===")
 	statusOutput := utils.SupervisorctlStatus(constants.SupervisorWebServiceName)
 	if statusOutput != "" {
 		fmt.Printf("%s\n", statusOutput)
@@ -204,23 +192,16 @@ func checkWebServiceStatus() {
 		fmt.Println("无法获取服务状态")
 	}
 
-	// 同时显示所有服务状态
-	fmt.Println("\n=== 所有服务状态 ===")
-	allStatus := utils.GetAllServiceStatus()
-	fmt.Printf("%s\n", allStatus)
-
-	fmt.Println("\n按回车键返回...")
-	fmt.Scanln()
+	promptReturn()
 }
 
-func showWebServiceLogs() {
+func showAPIServiceLogs() {
 	// 使用 supervisor 查看服务日志
-	fmt.Println("\n=== Web 服务日志 (最近50行) ===")
+	fmt.Println("\n=== API 服务日志 (最近50行) ===")
 	output, err := utils.GetServiceLogs(constants.SupervisorWebServiceName, 50)
 	if err != nil {
 		fmt.Printf("获取服务日志失败: %v\n", err)
-		fmt.Println("\n按回车键返回...")
-		fmt.Scanln()
+		promptReturn()
 		return
 	}
 
@@ -230,6 +211,80 @@ func showWebServiceLogs() {
 		fmt.Println(output)
 	}
 
+	promptReturn()
+}
+
+func startFrontendService() {
+	if !utils.IsSupervisorConfigExists() {
+		if err := utils.InstallSupervisorMainConfig(); err != nil {
+			fmt.Printf("安装 supervisor 主配置失败: %v\n", err)
+			return
+		}
+	}
+
+	if !utils.IsFrontendServiceConfigExists() {
+		fmt.Println("前端服务配置未安装，正在安装...")
+		if err := utils.InstallFrontendServiceConfig(false); err != nil {
+			fmt.Printf("安装前端服务配置失败: %v\n", err)
+			return
+		}
+	}
+
+	if !utils.IsSupervisordRunning() {
+		fmt.Println("启动 supervisord...")
+		if err := utils.StartSupervisord(""); err != nil {
+			fmt.Printf("启动 supervisord 失败: %v\n", err)
+			return
+		}
+	}
+
+	fmt.Println("正在启动前端 (Nginx)...")
+	utils.SupervisorctlStart(constants.SupervisorFrontendServiceName)
+}
+
+func stopFrontendService() {
+	fmt.Println("正在停止前端 (Nginx)...")
+	utils.SupervisorctlStop(constants.SupervisorFrontendServiceName)
+}
+
+func checkFrontendStatus() {
+	fmt.Println("=== 前端服务状态 ===")
+	statusOutput := utils.SupervisorctlStatus(constants.SupervisorFrontendServiceName)
+	if statusOutput != "" {
+		fmt.Printf("%s\n", statusOutput)
+	} else {
+		fmt.Println("无法获取服务状态")
+	}
+
+	promptReturn()
+}
+
+func showFrontendLogs() {
+	fmt.Println("\n=== 前端服务日志 (最近50行) ===")
+	output, err := utils.GetServiceLogs(constants.SupervisorFrontendServiceName, 50)
+	if err != nil {
+		fmt.Printf("获取服务日志失败: %v\n", err)
+		promptReturn()
+		return
+	}
+
+	if output == "" {
+		fmt.Println("日志为空")
+	} else {
+		fmt.Println(output)
+	}
+
+	promptReturn()
+}
+
+func printAllServiceStatus() {
+	fmt.Println("\n=== 所有服务状态 ===")
+	allStatus := utils.GetAllServiceStatus()
+	fmt.Printf("%s\n", allStatus)
+	promptReturn()
+}
+
+func promptReturn() {
 	fmt.Println("\n按回车键返回...")
 	fmt.Scanln()
 }
