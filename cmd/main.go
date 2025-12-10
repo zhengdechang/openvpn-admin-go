@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
 
 	"openvpn-admin-go/logging"
@@ -115,33 +116,26 @@ func Execute() {
 	// webCmd is added to rootCmd in cmd/web.go's init()
 	rootCmd.AddCommand(logCmd)
 
-	// 检查是否为开发模式，如果是则默认启动web服务
-	if isDev := os.Getenv("DEV"); isDev == "true" || isDev == "1" {
-		// 在开发模式下，如果没有指定命令参数，则默认启动web服务
-		if len(os.Args) == 1 {
-			fmt.Println("检测到开发模式，自动启动Web服务...")
-			// 设置默认端口
-			webPort = 8085
-			// 初始化核心组件
-			if err := CoreInitializer(); err != nil {
-				fmt.Printf("核心初始化失败: %v\n", err)
-				os.Exit(1)
+	// 根据环境变量决定是否默认启动 Web 服务
+	enableWeb := os.Getenv("ENABLE_WEB")
+	if len(os.Args) == 1 && (enableWeb == "true" || enableWeb == "1") {
+		port := 8085
+		if envPort := os.Getenv("WEB_PORT"); envPort != "" {
+			if parsed, err := strconv.Atoi(envPort); err == nil {
+				port = parsed
 			}
-			// 使用 goroutine 启动web服务器
-			go func() {
-				if err := runWebServer(webPort); err != nil {
-					fmt.Printf("Web服务器启动失败: %v\n", err)
-					os.Exit(1)
-				}
-			}()
 		}
-	} else {
-		// 在生产模式下，如果没有指定命令参数，使用systemd服务启动web服务
-		if len(os.Args) == 1 {
-			fmt.Println("生产模式：启动Web服务...")
-			// 使用systemd服务启动web服务，使用默认端口
-			startAPIService(8085)
+
+		fmt.Printf("检测到 ENABLE_WEB 已启用，使用端口 %d 启动 Web 服务...\n", port)
+		if err := CoreInitializer(); err != nil {
+			fmt.Printf("核心初始化失败: %v\n", err)
+			os.Exit(1)
 		}
+		if err := runWebServer(port); err != nil {
+			fmt.Printf("Web服务器启动失败: %v\n", err)
+			os.Exit(1)
+		}
+		return
 	}
 
 	if err := rootCmd.Execute(); err != nil {

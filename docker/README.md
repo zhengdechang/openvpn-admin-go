@@ -13,16 +13,29 @@ This directory contains all Docker-related files for OpenVPN Admin Go deployment
 ### 1. Using Pre-built Image
 
 ```bash
-# Pull and run the latest image
-docker run -d \
+# Pull and run the latest image (CLI menu by default)
+docker run -it --rm \
   --name openvpn-admin \
   --cap-add NET_ADMIN \
   --device /dev/net/tun \
   -p 8085:8085 \
-  -p 3000:3000 \
   -p 1194:1194/udp \
   -v openvpn_data:/app/data \
   -v openvpn_logs:/app/logs \
+  -e JWT_SECRET=your-secret-key \
+  -e OPENVPN_SERVER_HOSTNAME=your-server-ip \
+  zhengdechang/openvpn-admin-go:latest
+
+# Start directly into the built-in web service (same image)
+docker run -d \
+  --name openvpn-admin-web \
+  --cap-add NET_ADMIN \
+  --device /dev/net/tun \
+  -p 8085:8085 \
+  -v openvpn_data:/app/data \
+  -v openvpn_logs:/app/logs \
+  -e ENABLE_WEB=true \
+  -e WEB_PORT=8085 \
   -e JWT_SECRET=your-secret-key \
   -e OPENVPN_SERVER_HOSTNAME=your-server-ip \
   zhengdechang/openvpn-admin-go:latest
@@ -159,7 +172,7 @@ docker logs openvpn-admin
 # Enter container for debugging
 docker exec -it openvpn-admin /bin/bash
 
-# Test health endpoints
+# Test health endpoints (only when ENABLE_WEB=true)
 curl http://localhost:8085/api/health
 curl http://localhost:3000
 ```
@@ -178,9 +191,9 @@ docker run -d --name openvpn-admin-local openvpn-admin-go:local
 
 ### Health Checks
 
-- Backend: `http://localhost:8085/api/health`
-- Frontend: `http://localhost:3000`
-- Combined: Both endpoints available in full stack mode
+- Backend: `http://localhost:8085/api/health` (only when `ENABLE_WEB=true`)
+- Frontend: `http://localhost:3000` (served from the same image; start the web UI explicitly)
+- Combined: Both endpoints available when the web UI is enabled
 
 ### Log Locations
 
