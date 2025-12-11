@@ -18,7 +18,6 @@ docker run -it --rm \
   --name openvpn-admin \
   --cap-add NET_ADMIN \
   --device /dev/net/tun \
-  -p 8085:8085 \
   -p 1194:1194/udp \
   -v openvpn_data:/app/data \
   -v openvpn_logs:/app/logs \
@@ -26,12 +25,13 @@ docker run -it --rm \
   -e OPENVPN_SERVER_HOSTNAME=your-server-ip \
   zhengdechang/openvpn-admin-go:latest
 
-# Start directly into the built-in web service (same image)
-docker run -d \
+# Start the CLI menu and also launch the built-in web service from the same image
+docker run -it --rm \
   --name openvpn-admin-web \
   --cap-add NET_ADMIN \
   --device /dev/net/tun \
   -p 8085:8085 \
+  -p 1194:1194/udp \
   -v openvpn_data:/app/data \
   -v openvpn_logs:/app/logs \
   -e ENABLE_WEB=true \

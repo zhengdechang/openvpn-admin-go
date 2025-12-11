@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
-	"strconv"
 	"syscall"
 
 	"openvpn-admin-go/logging"
@@ -115,28 +114,6 @@ func ShowConfig(cfg *openvpn.Config) {
 func Execute() {
 	// webCmd is added to rootCmd in cmd/web.go's init()
 	rootCmd.AddCommand(logCmd)
-
-	// 根据环境变量决定是否默认启动 Web 服务
-	enableWeb := os.Getenv("ENABLE_WEB")
-	if len(os.Args) == 1 && (enableWeb == "true" || enableWeb == "1") {
-		port := 8085
-		if envPort := os.Getenv("WEB_PORT"); envPort != "" {
-			if parsed, err := strconv.Atoi(envPort); err == nil {
-				port = parsed
-			}
-		}
-
-		fmt.Printf("检测到 ENABLE_WEB 已启用，使用端口 %d 启动 Web 服务...\n", port)
-		if err := CoreInitializer(); err != nil {
-			fmt.Printf("核心初始化失败: %v\n", err)
-			os.Exit(1)
-		}
-		if err := runWebServer(port); err != nil {
-			fmt.Printf("Web服务器启动失败: %v\n", err)
-			os.Exit(1)
-		}
-		return
-	}
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)

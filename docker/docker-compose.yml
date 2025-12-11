@@ -7,7 +7,7 @@ services:
     container_name: openvpn-admin
     image: ${DOCKERHUB_USERNAME}/openvpn-admin:latest
     restart: unless-stopped
-    # 默认启动交互式 CLI 菜单，设置 ENABLE_WEB=true 可直接启动 Web 服务
+    # 默认启动交互式 CLI 菜单，设置 ENABLE_WEB=true 会同时在后台启动 Web 服务
     command: []
     stdin_open: true
     tty: true
