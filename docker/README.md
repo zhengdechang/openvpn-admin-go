@@ -10,6 +10,42 @@ This directory contains all Docker-related files for OpenVPN Admin Go deployment
 
 ## 🚀 Quick Start
 
+### CLI-first walkthrough (with optional web toggle)
+
+```bash
+# 1) Build the image locally (optional if you pull from a registry)
+docker build -f docker/Dockerfile.combined -t openvpn-admin-go:local .
+
+# 2) Start in menu mode only (default)
+docker run -it --rm \
+  --name openvpn-admin-cli \
+  --cap-add NET_ADMIN \
+  --device /dev/net/tun \
+  -e JWT_SECRET=your-secret-key \
+  -e OPENVPN_SERVER_HOSTNAME=your-server-ip \
+  openvpn-admin-go:local
+
+# 3) Start in menu mode and also launch the web/API service in the background
+#    (press CTRL+C in the terminal when finished; the menu stays interactive)
+docker run -it --rm \
+  --name openvpn-admin-web \
+  --cap-add NET_ADMIN \
+  --device /dev/net/tun \
+  -p 8085:8085 \
+  -e ENABLE_WEB=true \
+  -e WEB_PORT=8085 \
+  -e JWT_SECRET=your-secret-key \
+  -e OPENVPN_SERVER_HOSTNAME=your-server-ip \
+  openvpn-admin-go:local
+
+# Example of piping a single command into the menu for automation
+printf "help\\nexit\\n" | docker run -i --rm \
+  --cap-add NET_ADMIN --device /dev/net/tun \
+  -e JWT_SECRET=your-secret-key \
+  -e OPENVPN_SERVER_HOSTNAME=your-server-ip \
+  openvpn-admin-go:local
+```
+
 ### 1. Using Pre-built Image
 
 ```bash
