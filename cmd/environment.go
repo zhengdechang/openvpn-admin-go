@@ -247,14 +247,14 @@ func InstallEnvironment() error {
 
 	fmt.Println("开始安装所需环境...")
 
-	// 安装 OpenVPN 和 OpenSSL
-	fmt.Println("正在安装 OpenVPN 和 OpenSSL...")
+	// 安装 OpenVPN、OpenSSL 和 Supervisor
+	fmt.Println("正在安装 OpenVPN、OpenSSL 和 Supervisor...")
 	if err := utils.ExecCommand("apt-get update"); err != nil {
 		return fmt.Errorf("更新软件包列表失败: %v", err)
 	}
 
-	if err := utils.ExecCommand("apt-get install -y openvpn openssl"); err != nil {
-		return fmt.Errorf("安装 OpenVPN 和 OpenSSL 失败: %v", err)
+	if err := utils.ExecCommand("apt-get install -y openvpn openssl supervisor"); err != nil {
+		return fmt.Errorf("安装 OpenVPN、OpenSSL 或 Supervisor 失败: %v", err)
 	}
 
 	// 创建配置目录
@@ -316,6 +316,11 @@ func CheckEnvironment() error {
 	// 检查OpenSSL是否安装
 	if !utils.CheckCommandExists("openssl") {
 		return fmt.Errorf("未找到OpenSSL，请先安装OpenSSL")
+	}
+
+	// 检查supervisor是否安装
+	if !utils.CheckSupervisorInstalled() {
+		return fmt.Errorf("未找到supervisor，请先安装supervisor")
 	}
 
 	// 检查OpenVPN配置目录是否存在

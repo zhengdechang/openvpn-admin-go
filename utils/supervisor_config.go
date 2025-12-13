@@ -90,7 +90,7 @@ func InstallWebServiceConfig(config ServiceConfig) error {
 		config.WorkingDirectory = wd
 	}
 	if config.Port == 0 {
-		config.Port = 8085
+		config.Port = constants.DefaultWebAPIPort
 	}
 	if config.DBPath == "" {
 		config.DBPath = "/app/data/db.sqlite3"

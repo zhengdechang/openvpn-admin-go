@@ -55,6 +55,11 @@ const (
 	SupervisorWebConfigPath      = "/etc/supervisor/conf.d/openvpn-go-api.conf"
 	SupervisorFrontendConfigPath = "/etc/supervisor/conf.d/openvpn-frontend.conf"
 
+	// Web/Frontend 默认配置
+	DefaultWebAPIPort   = 8085
+	DefaultFrontendPort = 80
+	NginxConfigPath     = "/etc/nginx/nginx.conf"
+
 	// OpenVPN 默认配置值
 	DefaultOpenVPNPort             = 4500
 	DefaultOpenVPNProto            = "tcp6"

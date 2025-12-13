@@ -25,17 +25,15 @@ func WebMenu() {
 		fmt.Println()
 		fmt.Println("=== Web 服务管理 ===")
 		fmt.Println()
-		fmt.Println("1.启动 API 服务")
-		fmt.Println("2.停止 API 服务")
+		fmt.Println("1.启动 Web 服务（前后端）")
+		fmt.Println("2.停止 Web 服务（前后端）")
 		fmt.Println("3.查看 API 服务状态")
 		fmt.Println("4.查看 API 服务日志")
-		fmt.Println("5.启动前端 (Nginx)")
-		fmt.Println("6.停止前端 (Nginx)")
-		fmt.Println("7.查看前端状态")
-		fmt.Println("8.查看前端日志")
-		fmt.Println("9.查看所有服务状态")
+		fmt.Println("5.查看前端状态")
+		fmt.Println("6.查看前端日志")
+		fmt.Println("7.查看所有服务状态")
 		fmt.Println("0.返回主菜单")
-		fmt.Print("请选择操作 (0-9): ")
+		fmt.Print("请选择操作 (0-7): ")
 
 		var choice string
 		fmt.Scanln(&choice)
@@ -44,38 +42,59 @@ func WebMenu() {
 		case "0":
 			return
 		case "1":
-			fmt.Print("请输入 API 服务端口 (默认8085): ")
-			var portInput string
-			fmt.Scanln(&portInput)
-			port := 8085 // 默认端口
-			if portInput != "" {
-				if p, err := strconv.Atoi(portInput); err == nil && p > 0 && p <= 65535 {
-					port = p
-				} else {
-					fmt.Println("端口号无效，使用默认端口8085")
-				}
-			}
-			startAPIService(port)
+			frontendPort := promptFrontendPort()
+			startWebServices(frontendPort)
 		case "2":
-			stopAPIService()
+			stopWebServices()
 		case "3":
 			checkAPIServiceStatus()
 		case "4":
 			showAPIServiceLogs()
 		case "5":
-			startFrontendService()
-		case "6":
-			stopFrontendService()
-		case "7":
 			checkFrontendStatus()
-		case "8":
+		case "6":
 			showFrontendLogs()
-		case "9":
+		case "7":
 			printAllServiceStatus()
 		default:
 			fmt.Println("无效选择，请重试")
 		}
 	}
+}
+
+func promptFrontendPort() int {
+	fmt.Printf("请输入前端 (Nginx) 监听端口 (默认%d): ", constants.DefaultFrontendPort)
+	var portInput string
+	fmt.Scanln(&portInput)
+
+	port := constants.DefaultFrontendPort
+	if portInput != "" {
+		if p, err := strconv.Atoi(portInput); err == nil && p > 0 && p <= 65535 {
+			port = p
+		} else {
+			fmt.Printf("端口号无效，使用默认端口%d\n", constants.DefaultFrontendPort)
+		}
+	}
+
+	return port
+}
+
+func startWebServices(frontendPort int) {
+	backendPort := constants.DefaultWebAPIPort
+	fmt.Printf("后端 API 端口固定为 %d\n", backendPort)
+	startAPIService(backendPort)
+
+	if err := startFrontendService(frontendPort); err != nil {
+		fmt.Printf("启动前端失败: %v\n", err)
+		return
+	}
+
+	fmt.Println("前后端服务已启动")
+}
+
+func stopWebServices() {
+	stopFrontendService()
+	stopAPIService()
 }
 
 // installAPIService 安装 API 服务的supervisor配置
@@ -214,32 +233,38 @@ func showAPIServiceLogs() {
 	promptReturn()
 }
 
-func startFrontendService() {
+func startFrontendService(port int) error {
 	if !utils.IsSupervisorConfigExists() {
 		if err := utils.InstallSupervisorMainConfig(); err != nil {
-			fmt.Printf("安装 supervisor 主配置失败: %v\n", err)
-			return
+			return fmt.Errorf("安装 supervisor 主配置失败: %v", err)
 		}
+	}
+
+	if err := utils.UpdateNginxListenPort(constants.NginxConfigPath, port); err != nil {
+		return fmt.Errorf("更新前端监听端口失败: %v", err)
 	}
 
 	if !utils.IsFrontendServiceConfigExists() {
 		fmt.Println("前端服务配置未安装，正在安装...")
 		if err := utils.InstallFrontendServiceConfig(false); err != nil {
-			fmt.Printf("安装前端服务配置失败: %v\n", err)
-			return
+			return fmt.Errorf("安装前端服务配置失败: %v", err)
 		}
 	}
 
 	if !utils.IsSupervisordRunning() {
 		fmt.Println("启动 supervisord...")
 		if err := utils.StartSupervisord(""); err != nil {
-			fmt.Printf("启动 supervisord 失败: %v\n", err)
-			return
+			return fmt.Errorf("启动 supervisord 失败: %v", err)
+		}
+	} else {
+		if err := utils.SupervisorctlReload(); err != nil {
+			return fmt.Errorf("重新加载 supervisor 配置失败: %v", err)
 		}
 	}
 
-	fmt.Println("正在启动前端 (Nginx)...")
+	fmt.Printf("正在启动前端 (Nginx)（端口: %d）...\n", port)
 	utils.SupervisorctlStart(constants.SupervisorFrontendServiceName)
+	return nil
 }
 
 func stopFrontendService() {
@@ -352,6 +377,6 @@ func init() {
 			}
 		},
 	}
-	webServerCmd.Flags().IntVarP(&webPort, "port", "p", 8085, "Web 服务器监听的端口")
+	webServerCmd.Flags().IntVarP(&webPort, "port", "p", constants.DefaultWebAPIPort, "Web 服务器监听的端口")
 	rootCmd.AddCommand(webServerCmd)
 }
