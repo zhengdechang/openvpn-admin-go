@@ -58,6 +58,20 @@ go run main.go
 go run cmd/main.go --help
 ```
 
+#### Run the compiled binary (no Docker)
+
+```bash
+# Build the binary
+go build -o bin/openvpn-go .
+
+# Launch the interactive menu
+./bin/openvpn-go
+
+# (Optional) Start the web/API service from the same binary
+# Run this in another terminal or background it so the menu stays interactive
+./bin/openvpn-go web --port 8085
+```
+
 **Available CLI Operations:**
 
 - Server management (start/stop/restart/configure)

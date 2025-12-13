@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"os/signal"
@@ -60,19 +61,34 @@ func InitCore() error {
 
 	// 检查环境
 	fmt.Println("正在检查运行环境...")
+	envReady := true
 	if err := cmd.CheckEnvironment(); err != nil {
+		envReady = false
 		fmt.Printf("环境检查失败: %v\n", err)
 		fmt.Println("尝试自动安装所需环境...")
+		skipRecheck := false
 		if errInstall := cmd.InstallEnvironment(); errInstall != nil {
-			return fmt.Errorf("环境自动安装失败: %v\n请确保权限、软件源和网络连接正常，然后重试。", errInstall)
+			if errors.Is(errInstall, cmd.ErrRootRequired) {
+				fmt.Println("自动安装需要 root 权限，请使用 sudo 运行本程序或手动安装 OpenVPN / OpenSSL 后重试。")
+				skipRecheck = true
+			} else {
+				return fmt.Errorf("环境自动安装失败: %v\n请确保权限、软件源和网络连接正常，然后重试。", errInstall)
+			}
 		}
 		// 重新检查环境
-		if errCheckAgain := cmd.CheckEnvironment(); errCheckAgain != nil {
-			return fmt.Errorf("环境检查仍然失败: %v\n请手动检查并修复问题后重新运行程序。", errCheckAgain)
+		if !skipRecheck {
+			if errCheckAgain := cmd.CheckEnvironment(); errCheckAgain != nil {
+				return fmt.Errorf("环境检查仍然失败: %v\n请手动检查并修复问题后重新运行程序。", errCheckAgain)
+			}
+			envReady = true
 		}
 	}
 
-	fmt.Println("环境检查通过")
+	if envReady {
+		fmt.Println("环境检查通过")
+	} else {
+		fmt.Println("环境未就绪，请根据提示完成依赖安装后重试。")
+	}
 
 	// 初始化数据库
 	if err := database.Init(); err != nil {

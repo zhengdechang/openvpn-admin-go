@@ -58,6 +58,20 @@ go run main.go
 go run cmd/main.go --help
 ```
 
+#### 直接运行编译后的二进制（无 Docker）
+
+```bash
+# 编译二进制
+go build -o bin/openvpn-go .
+
+# 启动交互式菜单
+./bin/openvpn-go
+
+# （可选）使用同一个二进制启动 Web/API 服务
+# 可在另一终端或后台运行，保证菜单保持可用
+./bin/openvpn-go web --port 8085
+```
+
 **可用的 CLI 操作：**
 
 - 服务器管理（启动/停止/重启/配置）

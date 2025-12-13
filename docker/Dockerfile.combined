@@ -131,9 +131,9 @@ WORKDIR /app
 # Expose ports
 EXPOSE 8085 3000 80 1194/udp
 
-# Health check
+# Health check (only meaningful when web is enabled)
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-    CMD curl -f http://localhost:8085/api/health || exit 1
+    CMD ["/bin/sh", "-c", "if [ \"$ENABLE_WEB\" = \"true\" ] || [ \"$ENABLE_WEB\" = \"1\" ]; then curl -f http://localhost:${WEB_PORT:-8085}/api/health; else exit 0; fi"]
 
 # Create volume mount points
 VOLUME ["/app/data", "/app/logs", "/app/config", "/etc/openvpn"]
@@ -147,4 +147,4 @@ ENV GIN_MODE=release \
 
 # Default entrypoint and command
 ENTRYPOINT ["/usr/local/bin/openvpn-entrypoint.sh"]
-CMD ["/bin/bash"]
+CMD []

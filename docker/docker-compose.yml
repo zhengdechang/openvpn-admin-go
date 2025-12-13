@@ -7,7 +7,8 @@ services:
     container_name: openvpn-admin
     image: ${DOCKERHUB_USERNAME}/openvpn-admin:latest
     restart: unless-stopped
-    command: ["/bin/bash"]
+    # 默认启动交互式 CLI 菜单，设置 ENABLE_WEB=true 会同时在后台启动 Web 服务
+    command: []
     stdin_open: true
     tty: true
 
@@ -33,11 +34,8 @@ services:
       - DB_PATH=/app/data/db.sqlite3
       - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key}
       - OPENVPN_STATUS_LOG_PATH=/var/log/openvpn/status.log
-      - SERVICE_MODE=${SERVICE_MODE:-all}
+      - ENABLE_WEB=${ENABLE_WEB:-false}
       - WEB_PORT=${WEB_PORT:-8085}
-      - WEB_AUTOSTART=${WEB_AUTOSTART:-true}
-      - FRONTEND_AUTOSTART=${FRONTEND_AUTOSTART:-false}
-      - OPENVPN_AUTOSTART=${OPENVPN_AUTOSTART:-false}
 
     # Volume mounts
     volumes:
@@ -54,7 +52,7 @@ services:
 
     # Health check
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8085/api/health"]
+      test: ["CMD-SHELL", "if [ \"$ENABLE_WEB\" = \"true\" ] || [ \"$ENABLE_WEB\" = \"1\" ]; then curl -f http://localhost:${WEB_PORT:-8085}/api/health; else exit 0; fi"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -67,34 +65,3 @@ services:
         max-size: "10m"
         max-file: "3"
 
-  # Frontend service (nginx)
-  openvpn-frontend:
-    image: ${DOCKERHUB_USERNAME}/openvpn-admin:latest
-    container_name: openvpn-frontend
-    restart: unless-stopped
-    command: ["nginx", "-g", "daemon off;"]
-    depends_on:
-      - openvpn-admin
-
-    # Network configuration
-    network_mode: host
-
-    # Environment variables
-    environment:
-      - NODE_ENV=production
-      - TZ=Asia/Shanghai
-
-    # Health check
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
-
-    # Logging
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "5m"
-        max-file: "3"

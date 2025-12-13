@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -10,6 +11,9 @@ import (
 	"openvpn-admin-go/openvpn"
 	"openvpn-admin-go/utils"
 )
+
+// ErrRootRequired 表示自动安装环境需要 root 权限
+var ErrRootRequired = errors.New("自动安装需要 root 权限")
 
 func CheckCertFiles() error {
 	// 定义需要检查的证书文件
@@ -238,7 +242,7 @@ func createOpenVPNDirectory() error {
 func InstallEnvironment() error {
 	// 检查是否以root权限运行
 	if os.Geteuid() != 0 {
-		return fmt.Errorf("请使用 sudo 运行程序")
+		return ErrRootRequired
 	}
 
 	fmt.Println("开始安装所需环境...")
