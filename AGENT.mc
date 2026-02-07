@@ -14,6 +14,7 @@
 - CLI help: `go run cmd/main.go --help`
 - Backend build: `go build -o openvpn-go main.go`
 - Backend tests: `go test ./...`
+- Go format: `gofmt -w .`
 - Frontend dev: `cd openvpn-web && npm install && npm run dev`
 - Frontend build: `cd openvpn-web && npm run build`
 - Frontend lint: `cd openvpn-web && npm run lint`
