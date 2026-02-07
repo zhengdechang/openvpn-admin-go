@@ -162,8 +162,8 @@ jobs:
                 comments = []
 
           summary = re.sub(r"\\n*Inline Comments.*?```json\\s*.*?```\\s*", "\\n", text, flags=re.S | re.I).strip()
-          pathlib.Path("codex-summary.md").write_text(summary + \"\\n\", encoding=\"utf-8\")
-          pathlib.Path(\"codex-inline-comments.json\").write_text(json.dumps(comments, ensure_ascii=False), encoding=\"utf-8\")
+          pathlib.Path("codex-summary.md").write_text(summary + "\\n", encoding="utf-8")
+          pathlib.Path("codex-inline-comments.json").write_text(json.dumps(comments, ensure_ascii=False), encoding="utf-8")
           PY
 
       - name: Add review-bot label

@@ -26,7 +26,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.payload.pull_request.number,
-              body: '/gemini summary',
+              body: '@gemini summary',
             });
 
       - name: Trigger Gemini review
@@ -38,5 +38,5 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.payload.pull_request.number,
-              body: '/gemini review',
+              body: '@gemini review',
             });
