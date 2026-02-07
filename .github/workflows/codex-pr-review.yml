@@ -13,7 +13,7 @@ permissions: {}
 
 jobs:
   codex:
-    if: ${{ github.event.pull_request.head.repo.full_name == github.repository && secrets.OPENAI_API_KEY != '' }}
+    if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
@@ -33,8 +33,20 @@ jobs:
             ${{ github.event.pull_request.base.ref }} \
             +refs/pull/${{ github.event.pull_request.number }}/head
 
+      - name: Guard (check OpenAI key)
+        id: guard
+        run: |
+          if [ -z "${OPENAI_API_KEY}" ]; then
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          fi
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
       - name: Build prompt
         id: prompt
+        if: ${{ steps.guard.outputs.enabled == 'true' }}
         run: |
           set -euo pipefail
           base_ref="origin/${{ github.event.pull_request.base.ref }}"
@@ -68,6 +80,7 @@ jobs:
       - name: Run Codex
         id: run_codex
         uses: openai/codex-action@v1
+        if: ${{ steps.guard.outputs.enabled == 'true' }}
         with:
           # ✅ 官方推荐用这个 input 传 key（而不是 env）
           openai-api-key: ${{ secrets.OPENAI_API_KEY }}
@@ -90,7 +103,7 @@ jobs:
           # allow-bots: "dependabot[bot]"
 
       - name: Upload Codex output
-        if: always()
+        if: ${{ steps.guard.outputs.enabled == 'true' }}
         uses: actions/upload-artifact@v4
         with:
           name: codex-output
