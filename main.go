@@ -38,7 +38,7 @@ func InitCore() error {
 	// 初始化日志系统
 	logConfigPath := "config/logging.json"
 	if err := logging.InitFromConfig(logConfigPath); err != nil {
-		fmt.Printf("日志系统初始化失败: %v\n", err)
+		fmt.Printf("日志系统初始化失败 (%s): %v\n", logConfigPath, err)
 		// 使用默认配置继续运行
 		defaultConfig := logging.Config{
 			LogLevel:      logging.INFO,

@@ -72,7 +72,10 @@ func MainMenu(cfg *openvpn.Config) {
 		fmt.Print("请选择操作 (0-6): ")
 
 		var choice string
-		fmt.Scanln(&choice)
+		if _, err := fmt.Scanln(&choice); err != nil {
+			fmt.Println("输入读取失败，请重试")
+			continue
+		}
 
 		switch choice {
 		case "0":

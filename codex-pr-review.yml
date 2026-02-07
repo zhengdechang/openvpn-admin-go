@@ -198,74 +198,65 @@ jobs:
               }
             }
 
-      - name: Post review (summary + inline comments)
+      - name: Post inline review comments
         if: ${{ steps.guard.outputs.enabled == 'true' && steps.run_codex.outcome == 'success' }}
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.REVIEW_BOT_TOKEN != '' && secrets.REVIEW_BOT_TOKEN || secrets.GITHUB_TOKEN }}
           script: |
             const fs = require('fs');
-            const summary = fs.readFileSync('codex-summary.md', 'utf8').trim();
             const raw = fs.readFileSync('codex-inline-comments.json', 'utf8').trim();
-
+            if (!raw) return;
             let comments = [];
-            if (raw) {
-              try {
-                comments = JSON.parse(raw);
-              } catch (e) {
-                core.warning(`Failed to parse inline comments JSON: ${e.message}`);
-                comments = [];
-              }
+            try {
+              comments = JSON.parse(raw);
+            } catch (e) {
+              core.warning(`Failed to parse inline comments JSON: ${e.message}`);
+              return;
             }
+            if (!Array.isArray(comments) || comments.length === 0) return;
 
             const owner = context.repo.owner;
             const repo = context.repo.repo;
             const pull_number = context.payload.pull_request.number;
             const commit_id = context.payload.pull_request.head.sha;
 
-            const mapped = Array.isArray(comments)
-              ? comments
-                  .filter(c => c && c.path)
-                  .map(c => {
-                    const line = Number.parseInt(c.line, 10);
-                    if (!Number.isFinite(line) || line <= 0) return null;
-                    const side = String(c.side || 'RIGHT').toUpperCase();
-                    if (!['RIGHT', 'LEFT'].includes(side)) return null;
-                    const body = String(c.body || '').trim();
-                    if (!body) return null;
-                    return {
-                      path: String(c.path),
-                      line,
-                      side,
-                      body: c.severity ? `${body}\n\nSeverity: ${c.severity}` : body,
-                    };
-                  })
-                  .filter(Boolean)
-              : [];
+            const mapped = comments
+              .filter(c => c && c.path && Number.isInteger(c.line))
+              .map(c => ({
+                path: c.path,
+                line: c.line,
+                side: c.side || 'RIGHT',
+                body: c.severity ? `${c.body}\n\nSeverity: ${c.severity}` : c.body,
+              }));
 
-            if (!summary && mapped.length === 0) return;
+            if (mapped.length === 0) return;
 
-            try {
-              await github.rest.pulls.createReview({
-                owner,
-                repo,
-                pull_number,
-                commit_id,
-                event: 'COMMENT',
-                body: summary || undefined,
-                comments: mapped.length ? mapped : undefined,
-              });
-            } catch (error) {
-              core.warning(`createReview failed: ${error.message}`);
-              if (summary) {
-                await github.rest.issues.createComment({
-                  owner,
-                  repo,
-                  issue_number: pull_number,
-                  body: summary,
-                });
-              }
-            }
+            await github.rest.pulls.createReview({
+              owner,
+              repo,
+              pull_number,
+              commit_id,
+              event: 'COMMENT',
+              comments: mapped,
+            });
+
+      - name: Post PR summary comment
+        if: ${{ steps.guard.outputs.enabled == 'true' && steps.run_codex.outcome == 'success' }}
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.REVIEW_BOT_TOKEN != '' && secrets.REVIEW_BOT_TOKEN || secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const body = fs.readFileSync('codex-summary.md', 'utf8').trim();
+            if (!body) return;
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              body,
+            });
 
       - name: Upload Codex output
         if: ${{ steps.guard.outputs.enabled == 'true' }}
