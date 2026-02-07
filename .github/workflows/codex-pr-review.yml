@@ -30,8 +30,8 @@ jobs:
       - name: Pre-fetch base and head refs
         run: |
           git fetch --no-tags origin \
-            ${{ github.event.pull_request.base.ref }} \
-            +refs/pull/${{ github.event.pull_request.number }}/head
+            ${{ github.event.pull_request.base.sha }} \
+            ${{ github.event.pull_request.head.sha }}
 
       - name: Guard (check OpenAI key)
         id: guard
@@ -49,8 +49,8 @@ jobs:
         if: ${{ steps.guard.outputs.enabled == 'true' }}
         run: |
           set -euo pipefail
-          base_ref="origin/${{ github.event.pull_request.base.ref }}"
-          head_ref="refs/pull/${{ github.event.pull_request.number }}/head"
+          base_ref="${{ github.event.pull_request.base.sha }}"
+          head_ref="${{ github.event.pull_request.head.sha }}"
           files="$(git diff --name-only "$base_ref" "$head_ref")"
           out="codex-prompt.md"
 
