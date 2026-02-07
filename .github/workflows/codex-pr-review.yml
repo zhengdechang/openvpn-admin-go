@@ -18,8 +18,8 @@ jobs:
     timeout-minutes: 20
     permissions:
       contents: read
-    outputs:
-      final_message: ${{ steps.run_codex.outputs.final-message }}
+      issues: write
+      pull-requests: write
     steps:
       - uses: actions/checkout@v5
         with:
@@ -57,6 +57,38 @@ jobs:
           cat .github/codex/prompts/global-review.md > "$out"
           echo "" >> "$out"
 
+          # Append nearest AGENT.mc files for changed paths (walk up from file dir).
+          declare -A agent_seen
+          agent_list=()
+          while IFS= read -r file; do
+            [ -z "$file" ] && continue
+            dir="$(dirname "$file")"
+            while true; do
+              candidate="${dir}/AGENT.mc"
+              if [ -f "$candidate" ]; then
+                if [ -z "${agent_seen[$candidate]+x}" ]; then
+                  agent_seen["$candidate"]=1
+                  agent_list+=("$candidate")
+                fi
+                break
+              fi
+              if [ "$dir" = "." ]; then
+                break
+              fi
+              dir="$(dirname "$dir")"
+            done
+          done <<< "$files"
+
+          if [ "${#agent_list[@]}" -gt 0 ]; then
+            echo "## AGENT Guidance" >> "$out"
+            for agent in "${agent_list[@]}"; do
+              echo "" >> "$out"
+              echo "### ${agent}" >> "$out"
+              cat "$agent" >> "$out"
+              echo "" >> "$out"
+            done
+          fi
+
           added=0
           if echo "$files" | grep -q '^openvpn-web/'; then
             cat .github/codex/prompts/openvpn-web-review.md >> "$out"
@@ -76,6 +108,13 @@ jobs:
           fi
 
           echo "file=$out" >> "$GITHUB_OUTPUT"
+
+      - name: Print prompt
+        if: ${{ steps.guard.outputs.enabled == 'true' }}
+        run: |
+          echo "----- CODEX PROMPT -----"
+          cat codex-prompt.md
+          echo "----- END CODEX PROMPT -----"
 
       - name: Run Codex
         id: run_codex
@@ -102,6 +141,125 @@ jobs:
           # allow-users: "alice,bob"
           # allow-bots: "dependabot[bot]"
 
+      - name: Parse Codex output
+        if: ${{ steps.guard.outputs.enabled == 'true' && steps.run_codex.outcome == 'success' }}
+        run: |
+          python - <<'PY'
+          import json
+          import pathlib
+          import re
+
+          text = pathlib.Path("codex-output.md").read_text(encoding="utf-8")
+
+          match = re.search(r"Inline Comments.*?```json\\s*(.*?)```", text, re.S | re.I)
+          comments = []
+          if match:
+            block = match.group(1).strip()
+            if block:
+              try:
+                comments = json.loads(block)
+              except json.JSONDecodeError:
+                comments = []
+
+          summary = re.sub(r"\\n*Inline Comments.*?```json\\s*.*?```\\s*", "\\n", text, flags=re.S | re.I).strip()
+          pathlib.Path("codex-summary.md").write_text(summary + \"\\n\", encoding=\"utf-8\")
+          pathlib.Path(\"codex-inline-comments.json\").write_text(json.dumps(comments, ensure_ascii=False), encoding=\"utf-8\")
+          PY
+
+      - name: Add review-bot label
+        if: ${{ steps.guard.outputs.enabled == 'true' }}
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.REVIEW_BOT_TOKEN != '' && secrets.REVIEW_BOT_TOKEN || secrets.GITHUB_TOKEN }}
+          script: |
+            const core = require('@actions/core');
+            const label = 'review-bot';
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const issue_number = context.payload.pull_request.number;
+
+            try {
+              await github.rest.issues.addLabels({ owner, repo, issue_number, labels: [label] });
+            } catch (error) {
+              if (error.status === 404) {
+                try {
+                  await github.rest.issues.createLabel({
+                    owner,
+                    repo,
+                    name: label,
+                    color: '1d76db',
+                    description: 'Automated review bot',
+                  });
+                  await github.rest.issues.addLabels({ owner, repo, issue_number, labels: [label] });
+                } catch (inner) {
+                  core.warning(`Failed to create/apply label: ${inner.message}`);
+                }
+              } else {
+                core.warning(`Failed to apply label: ${error.message}`);
+              }
+            }
+
+      - name: Post inline review comments
+        if: ${{ steps.guard.outputs.enabled == 'true' && steps.run_codex.outcome == 'success' }}
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.REVIEW_BOT_TOKEN != '' && secrets.REVIEW_BOT_TOKEN || secrets.GITHUB_TOKEN }}
+          script: |
+            const core = require('@actions/core');
+            const fs = require('fs');
+            const raw = fs.readFileSync('codex-inline-comments.json', 'utf8').trim();
+            if (!raw) return;
+            let comments = [];
+            try {
+              comments = JSON.parse(raw);
+            } catch (e) {
+              core.warning(`Failed to parse inline comments JSON: ${e.message}`);
+              return;
+            }
+            if (!Array.isArray(comments) || comments.length === 0) return;
+
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const pull_number = context.payload.pull_request.number;
+            const commit_id = context.payload.pull_request.head.sha;
+
+            const mapped = comments
+              .filter(c => c && c.path && Number.isInteger(c.line))
+              .map(c => ({
+                path: c.path,
+                line: c.line,
+                side: c.side || 'RIGHT',
+                body: c.severity ? `${c.body}\n\nSeverity: ${c.severity}` : c.body,
+              }));
+
+            if (mapped.length === 0) return;
+
+            await github.rest.pulls.createReview({
+              owner,
+              repo,
+              pull_number,
+              commit_id,
+              event: 'COMMENT',
+              comments: mapped,
+            });
+
+      - name: Post PR summary comment
+        if: ${{ steps.guard.outputs.enabled == 'true' && steps.run_codex.outcome == 'success' }}
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.REVIEW_BOT_TOKEN != '' && secrets.REVIEW_BOT_TOKEN || secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const body = fs.readFileSync('codex-summary.md', 'utf8').trim();
+            if (!body) return;
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              body,
+            });
+
       - name: Upload Codex output
         if: ${{ steps.guard.outputs.enabled == 'true' }}
         uses: actions/upload-artifact@v4
@@ -109,25 +267,3 @@ jobs:
           name: codex-output
           path: codex-output.md
           if-no-files-found: ignore
-
-  post_feedback:
-    runs-on: ubuntu-latest
-    needs: codex
-    if: ${{ needs.codex.result == 'success' && needs.codex.outputs.final_message != '' }}
-    permissions:
-      issues: write
-      pull-requests: write
-    steps:
-      - name: Post Codex feedback as PR comment
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.payload.pull_request.number,
-              body: process.env.CODEX_FINAL_MESSAGE,
-            });
-        env:
-          CODEX_FINAL_MESSAGE: ${{ needs.codex.outputs.final_message }}
