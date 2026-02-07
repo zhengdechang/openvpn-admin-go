@@ -225,15 +225,17 @@ jobs:
 
             const mapped = Array.isArray(comments)
               ? comments
-                  .filter(c => c && c.path && Number.isInteger(c.line) && c.line > 0)
+                  .filter(c => c && c.path)
                   .map(c => {
+                    const line = Number.parseInt(c.line, 10);
+                    if (!Number.isFinite(line) || line <= 0) return null;
                     const side = String(c.side || 'RIGHT').toUpperCase();
                     if (!['RIGHT', 'LEFT'].includes(side)) return null;
                     const body = String(c.body || '').trim();
                     if (!body) return null;
                     return {
-                      path: c.path,
-                      line: c.line,
+                      path: String(c.path),
+                      line,
                       side,
                       body: c.severity ? `${body}\n\nSeverity: ${c.severity}` : body,
                     };
