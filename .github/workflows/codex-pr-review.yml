@@ -1,0 +1,120 @@
+name: Codex PR Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+# 避免同一个 PR 多次 push 时并发跑一堆 review
+concurrency:
+  group: codex-review-${{ github.repository }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  codex:
+    if: ${{ github.event.pull_request.head.repo.full_name == github.repository && secrets.OPENAI_API_KEY != '' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    outputs:
+      final_message: ${{ steps.run_codex.outputs.final-message }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          # 用 GitHub 生成的 merge ref，review 更贴近实际合并后的结果
+          ref: refs/pull/${{ github.event.pull_request.number }}/merge
+          fetch-depth: 0
+
+      - name: Pre-fetch base and head refs
+        run: |
+          git fetch --no-tags origin \
+            ${{ github.event.pull_request.base.ref }} \
+            +refs/pull/${{ github.event.pull_request.number }}/head
+
+      - name: Build prompt
+        id: prompt
+        run: |
+          set -euo pipefail
+          base_ref="origin/${{ github.event.pull_request.base.ref }}"
+          head_ref="refs/pull/${{ github.event.pull_request.number }}/head"
+          files="$(git diff --name-only "$base_ref" "$head_ref")"
+          out="codex-prompt.md"
+
+          cat .github/codex/prompts/global-review.md > "$out"
+          echo "" >> "$out"
+
+          added=0
+          if echo "$files" | grep -q '^openvpn-web/'; then
+            cat .github/codex/prompts/openvpn-web-review.md >> "$out"
+            echo "" >> "$out"
+            added=1
+          fi
+
+          if echo "$files" | grep -E -q '^(cmd|controller|router|middleware|model|openvpn|services|utils|config|database|data|constants|logging|main\\.go|go\\.mod|go\\.sum|template|file)/'; then
+            cat .github/codex/prompts/review.md >> "$out"
+            echo "" >> "$out"
+            added=1
+          fi
+
+          if [ "$added" -eq 0 ]; then
+            # Default to backend review for mixed or unknown changes.
+            cat .github/codex/prompts/review.md >> "$out"
+          fi
+
+          echo "file=$out" >> "$GITHUB_OUTPUT"
+
+      - name: Run Codex
+        id: run_codex
+        uses: openai/codex-action@v1
+        with:
+          # ✅ 官方推荐用这个 input 传 key（而不是 env）
+          openai-api-key: ${{ secrets.OPENAI_API_KEY }}
+
+          # 二选一：prompt 或 prompt-file（推荐 prompt-file，方便维护）
+          prompt-file: ${{ steps.prompt.outputs.file }}
+
+          # 可选：把最终输出落盘，后续可上传 artifact
+          output-file: codex-output.md
+
+          # 权限与安全：默认 drop-sudo 就很推荐
+          safety-strategy: drop-sudo
+
+          # 限制 Codex 的沙箱能力，review 一般不需要写盘，可用 read-only
+          # 如果你希望它能自动改代码/打补丁，再换 workspace-write
+          sandbox: read-only
+
+          # 可选：限制触发者（默认仅有写权限的人能触发；这里你也可以显式加白名单）
+          # allow-users: "alice,bob"
+          # allow-bots: "dependabot[bot]"
+
+      - name: Upload Codex output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: codex-output
+          path: codex-output.md
+          if-no-files-found: ignore
+
+  post_feedback:
+    runs-on: ubuntu-latest
+    needs: codex
+    if: ${{ needs.codex.result == 'success' && needs.codex.outputs.final_message != '' }}
+    permissions:
+      issues: write
+      pull-requests: write
+    steps:
+      - name: Post Codex feedback as PR comment
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              body: process.env.CODEX_FINAL_MESSAGE,
+            });
+        env:
+          CODEX_FINAL_MESSAGE: ${{ needs.codex.outputs.final_message }}
