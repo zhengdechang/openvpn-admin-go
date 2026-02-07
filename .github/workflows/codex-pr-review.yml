@@ -151,7 +151,7 @@ jobs:
 
           text = pathlib.Path("codex-output.md").read_text(encoding="utf-8")
 
-          match = re.search(r"Inline Comments.*?```json\\s*(.*?)```", text, re.S | re.I)
+          match = re.search(r"(?is)Inline Comments.*?```json\s*(.*?)```", text)
           comments = []
           if match:
             block = match.group(1).strip()
@@ -161,7 +161,7 @@ jobs:
               except json.JSONDecodeError:
                 comments = []
 
-          summary = re.sub(r"\\n*Inline Comments.*?```json\\s*.*?```\\s*", "\\n", text, flags=re.S | re.I).strip()
+          summary = re.sub(r"(?is)\n*Inline Comments.*?```json\s*.*?```\s*", "\n", text).strip()
           pathlib.Path("codex-summary.md").write_text(summary + "\\n", encoding="utf-8")
           pathlib.Path("codex-inline-comments.json").write_text(json.dumps(comments, ensure_ascii=False), encoding="utf-8")
           PY
