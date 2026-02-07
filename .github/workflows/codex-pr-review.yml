@@ -172,7 +172,6 @@ jobs:
         with:
           github-token: ${{ secrets.REVIEW_BOT_TOKEN != '' && secrets.REVIEW_BOT_TOKEN || secrets.GITHUB_TOKEN }}
           script: |
-            const core = require('@actions/core');
             const label = 'review-bot';
             const owner = context.repo.owner;
             const repo = context.repo.repo;
@@ -205,7 +204,6 @@ jobs:
         with:
           github-token: ${{ secrets.REVIEW_BOT_TOKEN != '' && secrets.REVIEW_BOT_TOKEN || secrets.GITHUB_TOKEN }}
           script: |
-            const core = require('@actions/core');
             const fs = require('fs');
             const raw = fs.readFileSync('codex-inline-comments.json', 'utf8').trim();
             if (!raw) return;
