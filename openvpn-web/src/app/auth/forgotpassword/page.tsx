@@ -13,7 +13,7 @@ import { userAPI } from "@/services/api"; // 假设有一个 API 请求封装
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import MainLayout from "@/components/layout/main-layout";
+import AuthLayout from "@/components/layout/auth-layout";
 
 export default function ResetPasswordPage() {
   const router = useRouter();
@@ -60,8 +60,7 @@ export default function ResetPasswordPage() {
   };
 
   return (
-    <MainLayout className="flex justify-center items-center bg-gradient-to-br from-secondary/30 to-secondary/10 h-full">
-      <div className="flex-grow flex items-center justify-center p-4">
+    <AuthLayout>
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-primary">{t("auth.forgotpassword.pageTitle")}</h1>
@@ -112,7 +111,6 @@ export default function ResetPasswordPage() {
             </CardContent>
           </Card>
         </div>
-      </div>
-    </MainLayout>
+    </AuthLayout>
   );
 }

@@ -4,21 +4,36 @@
  * @Date: 2025-06-04 10:25:24
  */
 /** @type {import('next').NextConfig} */
+
+const isDev = process.env.NODE_ENV === "development";
+const path = require("path");
+
 const nextConfig = {
   reactStrictMode: true,
-  output: "export",
-  trailingSlash: true,
-  images: {
-    unoptimized: true,
+  turbopack: {
+    root: path.resolve(__dirname),
   },
-  async rewrites() {
-    return [
-      {
-        source: "/api/:path*", // 代理所有 /api/ 开头的请求
-        destination: "http://localhost:8085/api/:path*", // 代理到 8012 端口
-      },
-    ];
-  },
+  // Static export for production; dev server runs normally with API rewrites
+  ...(isDev
+    ? {}
+    : {
+        output: "export",
+        trailingSlash: true,
+        images: {
+          unoptimized: true,
+        },
+      }),
+  // API proxy rewrites — only effective in dev (incompatible with static export)
+  ...(isDev && {
+    async rewrites() {
+      return [
+        {
+          source: "/api/:path*",
+          destination: "http://localhost:8085/api/:path*",
+        },
+      ];
+    },
+  }),
 };
 
 module.exports = nextConfig;

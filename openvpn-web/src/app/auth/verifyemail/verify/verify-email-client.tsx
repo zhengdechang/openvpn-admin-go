@@ -8,7 +8,7 @@ import { userAPI } from "@/services/api"; // 假设有一个 API 请求封装
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import MainLayout from "@/components/layout/main-layout";
+import AuthLayout from "@/components/layout/auth-layout";
 
 export default function VerifyEmailClient() {
   const router = useRouter();
@@ -56,8 +56,7 @@ export default function VerifyEmailClient() {
   };
 
   return (
-    <MainLayout>
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+    <AuthLayout>
         <div className="max-w-md w-full space-y-8">
           <Card>
             <CardContent className="p-6">
@@ -107,7 +106,6 @@ export default function VerifyEmailClient() {
             </CardContent>
           </Card>
         </div>
-      </div>
-    </MainLayout>
+    </AuthLayout>
   );
 }

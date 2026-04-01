@@ -1,15 +1,14 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { showToast } from "@/lib/toast-utils";
 import { userAPI } from "@/services/api"; // 假设有一个 API 请求封装
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import MainLayout from "@/components/layout/main-layout";
-import { useParams } from "next/navigation";
+import AuthLayout from "@/components/layout/auth-layout";
 
 export default function VerifyEmailPage() {
   const router = useRouter();
@@ -56,9 +55,8 @@ export default function VerifyEmailPage() {
   };
 
   return (
-    <MainLayout className="flex justify-center items-center bg-gradient-to-br from-secondary/30 to-secondary/10 h-full">
-      <div className="flex-grow flex h-full items-center justify-center p-4 ">
-        <div className="w-full h-full max-w-md">
+    <AuthLayout>
+        <div className="w-full max-w-md">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-primary">{t("auth.verifyemail.pageTitle")}</h1>
             <div className="h-1 w-16 bg-primary mx-auto my-4"></div>
@@ -106,7 +104,6 @@ export default function VerifyEmailPage() {
             </CardContent>
           </Card>
         </div>
-      </div>
-    </MainLayout>
+    </AuthLayout>
   );
 }

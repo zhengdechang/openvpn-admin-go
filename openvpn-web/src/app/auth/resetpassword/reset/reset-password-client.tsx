@@ -11,7 +11,7 @@ import { userAPI } from "@/services/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import MainLayout from "@/components/layout/main-layout";
+import AuthLayout from "@/components/layout/auth-layout";
 
 type ResetPasswordFormData = z.infer<ReturnType<typeof getResetPasswordSchema>>;
 
@@ -76,8 +76,7 @@ export default function ResetPasswordClient() {
   };
 
   return (
-    <MainLayout className="flex justify-center items-center bg-gradient-to-br from-secondary/30 to-secondary/10 h-full">
-      <div className="flex-grow flex h-full items-center justify-center p-4">
+    <AuthLayout>
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-primary">{t("auth.resetpassword.pageTitle")}</h1>
@@ -146,7 +145,6 @@ export default function ResetPasswordClient() {
             </CardContent>
           </Card>
         </div>
-      </div>
-    </MainLayout>
+    </AuthLayout>
   );
 }

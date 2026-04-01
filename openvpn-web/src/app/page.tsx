@@ -5,7 +5,6 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth-context";
 import { useTranslation } from "react-i18next";
-import MainLayout from "@/components/layout/main-layout";
 
 export default function Home() {
   const { user, loading, refreshToken } = useAuth();
@@ -16,7 +15,7 @@ export default function Home() {
   }, []);
 
   return (
-    <MainLayout>
+    <div className="min-h-screen overflow-y-auto bg-background">
       {/* Hero Section */}
       <div className="hero-pattern py-24">
         <div className="container mx-auto px-4">
@@ -307,6 +306,6 @@ export default function Home() {
           </div>
         </div>
       </div>
-    </MainLayout>
+    </div>
   );
 }

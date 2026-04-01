@@ -5,7 +5,7 @@ import { cookies } from 'next/headers';
  * @returns {Promise<string|null>} 认证令牌或null
  */
 export async function getAuthToken(): Promise<string | null> {
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const token = cookieStore.get('auth_token');
   return token ? token.value : null;
 }
