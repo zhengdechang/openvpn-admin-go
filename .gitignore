@@ -16,3 +16,5 @@ docker/data/
 docker/openvpn/
 openvpn-admin
 .gstack/
+
+node_modules/

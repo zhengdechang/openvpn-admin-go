@@ -5,11 +5,14 @@
  */
 import React from "react";
 import "./globals.css";
+import { Inter } from "next/font/google";
 import { AuthProvider } from "@/lib/auth-context";
 import { Toaster } from "sonner";
 import { LoadingScreen } from "@/components/ui/loading";
 import { getLocaleOnServer } from "@/i18n/server";
 import { I18nProvider } from "@/i18n/i18n-provider";
+
+const inter = Inter({ subsets: ["latin"] });
 
 export default async function RootLayout({
   // Make it an async function
@@ -20,13 +23,13 @@ export default async function RootLayout({
   const locale = getLocaleOnServer();
 
   return (
-    <html lang={locale} suppressHydrationWarning>
+    <html lang={locale} className={inter.className} suppressHydrationWarning>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="description" content="OpenVPN Management System" />
         <title>OpenVPN Management System</title>
       </head>
-      <body className="font-sans" suppressHydrationWarning>
+      <body suppressHydrationWarning>
         <I18nProvider locale={locale}>
           <LoadingScreen />
           <AuthProvider>
