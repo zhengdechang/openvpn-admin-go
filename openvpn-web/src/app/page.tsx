@@ -140,7 +140,7 @@ export default function Home() {
               </div>
             </div>
             <Button asChild size="lg" className="px-8">
-              <Link href="https://github.com/zhengdechang/openvpn-admin-go#readme" target="_blank" rel="noopener noreferrer">
+              <Link href="/docs">
                 {t("home.featuresSection.viewDocsButton")}
               </Link>
             </Button>

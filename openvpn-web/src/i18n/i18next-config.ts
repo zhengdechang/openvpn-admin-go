@@ -14,6 +14,7 @@ const loadLangResources = (lang: string) => ({
     login: require(`./${lang}/login`).default,
     register: require(`./${lang}/register`).default,
     dashboard: require(`./${lang}/dashboard`).default,
+    docs: require(`./${lang}/docs`).default,
   },
 });
 
