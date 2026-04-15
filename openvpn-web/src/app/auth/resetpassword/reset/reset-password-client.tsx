@@ -8,10 +8,10 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { showToast } from "@/lib/toast-utils";
 import { userAPI } from "@/services/api";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import AuthLayout from "@/components/layout/auth-layout";
+import MuiButton from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
 
 type ResetPasswordFormData = z.infer<ReturnType<typeof getResetPasswordSchema>>;
 
@@ -90,39 +90,36 @@ export default function ResetPasswordClient() {
 
               <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
                 {/* 新密码输入框 */}
-                <div>
-                  <Input
-                    type="password"
-                    placeholder={t("auth.resetpassword.passwordPlaceholder")}
-                    {...register("password")}
-                    className={errors.password ? "border-red-500" : ""}
-                  />
-                  {errors.password && (
-                    <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>
-                  )}
-                </div>
+                <TextField
+                  type="password"
+                  label={t("auth.resetpassword.passwordPlaceholder")}
+                  placeholder={t("auth.resetpassword.passwordPlaceholder")}
+                  fullWidth
+                  error={!!errors.password}
+                  helperText={errors.password?.message}
+                  {...register("password")}
+                />
 
                 {/* 确认密码输入框 */}
-                <div>
-                  <Input
-                    type="password"
-                    placeholder={t("auth.resetpassword.confirmPasswordPlaceholder")}
-                    {...register("confirmPassword")}
-                    className={errors.confirmPassword ? "border-red-500" : ""}
-                  />
-                  {errors.confirmPassword && (
-                    <p className="text-red-500 text-sm mt-1">{errors.confirmPassword.message}</p>
-                  )}
-                </div>
+                <TextField
+                  type="password"
+                  label={t("auth.resetpassword.confirmPasswordPlaceholder")}
+                  placeholder={t("auth.resetpassword.confirmPasswordPlaceholder")}
+                  fullWidth
+                  error={!!errors.confirmPassword}
+                  helperText={errors.confirmPassword?.message}
+                  {...register("confirmPassword")}
+                />
 
                 {/* 重置按钮 */}
-                <Button
+                <MuiButton
                   type="submit"
-                  className="w-full"
+                  variant="contained"
+                  fullWidth
                   disabled={loading}
                 >
                   {loading ? t("auth.resetpassword.resetting") : t("auth.resetpassword.resetButton")}
-                </Button>
+                </MuiButton>
 
                 {/* 结果显示 */}
                 {success && (
@@ -133,14 +130,14 @@ export default function ResetPasswordClient() {
                 )}
 
                 {/* 返回登录 */}
-                <Button
+                <MuiButton
                   type="button"
-                  variant="outline"
-                  className="w-full"
+                  variant="outlined"
+                  fullWidth
                   onClick={() => router.push("/auth/login")}
                 >
                   {t("auth.resetpassword.backToLogin")}
-                </Button>
+                </MuiButton>
               </form>
             </CardContent>
           </Card>

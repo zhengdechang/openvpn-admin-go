@@ -3,12 +3,12 @@
 import React, { useState, useEffect } from "react";
 import { ConfigItem } from "@/types/types";
 import { serverAPI } from "@/services/api";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Save, RefreshCw } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import ConfigItemComponent from "./config-item";
+import MuiButton from "@mui/material/Button";
 
 export default function ConfigManager() {
   const { t, i18n } = useTranslation();
@@ -116,22 +116,22 @@ export default function ConfigManager() {
         <div className="flex items-center justify-between">
           <CardTitle>{t("dashboard.server.config.title")}</CardTitle>
           <div className="flex items-center space-x-2">
-            <Button variant="outline" onClick={handleRefresh} disabled={saving}>
-              <RefreshCw className="h-4 w-4 mr-2" />
+            <MuiButton variant="outlined" onClick={handleRefresh} disabled={saving} startIcon={<RefreshCw className="h-4 w-4" />}>
               {t("dashboard.server.config.refreshButton")}
-            </Button>
-            <Button
+            </MuiButton>
+            <MuiButton
+              variant="contained"
               onClick={handleSaveAll}
               disabled={!hasChanges || saving}
-              className={hasChanges ? "bg-green-600 hover:bg-green-700" : ""}
+              startIcon={<Save className="h-4 w-4" />}
+              sx={hasChanges ? { backgroundColor: "#16a34a", "&:hover": { backgroundColor: "#15803d" } } : {}}
             >
-              <Save className="h-4 w-4 mr-2" />
               {saving
                 ? t("dashboard.server.config.saving")
                 : `${t("dashboard.server.config.saveAllButton")}${
                     hasChanges ? ` (${Object.keys(changedItems).length})` : ""
                   }`}
-            </Button>
+            </MuiButton>
           </div>
         </div>
         {hasChanges && (

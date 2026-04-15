@@ -5,24 +5,14 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { showToast } from "@/lib/toast-utils";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import * as z from "zod";
 import AuthLayout from "@/components/layout/auth-layout";
-import { useTranslation } from 'react-i18next';
-
-
+import { useTranslation } from "react-i18next";
+import MuiButton from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -108,121 +98,104 @@ export default function RegisterPage() {
 
           <Card className="shadow-lg border-t-4 border-t-primary">
             <CardContent className="pt-6">
-              <Form {...form}>
-                <form
-                  onSubmit={form.handleSubmit(onSubmit)}
-                  className="space-y-5"
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-5"
+              >
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  {/* 用户名 */}
+                  <Controller
+                    control={form.control}
+                    name="name"
+                    render={({ field, fieldState }) => (
+                      <TextField
+                        {...field}
+                        label={t('register.name')}
+                        placeholder={t('register.namePlaceholder')}
+                        fullWidth
+                        error={!!fieldState.error}
+                        helperText={fieldState.error?.message}
+                      />
+                    )}
+                  />
+
+                  {/* 邮箱 */}
+                  <Controller
+                    control={form.control}
+                    name="email"
+                    render={({ field, fieldState }) => (
+                      <TextField
+                        {...field}
+                        label={t('register.email')}
+                        placeholder={t('register.emailPlaceholder')}
+                        fullWidth
+                        error={!!fieldState.error}
+                        helperText={fieldState.error?.message}
+                      />
+                    )}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  {/* 密码 */}
+                  <Controller
+                    control={form.control}
+                    name="password"
+                    render={({ field, fieldState }) => (
+                      <TextField
+                        {...field}
+                        type="password"
+                        label={t('register.password')}
+                        placeholder={t('register.passwordPlaceholder')}
+                        fullWidth
+                        error={!!fieldState.error}
+                        helperText={fieldState.error?.message}
+                      />
+                    )}
+                  />
+
+                  {/* 确认密码 */}
+                  <Controller
+                    control={form.control}
+                    name="passwordConfirm"
+                    render={({ field, fieldState }) => (
+                      <TextField
+                        {...field}
+                        type="password"
+                        label={t('register.confirmPassword')}
+                        placeholder={t('register.confirmPasswordPlaceholder')}
+                        fullWidth
+                        error={!!fieldState.error}
+                        helperText={fieldState.error?.message}
+                      />
+                    )}
+                  />
+                </div>
+
+                {/* 注册按钮 */}
+                <MuiButton
+                  type="submit"
+                  variant="contained"
+                  fullWidth
+                  disabled={isRegistering}
                 >
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    {/* 用户名 */}
-                    <FormField
-                      control={form.control}
-                      name="name"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-base font-medium">
-                            {t('register.name')}
-                          </FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder={t('register.namePlaceholder')}
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                  {isRegistering ? t('common.loading') : t('register.register')}
+                </MuiButton>
 
-                    {/* 邮箱 */}
-                    <FormField
-                      control={form.control}
-                      name="email"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-base font-medium">
-                            {t('register.email')}
-                          </FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder={t('register.emailPlaceholder')}
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    {/* 密码 */}
-                    <FormField
-                      control={form.control}
-                      name="password"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-base font-medium">
-                            {t('register.password')}
-                          </FormLabel>
-                          <FormControl>
-                            <Input
-                              type="password"
-                              placeholder={t('register.passwordPlaceholder')}
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    {/* 确认密码 */}
-                    <FormField
-                      control={form.control}
-                      name="passwordConfirm"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-base font-medium">
-                            {t('register.confirmPassword')}
-                          </FormLabel>
-                          <FormControl>
-                            <Input
-                              type="password"
-                              placeholder={t('register.confirmPasswordPlaceholder')}
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  {/* 注册按钮 */}
-                  <Button
-                    type="submit"
-                    className="w-full"
-                    disabled={isRegistering}
+                {/* 登录链接 */}
+                <div className="text-center mt-4">
+                  <span className="text-gray-600">
+                    {t('register.info.haveAccount')}{" "}
+                  </span>
+                  <Link
+                    href="/auth/login"
+                    className="text-primary hover:underline"
+                    onClick={handleLoginClick}
                   >
-                    {isRegistering ? t('common.loading') : t('register.register')}
-                  </Button>
-
-                  {/* 登录链接 */}
-                  <div className="text-center mt-4">
-                    <span className="text-gray-600">
-                      {t('register.info.haveAccount')}{" "}
-                    </span>
-                    <Link
-                      href="/auth/login"
-                      className="text-primary hover:underline"
-                      onClick={handleLoginClick}
-                    >
-                      {t('register.login')}
-                    </Link>
-                  </div>
-                </form>
-              </Form>
+                    {t('register.login')}
+                  </Link>
+                </div>
+              </form>
             </CardContent>
           </Card>
         </div>

@@ -5,22 +5,14 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { showToast } from "@/lib/toast-utils";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import * as z from "zod";
 import AuthLayout from "@/components/layout/auth-layout";
 import { useTranslation } from "react-i18next";
+import MuiButton from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
 
 // 登录表单验证
 const loginSchema = z.object({
@@ -88,86 +80,77 @@ export default function LoginPage() {
 
           <Card className="shadow-lg border-t-4 border-t-primary">
             <CardContent className="pt-6">
-              <Form {...form}>
-                <form
-                  onSubmit={form.handleSubmit(onSubmit)}
-                  className="space-y-5"
-                >
-                  {/* 邮箱 */}
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-base font-medium">
-                          {t("login.email")}
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            type="email"
-                            placeholder={t("login.emailPlaceholder")}
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-5"
+              >
+                {/* 邮箱 */}
+                <Controller
+                  control={form.control}
+                  name="email"
+                  render={({ field, fieldState }) => (
+                    <TextField
+                      {...field}
+                      type="email"
+                      label={t("login.email")}
+                      placeholder={t("login.emailPlaceholder")}
+                      fullWidth
+                      error={!!fieldState.error}
+                      helperText={fieldState.error?.message}
+                    />
+                  )}
+                />
 
-                  {/* 密码 */}
-                  <FormField
-                    control={form.control}
-                    name="password"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-base font-medium">
-                          {t("login.password")}
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            type="password"
-                            placeholder={t("login.passwordPlaceholder")}
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                {/* 密码 */}
+                <Controller
+                  control={form.control}
+                  name="password"
+                  render={({ field, fieldState }) => (
+                    <TextField
+                      {...field}
+                      type="password"
+                      label={t("login.password")}
+                      placeholder={t("login.passwordPlaceholder")}
+                      fullWidth
+                      error={!!fieldState.error}
+                      helperText={fieldState.error?.message}
+                    />
+                  )}
+                />
 
-                  {/* 忘记密码链接 */}
-                  <div className="flex justify-end">
-                    <Link
-                      href="/auth/forgotpassword"
-                      className="text-sm text-primary hover:underline"
-                    >
-                      {t("login.forgotPassword")}
-                    </Link>
-                  </div>
-
-                  {/* 登录按钮 */}
-                  <Button
-                    type="submit"
-                    className="w-full"
-                    disabled={isLoggingIn}
+                {/* 忘记密码链接 */}
+                <div className="flex justify-end">
+                  <Link
+                    href="/auth/forgotpassword"
+                    className="text-sm text-primary hover:underline"
                   >
-                    {isLoggingIn ? t("common.loading") : t("login.login")}
-                  </Button>
+                    {t("login.forgotPassword")}
+                  </Link>
+                </div>
 
-                  {/* 注册链接 */}
-                  <div className="text-center mt-4">
-                    <span className="text-gray-600">
-                      {t("login.info.noAccount")}{" "}
-                    </span>
-                    <Link
-                      href="/auth/register"
-                      className="text-primary hover:underline"
-                    >
-                      {t("login.register")}
-                    </Link>
-                  </div>
-                </form>
-              </Form>
+                {/* 登录按钮 */}
+                <MuiButton
+                  type="submit"
+                  variant="contained"
+                  fullWidth
+                  disabled={isLoggingIn}
+                >
+                  {isLoggingIn ? t("common.loading") : t("login.login")}
+                </MuiButton>
+
+                {/* 注册链接 */}
+                <div className="text-center mt-4">
+                  <span className="text-gray-600">
+                    {t("login.info.noAccount")}{" "}
+                  </span>
+                  <Link
+                    href="/auth/register"
+                    className="text-primary hover:underline"
+                  >
+                    {t("login.register")}
+                  </Link>
+                </div>
+              </form>
             </CardContent>
           </Card>
         </div>

@@ -2,19 +2,14 @@
 
 import React, { useState, useEffect } from "react";
 import { ConfigItem } from "@/types/types";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
 import { X, Plus, Edit2, Check, X as Cancel } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import MuiButton from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
+import Chip from "@mui/material/Chip";
+import Switch from "@mui/material/Switch";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import { FormControl, InputLabel, Select as MuiSelect, MenuItem } from "@mui/material";
 
 interface ConfigItemComponentProps {
   item: ConfigItem;
@@ -81,44 +76,53 @@ export default function ConfigItemComponent({
     switch (item.type) {
       case "text":
         return (
-          <Input
+          <TextField
             value={localValue || ""}
             onChange={(e) => setLocalValue(e.target.value)}
             placeholder={item.description}
-            className="w-full text-sm"
+            fullWidth
+            size="small"
           />
         );
       case "number":
         return (
-          <Input
+          <TextField
             type="number"
             value={localValue || ""}
             onChange={(e) => setLocalValue(parseInt(e.target.value) || 0)}
             placeholder={item.description}
-            className="w-full text-sm"
+            fullWidth
+            size="small"
           />
         );
       case "boolean":
         return (
-          <Switch
-            checked={localValue || false}
-            onCheckedChange={setLocalValue}
+          <FormControlLabel
+            control={
+              <Switch
+                checked={localValue || false}
+                onChange={(e) => setLocalValue(e.target.checked)}
+              />
+            }
+            label={localValue ? "启用" : "禁用"}
           />
         );
       case "select":
         return (
-          <Select value={localValue || ""} onValueChange={setLocalValue}>
-            <SelectTrigger className="w-full text-sm">
-              <SelectValue placeholder={item.description} />
-            </SelectTrigger>
-            <SelectContent>
+          <FormControl fullWidth size="small">
+            <InputLabel>{item.description}</InputLabel>
+            <MuiSelect
+              value={localValue || ""}
+              label={item.description}
+              onChange={(e) => setLocalValue(e.target.value)}
+            >
               {item.options?.map((option) => (
-                <SelectItem key={option} value={option}>
+                <MenuItem key={option} value={option}>
                   {option}
-                </SelectItem>
+                </MenuItem>
               ))}
-            </SelectContent>
-          </Select>
+            </MuiSelect>
+          </FormControl>
         );
       case "array":
         return (
@@ -126,32 +130,34 @@ export default function ConfigItemComponent({
             <div className="flex-1 overflow-y-auto space-y-1 max-h-16">
               {arrayItems.map((arrayItem, index) => (
                 <div key={index} className="flex items-center space-x-1">
-                  <Input
+                  <TextField
                     value={arrayItem}
                     onChange={(e) => updateArrayItem(index, e.target.value)}
                     placeholder="输入路由"
-                    className="flex-1 text-xs h-7"
+                    size="small"
+                    sx={{ flex: 1, "& .MuiInputBase-input": { py: 0.5, fontSize: "0.75rem" } }}
                   />
-                  <Button
-                    variant="outline"
-                    size="sm"
+                  <MuiButton
+                    variant="outlined"
+                    size="small"
                     onClick={() => removeArrayItem(index)}
-                    className="h-7 w-7 p-0"
+                    sx={{ minWidth: "28px", p: "2px", height: "28px" }}
                   >
                     <X className="h-3 w-3" />
-                  </Button>
+                  </MuiButton>
                 </div>
               ))}
             </div>
-            <Button
-              variant="outline"
-              size="sm"
+            <MuiButton
+              variant="outlined"
+              size="small"
               onClick={addArrayItem}
-              className="w-full text-xs h-7 mt-1"
+              fullWidth
+              startIcon={<Plus className="h-3 w-3" />}
+              sx={{ mt: 0.5, fontSize: "0.75rem", height: "28px" }}
             >
-              <Plus className="h-3 w-3 mr-1" />
               {t("dashboard.server.config.addButton")}
-            </Button>
+            </MuiButton>
           </div>
         );
       default:
@@ -163,18 +169,18 @@ export default function ConfigItemComponent({
     switch (item.type) {
       case "boolean":
         return (
-          <Badge variant={item.value ? "default" : "secondary"}>
-            {item.value ? "启用" : "禁用"}
-          </Badge>
+          <Chip
+            label={item.value ? "启用" : "禁用"}
+            color={item.value ? "success" : "default"}
+            size="small"
+          />
         );
       case "array":
         return (
           <div className="flex flex-wrap gap-1 max-h-16 overflow-y-auto">
             {Array.isArray(item.value) && item.value.length > 0 ? (
               item.value.map((arrayItem, index) => (
-                <Badge key={index} variant="outline" className="text-xs">
-                  {arrayItem}
-                </Badge>
+                <Chip key={index} label={arrayItem} variant="outlined" size="small" />
               ))
             ) : (
               <span className="text-gray-500 text-sm">无</span>
@@ -195,29 +201,28 @@ export default function ConfigItemComponent({
             {item.description}
           </p>
           {item.required && (
-            <Badge variant="destructive" className="text-xs mt-1">
-              必填
-            </Badge>
+            <Chip label="必填" color="error" size="small" sx={{ mt: 0.5 }} />
           )}
         </div>
         <div className="flex items-center space-x-1 ml-2 flex-shrink-0">
           {isEditing ? (
             <>
-              <Button variant="outline" size="sm" onClick={handleCancel}>
+              <MuiButton variant="outlined" size="small" onClick={handleCancel} sx={{ minWidth: "28px", p: "2px" }}>
                 <Cancel className="h-3 w-3" />
-              </Button>
-              <Button size="sm" onClick={handleSave}>
+              </MuiButton>
+              <MuiButton variant="contained" size="small" onClick={handleSave} sx={{ minWidth: "28px", p: "2px" }}>
                 <Check className="h-3 w-3" />
-              </Button>
+              </MuiButton>
             </>
           ) : (
-            <Button
-              variant="outline"
-              size="sm"
+            <MuiButton
+              variant="outlined"
+              size="small"
               onClick={() => onEditToggle(item.key)}
+              sx={{ minWidth: "28px", p: "2px" }}
             >
               <Edit2 className="h-3 w-3" />
-            </Button>
+            </MuiButton>
           )}
         </div>
       </div>

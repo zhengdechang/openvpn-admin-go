@@ -11,6 +11,9 @@ import { Toaster } from "sonner";
 import { LoadingScreen } from "@/components/ui/loading";
 import { getLocaleOnServer } from "@/i18n/server";
 import { I18nProvider } from "@/i18n/i18n-provider";
+import { ThemeProvider } from "@mui/material/styles";
+import CssBaseline from "@mui/material/CssBaseline";
+import { muiTheme } from "@/lib/mui-theme";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -31,26 +34,29 @@ export default async function RootLayout({
         <link rel="icon" type="image/svg+xml" href="/logo.svg" />
       </head>
       <body suppressHydrationWarning>
-        <I18nProvider locale={locale}>
-          <LoadingScreen />
-          <AuthProvider>
-            <div>{children}</div>
-            <Toaster
-              position="top-right"
-              expand={true}
-              visibleToasts={6}
-              closeButton={true}
-              richColors={true}
-              toastOptions={{
-                duration: 5000,
-                className: "toast-message",
-                style: {
-                  marginBottom: "0.5rem",
-                },
-              }}
-            />
-          </AuthProvider>
-        </I18nProvider>
+        <ThemeProvider theme={muiTheme}>
+          <CssBaseline />
+          <I18nProvider locale={locale}>
+            <LoadingScreen />
+            <AuthProvider>
+              <div>{children}</div>
+              <Toaster
+                position="top-right"
+                expand={true}
+                visibleToasts={6}
+                closeButton={true}
+                richColors={true}
+                toastOptions={{
+                  duration: 5000,
+                  className: "toast-message",
+                  style: {
+                    marginBottom: "0.5rem",
+                  },
+                }}
+              />
+            </AuthProvider>
+          </I18nProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

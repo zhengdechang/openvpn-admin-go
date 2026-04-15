@@ -3,8 +3,8 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
-import { Button } from "@/components/ui/button";
 import LanguageSwitcher from "@/components/ui/language-switcher";
+import MuiButton from "@mui/material/Button";
 
 const NAV_SECTIONS = ["overview", "quickstart", "envvars", "roles", "api", "faq"] as const;
 type Section = (typeof NAV_SECTIONS)[number];
@@ -67,9 +67,14 @@ export default function DocsPage() {
           </div>
           <div className="flex items-center gap-2">
             <LanguageSwitcher />
-            <Button asChild variant="outline" size="sm">
-              <Link href="/">&larr; {t("common.back") || "Back"}</Link>
-            </Button>
+            <MuiButton
+              component={Link}
+              href="/"
+              variant="outlined"
+              size="small"
+            >
+              &larr; {t("common.back") || "Back"}
+            </MuiButton>
           </div>
         </div>
       </div>
@@ -84,17 +89,28 @@ export default function DocsPage() {
               </p>
               <nav className="space-y-1">
                 {NAV_SECTIONS.map((s) => (
-                  <button
+                  <MuiButton
                     key={s}
                     onClick={() => scrollTo(s)}
-                    className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors ${
-                      activeSection === s
-                        ? "bg-primary text-white font-medium"
-                        : "text-gray-600 hover:bg-gray-100"
-                    }`}
+                    variant="text"
+                    fullWidth
+                    sx={{
+                      justifyContent: "flex-start",
+                      textAlign: "left",
+                      borderRadius: "6px",
+                      px: 1.5,
+                      py: 1,
+                      fontSize: "0.875rem",
+                      fontWeight: activeSection === s ? 600 : 400,
+                      backgroundColor: activeSection === s ? "primary.main" : "transparent",
+                      color: activeSection === s ? "white" : "text.secondary",
+                      "&:hover": {
+                        backgroundColor: activeSection === s ? "primary.dark" : "grey.100",
+                      },
+                    }}
                   >
                     {t(`docs.nav.${s}`)}
-                  </button>
+                  </MuiButton>
                 ))}
               </nav>
             </div>
@@ -104,17 +120,19 @@ export default function DocsPage() {
           <div className="md:hidden mb-6 w-full">
             <div className="flex gap-2 overflow-x-auto pb-2">
               {NAV_SECTIONS.map((s) => (
-                <button
+                <MuiButton
                   key={s}
                   onClick={() => scrollTo(s)}
-                  className={`shrink-0 px-3 py-1.5 rounded-full text-sm border transition-colors ${
-                    activeSection === s
-                      ? "bg-primary text-white border-primary"
-                      : "border-gray-300 text-gray-600 hover:bg-gray-50"
-                  }`}
+                  variant={activeSection === s ? "contained" : "outlined"}
+                  size="small"
+                  sx={{
+                    flexShrink: 0,
+                    borderRadius: "9999px",
+                    fontSize: "0.875rem",
+                  }}
                 >
                   {t(`docs.nav.${s}`)}
-                </button>
+                </MuiButton>
               ))}
             </div>
           </div>

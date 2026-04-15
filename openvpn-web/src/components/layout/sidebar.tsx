@@ -7,6 +7,7 @@ import { useAuth } from "@/lib/auth-context";
 import { UserRole } from "@/types/types";
 import { useTranslation } from "react-i18next";
 import VPNLogo from "@/components/ui/vpn-logo";
+import IconButton from "@mui/material/IconButton";
 
 interface NavItem {
   href: string;
@@ -199,29 +200,24 @@ export default function Sidebar({ onClose }: { onClose?: () => void } = {}) {
         </div>
         {/* 关闭按钮（移动端） */}
         {onClose && (
-          <button
+          <IconButton
             onClick={onClose}
             className="md:hidden"
-            style={{
-              width: "28px",
-              height: "28px",
-              borderRadius: "6px",
-              border: "none",
-              background: "rgba(255,255,255,0.08)",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: "rgba(255,255,255,0.6)",
-              flexShrink: 0,
-            }}
             aria-label="Close menu"
+            size="small"
+            sx={{
+              color: "rgba(255,255,255,0.6)",
+              background: "rgba(255,255,255,0.08)",
+              borderRadius: "6px",
+              flexShrink: 0,
+              "&:hover": { background: "rgba(255,255,255,0.14)" },
+            }}
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <line x1="18" y1="6" x2="6" y2="18" />
               <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
-          </button>
+          </IconButton>
         )}
       </div>
 
@@ -389,6 +385,7 @@ export default function Sidebar({ onClose }: { onClose?: () => void } = {}) {
                 cursor: "pointer",
                 width: "100%",
                 fontFamily: "inherit",
+                fontWeight: 600,
                 transition: "background 0.15s",
               }}
             >

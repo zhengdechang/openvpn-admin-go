@@ -8,9 +8,9 @@ import { serverAPI } from "@/services/api";
 import type { ServerStatus } from "@/types/types";
 import { UserRole } from "@/types/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import ConfigManager from "@/components/config/config-manager";
+import MuiButton from "@mui/material/Button";
 
 export default function ServerPage() {
   const { user: currentUser } = useAuth();
@@ -93,7 +93,8 @@ export default function ServerPage() {
         </CardHeader>
         <CardContent>
           <div className="space-x-2">
-            <Button
+            <MuiButton
+              variant="contained"
               onClick={async () => {
                 try {
                   await serverAPI.start();
@@ -105,8 +106,9 @@ export default function ServerPage() {
               }}
             >
               {t("dashboard.server.startButton")}
-            </Button>
-            <Button
+            </MuiButton>
+            <MuiButton
+              variant="contained"
               onClick={async () => {
                 try {
                   await serverAPI.stop();
@@ -118,8 +120,9 @@ export default function ServerPage() {
               }}
             >
               {t("dashboard.server.stopButton")}
-            </Button>
-            <Button
+            </MuiButton>
+            <MuiButton
+              variant="contained"
               onClick={async () => {
                 try {
                   await serverAPI.restart();
@@ -131,7 +134,7 @@ export default function ServerPage() {
               }}
             >
               {t("dashboard.server.restartButton")}
-            </Button>
+            </MuiButton>
           </div>
         </CardContent>
       </Card>

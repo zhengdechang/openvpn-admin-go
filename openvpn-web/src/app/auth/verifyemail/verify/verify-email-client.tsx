@@ -5,10 +5,10 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { showToast } from "@/lib/toast-utils";
 import { userAPI } from "@/services/api"; // 假设有一个 API 请求封装
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import AuthLayout from "@/components/layout/auth-layout";
+import MuiButton from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
 
 export default function VerifyEmailClient() {
   const router = useRouter();
@@ -70,22 +70,26 @@ export default function VerifyEmailClient() {
               </div>
 
               {/* 验证码输入框 */}
-              <Input
+              <TextField
                 type="text"
                 value={code}
                 onChange={handleInputChange}
+                label={t("auth.verifyemail.codePlaceholder")}
                 placeholder={t("auth.verifyemail.codePlaceholder")}
-                className="mt-4 text-center"
+                fullWidth
+                sx={{ mt: 2 }}
               />
 
               {/* 验证按钮 */}
-              <Button
-                className="w-full mt-4"
+              <MuiButton
+                variant="contained"
+                fullWidth
                 onClick={handleVerify}
                 disabled={loading}
+                sx={{ mt: 2 }}
               >
                 {loading ? t("auth.verifyemail.verifying") : t("auth.verifyemail.verifyButton")}
-              </Button>
+              </MuiButton>
 
               {/* 结果显示 */}
               {success && (
@@ -95,13 +99,14 @@ export default function VerifyEmailClient() {
 
               {/* 失败时提供重新注册选项 */}
               {!success && (
-                <Button
-                  className="w-full mt-4"
-                  variant="outline"
+                <MuiButton
+                  variant="outlined"
+                  fullWidth
                   onClick={() => router.push("/auth/register")}
+                  sx={{ mt: 2 }}
                 >
                   {t("auth.verifyemail.registerAgain")}
-                </Button>
+                </MuiButton>
               )}
             </CardContent>
           </Card>

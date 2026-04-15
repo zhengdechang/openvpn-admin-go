@@ -9,9 +9,9 @@ import React, { useState } from "react";
 import MainLayout from "@/components/layout/main-layout";
 import { useAuth } from "@/lib/auth-context";
 import { useTranslation } from "react-i18next";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import MuiButton from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
 
 export default function ProfilePage() {
   const { user, updateUserInfo } = useAuth();
@@ -67,30 +67,24 @@ export default function ProfilePage() {
                   {t("dashboard.profile.basicInfoTitle")}
                 </h2>
                 <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      {t("dashboard.profile.namePlaceholder")}
-                    </label>
-                    <Input
-                      placeholder={t("dashboard.profile.namePlaceholder")}
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      disabled={true}
-                      className="bg-gray-50"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      {t("dashboard.profile.emailPlaceholder")}
-                    </label>
-                    <Input
-                      placeholder={t("dashboard.profile.emailPlaceholder")}
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      disabled={true}
-                      className="bg-gray-50"
-                    />
-                  </div>
+                  <TextField
+                    label={t("dashboard.profile.namePlaceholder")}
+                    placeholder={t("dashboard.profile.namePlaceholder")}
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    disabled={true}
+                    fullWidth
+                    sx={{ backgroundColor: "#f9fafb" }}
+                  />
+                  <TextField
+                    label={t("dashboard.profile.emailPlaceholder")}
+                    placeholder={t("dashboard.profile.emailPlaceholder")}
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    disabled={true}
+                    fullWidth
+                    sx={{ backgroundColor: "#f9fafb" }}
+                  />
                 </div>
               </div>
 
@@ -103,28 +97,24 @@ export default function ProfilePage() {
                   {t("dashboard.profile.changePasswordTitle")}
                 </h2>
                 <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      {t("dashboard.profile.newPasswordPlaceholder")}
-                    </label>
-                    <Input
-                      type="password"
-                      placeholder={t(
-                        "dashboard.profile.newPasswordPlaceholder"
-                      )}
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                    />
-                  </div>
-                  <Button
+                  <TextField
+                    type="password"
+                    label={t("dashboard.profile.newPasswordPlaceholder")}
+                    placeholder={t("dashboard.profile.newPasswordPlaceholder")}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    fullWidth
+                  />
+                  <MuiButton
+                    variant="contained"
                     onClick={handleChangePassword}
                     disabled={loading}
-                    className="w-full"
+                    fullWidth
                   >
                     {loading
                       ? t("common.loading")
                       : t("dashboard.profile.updatePasswordButton")}
-                  </Button>
+                  </MuiButton>
                 </div>
               </div>
             </div>

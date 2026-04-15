@@ -7,16 +7,6 @@ import { useTranslation } from "react-i18next";
 import MainLayout from "@/components/layout/main-layout";
 import { departmentAPI, userManagementAPI } from "@/services/api";
 import type { Department, AdminUser } from "@/types/types";
-import {
-  Dialog,
-  DialogTrigger,
-  DialogContent,
-  DialogHeader,
-  DialogFooter,
-  DialogTitle,
-  DialogClose,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import {
   Table,
@@ -26,8 +16,11 @@ import {
   TableBody,
   TableCell,
 } from "@/components/ui/table";
-import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import MuiButton from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
+import { Dialog as MuiDialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
+import { FormControl, InputLabel, Select as MuiSelect, MenuItem } from "@mui/material";
 
 type DepartmentTree = Department & { children: DepartmentTree[] };
 
@@ -224,9 +217,9 @@ export default function DepartmentsPage() {
             {(currentUser?.role === UserRole.ADMIN ||
               currentUser?.role === UserRole.SUPERADMIN) && (
               <>
-                <Button
-                  size="sm"
-                  variant="outline"
+                <MuiButton
+                  size="small"
+                  variant="outlined"
                   onClick={() => {
                     setEditingDept(node);
                     setForm({
@@ -238,14 +231,15 @@ export default function DepartmentsPage() {
                   }}
                 >
                   {t("dashboard.departments.edit")}
-                </Button>
-                <Button
-                  size="sm"
-                  variant="destructive"
+                </MuiButton>
+                <MuiButton
+                  size="small"
+                  variant="contained"
+                  color="error"
                   onClick={() => handleDelete(node.id)}
                 >
                   {t("dashboard.departments.delete")}
-                </Button>
+                </MuiButton>
               </>
             )}
           </TableCell>
@@ -265,153 +259,154 @@ export default function DepartmentsPage() {
         </h2>
         {(currentUser?.role === UserRole.ADMIN ||
           currentUser?.role === UserRole.SUPERADMIN) && (
-          <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-              <Button>{t("dashboard.departments.addDepartment")}</Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>
-                  {t("dashboard.departments.addDepartmentDialogTitle")}
-                </DialogTitle>
-              </DialogHeader>
-              <div className="space-y-2 pt-2">
-                <Input
-                  placeholder={t(
-                    "dashboard.departments.departmentNamePlaceholder"
-                  )}
-                  value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
-                />
-                <select
-                  className="border px-2 w-full py-1"
+          <MuiButton variant="contained" onClick={() => setOpen(true)}>
+            {t("dashboard.departments.addDepartment")}
+          </MuiButton>
+        )}
+      </div>
+
+      {/* Add Department Dialog */}
+      <MuiDialog open={open} onClose={() => setOpen(false)}>
+        <DialogTitle>
+          {t("dashboard.departments.addDepartmentDialogTitle")}
+        </DialogTitle>
+        <DialogContent>
+          <div className="space-y-4 pt-2">
+            <TextField
+              label={t("dashboard.departments.departmentNamePlaceholder")}
+              placeholder={t("dashboard.departments.departmentNamePlaceholder")}
+              value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+              fullWidth
+              sx={{ mt: 1 }}
+            />
+            <FormControl fullWidth>
+              <InputLabel>{t("dashboard.departments.selectParentDepartment")}</InputLabel>
+              <MuiSelect
+                value={form.parentId}
+                label={t("dashboard.departments.selectParentDepartment")}
+                onChange={(e) => setForm({ ...form, parentId: e.target.value })}
+              >
+                <MenuItem value="">
+                  {t("dashboard.departments.selectParentDepartment")}
+                </MenuItem>
+                {depts.map((d) => (
+                  <MenuItem key={d.id} value={d.id}>
+                    {d.name}
+                  </MenuItem>
+                ))}
+              </MuiSelect>
+            </FormControl>
+            <FormControl fullWidth>
+              <InputLabel>{t("dashboard.departments.selectHead")}</InputLabel>
+              <MuiSelect
+                value={form.headId}
+                label={t("dashboard.departments.selectHead")}
+                onChange={(e) => setForm({ ...form, headId: e.target.value })}
+              >
+                <MenuItem value="">
+                  {t("dashboard.departments.selectHead")}
+                </MenuItem>
+                {users.map((u) => (
+                  <MenuItem key={u.id} value={u.id}>
+                    {u.name}
+                  </MenuItem>
+                ))}
+              </MuiSelect>
+            </FormControl>
+          </div>
+        </DialogContent>
+        <DialogActions>
+          <MuiButton variant="outlined" onClick={() => setOpen(false)}>
+            {t("dashboard.departments.cancel")}
+          </MuiButton>
+          <MuiButton variant="contained" onClick={handleCreate}>
+            {t("dashboard.departments.create")}
+          </MuiButton>
+        </DialogActions>
+      </MuiDialog>
+
+      {/* Edit Department Dialog */}
+      {(currentUser?.role === UserRole.ADMIN ||
+        currentUser?.role === UserRole.SUPERADMIN) && (
+        <MuiDialog
+          open={editOpen}
+          onClose={() => {
+            setEditOpen(false);
+            setEditingDept(null);
+            setForm({ name: "", headId: "", parentId: "" });
+          }}
+        >
+          <DialogTitle>
+            {t("dashboard.departments.editDepartmentDialogTitle")}
+          </DialogTitle>
+          <DialogContent>
+            <div className="space-y-4 pt-2">
+              <TextField
+                label={t("dashboard.departments.departmentNamePlaceholder")}
+                placeholder={t("dashboard.departments.departmentNamePlaceholder")}
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                fullWidth
+                sx={{ mt: 1 }}
+              />
+              <FormControl fullWidth>
+                <InputLabel>{t("dashboard.departments.selectParentDepartment")}</InputLabel>
+                <MuiSelect
                   value={form.parentId}
-                  onChange={(e) =>
-                    setForm({ ...form, parentId: e.target.value })
-                  }
+                  label={t("dashboard.departments.selectParentDepartment")}
+                  onChange={(e) => setForm({ ...form, parentId: e.target.value })}
                 >
-                  <option value="">
+                  <MenuItem value="">
                     {t("dashboard.departments.selectParentDepartment")}
-                  </option>
-                  {depts.map((d) => (
-                    <option key={d.id} value={d.id}>
-                      {d.name}
-                    </option>
-                  ))}
-                </select>
-                <select
-                  className="border px-2 w-full py-1"
+                  </MenuItem>
+                  {/* Filter out the current department being edited from the parent list */}
+                  {depts
+                    .filter((d) => d.id !== editingDept?.id)
+                    .map((d) => (
+                      <MenuItem key={d.id} value={d.id}>
+                        {d.name}
+                      </MenuItem>
+                    ))}
+                </MuiSelect>
+              </FormControl>
+              <FormControl fullWidth>
+                <InputLabel>{t("dashboard.departments.selectHead")}</InputLabel>
+                <MuiSelect
                   value={form.headId}
+                  label={t("dashboard.departments.selectHead")}
                   onChange={(e) => setForm({ ...form, headId: e.target.value })}
                 >
-                  <option value="">
+                  <MenuItem value="">
                     {t("dashboard.departments.selectHead")}
-                  </option>
+                  </MenuItem>
                   {users.map((u) => (
-                    <option key={u.id} value={u.id}>
+                    <MenuItem key={u.id} value={u.id}>
                       {u.name}
-                    </option>
+                    </MenuItem>
                   ))}
-                </select>
-              </div>
-              <DialogFooter>
-                <DialogClose asChild>
-                  <Button variant="outline">
-                    {t("dashboard.departments.cancel")}
-                  </Button>
-                </DialogClose>
-                <Button onClick={handleCreate}>
-                  {t("dashboard.departments.create")}
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        )}
-        {/* Edit Department Dialog */}
-        {(currentUser?.role === UserRole.ADMIN ||
-          currentUser?.role === UserRole.SUPERADMIN) &&
-          editingDept && ( // Ensure editingDept is not null to render
-            <Dialog
-              open={editOpen}
-              onOpenChange={(isOpen) => {
-                setEditOpen(isOpen);
-                if (!isOpen) {
-                  setEditingDept(null);
-                  setForm({ name: "", headId: "", parentId: "" }); // Reset form on close
-                }
+                </MuiSelect>
+              </FormControl>
+            </div>
+          </DialogContent>
+          <DialogActions>
+            <MuiButton
+              variant="outlined"
+              onClick={() => {
+                setEditOpen(false);
+                setEditingDept(null);
+                setForm({ name: "", headId: "", parentId: "" });
               }}
             >
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>
-                    {t("dashboard.departments.editDepartmentDialogTitle")}
-                  </DialogTitle>
-                </DialogHeader>
-                <div className="space-y-2 pt-2">
-                  <Input
-                    placeholder={t(
-                      "dashboard.departments.departmentNamePlaceholder"
-                    )}
-                    value={form.name}
-                    onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  />
-                  <select
-                    className="border px-2 w-full py-1"
-                    value={form.parentId}
-                    onChange={(e) =>
-                      setForm({ ...form, parentId: e.target.value })
-                    }
-                  >
-                    <option value="">
-                      {t("dashboard.departments.selectParentDepartment")}
-                    </option>
-                    {/* Filter out the current department being edited from the parent list */}
-                    {depts
-                      .filter((d) => d.id !== editingDept?.id)
-                      .map((d) => (
-                        <option key={d.id} value={d.id}>
-                          {d.name}
-                        </option>
-                      ))}
-                  </select>
-                  <select
-                    className="border px-2 w-full py-1"
-                    value={form.headId}
-                    onChange={(e) =>
-                      setForm({ ...form, headId: e.target.value })
-                    }
-                  >
-                    <option value="">
-                      {t("dashboard.departments.selectHead")}
-                    </option>
-                    {users.map((u) => (
-                      <option key={u.id} value={u.id}>
-                        {u.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <DialogFooter>
-                  <DialogClose asChild>
-                    <Button
-                      variant="outline"
-                      onClick={() => {
-                        setEditOpen(false);
-                        setEditingDept(null);
-                        setForm({ name: "", headId: "", parentId: "" }); // Reset form on cancel
-                      }}
-                    >
-                      {t("dashboard.departments.cancel")}
-                    </Button>
-                  </DialogClose>
-                  <Button onClick={handleEdit}>
-                    {t("dashboard.departments.saveChangesButton")}
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          )}
-      </div>
+              {t("dashboard.departments.cancel")}
+            </MuiButton>
+            <MuiButton variant="contained" onClick={handleEdit}>
+              {t("dashboard.departments.saveChangesButton")}
+            </MuiButton>
+          </DialogActions>
+        </MuiDialog>
+      )}
+
       <Card>
         <CardHeader>
           <CardTitle>{t("dashboard.departments.listTitle")}</CardTitle>

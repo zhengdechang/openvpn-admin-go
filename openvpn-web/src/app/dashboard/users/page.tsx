@@ -3,16 +3,6 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useAuth } from "@/lib/auth-context";
-import {
-  Dialog,
-  DialogTrigger,
-  DialogContent,
-  DialogHeader,
-  DialogFooter,
-  DialogTitle,
-  DialogDescription,
-  DialogClose,
-} from "@/components/ui/dialog";
 import { useTranslation } from "react-i18next";
 import MainLayout from "@/components/layout/main-layout";
 import { userManagementAPI, departmentAPI, openvpnAPI } from "@/services/api";
@@ -23,10 +13,6 @@ import {
   UserUpdateRequest,
 } from "@/types/types";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import {
   useReactTable,
@@ -36,6 +22,11 @@ import {
   type ColumnDef,
   type SortingState,
 } from "@tanstack/react-table";
+import MuiButton from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
+import Chip from "@mui/material/Chip";
+import { Dialog as MuiDialog, DialogTitle, DialogContent, DialogActions, DialogContentText } from "@mui/material";
+import { FormControl, InputLabel, Select as MuiSelect, MenuItem } from "@mui/material";
 
 // Helper function to format bytes into a readable string
 const formatBytes = (bytes?: number, decimals = 2): string => {
@@ -70,7 +61,6 @@ export default function UsersPage() {
 
   // Form state for adding a new user
   const [addUserForm, setAddUserForm] = useState<UserUpdateRequest>({
-    // Using UserUpdateRequest for consistency
     name: "",
     email: "",
     password: "",
@@ -383,9 +373,12 @@ export default function UsersPage() {
         accessorKey: "role",
         header: () => t("dashboard.users.columnRole"),
         cell: ({ row }) => (
-          <Badge variant="secondary" className="capitalize">
-            {t(`dashboard.users.role${row.original.role.charAt(0).toUpperCase() + row.original.role.slice(1)}`, row.original.role)}
-          </Badge>
+          <Chip
+            label={t(`dashboard.users.role${row.original.role.charAt(0).toUpperCase() + row.original.role.slice(1)}`, row.original.role)}
+            size="small"
+            color="default"
+            sx={{ textTransform: "capitalize" }}
+          />
         ),
       },
       {
@@ -429,9 +422,11 @@ export default function UsersPage() {
         header: () => t("dashboard.users.columnOnlineStatus"),
         cell: ({ row }) =>
           typeof row.original.isOnline === "boolean" ? (
-            <Badge variant={row.original.isOnline ? "default" : "secondary"}>
-              {row.original.isOnline ? t("dashboard.users.statusOnline") : t("dashboard.users.statusOffline")}
-            </Badge>
+            <Chip
+              label={row.original.isOnline ? t("dashboard.users.statusOnline") : t("dashboard.users.statusOffline")}
+              color={row.original.isOnline ? "success" : "default"}
+              size="small"
+            />
           ) : (
             t("common.na")
           ),
@@ -440,9 +435,11 @@ export default function UsersPage() {
         accessorKey: "isPaused",
         header: () => t("dashboard.users.columnAccessState", "Access State"),
         cell: ({ row }) => (
-          <Badge variant={row.original.isPaused ? "destructive" : "default"}>
-            {row.original.isPaused ? t("dashboard.users.statusPaused", "Paused") : t("dashboard.users.statusActive", "Active")}
-          </Badge>
+          <Chip
+            label={row.original.isPaused ? t("dashboard.users.statusPaused", "Paused") : t("dashboard.users.statusActive", "Active")}
+            color={row.original.isPaused ? "error" : "success"}
+            size="small"
+          />
         ),
       },
       {
@@ -464,40 +461,43 @@ export default function UsersPage() {
             <div className="flex flex-wrap items-center justify-center gap-1">
               {canManageUsers && (
                 u.isPaused ? (
-                  <Button size="sm" variant="outline" className="h-8 px-2" onClick={() => handleResumeUser(u.name)}>
+                  <MuiButton size="small" variant="outlined" sx={{ height: 32, px: 1, minWidth: "auto" }} onClick={() => handleResumeUser(u.name)}>
                     {t("dashboard.users.resumeButton", "Resume")}
-                  </Button>
+                  </MuiButton>
                 ) : (
-                  <Button size="sm" variant="outline" className="h-8 px-2" onClick={() => handlePauseUser(u.name)}>
+                  <MuiButton size="small" variant="outlined" sx={{ height: 32, px: 1, minWidth: "auto" }} onClick={() => handlePauseUser(u.name)}>
                     {t("dashboard.users.pauseButton", "Pause")}
-                  </Button>
+                  </MuiButton>
                 )
               )}
               {(currentUser?.role === UserRole.ADMIN ||
                 currentUser?.role === UserRole.SUPERADMIN ||
                 (currentUser?.role === UserRole.MANAGER && currentUser.departmentId === u.departmentId)) && (
-                <Button size="sm" variant="outline" className="h-8 px-2" onClick={() => handleEditClick(u)}>
+                <MuiButton size="small" variant="outlined" sx={{ height: 32, px: 1, minWidth: "auto" }} onClick={() => handleEditClick(u)}>
                   {t("common.edit")}
-                </Button>
+                </MuiButton>
               )}
               {(currentUser?.role === UserRole.SUPERADMIN ||
                 (currentUser?.role === UserRole.ADMIN && u.role !== UserRole.SUPERADMIN) ||
                 (currentUser?.role === UserRole.MANAGER && u.departmentId === currentUser.departmentId && u.role !== UserRole.SUPERADMIN && u.role !== UserRole.ADMIN)) &&
                 u.id !== currentUser?.id && (
-                  <Button size="sm" variant="destructive" className="h-8 px-2" onClick={() => handleDelete(u.id)}>
+                  <MuiButton size="small" variant="contained" color="error" sx={{ height: 32, px: 1, minWidth: "auto" }} onClick={() => handleDelete(u.id)}>
                     {t("dashboard.users.deleteButton")}
-                  </Button>
+                  </MuiButton>
                 )}
-              <select
-                className="border px-1 py-1 rounded-md text-sm h-8"
-                defaultValue=""
-                onChange={(e) => handleDownload(u.name, e.target.value)}
-              >
-                <option value="" disabled>{t("dashboard.users.downloadConfigButtonShort", "DL Cfg")}</option>
-                <option value="windows">{t("dashboard.users.osWindows")}</option>
-                <option value="macos">{t("dashboard.users.osMacOS")}</option>
-                <option value="linux">{t("dashboard.users.osLinux")}</option>
-              </select>
+              <FormControl size="small" sx={{ minWidth: 80 }}>
+                <MuiSelect
+                  displayEmpty
+                  value=""
+                  onChange={(e) => handleDownload(u.name, e.target.value)}
+                  sx={{ height: 32, fontSize: "0.8rem" }}
+                  renderValue={() => t("dashboard.users.downloadConfigButtonShort", "DL Cfg")}
+                >
+                  <MenuItem value="windows">{t("dashboard.users.osWindows")}</MenuItem>
+                  <MenuItem value="macos">{t("dashboard.users.osMacOS")}</MenuItem>
+                  <MenuItem value="linux">{t("dashboard.users.osLinux")}</MenuItem>
+                </MuiSelect>
+              </FormControl>
             </div>
           );
         },
@@ -521,211 +521,158 @@ export default function UsersPage() {
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <h1 className="text-2xl font-bold">{t("dashboard.users.pageTitle")}</h1>
         {canManageUsers && (
-          <Dialog open={addUserDialogOpen} onOpenChange={setAddUserDialogOpen}>
-            <DialogTrigger asChild>
-              <Button
-                onClick={() => {
-                  let initialDeptId = "";
-                  let initialRole = UserRole.USER;
-                  if (currentUser?.role === UserRole.MANAGER) {
-                    initialDeptId = currentUser.departmentId || "";
-                    // Managers can only create users
-                  }
-                  setAddUserForm({
-                    name: "",
-                    email: "",
-                    password: "",
-                    role: initialRole,
-                    departmentId: initialDeptId,
-                    fixedIp: "",
-                    subnet: "", // Initialize with empty string
-                  });
-                  setAddUserDialogOpen(true);
-                }}
-              >
-                {t("dashboard.users.addUserButton")}
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>
-                  {t("dashboard.users.addUserDialogTitle")}
-                </DialogTitle>
-              </DialogHeader>
-              <div className="space-y-3 py-3">
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="add-name" className="text-right">
-                    {t("dashboard.users.namePlaceholder")}
-                  </Label>
-                  <Input
-                    id="add-name"
-                    value={addUserForm.name}
-                    onChange={(e) =>
-                      setAddUserForm({ ...addUserForm, name: e.target.value })
-                    }
-                    className="col-span-3"
-                  />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="add-email" className="text-right">
-                    {t("dashboard.users.emailPlaceholder")}
-                  </Label>
-                  <Input
-                    id="add-email"
-                    type="email"
-                    value={addUserForm.email}
-                    onChange={(e) =>
-                      setAddUserForm({ ...addUserForm, email: e.target.value })
-                    }
-                    className="col-span-3"
-                  />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="add-password" className="text-right">
-                    {t("dashboard.users.passwordPlaceholder")}
-                  </Label>
-                  <Input
-                    id="add-password"
-                    type="password"
-                    value={addUserForm.password}
-                    onChange={(e) =>
-                      setAddUserForm({
-                        ...addUserForm,
-                        password: e.target.value,
-                      })
-                    }
-                    className="col-span-3"
-                  />
-                </div>
-
-                {canEditFixedIp && (
-                  <>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="add-fixedIp" className="text-right">
-                        {t(
-                          "dashboard.users.fixedIpLabel",
-                          "Fixed VPN IP (Optional)"
-                        )}
-                      </Label>
-                      <Input
-                        id="add-fixedIp"
-                        value={addUserForm.fixedIp || ""}
-                        onChange={(e) =>
-                          setAddUserForm({
-                            ...addUserForm,
-                            fixedIp: e.target.value,
-                          })
-                        }
-                        placeholder={t(
-                          "dashboard.users.fixedIpPlaceholder",
-                          "e.g., 10.8.0.100 or empty"
-                        )}
-                        className="col-span-3"
-                      />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="add-subnet" className="text-right">
-                        {t("dashboard.users.subnetLabel", "Subnet (Optional)")}
-                      </Label>
-                      <Input
-                        id="add-subnet"
-                        value={addUserForm.subnet || ""}
-                        onChange={(e) =>
-                          setAddUserForm({
-                            ...addUserForm,
-                            subnet: e.target.value,
-                          })
-                        }
-                        placeholder={t(
-                          "dashboard.users.subnetPlaceholder",
-                          "e.g., 10.10.120.0/23 or empty"
-                        )}
-                        className="col-span-3"
-                      />
-                    </div>
-                  </>
-                )}
-
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="add-role" className="text-right">
-                    {t("dashboard.users.roleLabel", "Role")}
-                  </Label>
-                  <select
-                    id="add-role"
-                    value={addUserForm.role}
-                    onChange={(e) =>
-                      setAddUserForm({
-                        ...addUserForm,
-                        role: e.target.value as UserRole,
-                      })
-                    }
-                    className="col-span-3 border px-2 py-2 rounded-md"
-                    disabled={
-                      currentUser?.role === UserRole.MANAGER
-                    } /* Managers can only create 'user' role */
-                  >
-                    {Object.values(UserRole)
-                      .filter(
-                        (role) =>
-                          currentUser?.role === UserRole.SUPERADMIN || // Superadmin can assign any role
-                          (currentUser?.role === UserRole.ADMIN &&
-                            role !== UserRole.SUPERADMIN) || // Admin can assign any role except Superadmin
-                          (currentUser?.role === UserRole.MANAGER &&
-                            role === UserRole.USER) // Manager can only assign User
-                      )
-                      .map((role) => (
-                        <option key={role} value={role}>
-                          {t(
-                            `dashboard.users.role${
-                              role.charAt(0).toUpperCase() + role.slice(1)
-                            }`,
-                            role
-                          )}
-                        </option>
-                      ))}
-                  </select>
-                </div>
-
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="add-department" className="text-right">
-                    {t("dashboard.users.departmentLabel")}
-                  </Label>
-                  <select
-                    id="add-department"
-                    value={addUserForm.departmentId || ""}
-                    onChange={(e) =>
-                      setAddUserForm({
-                        ...addUserForm,
-                        departmentId: e.target.value,
-                      })
-                    }
-                    className="col-span-3 border px-2 py-2 rounded-md"
-                    disabled={
-                      currentUser?.role === UserRole.MANAGER &&
-                      !!currentUser.departmentId
-                    } /* Manager cannot change their own department selection */
-                  >
-                    <option value="">
-                      {t("dashboard.users.selectDepartmentPlaceholder")}
-                    </option>
-                    {depts.map((d) => (
-                      <option key={d.id} value={d.id}>
-                        {d.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-              <DialogFooter>
-                <DialogClose asChild>
-                  <Button variant="outline">{t("common.cancel")}</Button>
-                </DialogClose>
-                <Button onClick={handleCreateUser}>{t("common.create")}</Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+          <MuiButton
+            variant="contained"
+            onClick={() => {
+              let initialDeptId = "";
+              let initialRole = UserRole.USER;
+              if (currentUser?.role === UserRole.MANAGER) {
+                initialDeptId = currentUser.departmentId || "";
+                // Managers can only create users
+              }
+              setAddUserForm({
+                name: "",
+                email: "",
+                password: "",
+                role: initialRole,
+                departmentId: initialDeptId,
+                fixedIp: "",
+                subnet: "", // Initialize with empty string
+              });
+              setAddUserDialogOpen(true);
+            }}
+          >
+            {t("dashboard.users.addUserButton")}
+          </MuiButton>
         )}
       </div>
+
+      {/* Add User Dialog */}
+      <MuiDialog open={addUserDialogOpen} onClose={() => setAddUserDialogOpen(false)}>
+        <DialogTitle>
+          {t("dashboard.users.addUserDialogTitle")}
+        </DialogTitle>
+        <DialogContent>
+          <div className="space-y-4 py-2">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <span className="text-right text-sm font-medium">{t("dashboard.users.namePlaceholder")}</span>
+              <TextField
+                size="small"
+                value={addUserForm.name}
+                onChange={(e) => setAddUserForm({ ...addUserForm, name: e.target.value })}
+                className="col-span-3"
+                fullWidth
+                sx={{ gridColumn: "span 3" }}
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <span className="text-right text-sm font-medium">{t("dashboard.users.emailPlaceholder")}</span>
+              <TextField
+                size="small"
+                type="email"
+                value={addUserForm.email}
+                onChange={(e) => setAddUserForm({ ...addUserForm, email: e.target.value })}
+                fullWidth
+                sx={{ gridColumn: "span 3" }}
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <span className="text-right text-sm font-medium">{t("dashboard.users.passwordPlaceholder")}</span>
+              <TextField
+                size="small"
+                type="password"
+                value={addUserForm.password}
+                onChange={(e) => setAddUserForm({ ...addUserForm, password: e.target.value })}
+                fullWidth
+                sx={{ gridColumn: "span 3" }}
+              />
+            </div>
+
+            {canEditFixedIp && (
+              <>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <span className="text-right text-sm font-medium">
+                    {t("dashboard.users.fixedIpLabel", "Fixed VPN IP (Optional)")}
+                  </span>
+                  <TextField
+                    size="small"
+                    value={addUserForm.fixedIp || ""}
+                    onChange={(e) => setAddUserForm({ ...addUserForm, fixedIp: e.target.value })}
+                    placeholder={t("dashboard.users.fixedIpPlaceholder", "e.g., 10.8.0.100 or empty")}
+                    fullWidth
+                    sx={{ gridColumn: "span 3" }}
+                  />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <span className="text-right text-sm font-medium">
+                    {t("dashboard.users.subnetLabel", "Subnet (Optional)")}
+                  </span>
+                  <TextField
+                    size="small"
+                    value={addUserForm.subnet || ""}
+                    onChange={(e) => setAddUserForm({ ...addUserForm, subnet: e.target.value })}
+                    placeholder={t("dashboard.users.subnetPlaceholder", "e.g., 10.10.120.0/23 or empty")}
+                    fullWidth
+                    sx={{ gridColumn: "span 3" }}
+                  />
+                </div>
+              </>
+            )}
+
+            <div className="grid grid-cols-4 items-center gap-4">
+              <span className="text-right text-sm font-medium">{t("dashboard.users.roleLabel", "Role")}</span>
+              <FormControl size="small" sx={{ gridColumn: "span 3", width: "100%" }}>
+                <InputLabel>{t("dashboard.users.roleLabel", "Role")}</InputLabel>
+                <MuiSelect
+                  value={addUserForm.role}
+                  label={t("dashboard.users.roleLabel", "Role")}
+                  onChange={(e) => setAddUserForm({ ...addUserForm, role: e.target.value as UserRole })}
+                  disabled={currentUser?.role === UserRole.MANAGER}
+                >
+                  {Object.values(UserRole)
+                    .filter(
+                      (role) =>
+                        currentUser?.role === UserRole.SUPERADMIN ||
+                        (currentUser?.role === UserRole.ADMIN && role !== UserRole.SUPERADMIN) ||
+                        (currentUser?.role === UserRole.MANAGER && role === UserRole.USER)
+                    )
+                    .map((role) => (
+                      <MenuItem key={role} value={role}>
+                        {t(`dashboard.users.role${role.charAt(0).toUpperCase() + role.slice(1)}`, role)}
+                      </MenuItem>
+                    ))}
+                </MuiSelect>
+              </FormControl>
+            </div>
+
+            <div className="grid grid-cols-4 items-center gap-4">
+              <span className="text-right text-sm font-medium">{t("dashboard.users.departmentLabel")}</span>
+              <FormControl size="small" sx={{ gridColumn: "span 3", width: "100%" }}>
+                <InputLabel>{t("dashboard.users.selectDepartmentPlaceholder")}</InputLabel>
+                <MuiSelect
+                  value={addUserForm.departmentId || ""}
+                  label={t("dashboard.users.selectDepartmentPlaceholder")}
+                  onChange={(e) => setAddUserForm({ ...addUserForm, departmentId: e.target.value })}
+                  disabled={currentUser?.role === UserRole.MANAGER && !!currentUser.departmentId}
+                >
+                  <MenuItem value="">
+                    {t("dashboard.users.selectDepartmentPlaceholder")}
+                  </MenuItem>
+                  {depts.map((d) => (
+                    <MenuItem key={d.id} value={d.id}>
+                      {d.name}
+                    </MenuItem>
+                  ))}
+                </MuiSelect>
+              </FormControl>
+            </div>
+          </div>
+        </DialogContent>
+        <DialogActions>
+          <MuiButton variant="outlined" onClick={() => setAddUserDialogOpen(false)}>{t("common.cancel")}</MuiButton>
+          <MuiButton variant="contained" onClick={handleCreateUser}>{t("common.create")}</MuiButton>
+        </DialogActions>
+      </MuiDialog>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <Card>
@@ -793,75 +740,57 @@ export default function UsersPage() {
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div className="grid w-full gap-3 md:grid-cols-2 xl:grid-cols-4 xl:max-w-4xl">
           <div className="flex flex-col gap-1">
-            <Label htmlFor="user-search">
-              {t("dashboard.users.searchLabel", "Search")}
-            </Label>
-            <Input
-              id="user-search"
+            <TextField
+              label={t("dashboard.users.searchLabel", "Search")}
+              size="small"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder={t(
-                "dashboard.users.searchPlaceholder",
-                "Search by name or email"
-              )}
+              placeholder={t("dashboard.users.searchPlaceholder", "Search by name or email")}
+              fullWidth
             />
           </div>
           <div className="flex flex-col gap-1">
-            <Label htmlFor="user-department-filter">
-              {t("dashboard.users.departmentFilterLabel")}
-            </Label>
-            <select
-              id="user-department-filter"
-              value={departmentFilter}
-              onChange={(e) => setDepartmentFilter(e.target.value)}
-              className="border px-2 py-2 rounded-md"
-            >
-              <option value="all">
-                {t("dashboard.users.filterDepartmentAll")}
-              </option>
-              <option value="none">
-                {t("dashboard.users.filterDepartmentNone")}
-              </option>
-              {depts.map((d) => (
-                <option key={d.id} value={d.id}>
-                  {d.name}
-                </option>
-              ))}
-            </select>
+            <FormControl size="small" fullWidth>
+              <InputLabel>{t("dashboard.users.departmentFilterLabel")}</InputLabel>
+              <MuiSelect
+                value={departmentFilter}
+                label={t("dashboard.users.departmentFilterLabel")}
+                onChange={(e) => setDepartmentFilter(e.target.value)}
+              >
+                <MenuItem value="all">{t("dashboard.users.filterDepartmentAll")}</MenuItem>
+                <MenuItem value="none">{t("dashboard.users.filterDepartmentNone")}</MenuItem>
+                {depts.map((d) => (
+                  <MenuItem key={d.id} value={d.id}>
+                    {d.name}
+                  </MenuItem>
+                ))}
+              </MuiSelect>
+            </FormControl>
           </div>
           <div className="flex flex-col gap-1">
-            <Label htmlFor="user-status-filter">
-              {t("dashboard.users.statusFilterLabel")}
-            </Label>
-            <select
-              id="user-status-filter"
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="border px-2 py-2 rounded-md"
-            >
-              <option value="all">
-                {t("dashboard.users.filterStatusAll")}
-              </option>
-              <option value="online">
-                {t("dashboard.users.filterStatusOnline")}
-              </option>
-              <option value="offline">
-                {t("dashboard.users.filterStatusOffline")}
-              </option>
-              <option value="paused">
-                {t("dashboard.users.filterStatusPaused")}
-              </option>
-            </select>
+            <FormControl size="small" fullWidth>
+              <InputLabel>{t("dashboard.users.statusFilterLabel")}</InputLabel>
+              <MuiSelect
+                value={statusFilter}
+                label={t("dashboard.users.statusFilterLabel")}
+                onChange={(e) => setStatusFilter(e.target.value)}
+              >
+                <MenuItem value="all">{t("dashboard.users.filterStatusAll")}</MenuItem>
+                <MenuItem value="online">{t("dashboard.users.filterStatusOnline")}</MenuItem>
+                <MenuItem value="offline">{t("dashboard.users.filterStatusOffline")}</MenuItem>
+                <MenuItem value="paused">{t("dashboard.users.filterStatusPaused")}</MenuItem>
+              </MuiSelect>
+            </FormControl>
           </div>
         </div>
         {hasFilters && (
-          <Button
-            variant="ghost"
+          <MuiButton
+            variant="text"
             className="self-start lg:self-auto"
             onClick={handleClearFilters}
           >
             {t("common.clearFilters", "Clear filters")}
-          </Button>
+          </MuiButton>
         )}
       </div>
 
@@ -874,194 +803,148 @@ export default function UsersPage() {
         </span>
       </div>
 
-      <Dialog open={editUserDialogOpen} onOpenChange={setEditUserDialogOpen}>
-        <DialogContent className="sm:max-w-[525px]">
-          <DialogHeader>
-            <DialogTitle>
-              {t("dashboard.users.editUserDialogTitle", "Edit User")}
-            </DialogTitle>
-            <DialogDescription>
-              {t(
-                "dashboard.users.editUserDescription",
-                "Make changes to the user profile here. Click save when you're done."
-              )}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
+      {/* Edit User Dialog */}
+      <MuiDialog open={editUserDialogOpen} onClose={() => setEditUserDialogOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>
+          {t("dashboard.users.editUserDialogTitle", "Edit User")}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText sx={{ mb: 2 }}>
+            {t(
+              "dashboard.users.editUserDescription",
+              "Make changes to the user profile here. Click save when you're done."
+            )}
+          </DialogContentText>
+          <div className="grid gap-4 py-2">
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="edit-name" className="text-right">
-                {t("dashboard.users.namePlaceholder")}
-              </Label>
-              <Input
-                id="edit-name"
+              <span className="text-right text-sm font-medium">{t("dashboard.users.namePlaceholder")}</span>
+              <TextField
+                size="small"
                 value={editForm.name || ""}
-                onChange={(e) =>
-                  setEditForm({ ...editForm, name: e.target.value })
-                }
-                className="col-span-3"
+                onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                fullWidth
+                sx={{ gridColumn: "span 3" }}
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="edit-email" className="text-right">
-                {t("dashboard.users.emailPlaceholder")}
-              </Label>
-              <Input
-                id="edit-email"
+              <span className="text-right text-sm font-medium">{t("dashboard.users.emailPlaceholder")}</span>
+              <TextField
+                size="small"
                 type="email"
                 value={editForm.email || ""}
-                onChange={(e) =>
-                  setEditForm({ ...editForm, email: e.target.value })
-                }
-                className="col-span-3"
+                onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                fullWidth
+                sx={{ gridColumn: "span 3" }}
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="edit-password" className="text-right">
-                {t(
-                  "dashboard.users.passwordOptionalPlaceholder",
-                  "Password (optional)"
-                )}
-              </Label>
-              <Input
-                id="edit-password"
+              <span className="text-right text-sm font-medium">
+                {t("dashboard.users.passwordOptionalPlaceholder", "Password (optional)")}
+              </span>
+              <TextField
+                size="small"
                 type="password"
                 value={editForm.password || ""}
-                onChange={(e) =>
-                  setEditForm({ ...editForm, password: e.target.value })
-                }
-                className="col-span-3"
-                placeholder={t(
-                  "dashboard.users.passwordLeaveBlankPlaceholder",
-                  "Leave blank to keep current"
-                )}
+                onChange={(e) => setEditForm({ ...editForm, password: e.target.value })}
+                fullWidth
+                placeholder={t("dashboard.users.passwordLeaveBlankPlaceholder", "Leave blank to keep current")}
+                sx={{ gridColumn: "span 3" }}
               />
             </div>
 
             {canEditFixedIp && (
               <>
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="edit-fixedIp" className="text-right">
-                    {t(
-                      "dashboard.users.fixedIpLabel",
-                      "Fixed VPN IP (Optional)"
-                    )}
-                  </Label>
-                  <Input
-                    id="edit-fixedIp"
+                  <span className="text-right text-sm font-medium">
+                    {t("dashboard.users.fixedIpLabel", "Fixed VPN IP (Optional)")}
+                  </span>
+                  <TextField
+                    size="small"
                     value={editForm.fixedIp || ""}
-                    onChange={(e) =>
-                      setEditForm({
-                        ...editForm,
-                        fixedIp: e.target.value,
-                      })
-                    }
-                    placeholder={t(
-                      "dashboard.users.fixedIpPlaceholder",
-                      "e.g., 10.8.0.100 or empty"
-                    )}
-                    className="col-span-3"
+                    onChange={(e) => setEditForm({ ...editForm, fixedIp: e.target.value })}
+                    placeholder={t("dashboard.users.fixedIpPlaceholder", "e.g., 10.8.0.100 or empty")}
+                    fullWidth
+                    sx={{ gridColumn: "span 3" }}
                   />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="edit-subnet" className="text-right">
+                  <span className="text-right text-sm font-medium">
                     {t("dashboard.users.subnetLabel", "Subnet (Optional)")}
-                  </Label>
-                  <Input
-                    id="edit-subnet"
+                  </span>
+                  <TextField
+                    size="small"
                     value={editForm.subnet || ""}
-                    onChange={(e) =>
-                      setEditForm({
-                        ...editForm,
-                        subnet: e.target.value,
-                      })
-                    }
-                    placeholder={t(
-                      "dashboard.users.subnetPlaceholder",
-                      "e.g., 10.10.120.0/23 or empty"
-                    )}
-                    className="col-span-3"
+                    onChange={(e) => setEditForm({ ...editForm, subnet: e.target.value })}
+                    placeholder={t("dashboard.users.subnetPlaceholder", "e.g., 10.10.120.0/23 or empty")}
+                    fullWidth
+                    sx={{ gridColumn: "span 3" }}
                   />
                 </div>
               </>
             )}
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="edit-department" className="text-right">
-                {t("dashboard.users.departmentLabel")}
-              </Label>
-              <select
-                id="edit-department"
-                value={editForm.departmentId || ""}
-                onChange={(e) =>
-                  setEditForm({ ...editForm, departmentId: e.target.value })
-                }
-                className="col-span-3 border px-2 py-2 rounded-md"
-                disabled={
-                  currentUser?.role === UserRole.MANAGER &&
-                  editingUser?.departmentId !== currentUser.departmentId &&
-                  editingUser?.id !== currentUser.id
-                }
-              >
-                <option value="">
-                  {t("dashboard.users.selectDepartmentPlaceholder")}
-                </option>
-                {depts.map((d) => (
-                  <option key={d.id} value={d.id}>
-                    {d.name}
-                  </option>
-                ))}
-              </select>
+              <span className="text-right text-sm font-medium">{t("dashboard.users.departmentLabel")}</span>
+              <FormControl size="small" sx={{ gridColumn: "span 3", width: "100%" }}>
+                <InputLabel>{t("dashboard.users.selectDepartmentPlaceholder")}</InputLabel>
+                <MuiSelect
+                  value={editForm.departmentId || ""}
+                  label={t("dashboard.users.selectDepartmentPlaceholder")}
+                  onChange={(e) => setEditForm({ ...editForm, departmentId: e.target.value })}
+                  disabled={
+                    currentUser?.role === UserRole.MANAGER &&
+                    editingUser?.departmentId !== currentUser.departmentId &&
+                    editingUser?.id !== currentUser.id
+                  }
+                >
+                  <MenuItem value="">
+                    {t("dashboard.users.selectDepartmentPlaceholder")}
+                  </MenuItem>
+                  {depts.map((d) => (
+                    <MenuItem key={d.id} value={d.id}>
+                      {d.name}
+                    </MenuItem>
+                  ))}
+                </MuiSelect>
+              </FormControl>
             </div>
             {(currentUser?.role === UserRole.SUPERADMIN ||
               (currentUser?.role === UserRole.ADMIN &&
                 editingUser?.role !== UserRole.SUPERADMIN)) &&
               (editingUser?.id !== currentUser?.id ||
-                currentUser?.role ===
-                  UserRole.SUPERADMIN) /* Can't change own role unless superadmin */ && (
+                currentUser?.role === UserRole.SUPERADMIN) && (
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="edit-role" className="text-right">
-                    {t("dashboard.users.roleLabel", "Role")}
-                  </Label>
-                  <select
-                    id="edit-role"
-                    value={editForm.role || ""}
-                    onChange={(e) =>
-                      setEditForm({
-                        ...editForm,
-                        role: e.target.value as UserRole,
-                      })
-                    }
-                    className="col-span-3 border px-2 py-2 rounded-md"
-                  >
-                    {Object.values(UserRole)
-                      .filter(
-                        (role) =>
-                          currentUser?.role === UserRole.SUPERADMIN ||
-                          role !== UserRole.SUPERADMIN
-                      )
-                      .map((role) => (
-                        <option key={role} value={role}>
-                          {t(
-                            `dashboard.users.role${
-                              role.charAt(0).toUpperCase() + role.slice(1)
-                            }`,
-                            role
-                          )}
-                        </option>
-                      ))}
-                  </select>
+                  <span className="text-right text-sm font-medium">{t("dashboard.users.roleLabel", "Role")}</span>
+                  <FormControl size="small" sx={{ gridColumn: "span 3", width: "100%" }}>
+                    <InputLabel>{t("dashboard.users.roleLabel", "Role")}</InputLabel>
+                    <MuiSelect
+                      value={editForm.role || ""}
+                      label={t("dashboard.users.roleLabel", "Role")}
+                      onChange={(e) => setEditForm({ ...editForm, role: e.target.value as UserRole })}
+                    >
+                      {Object.values(UserRole)
+                        .filter(
+                          (role) =>
+                            currentUser?.role === UserRole.SUPERADMIN ||
+                            role !== UserRole.SUPERADMIN
+                        )
+                        .map((role) => (
+                          <MenuItem key={role} value={role}>
+                            {t(`dashboard.users.role${role.charAt(0).toUpperCase() + role.slice(1)}`, role)}
+                          </MenuItem>
+                        ))}
+                    </MuiSelect>
+                  </FormControl>
                 </div>
               )}
           </div>
-          <DialogFooter>
-            <DialogClose asChild>
-              <Button variant="outline">{t("common.cancel")}</Button>
-            </DialogClose>
-            <Button onClick={handleUpdateUser}>
-              {t("common.saveChanges")}
-            </Button>
-          </DialogFooter>
         </DialogContent>
-      </Dialog>
+        <DialogActions>
+          <MuiButton variant="outlined" onClick={() => setEditUserDialogOpen(false)}>{t("common.cancel")}</MuiButton>
+          <MuiButton variant="contained" onClick={handleUpdateUser}>
+            {t("common.saveChanges")}
+          </MuiButton>
+        </DialogActions>
+      </MuiDialog>
 
       <Card>
         <CardHeader>
@@ -1087,12 +970,17 @@ export default function UsersPage() {
                           <div className="text-xs text-muted-foreground mt-0.5">{u.email}</div>
                         </div>
                         <div className="flex flex-col items-end gap-1 shrink-0">
-                          <Badge variant={u.isOnline ? "default" : "secondary"} className="text-xs">
-                            {u.isOnline ? t("dashboard.users.statusOnline") : t("dashboard.users.statusOffline")}
-                          </Badge>
-                          <Badge variant={u.isPaused ? "destructive" : "outline"} className="text-xs">
-                            {u.isPaused ? t("dashboard.users.statusPaused", "Paused") : t("dashboard.users.statusActive", "Active")}
-                          </Badge>
+                          <Chip
+                            label={u.isOnline ? t("dashboard.users.statusOnline") : t("dashboard.users.statusOffline")}
+                            color={u.isOnline ? "success" : "default"}
+                            size="small"
+                          />
+                          <Chip
+                            label={u.isPaused ? t("dashboard.users.statusPaused", "Paused") : t("dashboard.users.statusActive", "Active")}
+                            color={u.isPaused ? "error" : "default"}
+                            variant="outlined"
+                            size="small"
+                          />
                         </div>
                       </div>
                       {/* Meta row */}
@@ -1108,39 +996,42 @@ export default function UsersPage() {
                       <div className="flex flex-wrap gap-2 pt-1 border-t">
                         {canManageUsers && (
                           u.isPaused ? (
-                            <Button size="sm" variant="outline" className="h-7 text-xs px-2" onClick={() => handleResumeUser(u.name)}>
+                            <MuiButton size="small" variant="outlined" sx={{ height: 28, fontSize: "0.75rem", px: 1 }} onClick={() => handleResumeUser(u.name)}>
                               {t("dashboard.users.resumeButton", "Resume")}
-                            </Button>
+                            </MuiButton>
                           ) : (
-                            <Button size="sm" variant="outline" className="h-7 text-xs px-2" onClick={() => handlePauseUser(u.name)}>
+                            <MuiButton size="small" variant="outlined" sx={{ height: 28, fontSize: "0.75rem", px: 1 }} onClick={() => handlePauseUser(u.name)}>
                               {t("dashboard.users.pauseButton", "Pause")}
-                            </Button>
+                            </MuiButton>
                           )
                         )}
                         {(currentUser?.role === UserRole.ADMIN || currentUser?.role === UserRole.SUPERADMIN ||
                           (currentUser?.role === UserRole.MANAGER && currentUser.departmentId === u.departmentId)) && (
-                          <Button size="sm" variant="outline" className="h-7 text-xs px-2" onClick={() => handleEditClick(u)}>
+                          <MuiButton size="small" variant="outlined" sx={{ height: 28, fontSize: "0.75rem", px: 1 }} onClick={() => handleEditClick(u)}>
                             {t("common.edit")}
-                          </Button>
+                          </MuiButton>
                         )}
                         {(currentUser?.role === UserRole.SUPERADMIN ||
                           (currentUser?.role === UserRole.ADMIN && u.role !== UserRole.SUPERADMIN) ||
                           (currentUser?.role === UserRole.MANAGER && u.departmentId === currentUser.departmentId && u.role !== UserRole.SUPERADMIN && u.role !== UserRole.ADMIN)) &&
                           u.id !== currentUser?.id && (
-                            <Button size="sm" variant="destructive" className="h-7 text-xs px-2" onClick={() => handleDelete(u.id)}>
+                            <MuiButton size="small" variant="contained" color="error" sx={{ height: 28, fontSize: "0.75rem", px: 1 }} onClick={() => handleDelete(u.id)}>
                               {t("dashboard.users.deleteButton")}
-                            </Button>
+                            </MuiButton>
                           )}
-                        <select
-                          className="border px-1 py-0.5 rounded-md text-xs h-7"
-                          defaultValue=""
-                          onChange={(e) => handleDownload(u.name, e.target.value)}
-                        >
-                          <option value="" disabled>{t("dashboard.users.downloadConfigButtonShort", "DL Cfg")}</option>
-                          <option value="windows">{t("dashboard.users.osWindows")}</option>
-                          <option value="macos">{t("dashboard.users.osMacOS")}</option>
-                          <option value="linux">{t("dashboard.users.osLinux")}</option>
-                        </select>
+                        <FormControl size="small" sx={{ minWidth: 72 }}>
+                          <MuiSelect
+                            displayEmpty
+                            value=""
+                            onChange={(e) => handleDownload(u.name, e.target.value)}
+                            sx={{ height: 28, fontSize: "0.75rem" }}
+                            renderValue={() => t("dashboard.users.downloadConfigButtonShort", "DL Cfg")}
+                          >
+                            <MenuItem value="windows">{t("dashboard.users.osWindows")}</MenuItem>
+                            <MenuItem value="macos">{t("dashboard.users.osMacOS")}</MenuItem>
+                            <MenuItem value="linux">{t("dashboard.users.osLinux")}</MenuItem>
+                          </MuiSelect>
+                        </FormControl>
                       </div>
                     </div>
                   );

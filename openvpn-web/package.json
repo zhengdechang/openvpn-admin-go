@@ -19,6 +19,10 @@
     "auto-gen-i18n": "node ./src/i18n/auto-gen-i18n.js"
   },
   "dependencies": {
+    "@mui/material": "^5.16.7",
+    "@mui/icons-material": "^5.16.7",
+    "@emotion/react": "^11.13.3",
+    "@emotion/styled": "^11.13.0",
     "@formatjs/intl-localematcher": "^0.6.1",
     "@tanstack/react-table": "^8.20.5",
     "@hookform/resolvers": "^3.10.0",

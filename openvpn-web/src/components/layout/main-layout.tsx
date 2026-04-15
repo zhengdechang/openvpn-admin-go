@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import Sidebar from "./sidebar";
 import LanguageSwitcher from "@/components/ui/language-switcher";
+import IconButton from "@mui/material/IconButton";
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -108,30 +109,19 @@ export default function MainLayout({ children, className }: MainLayoutProps) {
         >
           <div style={{ display: "flex", alignItems: "center", gap: "12px", minWidth: 0 }}>
             {/* ─── 汉堡菜单（仅移动端显示）─── */}
-            <button
+            <IconButton
               onClick={() => setSidebarOpen(true)}
               className="md:hidden"
-              style={{
-                width: "36px",
-                height: "36px",
-                borderRadius: "8px",
-                border: "none",
-                background: "transparent",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "hsl(var(--foreground))",
-                flexShrink: 0,
-              }}
               aria-label="Open menu"
+              size="small"
+              sx={{ color: "hsl(var(--foreground))", flexShrink: 0 }}
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="3" y1="6" x2="21" y2="6" />
                 <line x1="3" y1="12" x2="21" y2="12" />
                 <line x1="3" y1="18" x2="21" y2="18" />
               </svg>
-            </button>
+            </IconButton>
 
             <div style={{ minWidth: 0 }}>
               <div style={{ fontSize: "15px", fontWeight: 600, color: "hsl(var(--foreground))", lineHeight: 1.2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
@@ -148,25 +138,16 @@ export default function MainLayout({ children, className }: MainLayoutProps) {
             <LanguageSwitcher />
 
             {/* 通知铃 */}
-            <button
-              style={{
-                width: "32px",
-                height: "32px",
-                borderRadius: "8px",
-                border: "none",
-                background: "transparent",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "hsl(var(--muted-foreground))",
-              }}
+            <IconButton
+              size="small"
+              aria-label="Notifications"
+              sx={{ color: "hsl(var(--muted-foreground))" }}
             >
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
                 <path d="M13.73 21a2 2 0 0 1-3.46 0" />
               </svg>
-            </button>
+            </IconButton>
           </div>
         </header>
 
