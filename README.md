@@ -31,17 +31,19 @@ This project consists of two main components:
 ### Backend (openvpn-admin-go)
 
 - **Language:** Go 1.21+
-- **Framework:** Gin (HTTP router)
-- **Database:** PostgreSQL with GORM ORM
-- **Authentication:** JWT tokens
+- **Framework:** Gin v1.10 (HTTP router)
+- **Database:** PostgreSQL 16 with GORM ORM + Goose migrations
+- **Authentication:** JWT tokens (golang-jwt/jwt v4)
+- **CLI:** Cobra + promptui interactive menu
 - **OpenVPN Integration:** Direct system integration with OpenVPN service
 
 ### Frontend (openvpn-web)
 
-- **Framework:** Next.js 14 with TypeScript
-- **UI Library:** Tailwind CSS + Radix UI components
-- **State Management:** Zustand
-- **Internationalization:** i18next
+- **Framework:** Next.js 16 with React 19 + TypeScript
+- **UI Library:** Tailwind CSS + Radix UI + MUI v5 components
+- **State Management:** Zustand v5
+- **Internationalization:** i18next v25 + react-i18next
+- **Forms:** React Hook Form + Zod validation
 - **API Client:** Axios
 
 ## 🖥️ Management Interfaces
@@ -97,7 +99,8 @@ Modern web interface accessible at `http://localhost:8085` (default):
 ### Prerequisites
 
 - **Go 1.21+** - Backend development
-- **Node.js 18+** - Frontend development
+- **Node.js 20+** - Frontend development
+- **PostgreSQL 16** - Database
 - **OpenVPN** - VPN server software
 - **Linux System** - Ubuntu/Debian/CentOS (systemd required)
 - **Root/Sudo Access** - For OpenVPN service management
@@ -364,17 +367,16 @@ Every merge to `main` automatically:
 # Pull and run the latest image
 docker run -d \
   --name openvpn-admin \
+  --network host \
   --cap-add NET_ADMIN \
+  --cap-add SYS_MODULE \
   --device /dev/net/tun \
-  -p 8085:8085 \
-  -p 3000:3000 \
-  -p 80:80 \
-  -p 1194:1194/udp \
+  --privileged \
   -v openvpn_data:/app/data \
   -v openvpn_logs:/app/logs \
   -e JWT_SECRET=your-secret-key \
-  -e OPENVPN_SERVER_HOSTNAME=your-server-ip \
-  zhengdechang/openvpn-admin-go:latest
+  -e DATABASE_URL=postgres://openvpn:openvpn_secret@127.0.0.1:5432/openvpn?sslmode=disable \
+  zhengdechang/openvpn-admin-go:latest openvpn-go web --port 8085
 ```
 
 ```bash

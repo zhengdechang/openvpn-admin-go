@@ -28,11 +28,11 @@ const translation = {
     downloadButton: "Download Release",
     frontend: {
       title: "Frontend",
-      description: "Next.js 14 · TypeScript · Tailwind CSS · Radix UI"
+      description: "Next.js 16 · React 19 · TypeScript · Tailwind CSS · Radix UI · MUI v5"
     },
     backend: {
       title: "Backend",
-      description: "Go · Gin · PostgreSQL · Goose Migrations · JWT"
+      description: "Go 1.21+ · Gin v1.10 · PostgreSQL 16 · GORM · Goose Migrations · JWT"
     }
   },
   githubSection: {
