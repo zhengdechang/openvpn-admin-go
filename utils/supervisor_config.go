@@ -14,7 +14,7 @@ type SupervisorConfig struct {
 	BinaryPath       string
 	WorkingDirectory string
 	Port             int
-	DBPath           string
+	DatabaseURL      string
 	OpenVPNConfigDir string
 	OpenVPNAutoStart bool
 	WebAutoStart     bool
@@ -25,7 +25,7 @@ type ServiceConfig struct {
 	BinaryPath       string
 	WorkingDirectory string
 	Port             int
-	DBPath           string
+	DatabaseURL      string
 	OpenVPNConfigDir string
 	AutoStart        bool
 }
@@ -92,8 +92,8 @@ func InstallWebServiceConfig(config ServiceConfig) error {
 	if config.Port == 0 {
 		config.Port = 8085
 	}
-	if config.DBPath == "" {
-		config.DBPath = "/app/data/db.sqlite3"
+	if config.DatabaseURL == "" {
+		config.DatabaseURL = os.Getenv("DATABASE_URL")
 	}
 	if config.OpenVPNConfigDir == "" {
 		config.OpenVPNConfigDir = "/etc/openvpn"
@@ -124,7 +124,7 @@ func installServiceConfig(templateName, configPath string, config ServiceConfig)
 		"BinaryPath":       config.BinaryPath,
 		"WorkingDirectory": config.WorkingDirectory,
 		"Port":             config.Port,
-		"DBPath":           config.DBPath,
+		"DatabaseURL":      config.DatabaseURL,
 		"OpenVPNConfigDir": config.OpenVPNConfigDir,
 		"AutoStart":        config.AutoStart,
 	}
