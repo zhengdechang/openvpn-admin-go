@@ -1,12 +1,10 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import Sidebar from "./sidebar";
-import { setLocaleOnClient, getLocaleOnClient } from "@/i18n";
-import { LanguagesSupported } from "@/i18n/language";
-import type { Locale } from "@/i18n";
+import LanguageSwitcher from "@/components/ui/language-switcher";
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -32,13 +30,10 @@ function getPageInfo(
 }
 
 export default function MainLayout({ children, className }: MainLayoutProps) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const pathname = usePathname();
   const { title, breadcrumb } = getPageInfo(pathname || "", t);
-  const [langMenuOpen, setLangMenuOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [currentLocale, setCurrentLocale] = useState<Locale>(getLocaleOnClient());
-  const langMenuRef = useRef<HTMLDivElement>(null);
 
   // 路由切换时自动关闭侧边栏（移动端）
   useEffect(() => {
@@ -54,30 +49,6 @@ export default function MainLayout({ children, className }: MainLayoutProps) {
     }
     return () => { document.body.style.overflow = ""; };
   }, [sidebarOpen]);
-
-  const handleLanguageChange = (locale: Locale) => {
-    setLocaleOnClient(locale, true);
-    setCurrentLocale(locale);
-    setLangMenuOpen(false);
-    document.documentElement.lang = locale;
-    i18n.changeLanguage(locale);
-  };
-
-  useEffect(() => {
-    const handler = () => setCurrentLocale(i18n.language as Locale);
-    i18n.on("languageChanged", handler);
-    return () => i18n.off("languageChanged", handler);
-  }, [i18n]);
-
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (langMenuRef.current && !langMenuRef.current.contains(e.target as Node)) {
-        setLangMenuOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
 
   return (
     <div style={{ display: "flex", height: "100vh", overflow: "hidden" }}>
@@ -174,72 +145,7 @@ export default function MainLayout({ children, className }: MainLayoutProps) {
 
           <div style={{ display: "flex", alignItems: "center", gap: "4px", flexShrink: 0 }}>
             {/* Language switcher */}
-            <div ref={langMenuRef} style={{ position: "relative" }}>
-              <button
-                onClick={() => setLangMenuOpen(!langMenuOpen)}
-                title={t("layout.language")}
-                style={{
-                  height: "32px",
-                  padding: "0 10px",
-                  borderRadius: "8px",
-                  border: "1px solid hsl(var(--border))",
-                  background: langMenuOpen ? "hsl(var(--muted))" : "transparent",
-                  cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "5px",
-                  color: "hsl(var(--muted-foreground))",
-                  fontSize: "12px",
-                  fontWeight: 500,
-                }}
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="10" />
-                  <line x1="2" y1="12" x2="22" y2="12" />
-                  <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-                </svg>
-                {currentLocale === "zh-Hans" ? "中文" : "EN"}
-              </button>
-              {langMenuOpen && (
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "calc(100% + 6px)",
-                    right: 0,
-                    background: "#ffffff",
-                    borderRadius: "10px",
-                    border: "1px solid hsl(var(--border))",
-                    boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
-                    padding: "4px",
-                    minWidth: "130px",
-                    zIndex: 100,
-                  }}
-                >
-                  {LanguagesSupported.map((locale) => (
-                    <button
-                      key={locale}
-                      onClick={() => handleLanguageChange(locale)}
-                      style={{
-                        display: "block",
-                        width: "100%",
-                        textAlign: "left",
-                        padding: "7px 12px",
-                        borderRadius: "6px",
-                        fontSize: "13px",
-                        border: "none",
-                        background: currentLocale === locale ? "hsl(var(--secondary))" : "transparent",
-                        color: currentLocale === locale ? "hsl(var(--primary))" : "#374151",
-                        cursor: "pointer",
-                        fontFamily: "inherit",
-                        fontWeight: currentLocale === locale ? 600 : 400,
-                      }}
-                    >
-                      {locale === "en-US" ? t("layout.navbar.langEnglish") : t("layout.navbar.langChinese")}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+            <LanguageSwitcher />
 
             {/* 通知铃 */}
             <button

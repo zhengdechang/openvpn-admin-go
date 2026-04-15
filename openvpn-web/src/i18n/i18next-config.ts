@@ -1,10 +1,9 @@
 'use client'
 import i18n from 'i18next'
 import { initReactI18next } from 'react-i18next'
-import Cookies from 'js-cookie'
 
 import { LanguagesSupported } from './language'
-import { LOCALE_COOKIE_NAME } from './config'
+import { LOCALE_STORAGE_KEY } from './config'
 
 const loadLangResources = (lang: string) => ({
   translation: {
@@ -24,8 +23,15 @@ const resources = LanguagesSupported.reduce((acc: any, lang: string) => {
   return acc
 }, {})
 
+// Read saved locale synchronously so the initial render is already in the right language
+const savedLocale =
+  typeof window !== 'undefined'
+    ? (localStorage.getItem(LOCALE_STORAGE_KEY) ?? 'en-US')
+    : 'en-US'
+
 i18n.use(initReactI18next)
   .init({
+    lng: LanguagesSupported.includes(savedLocale) ? savedLocale : 'en-US',
     fallbackLng: 'en-US',
     resources,
     react: {

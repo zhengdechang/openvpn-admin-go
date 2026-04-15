@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth-context";
 import { useTranslation } from "react-i18next";
 import VPNLogo from "@/components/ui/vpn-logo";
+import LanguageSwitcher from "@/components/ui/language-switcher";
 
 export default function Home() {
   const { user, loading, refreshToken } = useAuth();
@@ -17,6 +18,11 @@ export default function Home() {
 
   return (
     <div className="min-h-screen overflow-y-auto bg-background">
+      {/* Top-right language switcher */}
+      <div className="fixed top-4 right-4 z-50">
+        <LanguageSwitcher />
+      </div>
+
       {/* Hero Section */}
       <div className="hero-pattern py-24">
         <div className="container mx-auto px-4">

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
+import LanguageSwitcher from "@/components/ui/language-switcher";
 
 const NAV_SECTIONS = ["overview", "quickstart", "envvars", "roles", "api", "faq"] as const;
 type Section = (typeof NAV_SECTIONS)[number];
@@ -64,9 +65,12 @@ export default function DocsPage() {
             <span className="text-gray-400">/</span>
             <span className="text-gray-600 font-medium">{t("docs.pageTitle")}</span>
           </div>
-          <Button asChild variant="outline" size="sm">
-            <Link href="/">&larr; {t("common.back") || "Back"}</Link>
-          </Button>
+          <div className="flex items-center gap-2">
+            <LanguageSwitcher />
+            <Button asChild variant="outline" size="sm">
+              <Link href="/">&larr; {t("common.back") || "Back"}</Link>
+            </Button>
+          </div>
         </div>
       </div>
 
