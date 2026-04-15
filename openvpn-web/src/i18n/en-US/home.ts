@@ -1,61 +1,80 @@
 const translation = {
-  title: "OpenVPN Admin Dashboard",
-  subtitle: "Professional OpenVPN management platform with enterprise-grade security, real-time monitoring, and intuitive web interface. Streamline your VPN infrastructure management with powerful tools for user administration, certificate management, and comprehensive logging.",
-  getStarted: "Get Started",
-  signUp: "Sign Up",
+  title: "VPN Admin — Enterprise OpenVPN Management",
+  subtitle: "A modern, open-source OpenVPN administration platform. Manage users, certificates, departments, and server status through a clean web interface — no CLI required.",
+  getStarted: "Sign In",
+  signUp: "Create Account",
   goDashboard: "Go to Dashboard",
   featuresSection: {
-    title: "System Features",
-    subtitle: "Professional OpenVPN management system core capabilities",
+    title: "Everything You Need",
+    subtitle: "Built for teams that need reliable, auditable, and scalable VPN management",
     auth: {
-      title: "User Management",
-      description: "Multi-role user system with department management and access control"
+      title: "User & Role Management",
+      description: "Multi-role access control (Superadmin / Admin / Manager / User) with department-level isolation and per-user VPN certificate lifecycle management."
     },
     ui: {
-      title: "Server Monitoring",
-      description: "Real-time monitoring of OpenVPN server status and client connections"
+      title: "Real-Time Server Monitoring",
+      description: "Live connection status, VPN IP assignments, traffic counters, and OpenVPN server health — all refreshed automatically."
     },
     docker: {
-      title: "Certificate Management",
-      description: "Automated client certificate generation and configuration file downloads"
+      title: "One-Command Deployment",
+      description: "Ship the entire stack — Go API, Next.js frontend, and PostgreSQL — with a single `docker compose up`. No external dependencies."
     },
     viewDocsButton: "View Documentation"
   },
   techStackSection: {
-    title: "Built with Modern Tech",
-    subtitle: "Frontend powered by Next.js 14, TypeScript, and Tailwind CSS for modern UI; Backend built with Go, Gin framework, and SQLite for high-performance API services. Complete full-stack solution following best practices.",
+    title: "Modern, Lightweight Tech Stack",
+    subtitle: "Designed for production from day one: statically exported frontend served by nginx, a single Go binary for the API, and PostgreSQL for reliability.",
     viewOnGithubButton: "View on GitHub",
     downloadButton: "Download Release",
     frontend: {
-      title: "Frontend Stack",
-      description: "Next.js 14 + TypeScript + Tailwind CSS + Radix UI"
+      title: "Frontend",
+      description: "Next.js 14 · TypeScript · Tailwind CSS · Radix UI"
     },
     backend: {
-      title: "Backend Stack",
-      description: "Go + Gin + SQLite + JWT + OpenVPN Integration"
+      title: "Backend",
+      description: "Go · Gin · PostgreSQL · Goose Migrations · JWT"
     }
   },
   githubSection: {
     title: "Open Source & Community Driven",
-    subtitle: "Join our growing community of developers and contributors. OpenVPN Admin Go is completely open source and welcomes contributions from developers worldwide.",
+    subtitle: "VPN Admin is MIT-licensed and welcomes contributions. Star the repo, open issues, and help shape the roadmap.",
     openSource: {
-      title: "Open Source",
-      description: "Fully open source project with MIT license. Fork, modify, and contribute freely."
+      title: "MIT License",
+      description: "Free to use, modify, and self-host. No vendor lock-in."
     },
     community: {
-      title: "Active Community",
-      description: "Join discussions, get help, and share your experiences with other users."
+      title: "Community",
+      description: "Join discussions on GitHub Issues and share your deployment stories."
     },
     documentation: {
-      title: "Comprehensive Docs",
-      description: "Detailed documentation, installation guides, and API references available."
+      title: "Documentation",
+      description: "Installation guides, API references, and Docker deployment walkthroughs."
     },
     releases: {
-      title: "Regular Updates",
-      description: "Frequent releases with new features, bug fixes, and security improvements."
+      title: "Active Development",
+      description: "Regular releases with new features, security patches, and bug fixes."
     },
-    viewSourceButton: "View Source Code",
-    reportIssueButton: "Report Issue"
+    viewSourceButton: "View Source on GitHub",
+    reportIssueButton: "Report an Issue"
+  },
+  contactSection: {
+    title: "Get in Touch",
+    subtitle: "Have questions, feature requests, or found a bug? Reach out through any of the channels below.",
+    github: {
+      title: "GitHub Issues",
+      description: "The best place for bug reports and feature requests."
+    },
+    email: {
+      title: "Email",
+      description: "For private inquiries or security disclosures."
+    },
+    telegram: {
+      title: "Telegram",
+      description: "Join the community channel for updates and support."
+    },
+    githubButton: "Open an Issue",
+    emailButton: "Send Email",
+    telegramButton: "Join on Telegram"
   }
 }
 

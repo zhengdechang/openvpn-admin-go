@@ -32,7 +32,7 @@ This project consists of two main components:
 
 - **Language:** Go 1.21+
 - **Framework:** Gin (HTTP router)
-- **Database:** SQLite with GORM ORM
+- **Database:** PostgreSQL with GORM ORM
 - **Authentication:** JWT tokens
 - **OpenVPN Integration:** Direct system integration with OpenVPN service
 
@@ -148,7 +148,7 @@ Create a `.env` file in the project root:
 
 ```env
 # Database Configuration
-DB_PATH=data/db.sqlite3
+DATABASE_URL=postgres://openvpn:openvpn_secret@localhost:5432/openvpn?sslmode=disable
 
 # JWT Configuration
 JWT_SECRET=your-super-secret-jwt-key
@@ -492,7 +492,7 @@ Container pre-configured environment variables:
 - `GIN_MODE=release`
 - `NODE_ENV=production`
 - `TZ=UTC`
-- `DB_PATH=/app/data/db.sqlite3`
+- `DATABASE_URL=postgres://openvpn:openvpn_secret@localhost:5432/openvpn?sslmode=disable`
 - `OPENVPN_CONFIG_DIR=/etc/openvpn`
 
 **Supervisor Service Control Variables:**

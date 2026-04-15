@@ -27,7 +27,8 @@ export default async function RootLayout({
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="description" content="OpenVPN Management System" />
-        <title>OpenVPN Management System</title>
+        <title>VPN Admin</title>
+        <link rel="icon" type="image/svg+xml" href="/logo.svg" />
       </head>
       <body suppressHydrationWarning>
         <I18nProvider locale={locale}>

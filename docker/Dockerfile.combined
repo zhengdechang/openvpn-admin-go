@@ -1,5 +1,5 @@
 # Multi-stage build for OpenVPN Admin Go with integrated frontend
-FROM node:18-alpine AS frontend-builder
+FROM node:22-alpine AS frontend-builder
 
 # Set working directory for frontend
 WORKDIR /app/frontend
@@ -15,7 +15,7 @@ RUN npm config set registry https://registry.npmjs.org && \
 COPY openvpn-web/package*.json ./
 
 # Install frontend dependencies
-RUN npm ci --only=production=false
+RUN npm install --legacy-peer-deps
 
 # Copy frontend source code
 COPY openvpn-web/ ./
@@ -24,22 +24,18 @@ COPY openvpn-web/ ./
 RUN npm run build
 
 # Go backend builder stage
-FROM golang:1.21 AS backend-builder
+FROM golang:1.23 AS backend-builder
 
 # Set working directory
 WORKDIR /app
 
-# Copy go mod files
-COPY go.mod go.sum ./
-
-# Download dependencies
-RUN go mod download
-
-# Copy source code
+# Copy all source code first (go mod tidy needs imports to resolve deps)
+COPY go.mod ./
 COPY . .
 
-# Build the Go binary
-RUN CGO_ENABLED=1 go build -ldflags="-s -w" -o openvpn-go main.go && \
+# Tidy resolves postgres driver deps, then build
+RUN go mod tidy && \
+    CGO_ENABLED=0 go build -ldflags="-s -w" -o openvpn-go main.go && \
     ls -la openvpn-go
 
 # Final runtime stage
@@ -60,7 +56,7 @@ RUN apt-get update && apt-get install -y \
     openvpn \
     openssl \
     ca-certificates \
-    sqlite3 \
+    postgresql-client \
     iptables \
     bash \
     curl \
@@ -142,7 +138,6 @@ VOLUME ["/app/data", "/app/logs", "/app/config", "/etc/openvpn"]
 ENV GIN_MODE=release \
     NODE_ENV=production \
     TZ=UTC \
-    DB_PATH=/app/data/db.sqlite3 \
     OPENVPN_CONFIG_DIR=/etc/openvpn
 
 # Default entrypoint and command

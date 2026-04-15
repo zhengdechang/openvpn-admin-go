@@ -32,7 +32,7 @@
 
 - **开发语言：** Go 1.21+
 - **Web 框架：** Gin (HTTP 路由器)
-- **数据库：** SQLite 配合 GORM ORM
+- **数据库：** PostgreSQL 配合 GORM ORM
 - **身份验证：** JWT 令牌
 - **OpenVPN 集成：** 直接与 OpenVPN 服务系统集成
 
@@ -148,7 +148,7 @@ go build -o bin/openvpn-go .
 
 ```env
 # 数据库配置
-DB_PATH=data/db.sqlite3
+DATABASE_URL=postgres://openvpn:openvpn_secret@localhost:5432/openvpn?sslmode=disable
 
 # JWT 配置
 JWT_SECRET=your-super-secret-jwt-key

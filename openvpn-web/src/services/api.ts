@@ -39,76 +39,47 @@ const api = axios.create({
   },
 });
 
-// 请求拦截器添加token
+// 请求拦截器：从 cookie 读取 token 并附加到请求头
 api.interceptors.request.use(
-  async (config) => {
-    const excludedUrls = [
-      "/api/user/login",
-      "/api/user/register",
-      "/api/user/refresh",
-      "/api/user/verify-email",
-      "/api/user/forgot-password",
-      "/api/user/reset-password",
-    ];
-
-    // Check if the current request URL is one of the excluded URLs
-    if (config.url && !excludedUrls.some((url) => config.url!.includes(url))) {
-      try {
-        console.log("Attempting to refresh token for URL:", config.url);
-        const refreshResponse = await userAPI.refreshToken(); // userAPI is defined in the same file
-        if (!refreshResponse.success) {
-          console.warn("Token refresh failed, clearing login info.");
-          useUserStore.getState().clearLoginInfo(); // useUserStore needs to be imported
-          // Optional: redirect to login or throw an error to stop the request
-          // For now, letting it proceed will likely result in a 401, handled by response interceptor
-        } else {
-          console.log("Token refreshed successfully.");
-        }
-      } catch (error) {
-        console.error("Error during token refresh:", error);
-        useUserStore.getState().clearLoginInfo();
-        // Optional: redirect or throw
-      }
-    }
-
-    // Re-read token from cookies as refreshToken might have updated it
+  (config) => {
     const token = Cookies.get("token");
     if (token) {
       config.headers["Authorization"] = `Bearer ${token}`;
     } else {
-      // If no token (e.g., after clearLoginInfo), remove auth header
       delete config.headers["Authorization"];
     }
     return config;
   },
-  (error) => {
-    // Do something with request error
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
-// 响应拦截器：处理 401 错误
+// 从统一响应格式 {success, data} 中提取 data，否则原样返回
+function unwrap<T>(responseData: any): T {
+  if (
+    responseData &&
+    typeof responseData === "object" &&
+    "success" in responseData &&
+    "data" in responseData
+  ) {
+    return responseData.data as T;
+  }
+  return responseData as T;
+}
+
+// 响应拦截器：401 时清除登录态并跳转登录页
 api.interceptors.response.use(
-  (response) => response, // 正常返回
+  (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Check if login info still exists before clearing
-      // This avoids redundant calls if the request interceptor already cleared it
       const { isLogin } = useUserStore.getState();
       if (isLogin) {
-        console.warn(
-          "Response interceptor: Unauthorized (401) and user was still logged in. Clearing login info..."
-        );
         useUserStore.getState().clearLoginInfo();
-        // Consider redirecting to login page here as a fallback
-        // window.location.href = '/auth/login'; // or use Next.js router if available outside component context
-      } else {
-        console.warn(
-          "Response interceptor: Unauthorized (401), but user info already cleared."
-        );
+        if (typeof window !== "undefined") {
+          window.location.href = "/auth/login";
+        }
       }
     }
-    return Promise.reject(error); // 继续抛出错误，供业务代码处理
+    return Promise.reject(error);
   }
 );
 
@@ -286,12 +257,8 @@ export const userAPI = {
   },
 
   async getLiveClientConnections(): Promise<LiveClientConnection[]> {
-    // The actual backend endpoint is /api/client/status/live
-    // The `/api` prefix is handled by the baseURL of the axios instance `api`
-    const response = await api.get<LiveClientConnection[]>(
-      "/api/client/status/live"
-    );
-    return response.data; // Assuming the backend directly returns the array
+    const response = await api.get("/api/client/status/live");
+    return unwrap<LiveClientConnection[]>(response.data) ?? [];
   },
 };
 
@@ -299,8 +266,8 @@ export const userAPI = {
 export const openvpnAPI = {
   // 获取客户端列表
   getClientList: async (): Promise<OpenVPNClient[]> => {
-    const response = await api.get<OpenVPNClient[]>("/api/client/list");
-    return response.data;
+    const response = await api.get("/api/client/list");
+    return unwrap<OpenVPNClient[]>(response.data) ?? [];
   },
   // 添加客户端，支持指定部门
   addClient: async (username: string, departmentId?: string): Promise<any> => {
@@ -324,11 +291,8 @@ export const openvpnAPI = {
     username: string,
     os?: string
   ): Promise<{ config: string }> => {
-    const response = await api.get<{ config: string }>(
-      `/api/client/config/${username}`,
-      { params: { os } }
-    );
-    return response.data;
+    const response = await api.get(`/api/client/config/${username}`, { params: { os } });
+    return unwrap<{ config: string }>(response.data);
   },
   // 吊销客户端证书
   revokeClient: async (username: string): Promise<any> => {
@@ -342,13 +306,13 @@ export const openvpnAPI = {
   },
   // 获取服务器状态
   getServerStatus: async (): Promise<ServerStatus> => {
-    const response = await api.get<ServerStatus>("/api/server/status");
-    return response.data;
+    const response = await api.get("/api/server/status");
+    return unwrap<ServerStatus>(response.data);
   },
   // 获取服务器日志
   getServerLogs: async (): Promise<string> => {
-    const response = await api.get<{ logs: string }>("/api/logs/server");
-    return response.data.logs;
+    const response = await api.get("/api/logs/server");
+    return unwrap<{ logs: string }>(response.data)?.logs ?? "";
   },
   // 获取客户端日志
   getClientLogs: async (
@@ -364,30 +328,21 @@ export const openvpnAPI = {
     const params = new URLSearchParams();
     if (offset !== undefined) params.append("offset", offset.toString());
     if (limit !== undefined) params.append("limit", limit.toString());
-
-    const response = await api.get<{
-      logs: string;
-      totalLines: number;
-      offset: number;
-      limit: number;
-      hasMore: boolean;
-    }>(`/api/logs/client?${params.toString()}`);
-    return response.data;
+    const response = await api.get(`/api/logs/client?${params.toString()}`);
+    return unwrap(response.data);
   },
   // 获取实时客户端连接
   getLiveClientConnections: async (): Promise<LiveClientConnection[]> => {
-    const response = await api.get<LiveClientConnection[]>(
-      "/api/client/status/live"
-    );
-    return response.data;
+    const response = await api.get("/api/client/status/live");
+    return unwrap<LiveClientConnection[]>(response.data) ?? [];
   },
 };
 
 // 服务器管理 API
 export const serverAPI = {
   getStatus: async (): Promise<ServerStatus> => {
-    const response = await api.get<ServerStatus>("/api/server/status");
-    return response.data;
+    const response = await api.get("/api/server/status");
+    return unwrap<ServerStatus>(response.data);
   },
   start: async (): Promise<any> => {
     const response = await api.post("/api/server/start");
@@ -402,10 +357,8 @@ export const serverAPI = {
     return response.data;
   },
   getConfigTemplate: async (): Promise<{ template: string }> => {
-    const response = await api.get<{ template: string }>(
-      "/api/server/config/template"
-    );
-    return response.data;
+    const response = await api.get("/api/server/config/template");
+    return unwrap<{ template: string }>(response.data);
   },
   updateConfig: async (config: string): Promise<any> => {
     const response = await api.put("/api/server/config", { config });
@@ -419,11 +372,8 @@ export const serverAPI = {
   getConfigItems: async (lang?: string): Promise<{ items: ConfigItem[] }> => {
     const params = new URLSearchParams();
     if (lang) params.append("lang", lang);
-
-    const response = await api.get<{ items: ConfigItem[] }>(
-      `/api/server/config/items?${params.toString()}`
-    );
-    return response.data;
+    const response = await api.get(`/api/server/config/items?${params.toString()}`);
+    return unwrap<{ items: ConfigItem[] }>(response.data);
   },
   updateConfigItem: async (key: string, value: any): Promise<any> => {
     const response = await api.put(`/api/server/config/item/${key}`, { value });
@@ -438,8 +388,8 @@ export const serverAPI = {
 // 部门管理 API
 export const departmentAPI = {
   list: async (): Promise<Department[]> => {
-    const response = await api.get<Department[]>("/api/departments");
-    return response.data;
+    const response = await api.get("/api/departments");
+    return unwrap<Department[]>(response.data) ?? [];
   },
   create: async (data: {
     name: string;
@@ -465,8 +415,8 @@ export const departmentAPI = {
 // 用户管理 API
 export const userManagementAPI = {
   list: async (): Promise<AdminUser[]> => {
-    const response = await api.get<AdminUser[]>("/api/client");
-    return response.data;
+    const response = await api.get("/api/client");
+    return unwrap<AdminUser[]>(response.data) ?? [];
   },
   create: async (
     user: Partial<AdminUser> & { password: string }
@@ -476,11 +426,10 @@ export const userManagementAPI = {
   },
   update: async (
     id: string,
-    data: UserUpdateRequest // Changed to use UserUpdateRequest
+    data: UserUpdateRequest
   ): Promise<AdminUser> => {
-    // Changed return type
-    const response = await api.put<AdminUser>(`/api/client/${id}`, data); // Assuming backend returns AdminUser
-    return response.data;
+    const response = await api.put(`/api/client/${id}`, data);
+    return unwrap<AdminUser>(response.data);
   },
   delete: async (id: string): Promise<any> => {
     const response = await api.delete(`/api/client/${id}`);
@@ -548,7 +497,7 @@ export const industryAPI = {
 
       return response.data;
     } catch (error) {
-      console.error("添加政策失败:", error);
+      void error;
       return {
         success: false,
         error: "添加政策失败，请稍后重试",
@@ -592,7 +541,7 @@ export const industryAPI = {
 
       return response.data;
     } catch (error) {
-      console.error("添加政策失败:", error);
+      void error;
       return {
         success: false,
         error: "添加政策失败，请稍后重试",
@@ -607,7 +556,7 @@ export const industryAPI = {
 
       return response.data;
     } catch (error) {
-      console.error("删除政策失败:", error);
+      void error;
       return {
         success: false,
         error: "删除政策失败，请稍后重试",

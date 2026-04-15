@@ -2,13 +2,14 @@ package controller
 
 import (
 	"fmt"
-	"net/http"
-	"openvpn-admin-go/constants"
-	"openvpn-admin-go/openvpn"
-	"openvpn-admin-go/utils"
 	"os"
 	"strings"
 	"time"
+
+	"openvpn-admin-go/common"
+	"openvpn-admin-go/constants"
+	"openvpn-admin-go/openvpn"
+	"openvpn-admin-go/utils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -20,13 +21,13 @@ func (c *ServerController) ListServers(ctx *gin.Context) {
 	// 加载当前配置
 	cfg, err := openvpn.LoadConfig()
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		common.InternalError(ctx, err.Error())
 		return
 	}
 	// 获取运行状态
 	status, err := GetServerStatus()
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		common.InternalError(ctx, err.Error())
 		return
 	}
 	// 构造返回结构
@@ -49,8 +50,7 @@ func (c *ServerController) ListServers(ctx *gin.Context) {
 		Connected: status.Connected,
 		Total:     status.Total,
 	}
-	// 返回数组格式
-	ctx.JSON(http.StatusOK, []interface{}{server})
+	common.OK(ctx, []interface{}{server})
 }
 
 // ServerStatus 服务器状态
@@ -116,67 +116,66 @@ func (c *ServerController) UpdateServer(ctx *gin.Context) {
 		Netmask  string `json:"netmask" binding:"required"`
 	}
 	if err := ctx.ShouldBindJSON(&server); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		common.BadRequest(ctx, err.Error())
 		return
 	}
 	// 使用 openvpn/server 包处理参数更新与服务重启
 	if err := openvpn.ConfigureServer(server.Port, server.Protocol, server.Network, server.Netmask); err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		common.InternalError(ctx, err.Error())
 		return
 	}
-	ctx.JSON(http.StatusOK, gin.H{"message": "Server updated successfully"})
+	common.OKMsg(ctx, "Server updated successfully")
 }
 
 // DeleteServer 删除服务器
 func (c *ServerController) DeleteServer(ctx *gin.Context) {
-	// 目前不支持删除服务器
-	ctx.JSON(http.StatusBadRequest, gin.H{"error": "目前不支持删除服务器"})
+	common.BadRequest(ctx, "目前不支持删除服务器")
 }
 
 // GetServerStatus 获取服务器状态
 func (c *ServerController) GetServerStatus(ctx *gin.Context) {
 	status, err := GetServerStatus()
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		common.InternalError(ctx, err.Error())
 		return
 	}
-	ctx.JSON(http.StatusOK, status)
+	common.OK(ctx, status)
 }
 
 // StartServer 启动服务器
 func (c *ServerController) StartServer(ctx *gin.Context) {
 	// 启动服务器
 	if err := openvpn.RestartServer(); err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		common.InternalError(ctx, err.Error())
 		return
 	}
-	ctx.JSON(http.StatusOK, gin.H{"message": "Server started successfully"})
+	common.OKMsg(ctx, "Server started successfully")
 }
 
 // StopServer 停止服务器
 func (c *ServerController) StopServer(ctx *gin.Context) {
 	// 停止服务器
 	utils.SystemctlStop(constants.ServiceName)
-	ctx.JSON(http.StatusOK, gin.H{"message": "Server stopped successfully"})
+	common.OKMsg(ctx, "Server stopped successfully")
 }
 
 // RestartServer 重启服务器
 func (c *ServerController) RestartServer(ctx *gin.Context) {
 	if err := openvpn.RestartServer(); err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		common.InternalError(ctx, err.Error())
 		return
 	}
-	ctx.JSON(http.StatusOK, gin.H{"message": "Server restarted successfully"})
+	common.OKMsg(ctx, "Server restarted successfully")
 }
 
 // GetServerConfigTemplate 获取服务器配置模板
 func (c *ServerController) GetServerConfigTemplate(ctx *gin.Context) {
 	template, err := openvpn.GetServerConfigTemplate()
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		common.InternalError(ctx, err.Error())
 		return
 	}
-	ctx.JSON(http.StatusOK, gin.H{"template": template})
+	common.OK(ctx, gin.H{"template": template})
 }
 
 // UpdateServerConfig 更新服务器配置
@@ -185,15 +184,15 @@ func (c *ServerController) UpdateServerConfig(ctx *gin.Context) {
 		Config string `json:"config" binding:"required"`
 	}
 	if err := ctx.ShouldBindJSON(&config); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		common.BadRequest(ctx, err.Error())
 		return
 	}
 	// 使用 openvpn/server 包写入自定义配置并重启服务
 	if err := openvpn.ApplyServerConfig(config.Config); err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		common.InternalError(ctx, err.Error())
 		return
 	}
-	ctx.JSON(http.StatusOK, gin.H{"message": "Server config updated successfully"})
+	common.OKMsg(ctx, "Server config updated successfully")
 }
 
 // UpdatePort 更新服务器端口
@@ -202,17 +201,17 @@ func (c *ServerController) UpdatePort(ctx *gin.Context) {
 		Port int `json:"port" binding:"required"`
 	}
 	if err := ctx.ShouldBindJSON(&port); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		common.BadRequest(ctx, err.Error())
 		return
 	}
 
 	// 更新端口
 	if err := openvpn.UpdatePort(port.Port); err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		common.InternalError(ctx, err.Error())
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"message": "Port updated successfully"})
+	common.OKMsg(ctx, "Port updated successfully")
 }
 
 // ConfigItem 配置项结构
@@ -347,7 +346,7 @@ func (c *ServerController) GetConfigItems(ctx *gin.Context) {
 	// 加载当前配置
 	cfg, err := openvpn.LoadConfig()
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "加载配置失败: " + err.Error()})
+		common.InternalError(ctx, "加载配置失败: "+err.Error())
 		return
 	}
 
@@ -445,14 +444,14 @@ func (c *ServerController) GetConfigItems(ctx *gin.Context) {
 		},
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"items": items})
+	common.OK(ctx, gin.H{"items": items})
 }
 
 // UpdateConfigItem 更新单个配置项
 func (c *ServerController) UpdateConfigItem(ctx *gin.Context) {
 	key := ctx.Param("key")
 	if key == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "配置项key不能为空"})
+		common.BadRequest(ctx, "配置项key不能为空")
 		return
 	}
 
@@ -460,36 +459,36 @@ func (c *ServerController) UpdateConfigItem(ctx *gin.Context) {
 		Value interface{} `json:"value" binding:"required"`
 	}
 	if err := ctx.ShouldBindJSON(&request); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		common.BadRequest(ctx, err.Error())
 		return
 	}
 
 	// 加载当前配置
 	cfg, err := openvpn.LoadConfig()
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "加载配置失败: " + err.Error()})
+		common.InternalError(ctx, "加载配置失败: "+err.Error())
 		return
 	}
 
 	// 更新指定的配置项
 	if err := updateSingleConfigItem(cfg, key, request.Value); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		common.BadRequest(ctx, err.Error())
 		return
 	}
 
 	// 保存配置
 	if err := openvpn.SaveConfig(cfg); err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "保存配置失败: " + err.Error()})
+		common.InternalError(ctx, "保存配置失败: "+err.Error())
 		return
 	}
 
 	// 重新生成服务器配置
 	if err := openvpn.UpdateServerConfig(); err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "更新服务器配置失败: " + err.Error()})
+		common.InternalError(ctx, "更新服务器配置失败: "+err.Error())
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"message": "配置项更新成功"})
+	common.OKMsg(ctx, "配置项更新成功")
 }
 
 // UpdateConfigItems 批量更新配置项
@@ -498,38 +497,38 @@ func (c *ServerController) UpdateConfigItems(ctx *gin.Context) {
 		Items map[string]interface{} `json:"items" binding:"required"`
 	}
 	if err := ctx.ShouldBindJSON(&request); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		common.BadRequest(ctx, err.Error())
 		return
 	}
 
 	// 加载当前配置
 	cfg, err := openvpn.LoadConfig()
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "加载配置失败: " + err.Error()})
+		common.InternalError(ctx, "加载配置失败: "+err.Error())
 		return
 	}
 
 	// 批量更新配置项
 	for key, value := range request.Items {
 		if err := updateSingleConfigItem(cfg, key, value); err != nil {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("更新配置项 %s 失败: %s", key, err.Error())})
+			common.BadRequest(ctx, fmt.Sprintf("更新配置项 %s 失败: %s", key, err.Error()))
 			return
 		}
 	}
 
 	// 保存配置
 	if err := openvpn.SaveConfig(cfg); err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "保存配置失败: " + err.Error()})
+		common.InternalError(ctx, "保存配置失败: "+err.Error())
 		return
 	}
 
 	// 重新生成服务器配置
 	if err := openvpn.UpdateServerConfig(); err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "更新服务器配置失败: " + err.Error()})
+		common.InternalError(ctx, "更新服务器配置失败: "+err.Error())
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"message": "配置项批量更新成功"})
+	common.OKMsg(ctx, "配置项批量更新成功")
 }
 
 // updateSingleConfigItem 更新单个配置项的辅助函数

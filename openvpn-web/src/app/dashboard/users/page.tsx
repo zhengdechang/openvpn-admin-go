@@ -1,7 +1,7 @@
 // In openvpn-web/src/app/dashboard/users/page.tsx
 "use client";
 
-import React, { useState, useEffect, useCallback, useMemo } from "react"; // Added useCallback
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useAuth } from "@/lib/auth-context";
 import {
   Dialog,
@@ -10,13 +10,12 @@ import {
   DialogHeader,
   DialogFooter,
   DialogTitle,
-  DialogDescription, // Added DialogDescription
+  DialogDescription,
   DialogClose,
 } from "@/components/ui/dialog";
 import { useTranslation } from "react-i18next";
 import MainLayout from "@/components/layout/main-layout";
 import { userManagementAPI, departmentAPI, openvpnAPI } from "@/services/api";
-// Ensure UserUpdateRequest is imported if defined and used
 import {
   AdminUser,
   Department,
@@ -25,18 +24,18 @@ import {
 } from "@/types/types";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  Table,
-  TableHeader,
-  TableRow,
-  TableHead,
-  TableBody,
-  TableCell,
-} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label"; // Added Label
+import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import {
+  useReactTable,
+  getCoreRowModel,
+  getSortedRowModel,
+  flexRender,
+  type ColumnDef,
+  type SortingState,
+} from "@tanstack/react-table";
 
 // Helper function to format bytes into a readable string
 const formatBytes = (bytes?: number, decimals = 2): string => {
@@ -365,6 +364,157 @@ export default function UsersPage() {
     setDepartmentFilter("all");
     setStatusFilter("all");
   };
+
+  // ── TanStack React Table ────────────────────────────────────────────
+  const [sorting, setSorting] = useState<SortingState>([]);
+
+  const columns = useMemo<ColumnDef<AdminUser>[]>(
+    () => [
+      {
+        accessorKey: "name",
+        header: () => t("dashboard.users.columnName"),
+        cell: ({ row }) => <span className="font-medium">{row.original.name}</span>,
+      },
+      {
+        accessorKey: "email",
+        header: () => t("dashboard.users.columnEmail"),
+      },
+      {
+        accessorKey: "role",
+        header: () => t("dashboard.users.columnRole"),
+        cell: ({ row }) => (
+          <Badge variant="secondary" className="capitalize">
+            {t(`dashboard.users.role${row.original.role.charAt(0).toUpperCase() + row.original.role.slice(1)}`, row.original.role)}
+          </Badge>
+        ),
+      },
+      {
+        accessorKey: "departmentId",
+        header: () => t("dashboard.users.columnDepartment"),
+        cell: ({ row }) =>
+          row.original.departmentId
+            ? departmentNameById[row.original.departmentId] || t("dashboard.users.emptyDepartment")
+            : t("dashboard.users.emptyDepartment"),
+      },
+      {
+        accessorKey: "fixedIp",
+        header: () => t("dashboard.users.columnFixedIp", "Fixed IP"),
+        cell: ({ row }) => row.original.fixedIp || "-",
+      },
+      {
+        accessorKey: "subnet",
+        header: () => t("dashboard.users.columnSubnet", "Subnet"),
+        cell: ({ row }) => row.original.subnet || "-",
+      },
+      {
+        accessorKey: "connectionIp",
+        header: () => t("dashboard.users.columnConnectionIp", "Connection IP"),
+        cell: ({ row }) => row.original.connectionIp || t("common.na"),
+      },
+      {
+        accessorKey: "allocatedVpnIp",
+        header: () => t("dashboard.users.columnAllocatedVpnIp", "VPN IP"),
+        cell: ({ row }) => row.original.allocatedVpnIp || t("common.na"),
+      },
+      {
+        accessorKey: "lastConnectionTime",
+        header: () => t("dashboard.users.columnLastConnection"),
+        cell: ({ row }) =>
+          row.original.lastConnectionTime
+            ? new Date(row.original.lastConnectionTime).toLocaleString()
+            : t("common.na"),
+      },
+      {
+        accessorKey: "isOnline",
+        header: () => t("dashboard.users.columnOnlineStatus"),
+        cell: ({ row }) =>
+          typeof row.original.isOnline === "boolean" ? (
+            <Badge variant={row.original.isOnline ? "default" : "secondary"}>
+              {row.original.isOnline ? t("dashboard.users.statusOnline") : t("dashboard.users.statusOffline")}
+            </Badge>
+          ) : (
+            t("common.na")
+          ),
+      },
+      {
+        accessorKey: "isPaused",
+        header: () => t("dashboard.users.columnAccessState", "Access State"),
+        cell: ({ row }) => (
+          <Badge variant={row.original.isPaused ? "destructive" : "default"}>
+            {row.original.isPaused ? t("dashboard.users.statusPaused", "Paused") : t("dashboard.users.statusActive", "Active")}
+          </Badge>
+        ),
+      },
+      {
+        accessorKey: "bytesReceived",
+        header: () => t("dashboard.users.columnBytesReceived", "Bytes Received"),
+        cell: ({ row }) => formatBytes(row.original.bytesReceived),
+      },
+      {
+        accessorKey: "bytesSent",
+        header: () => t("dashboard.users.columnBytesSent", "Bytes Sent"),
+        cell: ({ row }) => formatBytes(row.original.bytesSent),
+      },
+      {
+        id: "actions",
+        header: () => t("dashboard.users.columnActions"),
+        cell: ({ row }) => {
+          const u = row.original;
+          return (
+            <div className="flex flex-wrap items-center justify-center gap-1">
+              {canManageUsers && (
+                u.isPaused ? (
+                  <Button size="sm" variant="outline" className="h-8 px-2" onClick={() => handleResumeUser(u.name)}>
+                    {t("dashboard.users.resumeButton", "Resume")}
+                  </Button>
+                ) : (
+                  <Button size="sm" variant="outline" className="h-8 px-2" onClick={() => handlePauseUser(u.name)}>
+                    {t("dashboard.users.pauseButton", "Pause")}
+                  </Button>
+                )
+              )}
+              {(currentUser?.role === UserRole.ADMIN ||
+                currentUser?.role === UserRole.SUPERADMIN ||
+                (currentUser?.role === UserRole.MANAGER && currentUser.departmentId === u.departmentId)) && (
+                <Button size="sm" variant="outline" className="h-8 px-2" onClick={() => handleEditClick(u)}>
+                  {t("common.edit")}
+                </Button>
+              )}
+              {(currentUser?.role === UserRole.SUPERADMIN ||
+                (currentUser?.role === UserRole.ADMIN && u.role !== UserRole.SUPERADMIN) ||
+                (currentUser?.role === UserRole.MANAGER && u.departmentId === currentUser.departmentId && u.role !== UserRole.SUPERADMIN && u.role !== UserRole.ADMIN)) &&
+                u.id !== currentUser?.id && (
+                  <Button size="sm" variant="destructive" className="h-8 px-2" onClick={() => handleDelete(u.id)}>
+                    {t("dashboard.users.deleteButton")}
+                  </Button>
+                )}
+              <select
+                className="border px-1 py-1 rounded-md text-sm h-8"
+                defaultValue=""
+                onChange={(e) => handleDownload(u.name, e.target.value)}
+              >
+                <option value="" disabled>{t("dashboard.users.downloadConfigButtonShort", "DL Cfg")}</option>
+                <option value="windows">{t("dashboard.users.osWindows")}</option>
+                <option value="macos">{t("dashboard.users.osMacOS")}</option>
+                <option value="linux">{t("dashboard.users.osLinux")}</option>
+              </select>
+            </div>
+          );
+        },
+      },
+    ],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [t, departmentNameById, canManageUsers, currentUser, users]
+  );
+
+  const table = useReactTable({
+    data: filteredUsers,
+    columns,
+    state: { sorting },
+    onSortingChange: setSorting,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+  });
 
   return (
     <MainLayout className="p-4 space-y-6">
@@ -920,243 +1070,128 @@ export default function UsersPage() {
         <CardContent>
           {loading ? (
             <p>{t("common.loading")}</p>
+          ) : filteredUsers.length === 0 ? (
+            <p className="py-10 text-center text-muted-foreground">{t("dashboard.users.noResults")}</p>
           ) : (
-            <div className="relative">
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="min-w-[160px]">
-                        {t("dashboard.users.columnName")}
-                      </TableHead>
-                      <TableHead className="min-w-[200px]">
-                        {t("dashboard.users.columnEmail")}
-                      </TableHead>
-                      <TableHead className="min-w-[120px]">
-                        {t("dashboard.users.columnRole")}
-                      </TableHead>
-                      <TableHead className="min-w-[160px]">
-                        {t("dashboard.users.columnDepartment")}
-                      </TableHead>
-                      <TableHead className="min-w-[120px]">
-                        {t("dashboard.users.columnFixedIp", "Fixed IP")}
-                      </TableHead>
-                      <TableHead className="min-w-[120px]">
-                        {t("dashboard.users.columnSubnet", "Subnet")}
-                      </TableHead>
-                      <TableHead className="min-w-[140px]">
-                        {t(
-                          "dashboard.users.columnConnectionIp",
-                          "Connection IP"
+            <>
+              {/* ── Mobile: card list (hidden on md+) ───────────────────── */}
+              <div className="md:hidden space-y-3">
+                {table.getRowModel().rows.map((row) => {
+                  const u = row.original;
+                  return (
+                    <div key={u.id} className="border rounded-xl p-4 space-y-3 bg-card shadow-sm">
+                      {/* Header row */}
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <div className="font-semibold text-sm">{u.name}</div>
+                          <div className="text-xs text-muted-foreground mt-0.5">{u.email}</div>
+                        </div>
+                        <div className="flex flex-col items-end gap-1 shrink-0">
+                          <Badge variant={u.isOnline ? "default" : "secondary"} className="text-xs">
+                            {u.isOnline ? t("dashboard.users.statusOnline") : t("dashboard.users.statusOffline")}
+                          </Badge>
+                          <Badge variant={u.isPaused ? "destructive" : "outline"} className="text-xs">
+                            {u.isPaused ? t("dashboard.users.statusPaused", "Paused") : t("dashboard.users.statusActive", "Active")}
+                          </Badge>
+                        </div>
+                      </div>
+                      {/* Meta row */}
+                      <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                        <span><span className="font-medium text-foreground">{t("dashboard.users.columnRole")}:</span> {u.role}</span>
+                        <span><span className="font-medium text-foreground">{t("dashboard.users.columnDepartment")}:</span> {u.departmentId ? departmentNameById[u.departmentId] || "-" : "-"}</span>
+                        {u.fixedIp && <span><span className="font-medium text-foreground">IP:</span> {u.fixedIp}</span>}
+                        {u.allocatedVpnIp && <span><span className="font-medium text-foreground">VPN IP:</span> {u.allocatedVpnIp}</span>}
+                        <span><span className="font-medium text-foreground">↓</span> {formatBytes(u.bytesReceived)}</span>
+                        <span><span className="font-medium text-foreground">↑</span> {formatBytes(u.bytesSent)}</span>
+                      </div>
+                      {/* Actions */}
+                      <div className="flex flex-wrap gap-2 pt-1 border-t">
+                        {canManageUsers && (
+                          u.isPaused ? (
+                            <Button size="sm" variant="outline" className="h-7 text-xs px-2" onClick={() => handleResumeUser(u.name)}>
+                              {t("dashboard.users.resumeButton", "Resume")}
+                            </Button>
+                          ) : (
+                            <Button size="sm" variant="outline" className="h-7 text-xs px-2" onClick={() => handlePauseUser(u.name)}>
+                              {t("dashboard.users.pauseButton", "Pause")}
+                            </Button>
+                          )
                         )}
-                      </TableHead>
-                      <TableHead className="min-w-[120px]">
-                        {t("dashboard.users.columnAllocatedVpnIp", "VPN IP")}
-                      </TableHead>
-                      <TableHead className="min-w-[180px]">
-                        {t("dashboard.users.columnLastConnection")}
-                      </TableHead>
-                      <TableHead className="min-w-[130px]">
-                        {t("dashboard.users.columnOnlineStatus")}
-                      </TableHead>
-                      <TableHead className="min-w-[160px]">
-                        {t("dashboard.users.columnCreator")}
-                      </TableHead>
-                      <TableHead className="min-w-[130px]">
-                        {t("dashboard.users.columnAccessState", "Access State")}
-                      </TableHead>
-                      <TableHead className="min-w-[140px]">
-                        {t(
-                          "dashboard.users.columnBytesReceived",
-                          "Bytes Received"
+                        {(currentUser?.role === UserRole.ADMIN || currentUser?.role === UserRole.SUPERADMIN ||
+                          (currentUser?.role === UserRole.MANAGER && currentUser.departmentId === u.departmentId)) && (
+                          <Button size="sm" variant="outline" className="h-7 text-xs px-2" onClick={() => handleEditClick(u)}>
+                            {t("common.edit")}
+                          </Button>
                         )}
-                      </TableHead>
-                      <TableHead className="min-w-[140px]">
-                        {t("dashboard.users.columnBytesSent", "Bytes Sent")}
-                      </TableHead>
-                      <TableHead
-                        className="sticky right-0 min-w-[280px]"
-                        style={{
-                          backgroundColor: "#ffffff",
-                          boxShadow: "inset 10px 0 0px -9px #0505050f",
-                        }}
-                      >
-                        {t("dashboard.users.columnActions")}
-                      </TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredUsers.length === 0 ? (
-                      <TableRow>
-                        <TableCell
-                          colSpan={15}
-                          className="py-10 text-center text-muted-foreground"
+                        {(currentUser?.role === UserRole.SUPERADMIN ||
+                          (currentUser?.role === UserRole.ADMIN && u.role !== UserRole.SUPERADMIN) ||
+                          (currentUser?.role === UserRole.MANAGER && u.departmentId === currentUser.departmentId && u.role !== UserRole.SUPERADMIN && u.role !== UserRole.ADMIN)) &&
+                          u.id !== currentUser?.id && (
+                            <Button size="sm" variant="destructive" className="h-7 text-xs px-2" onClick={() => handleDelete(u.id)}>
+                              {t("dashboard.users.deleteButton")}
+                            </Button>
+                          )}
+                        <select
+                          className="border px-1 py-0.5 rounded-md text-xs h-7"
+                          defaultValue=""
+                          onChange={(e) => handleDownload(u.name, e.target.value)}
                         >
-                          {t("dashboard.users.noResults")}
-                        </TableCell>
-                      </TableRow>
-                    ) : (
-                      filteredUsers.map((u: AdminUser) => (
-                        <TableRow key={u.id}>
-                          <TableCell className="font-medium">
-                            {u.name}
-                          </TableCell>
-                          <TableCell>{u.email}</TableCell>
-                          <TableCell>
-                            <Badge variant="secondary" className="capitalize">
-                              {t(
-                                `dashboard.users.role${
-                                  u.role.charAt(0).toUpperCase() + u.role.slice(1)
-                                }`,
-                                u.role
-                              )}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            {u.departmentId
-                              ? departmentNameById[u.departmentId] ||
-                                t("dashboard.users.emptyDepartment")
-                              : t("dashboard.users.emptyDepartment")}
-                          </TableCell>
-                          <TableCell>{u.fixedIp || "-"}</TableCell>
-                          <TableCell>{u.subnet || "-"}</TableCell>
-                          <TableCell>
-                            {u.connectionIp || t("common.na")}
-                          </TableCell>
-                          <TableCell>
-                            {u.allocatedVpnIp || t("common.na")}
-                          </TableCell>
-                          <TableCell>
-                            {u.lastConnectionTime
-                              ? new Date(u.lastConnectionTime).toLocaleString()
-                              : t("common.na")}
-                          </TableCell>
-                          <TableCell>
-                            {typeof u.isOnline === "boolean" ? (
-                              <Badge
-                                variant={u.isOnline ? "default" : "secondary"}
-                              >
-                                {u.isOnline
-                                  ? t("dashboard.users.statusOnline")
-                                  : t("dashboard.users.statusOffline")}
-                              </Badge>
-                            ) : (
-                              t("common.na")
-                            )}
-                          </TableCell>
-                          <TableCell>
-                            {users.find((creator) => creator.id === u.creatorId)
-                              ?.name || t("common.na")}
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant={u.isPaused ? "destructive" : "default"}>
-                              {u.isPaused
-                                ? t("dashboard.users.statusPaused", "Paused")
-                                : t("dashboard.users.statusActive", "Active")}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>{formatBytes(u.bytesReceived)}</TableCell>
-                          <TableCell>{formatBytes(u.bytesSent)}</TableCell>
-                          <TableCell
-                            className="sticky right-0"
-                            style={{
-                              backgroundColor: "#ffffff",
-                              boxShadow: "inset 10px 0 0px -9px #0505050f",
-                            }}
-                          >
-                            <div className="flex flex-wrap items-center justify-center gap-1">
-                              {canManageUsers && (
-                                <>
-                                  {u.isPaused ? (
-                                    <Button
-                                      size="sm"
-                                      variant="outline"
-                                      className="h-8 px-2"
-                                      onClick={() => handleResumeUser(u.name)}
-                                    >
-                                      {t(
-                                        "dashboard.users.resumeButton",
-                                        "Resume"
-                                      )}
-                                    </Button>
-                                  ) : (
-                                    <Button
-                                      size="sm"
-                                      variant="outline"
-                                      className="h-8 px-2"
-                                      onClick={() => handlePauseUser(u.name)}
-                                    >
-                                      {t(
-                                        "dashboard.users.pauseButton",
-                                        "Pause"
-                                      )}
-                                    </Button>
-                                  )}
-                                </>
-                              )}
-                              {(currentUser?.role === UserRole.ADMIN ||
-                                currentUser?.role === UserRole.SUPERADMIN ||
-                                (currentUser?.role === UserRole.MANAGER &&
-                                  currentUser.departmentId ===
-                                    u.departmentId)) && (
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  className="h-8 px-2"
-                                  onClick={() => handleEditClick(u)}
-                                >
-                                  {t("common.edit")}
-                                </Button>
-                              )}
-                              {(currentUser?.role === UserRole.SUPERADMIN ||
-                                (currentUser?.role === UserRole.ADMIN &&
-                                  u.role !== UserRole.SUPERADMIN) ||
-                                (currentUser?.role === UserRole.MANAGER &&
-                                  u.departmentId === currentUser.departmentId &&
-                                  u.role !== UserRole.SUPERADMIN &&
-                                  u.role !== UserRole.ADMIN)) &&
-                                u.id !== currentUser?.id && (
-                                  <Button
-                                    size="sm"
-                                    variant="destructive"
-                                    className="h-8 px-2"
-                                    onClick={() => handleDelete(u.id)}
-                                  >
-                                    {t("dashboard.users.deleteButton")}
-                                  </Button>
-                                )}
-                              <select
-                                className="border px-1 py-1 rounded-md text-sm h-8"
-                                defaultValue=""
-                                onChange={(e) =>
-                                  handleDownload(u.name, e.target.value)
-                                }
-                              >
-                                <option value="" disabled>
-                                  {t(
-                                    "dashboard.users.downloadConfigButtonShort",
-                                    "DL"
-                                  )}
-                                </option>
-                                <option value="windows">
-                                  {t("dashboard.users.osWindows")}
-                                </option>
-                                <option value="macos">
-                                  {t("dashboard.users.osMacOS")}
-                                </option>
-                                <option value="linux">
-                                  {t("dashboard.users.osLinux")}
-                                </option>
-                              </select>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    )}
-                  </TableBody>
-                </Table>
+                          <option value="" disabled>{t("dashboard.users.downloadConfigButtonShort", "DL Cfg")}</option>
+                          <option value="windows">{t("dashboard.users.osWindows")}</option>
+                          <option value="macos">{t("dashboard.users.osMacOS")}</option>
+                          <option value="linux">{t("dashboard.users.osLinux")}</option>
+                        </select>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-            </div>
+
+              {/* ── Desktop: TanStack table (hidden below md) ────────────── */}
+              <div className="hidden md:block overflow-x-auto">
+                <table className="w-full caption-bottom text-sm border-collapse">
+                  <thead>
+                    {table.getHeaderGroups().map((hg) => (
+                      <tr key={hg.id} className="border-b">
+                        {hg.headers.map((header) => (
+                          <th
+                            key={header.id}
+                            className={[
+                              "h-12 px-4 text-left align-middle font-medium text-muted-foreground whitespace-nowrap",
+                              header.column.getCanSort() ? "cursor-pointer select-none" : "",
+                              header.id === "actions" ? "sticky right-0 min-w-[260px]" : "min-w-[120px]",
+                            ].join(" ")}
+                            style={header.id === "actions" ? { backgroundColor: "hsl(var(--card))", boxShadow: "inset 10px 0 0px -9px #0505050f" } : undefined}
+                            onClick={header.column.getToggleSortingHandler()}
+                          >
+                            {flexRender(header.column.columnDef.header, header.getContext())}
+                            {header.column.getIsSorted() === "asc" ? " ↑" : header.column.getIsSorted() === "desc" ? " ↓" : ""}
+                          </th>
+                        ))}
+                      </tr>
+                    ))}
+                  </thead>
+                  <tbody>
+                    {table.getRowModel().rows.map((row) => (
+                      <tr key={row.id} className="border-b transition-colors hover:bg-muted/50">
+                        {row.getVisibleCells().map((cell) => (
+                          <td
+                            key={cell.id}
+                            className={[
+                              "px-4 py-3 align-middle",
+                              cell.column.id === "actions" ? "sticky right-0" : "",
+                            ].join(" ")}
+                            style={cell.column.id === "actions" ? { backgroundColor: "hsl(var(--card))", boxShadow: "inset 10px 0 0px -9px #0505050f" } : undefined}
+                          >
+                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
           )}
         </CardContent>
       </Card>

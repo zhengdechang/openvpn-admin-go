@@ -6,9 +6,7 @@ import { usePathname } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { UserRole } from "@/types/types";
 import { useTranslation } from "react-i18next";
-import { setLocaleOnClient, getLocaleOnClient } from "@/i18n";
-import { LanguagesSupported } from "@/i18n/language";
-import type { Locale } from "@/i18n";
+import VPNLogo from "@/components/ui/vpn-logo";
 
 interface NavItem {
   href: string;
@@ -78,30 +76,12 @@ function SettingsIcon() {
   );
 }
 
-function ChevronRightIcon() {
-  return (
-    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-      <polyline points="9 18 15 12 9 6" />
-    </svg>
-  );
-}
-
 function LogoutIcon() {
   return (
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
       <polyline points="16 17 21 12 16 7" />
       <line x1="21" y1="12" x2="9" y2="12" />
-    </svg>
-  );
-}
-
-function GlobeIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="10" />
-      <line x1="2" y1="12" x2="22" y2="12" />
-      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
     </svg>
   );
 }
@@ -114,8 +94,8 @@ function getInitials(name?: string): string {
 }
 
 const AVATAR_COLORS = [
-  "#7c3aed", "#2563eb", "#0891b2", "#059669",
-  "#d97706", "#dc2626", "#7c3aed", "#0284c7",
+  "#0369a1", "#0ea5e9", "#0284c7", "#0891b2",
+  "#22c55e", "#16a34a", "#0c4a6e", "#075985",
 ];
 
 function getAvatarColor(name?: string): string {
@@ -124,43 +104,25 @@ function getAvatarColor(name?: string): string {
   return AVATAR_COLORS[idx];
 }
 
-export default function Sidebar() {
+export default function Sidebar({ onClose }: { onClose?: () => void } = {}) {
   const { user, logout } = useAuth();
   const pathname = usePathname();
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const [langMenuOpen, setLangMenuOpen] = useState(false);
-  const [currentLocale, setCurrentLocale] = useState<Locale>(getLocaleOnClient());
   const menuRef = useRef<HTMLDivElement>(null);
 
   const isActive = (href: string) =>
     pathname === href || pathname?.startsWith(`${href}/`);
 
-  const handleLanguageChange = (locale: Locale) => {
-    setLocaleOnClient(locale, true);
-    setCurrentLocale(locale);
-    setLangMenuOpen(false);
-    setUserMenuOpen(false);
-    document.documentElement.lang = locale;
-    i18n.changeLanguage(locale);
-  };
-
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
         setUserMenuOpen(false);
-        setLangMenuOpen(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-
-  useEffect(() => {
-    const handler = () => setCurrentLocale(i18n.language as Locale);
-    i18n.on("languageChanged", handler);
-    return () => i18n.off("languageChanged", handler);
-  }, [i18n]);
 
   const navItems: NavItem[] = [
     {
@@ -218,7 +180,7 @@ export default function Sidebar() {
       {/* Logo */}
       <div
         style={{
-          padding: "20px 20px 16px",
+          padding: "16px 16px 14px",
           borderBottom: "1px solid rgba(255,255,255,0.07)",
           display: "flex",
           alignItems: "center",
@@ -226,21 +188,8 @@ export default function Sidebar() {
           flexShrink: 0,
         }}
       >
-        <div
-          style={{
-            width: "32px",
-            height: "32px",
-            background: "hsl(var(--primary))",
-            borderRadius: "8px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            flexShrink: 0,
-          }}
-        >
-          <LockIcon />
-        </div>
-        <div>
+        <VPNLogo size={32} />
+        <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontSize: "14px", fontWeight: 700, color: "#ffffff", lineHeight: 1.2 }}>
             VPN Admin
           </div>
@@ -248,6 +197,32 @@ export default function Sidebar() {
             管理控制台
           </div>
         </div>
+        {/* 关闭按钮（移动端） */}
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="md:hidden"
+            style={{
+              width: "28px",
+              height: "28px",
+              borderRadius: "6px",
+              border: "none",
+              background: "rgba(255,255,255,0.08)",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "rgba(255,255,255,0.6)",
+              flexShrink: 0,
+            }}
+            aria-label="Close menu"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+        )}
       </div>
 
       {/* Nav */}
@@ -370,7 +345,7 @@ export default function Sidebar() {
               bottom: "calc(100% - 8px)",
               left: "8px",
               right: "8px",
-              background: "#1f2937",
+              background: "#012a4a",
               borderRadius: "10px",
               border: "1px solid rgba(255,255,255,0.1)",
               boxShadow: "0 -8px 24px rgba(0,0,0,0.3)",
@@ -396,73 +371,6 @@ export default function Sidebar() {
               <SettingsIcon />
               {t("layout.profile")}
             </Link>
-
-            {/* Language toggle */}
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                padding: "8px 10px",
-                borderRadius: "6px",
-                fontSize: "13px",
-                color: "#d1d5db",
-                cursor: "pointer",
-                transition: "background 0.15s",
-                position: "relative",
-              }}
-              onClick={() => setLangMenuOpen(!langMenuOpen)}
-            >
-              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <GlobeIcon />
-                {t("layout.language")}
-              </div>
-              <ChevronRightIcon />
-
-              {langMenuOpen && (
-                <div
-                  style={{
-                    position: "absolute",
-                    right: "calc(100% + 4px)",
-                    top: 0,
-                    background: "#1f2937",
-                    borderRadius: "8px",
-                    border: "1px solid rgba(255,255,255,0.1)",
-                    padding: "4px",
-                    minWidth: "140px",
-                    boxShadow: "0 4px 16px rgba(0,0,0,0.3)",
-                  }}
-                >
-                  {LanguagesSupported.map((locale) => (
-                    <button
-                      key={locale}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleLanguageChange(locale);
-                      }}
-                      style={{
-                        display: "block",
-                        width: "100%",
-                        textAlign: "left",
-                        padding: "7px 10px",
-                        borderRadius: "6px",
-                        fontSize: "12.5px",
-                        border: "none",
-                        background: currentLocale === locale ? "rgba(59,130,246,0.2)" : "transparent",
-                        color: currentLocale === locale ? "#60a5fa" : "#d1d5db",
-                        cursor: "pointer",
-                        fontFamily: "inherit",
-                        fontWeight: currentLocale === locale ? 600 : 400,
-                      }}
-                    >
-                      {locale === "en-US"
-                        ? t("layout.navbar.langEnglish")
-                        : t("layout.navbar.langSimplifiedChinese")}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
 
             <div style={{ borderTop: "1px solid rgba(255,255,255,0.07)", margin: "4px 0" }} />
 

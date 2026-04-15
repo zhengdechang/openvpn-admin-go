@@ -1,6 +1,6 @@
 module openvpn-admin-go
 
-go 1.18
+go 1.21
 
 require (
 	github.com/eiannone/keyboard v0.0.0-20220611211555-0d226195f203
@@ -8,10 +8,11 @@ require (
 	github.com/golang-jwt/jwt/v4 v4.5.2
 	github.com/google/uuid v1.6.0
 	github.com/manifoldco/promptui v0.9.0
+	github.com/pressly/goose/v3 v3.22.0
 	github.com/spf13/cobra v1.8.1
 	github.com/syndtr/goleveldb v1.0.0
 	golang.org/x/crypto v0.23.0
-	gorm.io/driver/sqlite v1.5.7
+	gorm.io/driver/postgres v1.5.9
 	gorm.io/gorm v1.25.7-0.20240204074919-46816ad31dde
 )
 
@@ -35,7 +36,6 @@ require (
 	github.com/klauspost/cpuid/v2 v2.2.7 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
-	github.com/mattn/go-sqlite3 v1.14.22 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.2 // indirect

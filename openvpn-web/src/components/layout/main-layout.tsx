@@ -1,13 +1,16 @@
 "use client";
 
-import React from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import Sidebar from "./sidebar";
+import { setLocaleOnClient, getLocaleOnClient } from "@/i18n";
+import { LanguagesSupported } from "@/i18n/language";
+import type { Locale } from "@/i18n";
 
 interface MainLayoutProps {
   children: React.ReactNode;
-  showFooter?: boolean; // kept for backward compat, ignored
+  showFooter?: boolean;
   className?: string;
 }
 
@@ -16,46 +19,98 @@ function getPageInfo(
   t: (key: string) => string
 ): { title: string; breadcrumb: string } {
   if (pathname.startsWith("/dashboard/users"))
-    return {
-      title: t("dashboard.users.title"),
-      breadcrumb: t("dashboard.users.title"),
-    };
+    return { title: t("dashboard.users.title"), breadcrumb: t("dashboard.users.title") };
   if (pathname.startsWith("/dashboard/departments"))
-    return {
-      title: t("dashboard.departments.title") || "部门管理",
-      breadcrumb: t("dashboard.departments.title") || "部门管理",
-    };
+    return { title: t("dashboard.departments.title") || "部门管理", breadcrumb: t("dashboard.departments.title") || "部门管理" };
   if (pathname.startsWith("/dashboard/server"))
-    return {
-      title: t("dashboard.server.title"),
-      breadcrumb: t("dashboard.server.title"),
-    };
+    return { title: t("dashboard.server.title"), breadcrumb: t("dashboard.server.title") };
   if (pathname.startsWith("/dashboard/logs"))
-    return {
-      title: t("dashboard.logs.titleServer"),
-      breadcrumb: t("dashboard.logs.titleServer"),
-    };
+    return { title: t("dashboard.logs.titleServer"), breadcrumb: t("dashboard.logs.titleServer") };
   if (pathname.startsWith("/dashboard/profile"))
-    return {
-      title: t("layout.profile"),
-      breadcrumb: t("layout.profile"),
-    };
+    return { title: t("layout.profile"), breadcrumb: t("layout.profile") };
   return { title: "Dashboard", breadcrumb: "Dashboard" };
 }
 
-export default function MainLayout({
-  children,
-  className,
-}: MainLayoutProps) {
-  const { t } = useTranslation();
+export default function MainLayout({ children, className }: MainLayoutProps) {
+  const { t, i18n } = useTranslation();
   const pathname = usePathname();
   const { title, breadcrumb } = getPageInfo(pathname || "", t);
+  const [langMenuOpen, setLangMenuOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [currentLocale, setCurrentLocale] = useState<Locale>(getLocaleOnClient());
+  const langMenuRef = useRef<HTMLDivElement>(null);
+
+  // 路由切换时自动关闭侧边栏（移动端）
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [pathname]);
+
+  // 侧边栏打开时禁止 body 滚动
+  useEffect(() => {
+    if (sidebarOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => { document.body.style.overflow = ""; };
+  }, [sidebarOpen]);
+
+  const handleLanguageChange = (locale: Locale) => {
+    setLocaleOnClient(locale, true);
+    setCurrentLocale(locale);
+    setLangMenuOpen(false);
+    document.documentElement.lang = locale;
+    i18n.changeLanguage(locale);
+  };
+
+  useEffect(() => {
+    const handler = () => setCurrentLocale(i18n.language as Locale);
+    i18n.on("languageChanged", handler);
+    return () => i18n.off("languageChanged", handler);
+  }, [i18n]);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (langMenuRef.current && !langMenuRef.current.contains(e.target as Node)) {
+        setLangMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
     <div style={{ display: "flex", height: "100vh", overflow: "hidden" }}>
-      <Sidebar />
 
-      {/* 右侧主区域 */}
+      {/* ─── 移动端遮罩 ────────────────────────────────────────── */}
+      {sidebarOpen && (
+        <div
+          onClick={() => setSidebarOpen(false)}
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.5)",
+            zIndex: 40,
+            backdropFilter: "blur(2px)",
+          }}
+        />
+      )}
+
+      {/* ─── 侧边栏：桌面端正常流；移动端 fixed 覆盖层 ──────────── */}
+      <div
+        className={[
+          // 移动端：fixed 从左侧滑入
+          "fixed top-0 left-0 h-full z-50 flex-shrink-0",
+          "transition-transform duration-300 ease-in-out",
+          // 桌面端：回归正常文档流
+          "md:relative md:top-auto md:left-auto md:translate-x-0 md:z-auto",
+          sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0",
+        ].join(" ")}
+      >
+        <Sidebar onClose={() => setSidebarOpen(false)} />
+      </div>
+
+      {/* ─── 右侧主区域 ─────────────────────────────────────────── */}
       <div
         style={{
           flex: 1,
@@ -71,37 +126,23 @@ export default function MainLayout({
           style={{
             height: "56px",
             minHeight: "56px",
-            background: "#ffffff",
+            background: "hsl(var(--card))",
             borderBottom: "1px solid hsl(var(--border))",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            padding: "0 24px",
+            padding: "0 16px",
             flexShrink: 0,
           }}
         >
-          <div>
-            <div
-              style={{
-                fontSize: "15px",
-                fontWeight: 600,
-                color: "#111827",
-                lineHeight: 1.2,
-              }}
-            >
-              {title}
-            </div>
-            <div style={{ fontSize: "11px", color: "#9ca3af", marginTop: "2px" }}>
-              Dashboard / {breadcrumb}
-            </div>
-          </div>
-
-          <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-            {/* 搜索 */}
+          <div style={{ display: "flex", alignItems: "center", gap: "12px", minWidth: 0 }}>
+            {/* ─── 汉堡菜单（仅移动端显示）─── */}
             <button
+              onClick={() => setSidebarOpen(true)}
+              className="md:hidden"
               style={{
-                width: "32px",
-                height: "32px",
+                width: "36px",
+                height: "36px",
                 borderRadius: "8px",
                 border: "none",
                 background: "transparent",
@@ -109,23 +150,96 @@ export default function MainLayout({
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                color: "#9ca3af",
+                color: "hsl(var(--foreground))",
+                flexShrink: 0,
               }}
+              aria-label="Open menu"
             >
-              <svg
-                width="15"
-                height="15"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <circle cx="11" cy="11" r="8" />
-                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="3" y1="6" x2="21" y2="6" />
+                <line x1="3" y1="12" x2="21" y2="12" />
+                <line x1="3" y1="18" x2="21" y2="18" />
               </svg>
             </button>
+
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontSize: "15px", fontWeight: 600, color: "hsl(var(--foreground))", lineHeight: 1.2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                {title}
+              </div>
+              <div style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))", marginTop: "1px" }} className="hidden sm:block">
+                Dashboard / {breadcrumb}
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: "flex", alignItems: "center", gap: "4px", flexShrink: 0 }}>
+            {/* Language switcher */}
+            <div ref={langMenuRef} style={{ position: "relative" }}>
+              <button
+                onClick={() => setLangMenuOpen(!langMenuOpen)}
+                title={t("layout.language")}
+                style={{
+                  height: "32px",
+                  padding: "0 10px",
+                  borderRadius: "8px",
+                  border: "1px solid hsl(var(--border))",
+                  background: langMenuOpen ? "hsl(var(--muted))" : "transparent",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "5px",
+                  color: "hsl(var(--muted-foreground))",
+                  fontSize: "12px",
+                  fontWeight: 500,
+                }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="2" y1="12" x2="22" y2="12" />
+                  <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                </svg>
+                {currentLocale === "zh-Hans" ? "中文" : "EN"}
+              </button>
+              {langMenuOpen && (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "calc(100% + 6px)",
+                    right: 0,
+                    background: "#ffffff",
+                    borderRadius: "10px",
+                    border: "1px solid hsl(var(--border))",
+                    boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
+                    padding: "4px",
+                    minWidth: "130px",
+                    zIndex: 100,
+                  }}
+                >
+                  {LanguagesSupported.map((locale) => (
+                    <button
+                      key={locale}
+                      onClick={() => handleLanguageChange(locale)}
+                      style={{
+                        display: "block",
+                        width: "100%",
+                        textAlign: "left",
+                        padding: "7px 12px",
+                        borderRadius: "6px",
+                        fontSize: "13px",
+                        border: "none",
+                        background: currentLocale === locale ? "hsl(var(--secondary))" : "transparent",
+                        color: currentLocale === locale ? "hsl(var(--primary))" : "#374151",
+                        cursor: "pointer",
+                        fontFamily: "inherit",
+                        fontWeight: currentLocale === locale ? 600 : 400,
+                      }}
+                    >
+                      {locale === "en-US" ? t("layout.navbar.langEnglish") : t("layout.navbar.langChinese")}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
 
             {/* 通知铃 */}
             <button
@@ -139,19 +253,10 @@ export default function MainLayout({
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                color: "#9ca3af",
+                color: "hsl(var(--muted-foreground))",
               }}
             >
-              <svg
-                width="15"
-                height="15"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
                 <path d="M13.73 21a2 2 0 0 1-3.46 0" />
               </svg>
@@ -160,9 +265,7 @@ export default function MainLayout({
         </header>
 
         {/* 内容区 */}
-        <main
-          className={`flex-1 overflow-y-auto custom-scrollbar ${className || ""}`}
-        >
+        <main className={`flex-1 overflow-y-auto custom-scrollbar ${className || ""}`}>
           {children}
         </main>
       </div>
