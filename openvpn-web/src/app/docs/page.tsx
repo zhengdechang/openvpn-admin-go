@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import LanguageSwitcher from "@/components/ui/language-switcher";
+import GitHubButton from "@/components/ui/github-button";
 import MuiButton from "@mui/material/Button";
 
 const NAV_SECTIONS = ["overview", "quickstart", "envvars", "roles", "api", "faq"] as const;
@@ -66,6 +67,7 @@ export default function DocsPage() {
             <span className="text-gray-600 font-medium">{t("docs.pageTitle")}</span>
           </div>
           <div className="flex items-center gap-2">
+            <GitHubButton />
             <LanguageSwitcher />
             <MuiButton
               component={Link}

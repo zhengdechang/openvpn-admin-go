@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import Sidebar from "./sidebar";
 import LanguageSwitcher from "@/components/ui/language-switcher";
+import GitHubButton from "@/components/ui/github-button";
 import IconButton from "@mui/material/IconButton";
 
 interface MainLayoutProps {
@@ -134,6 +135,8 @@ export default function MainLayout({ children, className }: MainLayoutProps) {
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: "4px", flexShrink: 0 }}>
+            {/* GitHub */}
+            <GitHubButton />
             {/* Language switcher */}
             <LanguageSwitcher />
 

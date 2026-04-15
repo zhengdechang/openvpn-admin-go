@@ -6,6 +6,7 @@ import { useAuth } from "@/lib/auth-context";
 import { useTranslation } from "react-i18next";
 import VPNLogo from "@/components/ui/vpn-logo";
 import LanguageSwitcher from "@/components/ui/language-switcher";
+import GitHubButton from "@/components/ui/github-button";
 import MuiButton from "@mui/material/Button";
 
 export default function Home() {
@@ -18,8 +19,9 @@ export default function Home() {
 
   return (
     <div className="min-h-screen overflow-y-auto bg-background">
-      {/* Top-right language switcher */}
-      <div className="fixed top-4 right-4 z-50">
+      {/* Top-right controls */}
+      <div className="fixed top-4 right-4 z-50 flex items-center gap-2">
+        <GitHubButton />
         <LanguageSwitcher />
       </div>
 
