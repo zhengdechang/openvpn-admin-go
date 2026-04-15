@@ -1,6 +1,10 @@
+"use client";
+
+import { ThemeProvider } from "@mui/material/styles";
+import CssBaseline from "@mui/material/CssBaseline";
 import { createTheme } from "@mui/material/styles";
 
-export const muiTheme = createTheme({
+const muiTheme = createTheme({
   palette: {
     primary: { main: "#0369A1" },
     secondary: { main: "#22C55E" },
@@ -26,3 +30,12 @@ export const muiTheme = createTheme({
     },
   },
 });
+
+export default function MuiProvider({ children }: { children: React.ReactNode }) {
+  return (
+    <ThemeProvider theme={muiTheme}>
+      <CssBaseline />
+      {children}
+    </ThemeProvider>
+  );
+}
