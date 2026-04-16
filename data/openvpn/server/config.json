@@ -1,9 +1,9 @@
 {
   "openvpn_port": 4500,
-  "openvpn_proto": "tcp6",
+  "openvpn_proto": "tcp",
   "openvpn_sync_certs": true,
   "openvpn_use_crl": true,
-  "openvpn_server_hostname": "192.168.2.1",
+  "openvpn_server_hostname": "openvpn-admin",
   "openvpn_server_network": "10.8.0.0",
   "openvpn_server_netmask": "255.255.255.0",
   "openvpn_routes": [
