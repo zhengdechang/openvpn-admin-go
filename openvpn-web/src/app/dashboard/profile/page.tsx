@@ -1,8 +1,3 @@
-/*
- * @Description:
- * @Author: Devin
- * @Date: 2025-06-05 13:07:03
- */
 "use client";
 
 import React, { useState } from "react";
@@ -10,8 +5,9 @@ import MainLayout from "@/components/layout/main-layout";
 import { useAuth } from "@/lib/auth-context";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import MuiButton from "@mui/material/Button";
-import TextField from "@mui/material/TextField";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export default function ProfilePage() {
   const { user, updateUserInfo } = useAuth();
@@ -67,24 +63,28 @@ export default function ProfilePage() {
                   {t("dashboard.profile.basicInfoTitle")}
                 </h2>
                 <div className="space-y-4">
-                  <TextField
-                    label={t("dashboard.profile.namePlaceholder")}
-                    placeholder={t("dashboard.profile.namePlaceholder")}
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    disabled={true}
-                    fullWidth
-                    sx={{ backgroundColor: "#f9fafb" }}
-                  />
-                  <TextField
-                    label={t("dashboard.profile.emailPlaceholder")}
-                    placeholder={t("dashboard.profile.emailPlaceholder")}
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    disabled={true}
-                    fullWidth
-                    sx={{ backgroundColor: "#f9fafb" }}
-                  />
+                  <div className="space-y-1">
+                    <Label htmlFor="profile-name">{t("dashboard.profile.namePlaceholder")}</Label>
+                    <Input
+                      id="profile-name"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      disabled
+                      placeholder={t("dashboard.profile.namePlaceholder")}
+                      className="bg-gray-50"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="profile-email">{t("dashboard.profile.emailPlaceholder")}</Label>
+                    <Input
+                      id="profile-email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      disabled
+                      placeholder={t("dashboard.profile.emailPlaceholder")}
+                      className="bg-gray-50"
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -97,24 +97,19 @@ export default function ProfilePage() {
                   {t("dashboard.profile.changePasswordTitle")}
                 </h2>
                 <div className="space-y-4">
-                  <TextField
-                    type="password"
-                    label={t("dashboard.profile.newPasswordPlaceholder")}
-                    placeholder={t("dashboard.profile.newPasswordPlaceholder")}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    fullWidth
-                  />
-                  <MuiButton
-                    variant="contained"
-                    onClick={handleChangePassword}
-                    disabled={loading}
-                    fullWidth
-                  >
-                    {loading
-                      ? t("common.loading")
-                      : t("dashboard.profile.updatePasswordButton")}
-                  </MuiButton>
+                  <div className="space-y-1">
+                    <Label htmlFor="profile-password">{t("dashboard.profile.newPasswordPlaceholder")}</Label>
+                    <Input
+                      id="profile-password"
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder={t("dashboard.profile.newPasswordPlaceholder")}
+                    />
+                  </div>
+                  <Button className="w-full" onClick={handleChangePassword} disabled={loading}>
+                    {loading ? t("common.loading") : t("dashboard.profile.updatePasswordButton")}
+                  </Button>
                 </div>
               </div>
             </div>

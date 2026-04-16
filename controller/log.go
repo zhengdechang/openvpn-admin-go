@@ -114,6 +114,11 @@ func (c *LogController) GetClientLogs(ctx *gin.Context) {
 		return
 	}
 
+	// Reverse so newest entries appear first
+	for i, j := 0, len(lines)-1; i < j; i, j = i+1, j-1 {
+		lines[i], lines[j] = lines[j], lines[i]
+	}
+
 	totalLines := len(lines)
 
 	if offset < 0 {

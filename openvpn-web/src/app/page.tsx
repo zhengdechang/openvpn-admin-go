@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next";
 import VPNLogo from "@/components/ui/vpn-logo";
 import LanguageSwitcher from "@/components/ui/language-switcher";
 import GitHubButton from "@/components/ui/github-button";
-import MuiButton from "@mui/material/Button";
+import { Button } from "@/components/ui/button";
 
 export default function Home() {
   const { user, loading, refreshToken } = useAuth();
@@ -39,36 +39,18 @@ export default function Home() {
             <p className="text-lg text-gray-700 mb-10">{t("home.subtitle")}</p>
             {!user ? (
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-4">
-                <MuiButton
-                  component={Link}
-                  href="/auth/login"
-                  variant="contained"
-                  size="large"
-                  className="w-full sm:w-auto"
-                >
-                  {t("home.getStarted")}
-                </MuiButton>
-                <MuiButton
-                  component={Link}
-                  href="/auth/register"
-                  variant="outlined"
-                  size="large"
-                  className="w-full sm:w-auto"
-                >
-                  {t("home.signUp")}
-                </MuiButton>
+                <Button size="lg" className="w-full sm:w-auto" asChild>
+                  <Link href="/auth/login">{t("home.getStarted")}</Link>
+                </Button>
+                <Button variant="outline" size="lg" className="w-full sm:w-auto" asChild>
+                  <Link href="/auth/register">{t("home.signUp")}</Link>
+                </Button>
               </div>
             ) : (
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-4">
-                <MuiButton
-                  component={Link}
-                  href="/dashboard"
-                  variant="contained"
-                  size="large"
-                  className="w-full sm:w-auto"
-                >
-                  {t("home.goDashboard")}
-                </MuiButton>
+                <Button size="lg" className="w-full sm:w-auto" asChild>
+                  <Link href="/dashboard">{t("home.goDashboard")}</Link>
+                </Button>
               </div>
             )}
           </div>
@@ -160,15 +142,9 @@ export default function Home() {
                 </p>
               </div>
             </div>
-            <MuiButton
-              component={Link}
-              href="/docs"
-              variant="contained"
-              size="large"
-              sx={{ px: 4 }}
-            >
-              {t("home.featuresSection.viewDocsButton")}
-            </MuiButton>
+            <Button size="lg" className="px-8" asChild>
+              <Link href="/docs">{t("home.featuresSection.viewDocsButton")}</Link>
+            </Button>
           </div>
         </div>
       </div>
@@ -231,22 +207,14 @@ export default function Home() {
             </div>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <MuiButton
-                component={Link}
-                href="https://github.com/zhengdechang/openvpn-admin-go/releases"
-                target="_blank"
-                rel="noopener noreferrer"
-                variant="contained"
-                size="large"
-                sx={{ px: 4 }}
-                startIcon={
-                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <Button size="lg" className="px-8" asChild>
+                <Link href="https://github.com/zhengdechang/openvpn-admin-go/releases" target="_blank" rel="noopener noreferrer">
+                  <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
                   </svg>
-                }
-              >
-                {t("home.techStackSection.downloadButton")}
-              </MuiButton>
+                  {t("home.techStackSection.downloadButton")}
+                </Link>
+              </Button>
             </div>
           </div>
         </div>
@@ -323,38 +291,22 @@ export default function Home() {
             </div>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <MuiButton
-                component={Link}
-                href="https://github.com/zhengdechang/openvpn-admin-go"
-                target="_blank"
-                rel="noopener noreferrer"
-                variant="contained"
-                size="large"
-                sx={{ px: 4 }}
-                startIcon={
-                  <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+              <Button size="lg" className="px-8" asChild>
+                <Link href="https://github.com/zhengdechang/openvpn-admin-go" target="_blank" rel="noopener noreferrer">
+                  <svg className="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
                   </svg>
-                }
-              >
-                {t("home.githubSection.viewSourceButton")}
-              </MuiButton>
-              <MuiButton
-                component={Link}
-                href="https://github.com/zhengdechang/openvpn-admin-go/issues"
-                target="_blank"
-                rel="noopener noreferrer"
-                variant="outlined"
-                size="large"
-                sx={{ px: 4 }}
-                startIcon={
-                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  {t("home.githubSection.viewSourceButton")}
+                </Link>
+              </Button>
+              <Button variant="outline" size="lg" className="px-8" asChild>
+                <Link href="https://github.com/zhengdechang/openvpn-admin-go/issues" target="_blank" rel="noopener noreferrer">
+                  <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                   </svg>
-                }
-              >
-                {t("home.githubSection.reportIssueButton")}
-              </MuiButton>
+                  {t("home.githubSection.reportIssueButton")}
+                </Link>
+              </Button>
             </div>
           </div>
         </div>
@@ -386,16 +338,11 @@ export default function Home() {
                 <p className="text-gray-600 text-sm mb-4">
                   {t("home.contactSection.github.description")}
                 </p>
-                <MuiButton
-                  component={Link}
-                  href="https://github.com/zhengdechang/openvpn-admin-go/issues"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  variant="outlined"
-                  size="small"
-                >
-                  {t("home.contactSection.githubButton")}
-                </MuiButton>
+                <Button variant="outline" size="sm" asChild>
+                  <Link href="https://github.com/zhengdechang/openvpn-admin-go/issues" target="_blank" rel="noopener noreferrer">
+                    {t("home.contactSection.githubButton")}
+                  </Link>
+                </Button>
               </div>
 
               {/* Email */}
@@ -411,14 +358,11 @@ export default function Home() {
                 <p className="text-gray-600 text-sm mb-4">
                   {t("home.contactSection.email.description")}
                 </p>
-                <MuiButton
-                  component={Link}
-                  href="mailto:support@vpnadmin.dev"
-                  variant="outlined"
-                  size="small"
-                >
-                  {t("home.contactSection.emailButton")}
-                </MuiButton>
+                <Button variant="outline" size="sm" asChild>
+                  <Link href="mailto:support@vpnadmin.dev">
+                    {t("home.contactSection.emailButton")}
+                  </Link>
+                </Button>
               </div>
 
               {/* Telegram */}
@@ -434,16 +378,11 @@ export default function Home() {
                 <p className="text-gray-600 text-sm mb-4">
                   {t("home.contactSection.telegram.description")}
                 </p>
-                <MuiButton
-                  component={Link}
-                  href="https://t.me/endevin"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  variant="outlined"
-                  size="small"
-                >
-                  {t("home.contactSection.telegramButton")}
-                </MuiButton>
+                <Button variant="outline" size="sm" asChild>
+                  <Link href="https://t.me/endevin" target="_blank" rel="noopener noreferrer">
+                    {t("home.contactSection.telegramButton")}
+                  </Link>
+                </Button>
               </div>
             </div>
           </div>

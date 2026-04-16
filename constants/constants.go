@@ -87,6 +87,7 @@ var OpenSSLExtFiles = []string{
 
 var BlacklistFile = []string{
 	"auth-blacklist.sh",
+	"auth-client-connect.sh",
 	"blacklist.txt",
 }
 

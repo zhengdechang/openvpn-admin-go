@@ -337,6 +337,7 @@ func runWebServer(port int) error {
 		router.SetupServerRoutes(api)
 		router.SetupClientRoutes(api)
 		router.SetupLogRoutes(api)
+		router.SetupNotificationRoutes(api)
 	}
 
 	serverAddr := fmt.Sprintf(":%d", port)

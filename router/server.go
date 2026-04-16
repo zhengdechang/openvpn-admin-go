@@ -27,6 +27,7 @@ func SetupServerRoutes(r *gin.RouterGroup) {
 			super.POST("/start", serverCtrl.StartServer)
 			super.POST("/stop", serverCtrl.StopServer)
 			super.POST("/restart", serverCtrl.RestartServer)
+			super.GET("/config/raw", serverCtrl.GetRawServerConfig)
 			super.GET("/config/template", serverCtrl.GetServerConfigTemplate)
 			super.PUT("/config", serverCtrl.UpdateServerConfig)
 			super.PUT("/port", serverCtrl.UpdatePort)

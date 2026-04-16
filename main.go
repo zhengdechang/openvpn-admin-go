@@ -106,17 +106,21 @@ func InitCore() error {
 	if err := database.Init(); err != nil {
 		return fmt.Errorf("数据库初始化失败: %v", err)
 	}
-	if err := database.Migrate(&model.User{}, &model.Department{}); err != nil {
+	if err := database.Migrate(&model.User{}, &model.Department{}, &model.Notification{}); err != nil {
 		return fmt.Errorf("数据库迁移失败: %v", err)
 	}
 	// Seed default superadmin user if not exists
 	func() {
 		var existing model.User
 		if err := database.DB.Where("email = ?", "superadmin@gmail.com").First(&existing).Error; err != nil {
-			initPassword, errPwd := generateRandomPassword(8) // 16-char hex
-			if errPwd != nil {
-				logging.Error("生成超级管理员随机密码失败: %v", errPwd)
-				return
+			initPassword := os.Getenv("SUPERADMIN_PASSWORD")
+			if initPassword == "" {
+				var errPwd error
+				initPassword, errPwd = generateRandomPassword(8) // 16-char hex
+				if errPwd != nil {
+					logging.Error("生成超级管理员随机密码失败: %v", errPwd)
+					return
+				}
 			}
 			hash, errHash := common.HashPassword(initPassword)
 			if errHash != nil {
@@ -138,7 +142,7 @@ func InitCore() error {
 				fmt.Printf("  密码:   %s\n", initPassword)
 				fmt.Printf("  请登录后立即修改密码！\n")
 				fmt.Printf("========================================\n\n")
-				logging.Info("已创建默认超级管理员: superadmin@gmail.com（随机密码，见控制台输出）")
+				logging.Info("已创建默认超级管理员: superadmin@gmail.com（密码见控制台输出）")
 			}
 		}
 	}()

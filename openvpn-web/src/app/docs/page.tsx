@@ -5,7 +5,16 @@ import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import LanguageSwitcher from "@/components/ui/language-switcher";
 import GitHubButton from "@/components/ui/github-button";
-import MuiButton from "@mui/material/Button";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 const NAV_SECTIONS = ["overview", "quickstart", "envvars", "roles", "api", "faq"] as const;
 type Section = (typeof NAV_SECTIONS)[number];
@@ -69,14 +78,9 @@ export default function DocsPage() {
           <div className="flex items-center gap-2">
             <GitHubButton />
             <LanguageSwitcher />
-            <MuiButton
-              component={Link}
-              href="/"
-              variant="outlined"
-              size="small"
-            >
-              &larr; {t("common.back") || "Back"}
-            </MuiButton>
+            <Button variant="outline" size="sm" asChild>
+              <Link href="/">&larr; {t("common.back") || "Back"}</Link>
+            </Button>
           </div>
         </div>
       </div>
@@ -91,28 +95,18 @@ export default function DocsPage() {
               </p>
               <nav className="space-y-1">
                 {NAV_SECTIONS.map((s) => (
-                  <MuiButton
+                  <button
                     key={s}
                     onClick={() => scrollTo(s)}
-                    variant="text"
-                    fullWidth
-                    sx={{
-                      justifyContent: "flex-start",
-                      textAlign: "left",
-                      borderRadius: "6px",
-                      px: 1.5,
-                      py: 1,
-                      fontSize: "0.875rem",
-                      fontWeight: activeSection === s ? 600 : 400,
-                      backgroundColor: activeSection === s ? "primary.main" : "transparent",
-                      color: activeSection === s ? "white" : "text.secondary",
-                      "&:hover": {
-                        backgroundColor: activeSection === s ? "primary.dark" : "grey.100",
-                      },
-                    }}
+                    className={cn(
+                      "w-full text-left px-3 py-2 rounded-md text-sm transition-colors",
+                      activeSection === s
+                        ? "bg-primary text-white font-semibold"
+                        : "text-muted-foreground hover:bg-gray-100 font-normal"
+                    )}
                   >
                     {t(`docs.nav.${s}`)}
-                  </MuiButton>
+                  </button>
                 ))}
               </nav>
             </div>
@@ -122,19 +116,15 @@ export default function DocsPage() {
           <div className="md:hidden mb-6 w-full">
             <div className="flex gap-2 overflow-x-auto pb-2">
               {NAV_SECTIONS.map((s) => (
-                <MuiButton
+                <Button
                   key={s}
                   onClick={() => scrollTo(s)}
-                  variant={activeSection === s ? "contained" : "outlined"}
-                  size="small"
-                  sx={{
-                    flexShrink: 0,
-                    borderRadius: "9999px",
-                    fontSize: "0.875rem",
-                  }}
+                  variant={activeSection === s ? "default" : "outline"}
+                  size="sm"
+                  className="flex-shrink-0 rounded-full text-sm"
                 >
                   {t(`docs.nav.${s}`)}
-                </MuiButton>
+                </Button>
               ))}
             </div>
           </div>
@@ -226,22 +216,22 @@ export default function DocsPage() {
               <div className="h-0.5 w-12 bg-primary mb-4" />
               <p className="text-gray-700 mb-6">{t("docs.envvars.description")}</p>
               <div className="overflow-x-auto rounded-lg border">
-                <table className="w-full text-sm">
-                  <thead className="bg-gray-50 border-b">
-                    <tr>
-                      <th className="text-left px-4 py-3 font-semibold">{t("docs.envvars.name")}</th>
-                      <th className="text-left px-4 py-3 font-semibold">{t("docs.envvars.default")}</th>
-                      <th className="text-left px-4 py-3 font-semibold">{t("docs.envvars.required")}</th>
-                      <th className="text-left px-4 py-3 font-semibold">{t("docs.envvars.description2")}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
+                <Table>
+                  <TableHeader className="bg-gray-50">
+                    <TableRow>
+                      <TableHead className="px-4 py-3 font-semibold">{t("docs.envvars.name")}</TableHead>
+                      <TableHead className="px-4 py-3 font-semibold">{t("docs.envvars.default")}</TableHead>
+                      <TableHead className="px-4 py-3 font-semibold">{t("docs.envvars.required")}</TableHead>
+                      <TableHead className="px-4 py-3 font-semibold">{t("docs.envvars.description2")}</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
                     {Array.isArray(envVars) &&
                       envVars.map((v, i) => (
-                        <tr key={i} className="border-b last:border-0 hover:bg-gray-50">
-                          <td className="px-4 py-3 font-mono text-xs font-semibold text-primary">{v.name}</td>
-                          <td className="px-4 py-3 text-gray-600 font-mono text-xs">{v.default}</td>
-                          <td className="px-4 py-3">
+                        <TableRow key={i} className="last:border-0 hover:bg-gray-50">
+                          <TableCell className="px-4 py-3 font-mono text-xs font-semibold text-primary">{v.name}</TableCell>
+                          <TableCell className="px-4 py-3 text-gray-600 font-mono text-xs">{v.default}</TableCell>
+                          <TableCell className="px-4 py-3">
                             <span
                               className={`px-2 py-0.5 rounded-full text-xs font-medium ${
                                 v.required
@@ -251,12 +241,12 @@ export default function DocsPage() {
                             >
                               {v.required ? t("docs.envvars.yes") : t("docs.envvars.no")}
                             </span>
-                          </td>
-                          <td className="px-4 py-3 text-gray-700">{v.description}</td>
-                        </tr>
+                          </TableCell>
+                          <TableCell className="px-4 py-3 text-gray-700">{v.description}</TableCell>
+                        </TableRow>
                       ))}
-                  </tbody>
-                </table>
+                  </TableBody>
+                </Table>
               </div>
             </section>
 
@@ -266,23 +256,23 @@ export default function DocsPage() {
               <div className="h-0.5 w-12 bg-primary mb-4" />
               <p className="text-gray-700 mb-6">{t("docs.roles.description")}</p>
               <div className="overflow-x-auto rounded-lg border">
-                <table className="w-full text-sm">
-                  <thead className="bg-gray-50 border-b">
-                    <tr>
-                      <th className="text-left px-4 py-3 font-semibold w-40">{t("docs.roles.role")}</th>
-                      <th className="text-left px-4 py-3 font-semibold">{t("docs.roles.permissions")}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
+                <Table>
+                  <TableHeader className="bg-gray-50">
+                    <TableRow>
+                      <TableHead className="px-4 py-3 font-semibold w-40">{t("docs.roles.role")}</TableHead>
+                      <TableHead className="px-4 py-3 font-semibold">{t("docs.roles.permissions")}</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
                     {Array.isArray(roleList) &&
                       roleList.map((r, i) => (
-                        <tr key={i} className="border-b last:border-0 hover:bg-gray-50">
-                          <td className="px-4 py-3 font-semibold text-primary">{r.role}</td>
-                          <td className="px-4 py-3 text-gray-700">{r.permissions}</td>
-                        </tr>
+                        <TableRow key={i} className="last:border-0 hover:bg-gray-50">
+                          <TableCell className="px-4 py-3 font-semibold text-primary">{r.role}</TableCell>
+                          <TableCell className="px-4 py-3 text-gray-700">{r.permissions}</TableCell>
+                        </TableRow>
                       ))}
-                  </tbody>
-                </table>
+                  </TableBody>
+                </Table>
               </div>
             </section>
 
@@ -292,20 +282,20 @@ export default function DocsPage() {
               <div className="h-0.5 w-12 bg-primary mb-4" />
               <p className="text-gray-700 mb-6">{t("docs.api.description")}</p>
               <div className="overflow-x-auto rounded-lg border">
-                <table className="w-full text-sm">
-                  <thead className="bg-gray-50 border-b">
-                    <tr>
-                      <th className="text-left px-4 py-3 font-semibold w-20">{t("docs.api.method")}</th>
-                      <th className="text-left px-4 py-3 font-semibold">{t("docs.api.endpoint")}</th>
-                      <th className="text-left px-4 py-3 font-semibold w-20">{t("docs.api.auth")}</th>
-                      <th className="text-left px-4 py-3 font-semibold">{t("docs.api.description2")}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
+                <Table>
+                  <TableHeader className="bg-gray-50">
+                    <TableRow>
+                      <TableHead className="px-4 py-3 font-semibold w-20">{t("docs.api.method")}</TableHead>
+                      <TableHead className="px-4 py-3 font-semibold">{t("docs.api.endpoint")}</TableHead>
+                      <TableHead className="px-4 py-3 font-semibold w-20">{t("docs.api.auth")}</TableHead>
+                      <TableHead className="px-4 py-3 font-semibold">{t("docs.api.description2")}</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
                     {Array.isArray(endpoints) &&
                       endpoints.map((ep, i) => (
-                        <tr key={i} className="border-b last:border-0 hover:bg-gray-50">
-                          <td className="px-4 py-3">
+                        <TableRow key={i} className="last:border-0 hover:bg-gray-50">
+                          <TableCell className="px-4 py-3">
                             <span
                               className={`px-2 py-0.5 rounded text-xs font-bold font-mono ${
                                 methodColor[ep.method] || "bg-gray-100 text-gray-700"
@@ -313,9 +303,9 @@ export default function DocsPage() {
                             >
                               {ep.method}
                             </span>
-                          </td>
-                          <td className="px-4 py-3 font-mono text-xs text-gray-800">{ep.endpoint}</td>
-                          <td className="px-4 py-3">
+                          </TableCell>
+                          <TableCell className="px-4 py-3 font-mono text-xs text-gray-800">{ep.endpoint}</TableCell>
+                          <TableCell className="px-4 py-3">
                             {ep.auth ? (
                               <span className="text-xs text-amber-700">
                                 {t("docs.api.yes")}
@@ -325,12 +315,12 @@ export default function DocsPage() {
                                 {t("docs.api.no")}
                               </span>
                             )}
-                          </td>
-                          <td className="px-4 py-3 text-gray-700">{ep.description}</td>
-                        </tr>
+                          </TableCell>
+                          <TableCell className="px-4 py-3 text-gray-700">{ep.description}</TableCell>
+                        </TableRow>
                       ))}
-                  </tbody>
-                </table>
+                  </TableBody>
+                </Table>
               </div>
             </section>
 

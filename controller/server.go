@@ -168,6 +168,20 @@ func (c *ServerController) RestartServer(ctx *gin.Context) {
 	common.OKMsg(ctx, "Server restarted successfully")
 }
 
+// GetRawServerConfig 读取磁盘上实际运行的 server.conf 原始内容
+func (c *ServerController) GetRawServerConfig(ctx *gin.Context) {
+	data, err := os.ReadFile(constants.ServerConfigPath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			common.OK(ctx, gin.H{"config": ""})
+			return
+		}
+		common.InternalError(ctx, err.Error())
+		return
+	}
+	common.OK(ctx, gin.H{"config": string(data)})
+}
+
 // GetServerConfigTemplate 获取服务器配置模板
 func (c *ServerController) GetServerConfigTemplate(ctx *gin.Context) {
 	template, err := openvpn.GetServerConfigTemplate()

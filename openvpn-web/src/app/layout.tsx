@@ -11,7 +11,6 @@ import { Toaster } from "sonner";
 import { LoadingScreen } from "@/components/ui/loading";
 import { getLocaleOnServer } from "@/i18n/server";
 import { I18nProvider } from "@/i18n/i18n-provider";
-import MuiProvider from "@/components/providers/mui-provider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -32,7 +31,6 @@ export default async function RootLayout({
         <link rel="icon" type="image/svg+xml" href="/logo.svg" />
       </head>
       <body suppressHydrationWarning>
-        <MuiProvider>
           <I18nProvider locale={locale}>
             <LoadingScreen />
             <AuthProvider>
@@ -53,7 +51,6 @@ export default async function RootLayout({
               />
             </AuthProvider>
           </I18nProvider>
-        </MuiProvider>
       </body>
     </html>
   );

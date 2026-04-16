@@ -18,15 +18,47 @@ import {
   useReactTable,
   getCoreRowModel,
   getSortedRowModel,
+  getPaginationRowModel,
   flexRender,
   type ColumnDef,
   type SortingState,
+  type PaginationState,
 } from "@tanstack/react-table";
-import MuiButton from "@mui/material/Button";
-import TextField from "@mui/material/TextField";
-import Chip from "@mui/material/Chip";
-import { Dialog as MuiDialog, DialogTitle, DialogContent, DialogActions, DialogContentText } from "@mui/material";
-import { FormControl, InputLabel, Select as MuiSelect, MenuItem } from "@mui/material";
+import { Button, buttonVariants } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 // Helper function to format bytes into a readable string
 const formatBytes = (bytes?: number, decimals = 2): string => {
@@ -38,15 +70,14 @@ const formatBytes = (bytes?: number, decimals = 2): string => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
 };
 
-// Define initial state for the edit form
 const initialEditFormState: UserUpdateRequest = {
   name: "",
   email: "",
   role: UserRole.USER,
   departmentId: "",
-  fixedIp: "", // Initialize with empty string
-  subnet: "", // Initialize with empty string
-  password: "", // For password changes
+  fixedIp: "",
+  subnet: "",
+  password: "",
 };
 
 export default function UsersPage() {
@@ -59,7 +90,6 @@ export default function UsersPage() {
   const [departmentFilter, setDepartmentFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
-  // Form state for adding a new user
   const [addUserForm, setAddUserForm] = useState<UserUpdateRequest>({
     name: "",
     email: "",
@@ -67,79 +97,59 @@ export default function UsersPage() {
     role: UserRole.USER,
     departmentId: "",
     fixedIp: "",
-    subnet: "", // Initialize with empty string
+    subnet: "",
   });
   const [addUserDialogOpen, setAddUserDialogOpen] = useState(false);
 
-  // State for Edit User Dialog
   const [editUserDialogOpen, setEditUserDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<AdminUser | null>(null);
-  const [editForm, setEditForm] =
-    useState<UserUpdateRequest>(initialEditFormState);
+  const [editForm, setEditForm] = useState<UserUpdateRequest>(initialEditFormState);
+  const [confirmState, setConfirmState] = useState<{
+    open: boolean;
+    title: string;
+    description: string;
+    onConfirm: () => void;
+    destructive?: boolean;
+  }>({ open: false, title: "", description: "", onConfirm: () => {} });
 
-  // Define handlePauseUser function
-  const handlePauseUser = async (username: string) => {
-    if (
-      !confirm(
-        t(
-          "dashboard.users.pauseConfirm",
-          `Are you sure you want to pause user ${username}?`
-        )
-      )
-    )
-      return;
-    try {
-      await userManagementAPI.pauseUser(username);
-      toast.success(
-        t(
-          "dashboard.users.pauseSuccess",
-          `User ${username} paused successfully.`
-        )
-      );
-      fetchAll(); // Refresh the user list to show updated status
-    } catch (error: any) {
-      toast.error(
-        error?.response?.data?.error ||
-          t("dashboard.users.pauseError", `Failed to pause user ${username}.`)
-      );
-    }
+  const handlePauseUser = (username: string) => {
+    setConfirmState({
+      open: true,
+      title: t("dashboard.users.pauseConfirmTitle", "Pause User"),
+      description: t("dashboard.users.pauseConfirm", `Are you sure you want to pause user ${username}?`),
+      onConfirm: async () => {
+        try {
+          await userManagementAPI.pauseUser(username);
+          toast.success(t("dashboard.users.pauseSuccess", `User ${username} paused successfully.`));
+          fetchAll();
+        } catch (error: any) {
+          toast.error(error?.response?.data?.error || t("dashboard.users.pauseError", `Failed to pause user ${username}.`));
+        }
+      },
+    });
   };
 
-  // Define handleResumeUser function
-  const handleResumeUser = async (username: string) => {
-    if (
-      !confirm(
-        t(
-          "dashboard.users.resumeConfirm",
-          `Are you sure you want to resume user ${username}?`
-        )
-      )
-    )
-      return;
-    try {
-      await userManagementAPI.resumeUser(username);
-      toast.success(
-        t(
-          "dashboard.users.resumeSuccess",
-          `User ${username} resumed successfully.`
-        )
-      );
-      fetchAll(); // Refresh the user list
-    } catch (error: any) {
-      toast.error(
-        error?.response?.data?.error ||
-          t("dashboard.users.resumeError", `Failed to resume user ${username}.`)
-      );
-    }
+  const handleResumeUser = (username: string) => {
+    setConfirmState({
+      open: true,
+      title: t("dashboard.users.resumeConfirmTitle", "Resume User"),
+      description: t("dashboard.users.resumeConfirm", `Are you sure you want to resume user ${username}?`),
+      onConfirm: async () => {
+        try {
+          await userManagementAPI.resumeUser(username);
+          toast.success(t("dashboard.users.resumeSuccess", `User ${username} resumed successfully.`));
+          fetchAll();
+        } catch (error: any) {
+          toast.error(error?.response?.data?.error || t("dashboard.users.resumeError", `Failed to resume user ${username}.`));
+        }
+      },
+    });
   };
 
   const fetchAll = useCallback(async () => {
     setLoading(true);
     try {
-      const [u, d] = await Promise.all([
-        userManagementAPI.list(),
-        departmentAPI.list(),
-      ]);
+      const [u, d] = await Promise.all([userManagementAPI.list(), departmentAPI.list()]);
       setUsers(u);
       setDepts(d);
     } catch {
@@ -147,7 +157,7 @@ export default function UsersPage() {
     } finally {
       setLoading(false);
     }
-  }, [t]); // Added t
+  }, [t]);
 
   useEffect(() => {
     fetchAll();
@@ -157,9 +167,7 @@ export default function UsersPage() {
     try {
       const data = await openvpnAPI.getClientConfig(username, os);
       const config = data.config;
-      const blob = new Blob([config], {
-        type: "application/x-openvpn-profile",
-      });
+      const blob = new Blob([config], { type: "application/x-openvpn-profile" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -182,53 +190,40 @@ export default function UsersPage() {
     }
     try {
       const payload: UserUpdateRequest = { ...addUserForm };
-      if (
-        !(
-          currentUser?.role === UserRole.ADMIN ||
-          currentUser?.role === UserRole.SUPERADMIN
-        ) &&
-        (payload.fixedIp || payload.subnet)
-      ) {
-        // Non-admins cannot set fixed IP or subnet on creation, clear them if set by mistake in form state
+      if (!(currentUser?.role === UserRole.ADMIN || currentUser?.role === UserRole.SUPERADMIN) && (payload.fixedIp || payload.subnet)) {
         payload.fixedIp = "";
         payload.subnet = "";
       }
-      // Ensure departmentId is set if manager is creating user
       if (currentUser?.role === UserRole.MANAGER && !payload.departmentId) {
         payload.departmentId = currentUser.departmentId || "";
       }
-
-      // If fixedIp is empty string, set it to null
-      if (payload.fixedIp === "") {
-        payload.fixedIp = null;
-      }
-      // If subnet is empty string, set it to null
-      if (payload.subnet === "") {
-        payload.subnet = null;
-      }
-
-      await userManagementAPI.create(
-        payload as Partial<AdminUser> & { password: string }
-      );
+      if (payload.fixedIp === "") payload.fixedIp = null;
+      if (payload.subnet === "") payload.subnet = null;
+      await userManagementAPI.create(payload as Partial<AdminUser> & { password: string });
       toast.success(t("dashboard.users.createSuccess"));
       setAddUserDialogOpen(false);
       fetchAll();
     } catch (error: any) {
-      toast.error(
-        error?.response?.data?.error || t("dashboard.users.createError")
-      );
+      toast.error(error?.response?.data?.error || t("dashboard.users.createError"));
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm(t("dashboard.users.deleteConfirm"))) return;
-    try {
-      await userManagementAPI.delete(id);
-      toast.success(t("dashboard.users.deleteSuccess"));
-      fetchAll();
-    } catch {
-      toast.error(t("dashboard.users.deleteError"));
-    }
+  const handleDelete = (id: string) => {
+    setConfirmState({
+      open: true,
+      title: t("dashboard.users.deleteConfirmTitle", "Delete User"),
+      description: t("dashboard.users.deleteConfirm"),
+      destructive: true,
+      onConfirm: async () => {
+        try {
+          await userManagementAPI.delete(id);
+          toast.success(t("dashboard.users.deleteSuccess"));
+          fetchAll();
+        } catch {
+          toast.error(t("dashboard.users.deleteError"));
+        }
+      },
+    });
   };
 
   const handleEditClick = (userToEdit: AdminUser) => {
@@ -247,51 +242,26 @@ export default function UsersPage() {
 
   const handleUpdateUser = async () => {
     if (!editingUser) return;
-
     const updatePayload: UserUpdateRequest = { ...editForm };
-
-    if (!updatePayload.password?.trim()) {
-      delete updatePayload.password;
-    }
-
-    if (
-      !(
-        currentUser?.role === UserRole.ADMIN ||
-        currentUser?.role === UserRole.SUPERADMIN
-      )
-    ) {
-      // If user is not admin/superadmin, don't send fixedIp or subnet
+    if (!updatePayload.password?.trim()) delete updatePayload.password;
+    if (!(currentUser?.role === UserRole.ADMIN || currentUser?.role === UserRole.SUPERADMIN)) {
       delete updatePayload.fixedIp;
       delete updatePayload.subnet;
     } else {
-      // If fixedIp is empty string, set it to null
-      if (updatePayload.fixedIp === "") {
-        updatePayload.fixedIp = null;
-      }
-      // If subnet is empty string, set it to null
-      if (updatePayload.subnet === "") {
-        updatePayload.subnet = null;
-      }
+      if (updatePayload.fixedIp === "") updatePayload.fixedIp = null;
+      if (updatePayload.subnet === "") updatePayload.subnet = null;
     }
-
     try {
       await userManagementAPI.update(editingUser.id, updatePayload);
-      toast.success(
-        t("dashboard.users.editUserSuccess", "User updated successfully!")
-      );
+      toast.success(t("dashboard.users.editUserSuccess", "User updated successfully!"));
       setEditUserDialogOpen(false);
       fetchAll();
     } catch (error: any) {
-      toast.error(
-        error?.response?.data?.error ||
-          t("dashboard.users.editUserError", "Failed to update user.")
-      );
+      toast.error(error?.response?.data?.error || t("dashboard.users.editUserError", "Failed to update user."));
     }
   };
 
-  const canEditFixedIp =
-    currentUser?.role === UserRole.ADMIN ||
-    currentUser?.role === UserRole.SUPERADMIN;
+  const canEditFixedIp = currentUser?.role === UserRole.ADMIN || currentUser?.role === UserRole.SUPERADMIN;
   const canManageUsers =
     currentUser?.role === UserRole.ADMIN ||
     currentUser?.role === UserRole.SUPERADMIN ||
@@ -308,9 +278,7 @@ export default function UsersPage() {
     const total = users.length;
     const online = users.filter((u) => u.isOnline).length;
     const paused = users.filter((u) => u.isPaused).length;
-    const totalTraffic = users.reduce((sum, u) => {
-      return sum + (u.bytesReceived || 0) + (u.bytesSent || 0);
-    }, 0);
+    const totalTraffic = users.reduce((sum, u) => sum + (u.bytesReceived || 0) + (u.bytesSent || 0), 0);
     return { total, online, paused, totalTraffic };
   }, [users]);
 
@@ -331,23 +299,13 @@ export default function UsersPage() {
           statusFilter === "all" ||
           (statusFilter === "paused" && user.isPaused) ||
           (statusFilter === "online" && !user.isPaused && user.isOnline) ||
-          (statusFilter === "offline" &&
-            !user.isPaused &&
-            user.isOnline === false);
+          (statusFilter === "offline" && !user.isPaused && user.isOnline === false);
         return matchesSearch && matchesDepartment && matchesStatus;
       })
       .sort((a, b) => (a.name || "").localeCompare(b.name || ""));
-  }, [
-    users,
-    normalizedSearch,
-    departmentFilter,
-    statusFilter,
-  ]);
+  }, [users, normalizedSearch, departmentFilter, statusFilter]);
 
-  const hasFilters =
-    normalizedSearch.length > 0 ||
-    departmentFilter !== "all" ||
-    statusFilter !== "all";
+  const hasFilters = normalizedSearch.length > 0 || departmentFilter !== "all" || statusFilter !== "all";
 
   const handleClearFilters = () => {
     setSearchTerm("");
@@ -355,8 +313,21 @@ export default function UsersPage() {
     setStatusFilter("all");
   };
 
-  // ── TanStack React Table ────────────────────────────────────────────
   const [sorting, setSorting] = useState<SortingState>([]);
+  const [pagination, setPagination] = useState<PaginationState>({ pageIndex: 0, pageSize: 25 });
+
+  const DownloadSelect = ({ username, size = "sm" }: { username: string; size?: "sm" | "xs" }) => (
+    <Select value="" onValueChange={(val) => handleDownload(username, val)}>
+      <SelectTrigger className={size === "xs" ? "h-7 w-20 text-xs" : "h-8 w-20 text-xs"}>
+        <SelectValue placeholder={t("dashboard.users.downloadConfigButtonShort", "DL Cfg")} />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="windows">{t("dashboard.users.osWindows")}</SelectItem>
+        <SelectItem value="macos">{t("dashboard.users.osMacOS")}</SelectItem>
+        <SelectItem value="linux">{t("dashboard.users.osLinux")}</SelectItem>
+      </SelectContent>
+    </Select>
+  );
 
   const columns = useMemo<ColumnDef<AdminUser>[]>(
     () => [
@@ -373,12 +344,9 @@ export default function UsersPage() {
         accessorKey: "role",
         header: () => t("dashboard.users.columnRole"),
         cell: ({ row }) => (
-          <Chip
-            label={t(`dashboard.users.role${row.original.role.charAt(0).toUpperCase() + row.original.role.slice(1)}`, row.original.role)}
-            size="small"
-            color="default"
-            sx={{ textTransform: "capitalize" }}
-          />
+          <Badge variant="secondary" className="capitalize">
+            {t(`dashboard.users.role${row.original.role.charAt(0).toUpperCase() + row.original.role.slice(1)}`, row.original.role)}
+          </Badge>
         ),
       },
       {
@@ -422,11 +390,9 @@ export default function UsersPage() {
         header: () => t("dashboard.users.columnOnlineStatus"),
         cell: ({ row }) =>
           typeof row.original.isOnline === "boolean" ? (
-            <Chip
-              label={row.original.isOnline ? t("dashboard.users.statusOnline") : t("dashboard.users.statusOffline")}
-              color={row.original.isOnline ? "success" : "default"}
-              size="small"
-            />
+            <Badge variant={row.original.isOnline ? "success" : "secondary"}>
+              {row.original.isOnline ? t("dashboard.users.statusOnline") : t("dashboard.users.statusOffline")}
+            </Badge>
           ) : (
             t("common.na")
           ),
@@ -435,11 +401,9 @@ export default function UsersPage() {
         accessorKey: "isPaused",
         header: () => t("dashboard.users.columnAccessState", "Access State"),
         cell: ({ row }) => (
-          <Chip
-            label={row.original.isPaused ? t("dashboard.users.statusPaused", "Paused") : t("dashboard.users.statusActive", "Active")}
-            color={row.original.isPaused ? "error" : "success"}
-            size="small"
-          />
+          <Badge variant={row.original.isPaused ? "destructive" : "success"}>
+            {row.original.isPaused ? t("dashboard.users.statusPaused", "Paused") : t("dashboard.users.statusActive", "Active")}
+          </Badge>
         ),
       },
       {
@@ -461,43 +425,31 @@ export default function UsersPage() {
             <div className="flex flex-wrap items-center justify-center gap-1">
               {canManageUsers && (
                 u.isPaused ? (
-                  <MuiButton size="small" variant="outlined" sx={{ height: 32, px: 1, minWidth: "auto" }} onClick={() => handleResumeUser(u.name)}>
+                  <Button size="sm" variant="outline" className="h-8 px-2" onClick={() => handleResumeUser(u.name)}>
                     {t("dashboard.users.resumeButton", "Resume")}
-                  </MuiButton>
+                  </Button>
                 ) : (
-                  <MuiButton size="small" variant="outlined" sx={{ height: 32, px: 1, minWidth: "auto" }} onClick={() => handlePauseUser(u.name)}>
+                  <Button size="sm" variant="outline" className="h-8 px-2" onClick={() => handlePauseUser(u.name)}>
                     {t("dashboard.users.pauseButton", "Pause")}
-                  </MuiButton>
+                  </Button>
                 )
               )}
               {(currentUser?.role === UserRole.ADMIN ||
                 currentUser?.role === UserRole.SUPERADMIN ||
                 (currentUser?.role === UserRole.MANAGER && currentUser.departmentId === u.departmentId)) && (
-                <MuiButton size="small" variant="outlined" sx={{ height: 32, px: 1, minWidth: "auto" }} onClick={() => handleEditClick(u)}>
+                <Button size="sm" variant="outline" className="h-8 px-2" onClick={() => handleEditClick(u)}>
                   {t("common.edit")}
-                </MuiButton>
+                </Button>
               )}
               {(currentUser?.role === UserRole.SUPERADMIN ||
                 (currentUser?.role === UserRole.ADMIN && u.role !== UserRole.SUPERADMIN) ||
                 (currentUser?.role === UserRole.MANAGER && u.departmentId === currentUser.departmentId && u.role !== UserRole.SUPERADMIN && u.role !== UserRole.ADMIN)) &&
                 u.id !== currentUser?.id && (
-                  <MuiButton size="small" variant="contained" color="error" sx={{ height: 32, px: 1, minWidth: "auto" }} onClick={() => handleDelete(u.id)}>
+                  <Button size="sm" variant="destructive" className="h-8 px-2" onClick={() => handleDelete(u.id)}>
                     {t("dashboard.users.deleteButton")}
-                  </MuiButton>
+                  </Button>
                 )}
-              <FormControl size="small" sx={{ minWidth: 80 }}>
-                <MuiSelect
-                  displayEmpty
-                  value=""
-                  onChange={(e) => handleDownload(u.name, e.target.value)}
-                  sx={{ height: 32, fontSize: "0.8rem" }}
-                  renderValue={() => t("dashboard.users.downloadConfigButtonShort", "DL Cfg")}
-                >
-                  <MenuItem value="windows">{t("dashboard.users.osWindows")}</MenuItem>
-                  <MenuItem value="macos">{t("dashboard.users.osMacOS")}</MenuItem>
-                  <MenuItem value="linux">{t("dashboard.users.osLinux")}</MenuItem>
-                </MuiSelect>
-              </FormControl>
+              <DownloadSelect username={u.name} />
             </div>
           );
         },
@@ -507,444 +459,404 @@ export default function UsersPage() {
     [t, departmentNameById, canManageUsers, currentUser, users]
   );
 
+  useEffect(() => {
+    setPagination((p) => ({ ...p, pageIndex: 0 }));
+  }, [filteredUsers.length]);
+
   const table = useReactTable({
     data: filteredUsers,
     columns,
-    state: { sorting },
+    state: { sorting, pagination },
     onSortingChange: setSorting,
+    onPaginationChange: setPagination,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    manualPagination: false,
   });
+
+  // ── Regular-user self view ─────────────────────────────────────────────
+  if (currentUser?.role === UserRole.USER) {
+    const me = users[0];
+    return (
+      <MainLayout className="p-4 space-y-6">
+        <h1 className="text-2xl font-bold">{t("dashboard.users.pageTitle")}</h1>
+
+        {loading || !me ? (
+          <p>{t("common.loading")}</p>
+        ) : (
+          <>
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">{t("dashboard.users.namePlaceholder")}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-2xl font-semibold">{me.name}</p>
+                  <p className="text-sm text-muted-foreground">{me.email}</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">{t("dashboard.users.columnOnlineStatus")}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-2xl font-semibold">
+                    {me.isOnline ? t("dashboard.users.statusOnline") : t("dashboard.users.statusOffline")}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {me.lastConnectionTime ? new Date(me.lastConnectionTime).toLocaleString() : t("common.na")}
+                  </p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">VPN IP</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-2xl font-semibold">{me.allocatedVpnIp || t("common.na")}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {t("dashboard.users.columnConnectionIp", "Connection IP")}: {me.connectionIp || t("common.na")}
+                  </p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">{t("dashboard.users.statsTraffic")}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-2xl font-semibold">{formatBytes((me.bytesReceived || 0) + (me.bytesSent || 0), 1)}</p>
+                  <p className="text-sm text-muted-foreground">↓ {formatBytes(me.bytesReceived)} · ↑ {formatBytes(me.bytesSent)}</p>
+                </CardContent>
+              </Card>
+            </div>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("dashboard.users.downloadConfigButton")}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-wrap gap-3">
+                  {(["windows", "macos", "linux"] as const).map((os) => (
+                    <Button key={os} size="lg" onClick={() => handleDownload(me.name, os)}>
+                      {os === "windows" ? (
+                        <svg className="mr-2" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-13.051-1.8"/></svg>
+                      ) : os === "macos" ? (
+                        <svg className="mr-2" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/></svg>
+                      ) : (
+                        <svg className="mr-2" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12.504 0c-.155 0-.315.008-.48.021-4.226.333-3.105 4.807-3.17 6.298-.076 1.092-.3 1.953-1.05 3.02-.885 1.051-2.127 2.75-2.716 4.521-.278.832-.41 1.684-.287 2.489a5.745 5.745 0 00.762 2.211c1.083 1.67 3.045 2.89 5.266 3.259.073.014.147.024.22.034.111.017.218.03.327.043a12.1 12.1 0 001.17.082c4.886 0 9.23-2.879 10.342-6.717.8-2.772-.267-5.774-2.887-7.664 1.005 2.3.474 4.85-.98 5.822-1.477.983-3.218.37-4.296-.854a9.387 9.387 0 01-.725-1.05 9.08 9.08 0 01-.638-1.491c-.304-.908-.39-1.933-.188-2.9C14.26 1.32 13.578 0 12.504 0zM7.03 4.282c-.53.197-.97.508-1.298.916C4.9 6.22 4.38 7.64 4.38 8.998c0 2.35 1.193 4.432 2.918 5.633-.197-.63-.267-1.29-.209-1.94-.35-.4-.648-.843-.875-1.33C5.793 10.39 5.615 9.24 5.85 8.127c.17-.816.512-1.59 1.01-2.244C7.11 5.6 7.36 5.2 7.03 4.282z"/></svg>
+                      )}
+                      {os === "windows" ? t("dashboard.users.osWindows") : os === "macos" ? t("dashboard.users.osMacOS") : t("dashboard.users.osLinux")}
+                    </Button>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </>
+        )}
+      </MainLayout>
+    );
+  }
 
   return (
     <MainLayout className="p-4 space-y-6">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <h1 className="text-2xl font-bold">{t("dashboard.users.pageTitle")}</h1>
         {canManageUsers && (
-          <MuiButton
-            variant="contained"
+          <Button
             onClick={() => {
               let initialDeptId = "";
-              let initialRole = UserRole.USER;
+              const initialRole = UserRole.USER;
               if (currentUser?.role === UserRole.MANAGER) {
                 initialDeptId = currentUser.departmentId || "";
-                // Managers can only create users
               }
-              setAddUserForm({
-                name: "",
-                email: "",
-                password: "",
-                role: initialRole,
-                departmentId: initialDeptId,
-                fixedIp: "",
-                subnet: "", // Initialize with empty string
-              });
+              setAddUserForm({ name: "", email: "", password: "", role: initialRole, departmentId: initialDeptId, fixedIp: "", subnet: "" });
               setAddUserDialogOpen(true);
             }}
           >
             {t("dashboard.users.addUserButton")}
-          </MuiButton>
+          </Button>
         )}
       </div>
 
       {/* Add User Dialog */}
-      <MuiDialog open={addUserDialogOpen} onClose={() => setAddUserDialogOpen(false)}>
-        <DialogTitle>
-          {t("dashboard.users.addUserDialogTitle")}
-        </DialogTitle>
-        <DialogContent>
+      <Dialog open={addUserDialogOpen} onOpenChange={setAddUserDialogOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>{t("dashboard.users.addUserDialogTitle")}</DialogTitle>
+          </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="grid grid-cols-4 items-center gap-4">
               <span className="text-right text-sm font-medium">{t("dashboard.users.namePlaceholder")}</span>
-              <TextField
-                size="small"
-                value={addUserForm.name}
-                onChange={(e) => setAddUserForm({ ...addUserForm, name: e.target.value })}
-                className="col-span-3"
-                fullWidth
-                sx={{ gridColumn: "span 3" }}
-              />
+              <div className="col-span-3">
+                <Input value={addUserForm.name} onChange={(e) => setAddUserForm({ ...addUserForm, name: e.target.value })} />
+              </div>
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <span className="text-right text-sm font-medium">{t("dashboard.users.emailPlaceholder")}</span>
-              <TextField
-                size="small"
-                type="email"
-                value={addUserForm.email}
-                onChange={(e) => setAddUserForm({ ...addUserForm, email: e.target.value })}
-                fullWidth
-                sx={{ gridColumn: "span 3" }}
-              />
+              <div className="col-span-3">
+                <Input type="email" value={addUserForm.email} onChange={(e) => setAddUserForm({ ...addUserForm, email: e.target.value })} />
+              </div>
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <span className="text-right text-sm font-medium">{t("dashboard.users.passwordPlaceholder")}</span>
-              <TextField
-                size="small"
-                type="password"
-                value={addUserForm.password}
-                onChange={(e) => setAddUserForm({ ...addUserForm, password: e.target.value })}
-                fullWidth
-                sx={{ gridColumn: "span 3" }}
-              />
+              <div className="col-span-3">
+                <Input type="password" value={addUserForm.password} onChange={(e) => setAddUserForm({ ...addUserForm, password: e.target.value })} />
+              </div>
             </div>
-
             {canEditFixedIp && (
               <>
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <span className="text-right text-sm font-medium">
-                    {t("dashboard.users.fixedIpLabel", "Fixed VPN IP (Optional)")}
-                  </span>
-                  <TextField
-                    size="small"
-                    value={addUserForm.fixedIp || ""}
-                    onChange={(e) => setAddUserForm({ ...addUserForm, fixedIp: e.target.value })}
-                    placeholder={t("dashboard.users.fixedIpPlaceholder", "e.g., 10.8.0.100 or empty")}
-                    fullWidth
-                    sx={{ gridColumn: "span 3" }}
-                  />
+                  <span className="text-right text-sm font-medium">{t("dashboard.users.fixedIpLabel", "Fixed VPN IP (Optional)")}</span>
+                  <div className="col-span-3">
+                    <Input value={addUserForm.fixedIp || ""} onChange={(e) => setAddUserForm({ ...addUserForm, fixedIp: e.target.value })} placeholder={t("dashboard.users.fixedIpPlaceholder", "e.g., 10.8.0.100 or empty")} />
+                  </div>
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <span className="text-right text-sm font-medium">
-                    {t("dashboard.users.subnetLabel", "Subnet (Optional)")}
-                  </span>
-                  <TextField
-                    size="small"
-                    value={addUserForm.subnet || ""}
-                    onChange={(e) => setAddUserForm({ ...addUserForm, subnet: e.target.value })}
-                    placeholder={t("dashboard.users.subnetPlaceholder", "e.g., 10.10.120.0/23 or empty")}
-                    fullWidth
-                    sx={{ gridColumn: "span 3" }}
-                  />
+                  <span className="text-right text-sm font-medium">{t("dashboard.users.subnetLabel", "Subnet (Optional)")}</span>
+                  <div className="col-span-3">
+                    <Input value={addUserForm.subnet || ""} onChange={(e) => setAddUserForm({ ...addUserForm, subnet: e.target.value })} placeholder={t("dashboard.users.subnetPlaceholder", "e.g., 10.10.120.0/23 or empty")} />
+                  </div>
                 </div>
               </>
             )}
-
             <div className="grid grid-cols-4 items-center gap-4">
               <span className="text-right text-sm font-medium">{t("dashboard.users.roleLabel", "Role")}</span>
-              <FormControl size="small" sx={{ gridColumn: "span 3", width: "100%" }}>
-                <InputLabel>{t("dashboard.users.roleLabel", "Role")}</InputLabel>
-                <MuiSelect
+              <div className="col-span-3">
+                <Select
                   value={addUserForm.role}
-                  label={t("dashboard.users.roleLabel", "Role")}
-                  onChange={(e) => setAddUserForm({ ...addUserForm, role: e.target.value as UserRole })}
+                  onValueChange={(val) => setAddUserForm({ ...addUserForm, role: val as UserRole })}
                   disabled={currentUser?.role === UserRole.MANAGER}
                 >
-                  {Object.values(UserRole)
-                    .filter(
-                      (role) =>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder={t("dashboard.users.roleLabel", "Role")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.values(UserRole)
+                      .filter((role) =>
                         currentUser?.role === UserRole.SUPERADMIN ||
                         (currentUser?.role === UserRole.ADMIN && role !== UserRole.SUPERADMIN) ||
                         (currentUser?.role === UserRole.MANAGER && role === UserRole.USER)
-                    )
-                    .map((role) => (
-                      <MenuItem key={role} value={role}>
-                        {t(`dashboard.users.role${role.charAt(0).toUpperCase() + role.slice(1)}`, role)}
-                      </MenuItem>
-                    ))}
-                </MuiSelect>
-              </FormControl>
+                      )
+                      .map((role) => (
+                        <SelectItem key={role} value={role}>
+                          {t(`dashboard.users.role${role.charAt(0).toUpperCase() + role.slice(1)}`, role)}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-
             <div className="grid grid-cols-4 items-center gap-4">
               <span className="text-right text-sm font-medium">{t("dashboard.users.departmentLabel")}</span>
-              <FormControl size="small" sx={{ gridColumn: "span 3", width: "100%" }}>
-                <InputLabel>{t("dashboard.users.selectDepartmentPlaceholder")}</InputLabel>
-                <MuiSelect
-                  value={addUserForm.departmentId || ""}
-                  label={t("dashboard.users.selectDepartmentPlaceholder")}
-                  onChange={(e) => setAddUserForm({ ...addUserForm, departmentId: e.target.value })}
+              <div className="col-span-3">
+                <Select
+                  value={addUserForm.departmentId || "__none__"}
+                  onValueChange={(val) => setAddUserForm({ ...addUserForm, departmentId: val === "__none__" ? "" : val })}
                   disabled={currentUser?.role === UserRole.MANAGER && !!currentUser.departmentId}
                 >
-                  <MenuItem value="">
-                    {t("dashboard.users.selectDepartmentPlaceholder")}
-                  </MenuItem>
-                  {depts.map((d) => (
-                    <MenuItem key={d.id} value={d.id}>
-                      {d.name}
-                    </MenuItem>
-                  ))}
-                </MuiSelect>
-              </FormControl>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder={t("dashboard.users.selectDepartmentPlaceholder")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">{t("dashboard.users.selectDepartmentPlaceholder")}</SelectItem>
+                    {depts.map((d) => (
+                      <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAddUserDialogOpen(false)}>{t("common.cancel")}</Button>
+            <Button onClick={handleCreateUser}>{t("common.create")}</Button>
+          </DialogFooter>
         </DialogContent>
-        <DialogActions>
-          <MuiButton variant="outlined" onClick={() => setAddUserDialogOpen(false)}>{t("common.cancel")}</MuiButton>
-          <MuiButton variant="contained" onClick={handleCreateUser}>{t("common.create")}</MuiButton>
-        </DialogActions>
-      </MuiDialog>
+      </Dialog>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              {t("dashboard.users.statsTotalUsers")}
-            </CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">{t("dashboard.users.statsTotalUsers")}</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-semibold">{stats.total}</p>
-            <p className="text-sm text-muted-foreground">
-              {t("dashboard.users.statsTotalUsersHint", {
-                count: stats.total,
-              })}
-            </p>
+            <p className="text-sm text-muted-foreground">{t("dashboard.users.statsTotalUsersHint", { count: stats.total })}</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              {t("dashboard.users.statsOnline")}
-            </CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">{t("dashboard.users.statsOnline")}</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-semibold">{stats.online}</p>
-            <p className="text-sm text-muted-foreground">
-              {t("dashboard.users.statsOnlineHint", {
-                count: stats.online,
-              })}
-            </p>
+            <p className="text-sm text-muted-foreground">{t("dashboard.users.statsOnlineHint", { count: stats.online })}</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              {t("dashboard.users.statsPaused")}
-            </CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">{t("dashboard.users.statsPaused")}</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-semibold">{stats.paused}</p>
-            <p className="text-sm text-muted-foreground">
-              {t("dashboard.users.statsPausedHint", {
-                count: stats.paused,
-              })}
-            </p>
+            <p className="text-sm text-muted-foreground">{t("dashboard.users.statsPausedHint", { count: stats.paused })}</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              {t("dashboard.users.statsTraffic")}
-            </CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">{t("dashboard.users.statsTraffic")}</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-semibold">
-              {formatBytes(stats.totalTraffic, 1)}
-            </p>
-            <p className="text-sm text-muted-foreground">
-              {t("dashboard.users.statsTrafficHint")}
-            </p>
+            <p className="text-3xl font-semibold">{formatBytes(stats.totalTraffic, 1)}</p>
+            <p className="text-sm text-muted-foreground">{t("dashboard.users.statsTrafficHint")}</p>
           </CardContent>
         </Card>
       </div>
 
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div className="grid w-full gap-3 md:grid-cols-2 xl:grid-cols-4 xl:max-w-4xl">
-          <div className="flex flex-col gap-1">
-            <TextField
-              label={t("dashboard.users.searchLabel", "Search")}
-              size="small"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder={t("dashboard.users.searchPlaceholder", "Search by name or email")}
-              fullWidth
-            />
-          </div>
-          <div className="flex flex-col gap-1">
-            <FormControl size="small" fullWidth>
-              <InputLabel>{t("dashboard.users.departmentFilterLabel")}</InputLabel>
-              <MuiSelect
-                value={departmentFilter}
-                label={t("dashboard.users.departmentFilterLabel")}
-                onChange={(e) => setDepartmentFilter(e.target.value)}
-              >
-                <MenuItem value="all">{t("dashboard.users.filterDepartmentAll")}</MenuItem>
-                <MenuItem value="none">{t("dashboard.users.filterDepartmentNone")}</MenuItem>
-                {depts.map((d) => (
-                  <MenuItem key={d.id} value={d.id}>
-                    {d.name}
-                  </MenuItem>
-                ))}
-              </MuiSelect>
-            </FormControl>
-          </div>
-          <div className="flex flex-col gap-1">
-            <FormControl size="small" fullWidth>
-              <InputLabel>{t("dashboard.users.statusFilterLabel")}</InputLabel>
-              <MuiSelect
-                value={statusFilter}
-                label={t("dashboard.users.statusFilterLabel")}
-                onChange={(e) => setStatusFilter(e.target.value)}
-              >
-                <MenuItem value="all">{t("dashboard.users.filterStatusAll")}</MenuItem>
-                <MenuItem value="online">{t("dashboard.users.filterStatusOnline")}</MenuItem>
-                <MenuItem value="offline">{t("dashboard.users.filterStatusOffline")}</MenuItem>
-                <MenuItem value="paused">{t("dashboard.users.filterStatusPaused")}</MenuItem>
-              </MuiSelect>
-            </FormControl>
-          </div>
+          <Input
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder={t("dashboard.users.searchPlaceholder", "Search by name or email")}
+          />
+          <Select value={departmentFilter} onValueChange={setDepartmentFilter}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder={t("dashboard.users.departmentFilterLabel")} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t("dashboard.users.filterDepartmentAll")}</SelectItem>
+              <SelectItem value="none">{t("dashboard.users.filterDepartmentNone")}</SelectItem>
+              {depts.map((d) => (
+                <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder={t("dashboard.users.statusFilterLabel")} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t("dashboard.users.filterStatusAll")}</SelectItem>
+              <SelectItem value="online">{t("dashboard.users.filterStatusOnline")}</SelectItem>
+              <SelectItem value="offline">{t("dashboard.users.filterStatusOffline")}</SelectItem>
+              <SelectItem value="paused">{t("dashboard.users.filterStatusPaused")}</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         {hasFilters && (
-          <MuiButton
-            variant="text"
-            className="self-start lg:self-auto"
-            onClick={handleClearFilters}
-          >
+          <Button variant="ghost" className="self-start lg:self-auto" onClick={handleClearFilters}>
             {t("common.clearFilters", "Clear filters")}
-          </MuiButton>
+          </Button>
         )}
       </div>
 
       <div className="flex items-center justify-between text-sm text-muted-foreground">
-        <span>
-          {t("dashboard.users.resultsSummary", {
-            count: filteredUsers.length,
-            total: users.length,
-          })}
-        </span>
+        <span>{t("dashboard.users.resultsSummary", { count: filteredUsers.length, total: users.length })}</span>
       </div>
 
       {/* Edit User Dialog */}
-      <MuiDialog open={editUserDialogOpen} onClose={() => setEditUserDialogOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>
-          {t("dashboard.users.editUserDialogTitle", "Edit User")}
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText sx={{ mb: 2 }}>
-            {t(
-              "dashboard.users.editUserDescription",
-              "Make changes to the user profile here. Click save when you're done."
-            )}
-          </DialogContentText>
+      <Dialog open={editUserDialogOpen} onOpenChange={setEditUserDialogOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>{t("dashboard.users.editUserDialogTitle", "Edit User")}</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">
+            {t("dashboard.users.editUserDescription", "Make changes to the user profile here. Click save when you're done.")}
+          </p>
           <div className="grid gap-4 py-2">
             <div className="grid grid-cols-4 items-center gap-4">
               <span className="text-right text-sm font-medium">{t("dashboard.users.namePlaceholder")}</span>
-              <TextField
-                size="small"
-                value={editForm.name || ""}
-                onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                fullWidth
-                sx={{ gridColumn: "span 3" }}
-              />
+              <div className="col-span-3">
+                <Input value={editForm.name || ""} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} />
+              </div>
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <span className="text-right text-sm font-medium">{t("dashboard.users.emailPlaceholder")}</span>
-              <TextField
-                size="small"
-                type="email"
-                value={editForm.email || ""}
-                onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
-                fullWidth
-                sx={{ gridColumn: "span 3" }}
-              />
+              <div className="col-span-3">
+                <Input type="email" value={editForm.email || ""} onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} />
+              </div>
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <span className="text-right text-sm font-medium">
-                {t("dashboard.users.passwordOptionalPlaceholder", "Password (optional)")}
-              </span>
-              <TextField
-                size="small"
-                type="password"
-                value={editForm.password || ""}
-                onChange={(e) => setEditForm({ ...editForm, password: e.target.value })}
-                fullWidth
-                placeholder={t("dashboard.users.passwordLeaveBlankPlaceholder", "Leave blank to keep current")}
-                sx={{ gridColumn: "span 3" }}
-              />
+              <span className="text-right text-sm font-medium">{t("dashboard.users.passwordOptionalPlaceholder", "Password (optional)")}</span>
+              <div className="col-span-3">
+                <Input type="password" value={editForm.password || ""} onChange={(e) => setEditForm({ ...editForm, password: e.target.value })} placeholder={t("dashboard.users.passwordLeaveBlankPlaceholder", "Leave blank to keep current")} />
+              </div>
             </div>
-
             {canEditFixedIp && (
               <>
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <span className="text-right text-sm font-medium">
-                    {t("dashboard.users.fixedIpLabel", "Fixed VPN IP (Optional)")}
-                  </span>
-                  <TextField
-                    size="small"
-                    value={editForm.fixedIp || ""}
-                    onChange={(e) => setEditForm({ ...editForm, fixedIp: e.target.value })}
-                    placeholder={t("dashboard.users.fixedIpPlaceholder", "e.g., 10.8.0.100 or empty")}
-                    fullWidth
-                    sx={{ gridColumn: "span 3" }}
-                  />
+                  <span className="text-right text-sm font-medium">{t("dashboard.users.fixedIpLabel", "Fixed VPN IP (Optional)")}</span>
+                  <div className="col-span-3">
+                    <Input value={editForm.fixedIp || ""} onChange={(e) => setEditForm({ ...editForm, fixedIp: e.target.value })} placeholder={t("dashboard.users.fixedIpPlaceholder", "e.g., 10.8.0.100 or empty")} />
+                  </div>
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <span className="text-right text-sm font-medium">
-                    {t("dashboard.users.subnetLabel", "Subnet (Optional)")}
-                  </span>
-                  <TextField
-                    size="small"
-                    value={editForm.subnet || ""}
-                    onChange={(e) => setEditForm({ ...editForm, subnet: e.target.value })}
-                    placeholder={t("dashboard.users.subnetPlaceholder", "e.g., 10.10.120.0/23 or empty")}
-                    fullWidth
-                    sx={{ gridColumn: "span 3" }}
-                  />
+                  <span className="text-right text-sm font-medium">{t("dashboard.users.subnetLabel", "Subnet (Optional)")}</span>
+                  <div className="col-span-3">
+                    <Input value={editForm.subnet || ""} onChange={(e) => setEditForm({ ...editForm, subnet: e.target.value })} placeholder={t("dashboard.users.subnetPlaceholder", "e.g., 10.10.120.0/23 or empty")} />
+                  </div>
                 </div>
               </>
             )}
             <div className="grid grid-cols-4 items-center gap-4">
               <span className="text-right text-sm font-medium">{t("dashboard.users.departmentLabel")}</span>
-              <FormControl size="small" sx={{ gridColumn: "span 3", width: "100%" }}>
-                <InputLabel>{t("dashboard.users.selectDepartmentPlaceholder")}</InputLabel>
-                <MuiSelect
-                  value={editForm.departmentId || ""}
-                  label={t("dashboard.users.selectDepartmentPlaceholder")}
-                  onChange={(e) => setEditForm({ ...editForm, departmentId: e.target.value })}
+              <div className="col-span-3">
+                <Select
+                  value={editForm.departmentId || "__none__"}
+                  onValueChange={(val) => setEditForm({ ...editForm, departmentId: val === "__none__" ? "" : val })}
                   disabled={
                     currentUser?.role === UserRole.MANAGER &&
                     editingUser?.departmentId !== currentUser.departmentId &&
                     editingUser?.id !== currentUser.id
                   }
                 >
-                  <MenuItem value="">
-                    {t("dashboard.users.selectDepartmentPlaceholder")}
-                  </MenuItem>
-                  {depts.map((d) => (
-                    <MenuItem key={d.id} value={d.id}>
-                      {d.name}
-                    </MenuItem>
-                  ))}
-                </MuiSelect>
-              </FormControl>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder={t("dashboard.users.selectDepartmentPlaceholder")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">{t("dashboard.users.selectDepartmentPlaceholder")}</SelectItem>
+                    {depts.map((d) => (
+                      <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
             {(currentUser?.role === UserRole.SUPERADMIN ||
-              (currentUser?.role === UserRole.ADMIN &&
-                editingUser?.role !== UserRole.SUPERADMIN)) &&
-              (editingUser?.id !== currentUser?.id ||
-                currentUser?.role === UserRole.SUPERADMIN) && (
+              (currentUser?.role === UserRole.ADMIN && editingUser?.role !== UserRole.SUPERADMIN)) &&
+              (editingUser?.id !== currentUser?.id || currentUser?.role === UserRole.SUPERADMIN) && (
                 <div className="grid grid-cols-4 items-center gap-4">
                   <span className="text-right text-sm font-medium">{t("dashboard.users.roleLabel", "Role")}</span>
-                  <FormControl size="small" sx={{ gridColumn: "span 3", width: "100%" }}>
-                    <InputLabel>{t("dashboard.users.roleLabel", "Role")}</InputLabel>
-                    <MuiSelect
+                  <div className="col-span-3">
+                    <Select
                       value={editForm.role || ""}
-                      label={t("dashboard.users.roleLabel", "Role")}
-                      onChange={(e) => setEditForm({ ...editForm, role: e.target.value as UserRole })}
+                      onValueChange={(val) => setEditForm({ ...editForm, role: val as UserRole })}
                     >
-                      {Object.values(UserRole)
-                        .filter(
-                          (role) =>
-                            currentUser?.role === UserRole.SUPERADMIN ||
-                            role !== UserRole.SUPERADMIN
-                        )
-                        .map((role) => (
-                          <MenuItem key={role} value={role}>
-                            {t(`dashboard.users.role${role.charAt(0).toUpperCase() + role.slice(1)}`, role)}
-                          </MenuItem>
-                        ))}
-                    </MuiSelect>
-                  </FormControl>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder={t("dashboard.users.roleLabel", "Role")} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.values(UserRole)
+                          .filter((role) => currentUser?.role === UserRole.SUPERADMIN || role !== UserRole.SUPERADMIN)
+                          .map((role) => (
+                            <SelectItem key={role} value={role}>
+                              {t(`dashboard.users.role${role.charAt(0).toUpperCase() + role.slice(1)}`, role)}
+                            </SelectItem>
+                          ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               )}
           </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditUserDialogOpen(false)}>{t("common.cancel")}</Button>
+            <Button onClick={handleUpdateUser}>{t("common.saveChanges")}</Button>
+          </DialogFooter>
         </DialogContent>
-        <DialogActions>
-          <MuiButton variant="outlined" onClick={() => setEditUserDialogOpen(false)}>{t("common.cancel")}</MuiButton>
-          <MuiButton variant="contained" onClick={handleUpdateUser}>
-            {t("common.saveChanges")}
-          </MuiButton>
-        </DialogActions>
-      </MuiDialog>
+      </Dialog>
 
       <Card>
         <CardHeader>
@@ -953,37 +865,30 @@ export default function UsersPage() {
         <CardContent>
           {loading ? (
             <p>{t("common.loading")}</p>
-          ) : filteredUsers.length === 0 ? (
-            <p className="py-10 text-center text-muted-foreground">{t("dashboard.users.noResults")}</p>
           ) : (
             <>
               {/* ── Mobile: card list (hidden on md+) ───────────────────── */}
               <div className="md:hidden space-y-3">
-                {table.getRowModel().rows.map((row) => {
+                {table.getRowModel().rows.length === 0 ? (
+                  <p className="py-10 text-center text-muted-foreground">{t("dashboard.users.noResults")}</p>
+                ) : table.getRowModel().rows.map((row) => {
                   const u = row.original;
                   return (
                     <div key={u.id} className="border rounded-xl p-4 space-y-3 bg-card shadow-sm">
-                      {/* Header row */}
                       <div className="flex items-start justify-between gap-2">
                         <div>
                           <div className="font-semibold text-sm">{u.name}</div>
                           <div className="text-xs text-muted-foreground mt-0.5">{u.email}</div>
                         </div>
                         <div className="flex flex-col items-end gap-1 shrink-0">
-                          <Chip
-                            label={u.isOnline ? t("dashboard.users.statusOnline") : t("dashboard.users.statusOffline")}
-                            color={u.isOnline ? "success" : "default"}
-                            size="small"
-                          />
-                          <Chip
-                            label={u.isPaused ? t("dashboard.users.statusPaused", "Paused") : t("dashboard.users.statusActive", "Active")}
-                            color={u.isPaused ? "error" : "default"}
-                            variant="outlined"
-                            size="small"
-                          />
+                          <Badge variant={u.isOnline ? "success" : "secondary"}>
+                            {u.isOnline ? t("dashboard.users.statusOnline") : t("dashboard.users.statusOffline")}
+                          </Badge>
+                          <Badge variant={u.isPaused ? "destructive" : "outline"}>
+                            {u.isPaused ? t("dashboard.users.statusPaused", "Paused") : t("dashboard.users.statusActive", "Active")}
+                          </Badge>
                         </div>
                       </div>
-                      {/* Meta row */}
                       <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-muted-foreground">
                         <span><span className="font-medium text-foreground">{t("dashboard.users.columnRole")}:</span> {u.role}</span>
                         <span><span className="font-medium text-foreground">{t("dashboard.users.columnDepartment")}:</span> {u.departmentId ? departmentNameById[u.departmentId] || "-" : "-"}</span>
@@ -992,46 +897,33 @@ export default function UsersPage() {
                         <span><span className="font-medium text-foreground">↓</span> {formatBytes(u.bytesReceived)}</span>
                         <span><span className="font-medium text-foreground">↑</span> {formatBytes(u.bytesSent)}</span>
                       </div>
-                      {/* Actions */}
                       <div className="flex flex-wrap gap-2 pt-1 border-t">
                         {canManageUsers && (
                           u.isPaused ? (
-                            <MuiButton size="small" variant="outlined" sx={{ height: 28, fontSize: "0.75rem", px: 1 }} onClick={() => handleResumeUser(u.name)}>
+                            <Button size="sm" variant="outline" className="h-7 text-xs px-2" onClick={() => handleResumeUser(u.name)}>
                               {t("dashboard.users.resumeButton", "Resume")}
-                            </MuiButton>
+                            </Button>
                           ) : (
-                            <MuiButton size="small" variant="outlined" sx={{ height: 28, fontSize: "0.75rem", px: 1 }} onClick={() => handlePauseUser(u.name)}>
+                            <Button size="sm" variant="outline" className="h-7 text-xs px-2" onClick={() => handlePauseUser(u.name)}>
                               {t("dashboard.users.pauseButton", "Pause")}
-                            </MuiButton>
+                            </Button>
                           )
                         )}
                         {(currentUser?.role === UserRole.ADMIN || currentUser?.role === UserRole.SUPERADMIN ||
                           (currentUser?.role === UserRole.MANAGER && currentUser.departmentId === u.departmentId)) && (
-                          <MuiButton size="small" variant="outlined" sx={{ height: 28, fontSize: "0.75rem", px: 1 }} onClick={() => handleEditClick(u)}>
+                          <Button size="sm" variant="outline" className="h-7 text-xs px-2" onClick={() => handleEditClick(u)}>
                             {t("common.edit")}
-                          </MuiButton>
+                          </Button>
                         )}
                         {(currentUser?.role === UserRole.SUPERADMIN ||
                           (currentUser?.role === UserRole.ADMIN && u.role !== UserRole.SUPERADMIN) ||
                           (currentUser?.role === UserRole.MANAGER && u.departmentId === currentUser.departmentId && u.role !== UserRole.SUPERADMIN && u.role !== UserRole.ADMIN)) &&
                           u.id !== currentUser?.id && (
-                            <MuiButton size="small" variant="contained" color="error" sx={{ height: 28, fontSize: "0.75rem", px: 1 }} onClick={() => handleDelete(u.id)}>
+                            <Button size="sm" variant="destructive" className="h-7 text-xs px-2" onClick={() => handleDelete(u.id)}>
                               {t("dashboard.users.deleteButton")}
-                            </MuiButton>
+                            </Button>
                           )}
-                        <FormControl size="small" sx={{ minWidth: 72 }}>
-                          <MuiSelect
-                            displayEmpty
-                            value=""
-                            onChange={(e) => handleDownload(u.name, e.target.value)}
-                            sx={{ height: 28, fontSize: "0.75rem" }}
-                            renderValue={() => t("dashboard.users.downloadConfigButtonShort", "DL Cfg")}
-                          >
-                            <MenuItem value="windows">{t("dashboard.users.osWindows")}</MenuItem>
-                            <MenuItem value="macos">{t("dashboard.users.osMacOS")}</MenuItem>
-                            <MenuItem value="linux">{t("dashboard.users.osLinux")}</MenuItem>
-                          </MuiSelect>
-                        </FormControl>
+                        <DownloadSelect username={u.name} size="xs" />
                       </div>
                     </div>
                   );
@@ -1040,15 +932,15 @@ export default function UsersPage() {
 
               {/* ── Desktop: TanStack table (hidden below md) ────────────── */}
               <div className="hidden md:block overflow-x-auto">
-                <table className="w-full caption-bottom text-sm border-collapse">
-                  <thead>
+                <Table>
+                  <TableHeader>
                     {table.getHeaderGroups().map((hg) => (
-                      <tr key={hg.id} className="border-b">
+                      <TableRow key={hg.id}>
                         {hg.headers.map((header) => (
-                          <th
+                          <TableHead
                             key={header.id}
                             className={[
-                              "h-12 px-4 text-left align-middle font-medium text-muted-foreground whitespace-nowrap",
+                              "h-12 px-4 whitespace-nowrap",
                               header.column.getCanSort() ? "cursor-pointer select-none" : "",
                               header.id === "actions" ? "sticky right-0 min-w-[260px]" : "min-w-[120px]",
                             ].join(" ")}
@@ -1057,35 +949,90 @@ export default function UsersPage() {
                           >
                             {flexRender(header.column.columnDef.header, header.getContext())}
                             {header.column.getIsSorted() === "asc" ? " ↑" : header.column.getIsSorted() === "desc" ? " ↓" : ""}
-                          </th>
+                          </TableHead>
                         ))}
-                      </tr>
+                      </TableRow>
                     ))}
-                  </thead>
-                  <tbody>
-                    {table.getRowModel().rows.map((row) => (
-                      <tr key={row.id} className="border-b transition-colors hover:bg-muted/50">
+                  </TableHeader>
+                  <TableBody>
+                    {table.getRowModel().rows.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={columns.length} className="py-10 text-center text-muted-foreground">
+                          {t("dashboard.users.noResults")}
+                        </TableCell>
+                      </TableRow>
+                    ) : table.getRowModel().rows.map((row) => (
+                      <TableRow key={row.id}>
                         {row.getVisibleCells().map((cell) => (
-                          <td
+                          <TableCell
                             key={cell.id}
                             className={[
-                              "px-4 py-3 align-middle",
+                              "px-4 py-3",
                               cell.column.id === "actions" ? "sticky right-0" : "",
                             ].join(" ")}
                             style={cell.column.id === "actions" ? { backgroundColor: "hsl(var(--card))", boxShadow: "inset 10px 0 0px -9px #0505050f" } : undefined}
                           >
                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                          </td>
+                          </TableCell>
                         ))}
-                      </tr>
+                      </TableRow>
                     ))}
-                  </tbody>
-                </table>
+                  </TableBody>
+                </Table>
+              </div>
+
+              {/* ── Pagination controls ───────────────────────────────────── */}
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 border-t mt-2">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <span>{t("dashboard.users.resultsSummary", { count: table.getRowModel().rows.length, total: filteredUsers.length })}</span>
+                  <span>·</span>
+                  <Select
+                    value={String(pagination.pageSize)}
+                    onValueChange={(val) => setPagination({ pageIndex: 0, pageSize: Number(val) })}
+                  >
+                    <SelectTrigger className="h-7 w-24 text-sm">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {[10, 25, 50, 100].map((size) => (
+                        <SelectItem key={size} value={String(size)}>{size} / {t("common.page", "page")}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Button size="sm" variant="outline" className="min-w-8 px-2" disabled={!table.getCanPreviousPage()} onClick={() => table.firstPage()}>«</Button>
+                  <Button size="sm" variant="outline" className="min-w-8 px-2" disabled={!table.getCanPreviousPage()} onClick={() => table.previousPage()}>‹</Button>
+                  <span className="px-3 text-sm">{table.getState().pagination.pageIndex + 1} / {Math.max(1, table.getPageCount())}</span>
+                  <Button size="sm" variant="outline" className="min-w-8 px-2" disabled={!table.getCanNextPage()} onClick={() => table.nextPage()}>›</Button>
+                  <Button size="sm" variant="outline" className="min-w-8 px-2" disabled={!table.getCanNextPage()} onClick={() => table.lastPage()}>»</Button>
+                </div>
               </div>
             </>
           )}
         </CardContent>
       </Card>
+
+      <AlertDialog
+        open={confirmState.open}
+        onOpenChange={(o) => setConfirmState((prev) => ({ ...prev, open: o }))}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{confirmState.title}</AlertDialogTitle>
+            <AlertDialogDescription>{confirmState.description}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
+            <AlertDialogAction
+              className={confirmState.destructive ? buttonVariants({ variant: "destructive" }) : undefined}
+              onClick={() => confirmState.onConfirm()}
+            >
+              {t("common.confirm", "Confirm")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </MainLayout>
   );
 }

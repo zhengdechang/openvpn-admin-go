@@ -15,6 +15,7 @@ import {
   LiveClientConnection, // Added import for live connections
   UserUpdateRequest, // Added for user update payload
   ConfigItem, // Added for config item management
+  Notification,
 } from "@/types";
 import Cookies from "js-cookie";
 import { useUserStore } from "@/store";
@@ -356,6 +357,10 @@ export const serverAPI = {
     const response = await api.post("/api/server/restart");
     return response.data;
   },
+  getRawConfig: async (): Promise<{ config: string }> => {
+    const response = await api.get("/api/server/config/raw");
+    return unwrap<{ config: string }>(response.data);
+  },
   getConfigTemplate: async (): Promise<{ template: string }> => {
     const response = await api.get("/api/server/config/template");
     return unwrap<{ template: string }>(response.data);
@@ -688,5 +693,27 @@ export const industryAPI = {
         error: "获取企业失败",
       };
     }
+  },
+};
+
+// Notification API — superadmin only
+export const notificationAPI = {
+  list: async (): Promise<Notification[]> => {
+    const response = await api.get("/api/notifications");
+    return unwrap<Notification[]>(response.data) ?? [];
+  },
+
+  getUnreadCount: async (): Promise<number> => {
+    const response = await api.get("/api/notifications/unread-count");
+    const data = unwrap<{ count: number }>(response.data);
+    return data?.count ?? 0;
+  },
+
+  markRead: async (id: string): Promise<void> => {
+    await api.patch(`/api/notifications/${id}/read`);
+  },
+
+  markAllRead: async (): Promise<void> => {
+    await api.patch("/api/notifications/read-all");
   },
 };

@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { Save, RefreshCw } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import ConfigItemComponent from "./config-item";
-import MuiButton from "@mui/material/Button";
+import { Button } from "@/components/ui/button";
 
 export default function ConfigManager() {
   const { t, i18n } = useTranslation();
@@ -116,22 +116,23 @@ export default function ConfigManager() {
         <div className="flex items-center justify-between">
           <CardTitle>{t("dashboard.server.config.title")}</CardTitle>
           <div className="flex items-center space-x-2">
-            <MuiButton variant="outlined" onClick={handleRefresh} disabled={saving} startIcon={<RefreshCw className="h-4 w-4" />}>
+            <Button variant="outline" onClick={handleRefresh} disabled={saving} size="sm">
+              <RefreshCw className="h-4 w-4 mr-1" />
               {t("dashboard.server.config.refreshButton")}
-            </MuiButton>
-            <MuiButton
-              variant="contained"
+            </Button>
+            <Button
               onClick={handleSaveAll}
               disabled={!hasChanges || saving}
-              startIcon={<Save className="h-4 w-4" />}
-              sx={hasChanges ? { backgroundColor: "#16a34a", "&:hover": { backgroundColor: "#15803d" } } : {}}
+              size="sm"
+              className={hasChanges ? "bg-green-600 hover:bg-green-700 text-white" : ""}
             >
+              <Save className="h-4 w-4 mr-1" />
               {saving
                 ? t("dashboard.server.config.saving")
                 : `${t("dashboard.server.config.saveAllButton")}${
                     hasChanges ? ` (${Object.keys(changedItems).length})` : ""
                   }`}
-            </MuiButton>
+            </Button>
           </div>
         </div>
         {hasChanges && (

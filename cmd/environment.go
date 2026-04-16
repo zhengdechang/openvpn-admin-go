@@ -287,9 +287,9 @@ func InstallEnvironment() error {
 		return fmt.Errorf("生成OpenVPN配置文件失败: %v", err)
 	}
 
-	// 停止所有正在运行的 OpenVPN 进程
+	// 停止所有正在运行的 OpenVPN 进程（使用 -x 精确匹配，避免误杀 openvpn-go 进程）
 	fmt.Println("正在停止所有 OpenVPN 进程...")
-	utils.ExecCommand("pkill openvpn") // 忽略错误，因为可能没有进程在运行
+	utils.ExecCommand("pkill -x openvpn") // 忽略错误，因为可能没有进程在运行
 
 	// 等待进程完全停止
 	time.Sleep(2 * time.Second)
