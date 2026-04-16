@@ -27,7 +27,7 @@ OpenVPN Web Admin Interface is designed to simplify OpenVPN management through a
 ### Backend Integration
 - **🔧 Go Backend** - High-performance backend built with Go
 - **🌐 Gin Framework** - Fast HTTP web framework
-- **💾 SQLite Database** - Lightweight, embedded database
+- **💾 PostgreSQL Database** - Lightweight, embedded database
 - **🔐 JWT Authentication** - Secure token-based authentication
 - **🔒 OpenVPN Integration** - Direct system integration with OpenVPN service
 

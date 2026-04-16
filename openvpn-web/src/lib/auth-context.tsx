@@ -1,8 +1,8 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { User, LoginCredentials, RegisterCredentials } from "../types/types";
-import { userAPI } from "../services/api";
+import { User, LoginCredentials, RegisterCredentials } from "@/types/types";
+import { userAPI } from "@/services/api";
 import { useRouter } from "next/navigation";
 import { useUserStore } from "@/store";
 import { showToast } from "@/lib/toast-utils";
@@ -26,7 +26,9 @@ export const AuthContext = createContext<AuthContextType | undefined>(
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(false);
+  // Initialize loading=true when the user was previously logged in,
+  // so dashboard layout waits for the token refresh before redirecting.
+  const [loading, setLoading] = useState(() => useUserStore.getState().isLogin);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
@@ -63,33 +65,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     const attemptRefreshOnLoad = async () => {
-      // Check isLogin directly from the store, as it's initialized from persisted state
       if (useUserStore.getState().isLogin) {
-        console.log(
-          "AuthProvider: User is logged in (from persisted state). Attempting token refresh on load."
-        );
-        setLoading(true); // Optionally set loading state
-        const refreshedSuccessfully = await refreshToken(); // Call the existing refreshToken method
-        if (!refreshedSuccessfully) {
-          console.warn(
-            "AuthProvider: Initial token refresh failed. Logging out."
-          );
-          // The refreshToken method itself might set errors, but explicit logout might be needed if it doesn't fully clear session
-          logout(); // Call existing logout which clears info and redirects
-        } else {
-          console.log("AuthProvider: Initial token refresh successful.");
+        const ok = await refreshToken();
+        if (!ok) {
+          logout();
         }
-        setLoading(false); // Reset loading state
       }
+      // If not previously logged in, loading was initialized to false — nothing to do.
     };
 
     attemptRefreshOnLoad();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    // This effect should run once on mount to check initial persisted login state.
-    // Or, if you want it to re-run if isLogin changes from false to true due to some other async init,
-    // you could add isLogin to dependencies, but be careful of loops if refreshToken itself changes isLogin.
-    // For "on load", an empty dependency array or a one-time check is usually best.
-  }, []); // Empty dependency array to run once on mount.
+  }, []); // Run once on mount.
 
   const refreshToken = async () => {
     setLoading(true);

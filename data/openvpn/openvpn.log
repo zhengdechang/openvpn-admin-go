@@ -1,0 +1,1038 @@
+2026-04-15 16:47:04 --cipher is not set. Previous OpenVPN version defaulted to BF-CBC as fallback when cipher negotiation failed in this case. If you need this fallback please add '--data-ciphers-fallback BF-CBC' to your configuration and/or add BF-CBC to --data-ciphers.
+2026-04-15 16:47:04 WARNING: Using --management on a TCP port WITHOUT passwords is STRONGLY discouraged and considered insecure
+2026-04-15 16:47:04 WARNING: file '/etc/openvpn/server/server.key' is group or others accessible
+2026-04-15 16:47:04 OpenVPN 2.5.11 x86_64-pc-linux-gnu [SSL (OpenSSL)] [LZO] [LZ4] [EPOLL] [PKCS11] [MH/PKTINFO] [AEAD] built on Sep 17 2024
+2026-04-15 16:47:04 library versions: OpenSSL 3.0.2 15 Mar 2022, LZO 2.10
+2026-04-15 16:47:04 MANAGEMENT: TCP Socket listening on [AF_INET]127.0.0.1:7505
+2026-04-15 16:47:04 net_route_v4_best_gw query: dst 0.0.0.0
+2026-04-15 16:47:04 net_route_v4_best_gw result: via 192.168.0.1 dev eth0
+2026-04-15 16:47:04 NOTE: your local LAN uses the extremely common subnet address 192.168.0.x or 192.168.1.x.  Be aware that this might create routing conflicts if you connect to the VPN server from public locations such as internet cafes that use the same subnet.
+2026-04-15 16:47:04 NOTE: the current --script-security setting may allow this configuration to call user-defined scripts
+2026-04-15 16:47:04 Diffie-Hellman initialized with 2048 bit key
+2026-04-15 16:47:04 Outgoing Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 16:47:04 Incoming Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 16:47:04 TUN/TAP device tun0 opened
+2026-04-15 16:47:04 net_iface_mtu_set: mtu 1500 for tun0
+2026-04-15 16:47:04 net_iface_up: set tun0 up
+2026-04-15 16:47:04 net_addr_v4_add: 10.8.0.1/24 dev tun0
+2026-04-15 16:47:04 Could not determine IPv4/IPv6 protocol. Using AF_INET
+2026-04-15 16:47:04 Socket Buffers: R=[131072->131072] S=[16384->16384]
+2026-04-15 16:47:04 Listening for incoming TCP connection on [AF_INET][undef]:4500
+2026-04-15 16:47:04 TCPv4_SERVER link local (bound): [AF_INET][undef]:4500
+2026-04-15 16:47:04 TCPv4_SERVER link remote: [AF_UNSPEC]
+2026-04-15 16:47:04 GID set to nogroup
+2026-04-15 16:47:04 UID set to nobody
+2026-04-15 16:47:04 MULTI: multi_init called, r=256 v=256
+2026-04-15 16:47:04 IFCONFIG POOL IPv4: base=10.8.0.2 size=253
+2026-04-15 16:47:04 IFCONFIG POOL LIST
+2026-04-15 16:47:04 MULTI: TCP INIT maxclients=1024 maxevents=1028
+2026-04-15 16:47:04 Initialization Sequence Completed
+2026-04-15 16:47:36 Outgoing Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 16:47:36 Incoming Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 16:47:36 TCP connection established with [AF_INET]192.168.0.4:36916
+2026-04-15 16:47:36 192.168.0.4:36916 TLS: Initial packet from [AF_INET]192.168.0.4:36916, sid=9f49c7ea 9a1f64fb
+2026-04-15 16:47:36 192.168.0.4:36916 VERIFY OK: depth=1, CN=OpenVPN-CA
+2026-04-15 16:47:36 192.168.0.4:36916 VERIFY OK: depth=0, CN=Super Admin
+2026-04-15 16:47:36 192.168.0.4:36916 peer info: IV_VER=2.5.11
+2026-04-15 16:47:36 192.168.0.4:36916 peer info: IV_PLAT=linux
+2026-04-15 16:47:36 192.168.0.4:36916 peer info: IV_PROTO=6
+2026-04-15 16:47:36 192.168.0.4:36916 peer info: IV_NCP=2
+2026-04-15 16:47:36 192.168.0.4:36916 peer info: IV_CIPHERS=AES-256-GCM:AES-128-GCM:CHACHA20-POLY1305:AES-256-CBC
+2026-04-15 16:47:36 192.168.0.4:36916 peer info: IV_LZ4=1
+2026-04-15 16:47:36 192.168.0.4:36916 peer info: IV_LZ4v2=1
+2026-04-15 16:47:36 192.168.0.4:36916 peer info: IV_LZO=1
+2026-04-15 16:47:36 192.168.0.4:36916 peer info: IV_COMP_STUB=1
+2026-04-15 16:47:36 192.168.0.4:36916 peer info: IV_COMP_STUBv2=1
+2026-04-15 16:47:36 192.168.0.4:36916 peer info: IV_TCPNL=1
+2026-04-15 16:47:36 192.168.0.4:36916 TLS Error: Auth Username/Password was not provided by peer
+2026-04-15 16:47:36 192.168.0.4:36916 TLS Error: TLS handshake failed
+2026-04-15 16:47:36 192.168.0.4:36916 Fatal TLS error (check_tls_errors_co), restarting
+2026-04-15 16:47:36 192.168.0.4:36916 SIGUSR1[soft,tls-error] received, client-instance restarting
+2026-04-15 16:47:41 Outgoing Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 16:47:41 Incoming Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 16:47:41 TCP connection established with [AF_INET]192.168.0.4:38610
+2026-04-15 16:47:41 192.168.0.4:38610 TLS: Initial packet from [AF_INET]192.168.0.4:38610, sid=195ca336 e7637d8f
+2026-04-15 16:47:41 192.168.0.4:38610 VERIFY OK: depth=1, CN=OpenVPN-CA
+2026-04-15 16:47:41 192.168.0.4:38610 VERIFY OK: depth=0, CN=Super Admin
+2026-04-15 16:47:41 192.168.0.4:38610 peer info: IV_VER=2.5.11
+2026-04-15 16:47:41 192.168.0.4:38610 peer info: IV_PLAT=linux
+2026-04-15 16:47:41 192.168.0.4:38610 peer info: IV_PROTO=6
+2026-04-15 16:47:41 192.168.0.4:38610 peer info: IV_NCP=2
+2026-04-15 16:47:41 192.168.0.4:38610 peer info: IV_CIPHERS=AES-256-GCM:AES-128-GCM:CHACHA20-POLY1305:AES-256-CBC
+2026-04-15 16:47:41 192.168.0.4:38610 peer info: IV_LZ4=1
+2026-04-15 16:47:41 192.168.0.4:38610 peer info: IV_LZ4v2=1
+2026-04-15 16:47:41 192.168.0.4:38610 peer info: IV_LZO=1
+2026-04-15 16:47:41 192.168.0.4:38610 peer info: IV_COMP_STUB=1
+2026-04-15 16:47:41 192.168.0.4:38610 peer info: IV_COMP_STUBv2=1
+2026-04-15 16:47:41 192.168.0.4:38610 peer info: IV_TCPNL=1
+2026-04-15 16:47:41 192.168.0.4:38610 TLS Error: Auth Username/Password was not provided by peer
+2026-04-15 16:47:41 192.168.0.4:38610 TLS Error: TLS handshake failed
+2026-04-15 16:47:41 192.168.0.4:38610 Fatal TLS error (check_tls_errors_co), restarting
+2026-04-15 16:47:41 192.168.0.4:38610 SIGUSR1[soft,tls-error] received, client-instance restarting
+2026-04-15 16:47:46 Outgoing Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 16:47:46 Incoming Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 16:47:46 TCP connection established with [AF_INET]192.168.0.4:38626
+2026-04-15 16:47:46 192.168.0.4:38626 TLS: Initial packet from [AF_INET]192.168.0.4:38626, sid=4f228bfc 66001d35
+2026-04-15 16:47:46 192.168.0.4:38626 VERIFY OK: depth=1, CN=OpenVPN-CA
+2026-04-15 16:47:46 192.168.0.4:38626 VERIFY OK: depth=0, CN=Super Admin
+2026-04-15 16:47:46 192.168.0.4:38626 peer info: IV_VER=2.5.11
+2026-04-15 16:47:46 192.168.0.4:38626 peer info: IV_PLAT=linux
+2026-04-15 16:47:46 192.168.0.4:38626 peer info: IV_PROTO=6
+2026-04-15 16:47:46 192.168.0.4:38626 peer info: IV_NCP=2
+2026-04-15 16:47:46 192.168.0.4:38626 peer info: IV_CIPHERS=AES-256-GCM:AES-128-GCM:CHACHA20-POLY1305:AES-256-CBC
+2026-04-15 16:47:46 192.168.0.4:38626 peer info: IV_LZ4=1
+2026-04-15 16:47:46 192.168.0.4:38626 peer info: IV_LZ4v2=1
+2026-04-15 16:47:46 192.168.0.4:38626 peer info: IV_LZO=1
+2026-04-15 16:47:46 192.168.0.4:38626 peer info: IV_COMP_STUB=1
+2026-04-15 16:47:46 192.168.0.4:38626 peer info: IV_COMP_STUBv2=1
+2026-04-15 16:47:46 192.168.0.4:38626 peer info: IV_TCPNL=1
+2026-04-15 16:47:46 192.168.0.4:38626 TLS Error: Auth Username/Password was not provided by peer
+2026-04-15 16:47:46 192.168.0.4:38626 TLS Error: TLS handshake failed
+2026-04-15 16:47:46 192.168.0.4:38626 Fatal TLS error (check_tls_errors_co), restarting
+2026-04-15 16:47:46 192.168.0.4:38626 SIGUSR1[soft,tls-error] received, client-instance restarting
+2026-04-15 16:49:57 Outgoing Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 16:49:57 Incoming Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 16:49:57 TCP connection established with [AF_INET]192.168.0.4:49700
+2026-04-15 16:49:57 192.168.0.4:49700 TLS: Initial packet from [AF_INET]192.168.0.4:49700, sid=1dfe4e52 89be8b02
+2026-04-15 16:49:57 192.168.0.4:49700 VERIFY OK: depth=1, CN=OpenVPN-CA
+2026-04-15 16:49:57 192.168.0.4:49700 VERIFY OK: depth=0, CN=Super Admin
+2026-04-15 16:49:57 192.168.0.4:49700 peer info: IV_VER=2.5.11
+2026-04-15 16:49:57 192.168.0.4:49700 peer info: IV_PLAT=linux
+2026-04-15 16:49:57 192.168.0.4:49700 peer info: IV_PROTO=6
+2026-04-15 16:49:57 192.168.0.4:49700 peer info: IV_NCP=2
+2026-04-15 16:49:57 192.168.0.4:49700 peer info: IV_CIPHERS=AES-256-GCM:AES-128-GCM:CHACHA20-POLY1305:AES-256-CBC
+2026-04-15 16:49:57 192.168.0.4:49700 peer info: IV_LZ4=1
+2026-04-15 16:49:57 192.168.0.4:49700 peer info: IV_LZ4v2=1
+2026-04-15 16:49:57 192.168.0.4:49700 peer info: IV_LZO=1
+2026-04-15 16:49:57 192.168.0.4:49700 peer info: IV_COMP_STUB=1
+2026-04-15 16:49:57 192.168.0.4:49700 peer info: IV_COMP_STUBv2=1
+2026-04-15 16:49:57 192.168.0.4:49700 peer info: IV_TCPNL=1
+2026-04-15 16:49:57 192.168.0.4:49700 TLS Error: Auth Username/Password was not provided by peer
+2026-04-15 16:49:57 192.168.0.4:49700 TLS Error: TLS handshake failed
+2026-04-15 16:49:57 192.168.0.4:49700 Fatal TLS error (check_tls_errors_co), restarting
+2026-04-15 16:49:57 192.168.0.4:49700 SIGUSR1[soft,tls-error] received, client-instance restarting
+2026-04-15 16:50:02 Outgoing Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 16:50:02 Incoming Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 16:50:02 TCP connection established with [AF_INET]192.168.0.4:48614
+2026-04-15 16:50:02 192.168.0.4:48614 TLS: Initial packet from [AF_INET]192.168.0.4:48614, sid=8a8efc84 3b082311
+2026-04-15 16:50:02 192.168.0.4:48614 VERIFY OK: depth=1, CN=OpenVPN-CA
+2026-04-15 16:50:02 192.168.0.4:48614 VERIFY OK: depth=0, CN=Super Admin
+2026-04-15 16:50:02 192.168.0.4:48614 peer info: IV_VER=2.5.11
+2026-04-15 16:50:02 192.168.0.4:48614 peer info: IV_PLAT=linux
+2026-04-15 16:50:02 192.168.0.4:48614 peer info: IV_PROTO=6
+2026-04-15 16:50:02 192.168.0.4:48614 peer info: IV_NCP=2
+2026-04-15 16:50:02 192.168.0.4:48614 peer info: IV_CIPHERS=AES-256-GCM:AES-128-GCM:CHACHA20-POLY1305:AES-256-CBC
+2026-04-15 16:50:02 192.168.0.4:48614 peer info: IV_LZ4=1
+2026-04-15 16:50:02 192.168.0.4:48614 peer info: IV_LZ4v2=1
+2026-04-15 16:50:02 192.168.0.4:48614 peer info: IV_LZO=1
+2026-04-15 16:50:02 192.168.0.4:48614 peer info: IV_COMP_STUB=1
+2026-04-15 16:50:02 192.168.0.4:48614 peer info: IV_COMP_STUBv2=1
+2026-04-15 16:50:02 192.168.0.4:48614 peer info: IV_TCPNL=1
+2026-04-15 16:50:02 192.168.0.4:48614 TLS Error: Auth Username/Password was not provided by peer
+2026-04-15 16:50:02 192.168.0.4:48614 TLS Error: TLS handshake failed
+2026-04-15 16:50:02 192.168.0.4:48614 Fatal TLS error (check_tls_errors_co), restarting
+2026-04-15 16:50:02 192.168.0.4:48614 SIGUSR1[soft,tls-error] received, client-instance restarting
+2026-04-15 16:50:07 Outgoing Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 16:50:07 Incoming Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 16:50:07 TCP connection established with [AF_INET]192.168.0.4:48628
+2026-04-15 16:50:07 192.168.0.4:48628 TLS: Initial packet from [AF_INET]192.168.0.4:48628, sid=e688ae51 4155b2eb
+2026-04-15 16:50:07 192.168.0.4:48628 VERIFY OK: depth=1, CN=OpenVPN-CA
+2026-04-15 16:50:07 192.168.0.4:48628 VERIFY OK: depth=0, CN=Super Admin
+2026-04-15 16:50:07 192.168.0.4:48628 peer info: IV_VER=2.5.11
+2026-04-15 16:50:07 192.168.0.4:48628 peer info: IV_PLAT=linux
+2026-04-15 16:50:07 192.168.0.4:48628 peer info: IV_PROTO=6
+2026-04-15 16:50:07 192.168.0.4:48628 peer info: IV_NCP=2
+2026-04-15 16:50:07 192.168.0.4:48628 peer info: IV_CIPHERS=AES-256-GCM:AES-128-GCM:CHACHA20-POLY1305:AES-256-CBC
+2026-04-15 16:50:07 192.168.0.4:48628 peer info: IV_LZ4=1
+2026-04-15 16:50:07 192.168.0.4:48628 peer info: IV_LZ4v2=1
+2026-04-15 16:50:07 192.168.0.4:48628 peer info: IV_LZO=1
+2026-04-15 16:50:07 192.168.0.4:48628 peer info: IV_COMP_STUB=1
+2026-04-15 16:50:07 192.168.0.4:48628 peer info: IV_COMP_STUBv2=1
+2026-04-15 16:50:07 192.168.0.4:48628 peer info: IV_TCPNL=1
+2026-04-15 16:50:07 192.168.0.4:48628 TLS Error: Auth Username/Password was not provided by peer
+2026-04-15 16:50:07 192.168.0.4:48628 TLS Error: TLS handshake failed
+2026-04-15 16:50:07 192.168.0.4:48628 Fatal TLS error (check_tls_errors_co), restarting
+2026-04-15 16:50:07 192.168.0.4:48628 SIGUSR1[soft,tls-error] received, client-instance restarting
+2026-04-15 16:51:47 Outgoing Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 16:51:47 Incoming Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 16:51:47 TCP connection established with [AF_INET]192.168.0.4:43966
+2026-04-15 16:51:47 192.168.0.4:43966 TLS: Initial packet from [AF_INET]192.168.0.4:43966, sid=85cae2cb 304915c3
+2026-04-15 16:51:47 192.168.0.4:43966 VERIFY OK: depth=1, CN=OpenVPN-CA
+2026-04-15 16:51:47 192.168.0.4:43966 VERIFY OK: depth=0, CN=Super Admin
+2026-04-15 16:51:47 192.168.0.4:43966 peer info: IV_VER=2.5.11
+2026-04-15 16:51:47 192.168.0.4:43966 peer info: IV_PLAT=linux
+2026-04-15 16:51:47 192.168.0.4:43966 peer info: IV_PROTO=6
+2026-04-15 16:51:47 192.168.0.4:43966 peer info: IV_NCP=2
+2026-04-15 16:51:47 192.168.0.4:43966 peer info: IV_CIPHERS=AES-256-GCM:AES-128-GCM:CHACHA20-POLY1305:AES-256-CBC
+2026-04-15 16:51:47 192.168.0.4:43966 peer info: IV_LZ4=1
+2026-04-15 16:51:47 192.168.0.4:43966 peer info: IV_LZ4v2=1
+2026-04-15 16:51:47 192.168.0.4:43966 peer info: IV_LZO=1
+2026-04-15 16:51:47 192.168.0.4:43966 peer info: IV_COMP_STUB=1
+2026-04-15 16:51:47 192.168.0.4:43966 peer info: IV_COMP_STUBv2=1
+2026-04-15 16:51:47 192.168.0.4:43966 peer info: IV_TCPNL=1
+2026-04-15 16:51:47 192.168.0.4:43966 TLS Error: Auth Username/Password was not provided by peer
+2026-04-15 16:51:47 192.168.0.4:43966 TLS Error: TLS handshake failed
+2026-04-15 16:51:47 192.168.0.4:43966 Fatal TLS error (check_tls_errors_co), restarting
+2026-04-15 16:51:47 192.168.0.4:43966 SIGUSR1[soft,tls-error] received, client-instance restarting
+2026-04-15 16:51:52 Outgoing Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 16:51:52 Incoming Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 16:51:52 TCP connection established with [AF_INET]192.168.0.4:34702
+2026-04-15 16:51:52 192.168.0.4:34702 TLS: Initial packet from [AF_INET]192.168.0.4:34702, sid=c046ca2c c1faaf25
+2026-04-15 16:51:52 192.168.0.4:34702 VERIFY OK: depth=1, CN=OpenVPN-CA
+2026-04-15 16:51:52 192.168.0.4:34702 VERIFY OK: depth=0, CN=Super Admin
+2026-04-15 16:51:52 192.168.0.4:34702 peer info: IV_VER=2.5.11
+2026-04-15 16:51:52 192.168.0.4:34702 peer info: IV_PLAT=linux
+2026-04-15 16:51:52 192.168.0.4:34702 peer info: IV_PROTO=6
+2026-04-15 16:51:52 192.168.0.4:34702 peer info: IV_NCP=2
+2026-04-15 16:51:52 192.168.0.4:34702 peer info: IV_CIPHERS=AES-256-GCM:AES-128-GCM:CHACHA20-POLY1305:AES-256-CBC
+2026-04-15 16:51:52 192.168.0.4:34702 peer info: IV_LZ4=1
+2026-04-15 16:51:52 192.168.0.4:34702 peer info: IV_LZ4v2=1
+2026-04-15 16:51:52 192.168.0.4:34702 peer info: IV_LZO=1
+2026-04-15 16:51:52 192.168.0.4:34702 peer info: IV_COMP_STUB=1
+2026-04-15 16:51:52 192.168.0.4:34702 peer info: IV_COMP_STUBv2=1
+2026-04-15 16:51:52 192.168.0.4:34702 peer info: IV_TCPNL=1
+2026-04-15 16:51:52 192.168.0.4:34702 TLS Error: Auth Username/Password was not provided by peer
+2026-04-15 16:51:52 192.168.0.4:34702 TLS Error: TLS handshake failed
+2026-04-15 16:51:52 192.168.0.4:34702 Fatal TLS error (check_tls_errors_co), restarting
+2026-04-15 16:51:52 192.168.0.4:34702 SIGUSR1[soft,tls-error] received, client-instance restarting
+2026-04-15 16:51:57 Outgoing Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 16:51:57 Incoming Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 16:51:57 TCP connection established with [AF_INET]192.168.0.4:34710
+2026-04-15 16:51:57 192.168.0.4:34710 TLS: Initial packet from [AF_INET]192.168.0.4:34710, sid=fcb41c50 d9149910
+2026-04-15 16:51:57 192.168.0.4:34710 VERIFY OK: depth=1, CN=OpenVPN-CA
+2026-04-15 16:51:57 192.168.0.4:34710 VERIFY OK: depth=0, CN=Super Admin
+2026-04-15 16:51:57 192.168.0.4:34710 peer info: IV_VER=2.5.11
+2026-04-15 16:51:57 192.168.0.4:34710 peer info: IV_PLAT=linux
+2026-04-15 16:51:57 192.168.0.4:34710 peer info: IV_PROTO=6
+2026-04-15 16:51:57 192.168.0.4:34710 peer info: IV_NCP=2
+2026-04-15 16:51:57 192.168.0.4:34710 peer info: IV_CIPHERS=AES-256-GCM:AES-128-GCM:CHACHA20-POLY1305:AES-256-CBC
+2026-04-15 16:51:57 192.168.0.4:34710 peer info: IV_LZ4=1
+2026-04-15 16:51:57 192.168.0.4:34710 peer info: IV_LZ4v2=1
+2026-04-15 16:51:57 192.168.0.4:34710 peer info: IV_LZO=1
+2026-04-15 16:51:57 192.168.0.4:34710 peer info: IV_COMP_STUB=1
+2026-04-15 16:51:57 192.168.0.4:34710 peer info: IV_COMP_STUBv2=1
+2026-04-15 16:51:57 192.168.0.4:34710 peer info: IV_TCPNL=1
+2026-04-15 16:51:57 192.168.0.4:34710 TLS Error: Auth Username/Password was not provided by peer
+2026-04-15 16:51:57 192.168.0.4:34710 TLS Error: TLS handshake failed
+2026-04-15 16:51:57 192.168.0.4:34710 Fatal TLS error (check_tls_errors_co), restarting
+2026-04-15 16:51:57 192.168.0.4:34710 SIGUSR1[soft,tls-error] received, client-instance restarting
+2026-04-15 17:00:43 Outgoing Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 17:00:43 Incoming Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 17:00:43 TCP connection established with [AF_INET]192.168.0.4:37756
+2026-04-15 17:00:43 192.168.0.4:37756 TLS: Initial packet from [AF_INET]192.168.0.4:37756, sid=0627f1d3 0e6ba2c9
+2026-04-15 17:00:43 192.168.0.4:37756 VERIFY OK: depth=1, CN=OpenVPN-CA
+2026-04-15 17:00:43 192.168.0.4:37756 VERIFY OK: depth=0, CN=Super Admin
+2026-04-15 17:00:43 192.168.0.4:37756 peer info: IV_VER=2.5.11
+2026-04-15 17:00:43 192.168.0.4:37756 peer info: IV_PLAT=linux
+2026-04-15 17:00:43 192.168.0.4:37756 peer info: IV_PROTO=6
+2026-04-15 17:00:43 192.168.0.4:37756 peer info: IV_NCP=2
+2026-04-15 17:00:43 192.168.0.4:37756 peer info: IV_CIPHERS=AES-256-GCM:AES-128-GCM:CHACHA20-POLY1305:AES-256-CBC
+2026-04-15 17:00:43 192.168.0.4:37756 peer info: IV_LZ4=1
+2026-04-15 17:00:43 192.168.0.4:37756 peer info: IV_LZ4v2=1
+2026-04-15 17:00:43 192.168.0.4:37756 peer info: IV_LZO=1
+2026-04-15 17:00:43 192.168.0.4:37756 peer info: IV_COMP_STUB=1
+2026-04-15 17:00:43 192.168.0.4:37756 peer info: IV_COMP_STUBv2=1
+2026-04-15 17:00:43 192.168.0.4:37756 peer info: IV_TCPNL=1
+/bin/bash: /etc/openvpn/server/auth-blacklist.sh: Permission denied
+2026-04-15 17:00:43 192.168.0.4:37756 WARNING: Failed running command (--auth-user-pass-verify): external program exited with error status: 126
+2026-04-15 17:00:43 192.168.0.4:37756 TLS Auth Error: Auth Username/Password verification failed for peer
+2026-04-15 17:00:43 192.168.0.4:37756 Control Channel: TLSv1.3, cipher TLSv1.3 TLS_AES_256_GCM_SHA384, peer certificate: 2048 bit RSA, signature: RSA-SHA256
+2026-04-15 17:00:43 192.168.0.4:37756 [Super Admin] Peer Connection Initiated with [AF_INET]192.168.0.4:37756
+2026-04-15 17:00:45 192.168.0.4:37756 PUSH: Received control message: 'PUSH_REQUEST'
+2026-04-15 17:00:45 192.168.0.4:37756 Delayed exit in 5 seconds
+2026-04-15 17:00:45 192.168.0.4:37756 SENT CONTROL [Super Admin]: 'AUTH_FAILED' (status=1)
+2026-04-15 17:00:45 192.168.0.4:37756 Connection reset, restarting [0]
+2026-04-15 17:00:45 192.168.0.4:37756 SIGUSR1[soft,connection-reset] received, client-instance restarting
+2026-04-15 17:01:56 Outgoing Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 17:01:56 Incoming Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 17:01:56 TCP connection established with [AF_INET]192.168.0.4:60072
+2026-04-15 17:01:56 192.168.0.4:60072 TLS: Initial packet from [AF_INET]192.168.0.4:60072, sid=6a341969 4e786b86
+2026-04-15 17:01:56 192.168.0.4:60072 VERIFY OK: depth=1, CN=OpenVPN-CA
+2026-04-15 17:01:56 192.168.0.4:60072 VERIFY OK: depth=0, CN=Super Admin
+2026-04-15 17:01:56 192.168.0.4:60072 peer info: IV_VER=2.5.11
+2026-04-15 17:01:56 192.168.0.4:60072 peer info: IV_PLAT=linux
+2026-04-15 17:01:56 192.168.0.4:60072 peer info: IV_PROTO=6
+2026-04-15 17:01:56 192.168.0.4:60072 peer info: IV_NCP=2
+2026-04-15 17:01:56 192.168.0.4:60072 peer info: IV_CIPHERS=AES-256-GCM:AES-128-GCM:CHACHA20-POLY1305:AES-256-CBC
+2026-04-15 17:01:56 192.168.0.4:60072 peer info: IV_LZ4=1
+2026-04-15 17:01:56 192.168.0.4:60072 peer info: IV_LZ4v2=1
+2026-04-15 17:01:56 192.168.0.4:60072 peer info: IV_LZO=1
+2026-04-15 17:01:56 192.168.0.4:60072 peer info: IV_COMP_STUB=1
+2026-04-15 17:01:56 192.168.0.4:60072 peer info: IV_COMP_STUBv2=1
+2026-04-15 17:01:56 192.168.0.4:60072 peer info: IV_TCPNL=1
+/bin/bash: /etc/openvpn/server/auth-blacklist.sh: Permission denied
+2026-04-15 17:01:56 192.168.0.4:60072 WARNING: Failed running command (--auth-user-pass-verify): external program exited with error status: 126
+2026-04-15 17:01:56 192.168.0.4:60072 TLS Auth Error: Auth Username/Password verification failed for peer
+2026-04-15 17:01:56 192.168.0.4:60072 Control Channel: TLSv1.3, cipher TLSv1.3 TLS_AES_256_GCM_SHA384, peer certificate: 2048 bit RSA, signature: RSA-SHA256
+2026-04-15 17:01:56 192.168.0.4:60072 [Super Admin] Peer Connection Initiated with [AF_INET]192.168.0.4:60072
+2026-04-15 17:01:57 192.168.0.4:60072 PUSH: Received control message: 'PUSH_REQUEST'
+2026-04-15 17:01:57 192.168.0.4:60072 Delayed exit in 5 seconds
+2026-04-15 17:01:57 192.168.0.4:60072 SENT CONTROL [Super Admin]: 'AUTH_FAILED' (status=1)
+2026-04-15 17:01:57 192.168.0.4:60072 Connection reset, restarting [0]
+2026-04-15 17:01:57 192.168.0.4:60072 SIGUSR1[soft,connection-reset] received, client-instance restarting
+2026-04-15 17:03:54 Outgoing Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 17:03:54 Incoming Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 17:03:54 TCP connection established with [AF_INET]192.168.0.4:46772
+2026-04-15 17:03:54 192.168.0.4:46772 TLS: Initial packet from [AF_INET]192.168.0.4:46772, sid=6d9cc6b4 43972b2d
+2026-04-15 17:03:54 192.168.0.4:46772 VERIFY OK: depth=1, CN=OpenVPN-CA
+2026-04-15 17:03:54 192.168.0.4:46772 VERIFY OK: depth=0, CN=Super Admin
+2026-04-15 17:03:54 192.168.0.4:46772 peer info: IV_VER=2.5.11
+2026-04-15 17:03:54 192.168.0.4:46772 peer info: IV_PLAT=linux
+2026-04-15 17:03:54 192.168.0.4:46772 peer info: IV_PROTO=6
+2026-04-15 17:03:54 192.168.0.4:46772 peer info: IV_NCP=2
+2026-04-15 17:03:54 192.168.0.4:46772 peer info: IV_CIPHERS=AES-256-GCM:AES-128-GCM:CHACHA20-POLY1305:AES-256-CBC
+2026-04-15 17:03:54 192.168.0.4:46772 peer info: IV_LZ4=1
+2026-04-15 17:03:54 192.168.0.4:46772 peer info: IV_LZ4v2=1
+2026-04-15 17:03:54 192.168.0.4:46772 peer info: IV_LZO=1
+2026-04-15 17:03:54 192.168.0.4:46772 peer info: IV_COMP_STUB=1
+2026-04-15 17:03:54 192.168.0.4:46772 peer info: IV_COMP_STUBv2=1
+2026-04-15 17:03:54 192.168.0.4:46772 peer info: IV_TCPNL=1
+touch: cannot touch '/var/log/openvpn-auth-blacklist.log': Permission denied
+2026-04-15 17:03:54 192.168.0.4:46772 WARNING: Failed running command (--auth-user-pass-verify): external program exited with error status: 1
+2026-04-15 17:03:54 192.168.0.4:46772 TLS Auth Error: Auth Username/Password verification failed for peer
+2026-04-15 17:03:54 192.168.0.4:46772 Control Channel: TLSv1.3, cipher TLSv1.3 TLS_AES_256_GCM_SHA384, peer certificate: 2048 bit RSA, signature: RSA-SHA256
+2026-04-15 17:03:54 192.168.0.4:46772 [Super Admin] Peer Connection Initiated with [AF_INET]192.168.0.4:46772
+2026-04-15 17:03:55 192.168.0.4:46772 PUSH: Received control message: 'PUSH_REQUEST'
+2026-04-15 17:03:55 192.168.0.4:46772 Delayed exit in 5 seconds
+2026-04-15 17:03:55 192.168.0.4:46772 SENT CONTROL [Super Admin]: 'AUTH_FAILED' (status=1)
+2026-04-15 17:03:55 192.168.0.4:46772 Connection reset, restarting [0]
+2026-04-15 17:03:55 192.168.0.4:46772 SIGUSR1[soft,connection-reset] received, client-instance restarting
+2026-04-15 17:06:41 Outgoing Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 17:06:41 Incoming Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 17:06:41 TCP connection established with [AF_INET]192.168.0.4:58892
+2026-04-15 17:06:41 192.168.0.4:58892 TLS: Initial packet from [AF_INET]192.168.0.4:58892, sid=873c2366 e8c099e0
+2026-04-15 17:06:41 192.168.0.4:58892 VERIFY OK: depth=1, CN=OpenVPN-CA
+2026-04-15 17:06:41 192.168.0.4:58892 VERIFY OK: depth=0, CN=Super Admin
+2026-04-15 17:06:41 192.168.0.4:58892 peer info: IV_VER=2.5.11
+2026-04-15 17:06:41 192.168.0.4:58892 peer info: IV_PLAT=linux
+2026-04-15 17:06:41 192.168.0.4:58892 peer info: IV_PROTO=6
+2026-04-15 17:06:41 192.168.0.4:58892 peer info: IV_NCP=2
+2026-04-15 17:06:41 192.168.0.4:58892 peer info: IV_CIPHERS=AES-256-GCM:AES-128-GCM:CHACHA20-POLY1305:AES-256-CBC
+2026-04-15 17:06:41 192.168.0.4:58892 peer info: IV_LZ4=1
+2026-04-15 17:06:41 192.168.0.4:58892 peer info: IV_LZ4v2=1
+2026-04-15 17:06:41 192.168.0.4:58892 peer info: IV_LZO=1
+2026-04-15 17:06:41 192.168.0.4:58892 peer info: IV_COMP_STUB=1
+2026-04-15 17:06:41 192.168.0.4:58892 peer info: IV_COMP_STUBv2=1
+2026-04-15 17:06:41 192.168.0.4:58892 peer info: IV_TCPNL=1
+grep: /etc/openvpn/server/blacklist.txt: Permission denied
+2026-04-15 17:06:41 192.168.0.4:58892 TLS: Username/Password authentication succeeded for username 'Super Admin' 
+2026-04-15 17:06:41 192.168.0.4:58892 Control Channel: TLSv1.3, cipher TLSv1.3 TLS_AES_256_GCM_SHA384, peer certificate: 2048 bit RSA, signature: RSA-SHA256
+2026-04-15 17:06:41 192.168.0.4:58892 [Super Admin] Peer Connection Initiated with [AF_INET]192.168.0.4:58892
+2026-04-15 17:06:41 Super Admin/192.168.0.4:58892 MULTI_sva: pool returned IPv4=10.8.0.2, IPv6=(Not enabled)
+2026-04-15 17:06:41 Super Admin/192.168.0.4:58892 MULTI: Learn: 10.8.0.2 -> Super Admin/192.168.0.4:58892
+2026-04-15 17:06:41 Super Admin/192.168.0.4:58892 MULTI: primary virtual IP for Super Admin/192.168.0.4:58892: 10.8.0.2
+2026-04-15 17:06:41 Super Admin/192.168.0.4:58892 Data Channel: using negotiated cipher 'AES-256-GCM'
+2026-04-15 17:06:41 Super Admin/192.168.0.4:58892 Outgoing Data Channel: Cipher 'AES-256-GCM' initialized with 256 bit key
+2026-04-15 17:06:41 Super Admin/192.168.0.4:58892 Incoming Data Channel: Cipher 'AES-256-GCM' initialized with 256 bit key
+2026-04-15 17:06:41 Super Admin/192.168.0.4:58892 SENT CONTROL [Super Admin]: 'PUSH_REPLY,route 10.10.100.0 255.255.255.0,route 10.10.98.0 255.255.255.0,route-gateway 10.8.0.1,topology subnet,ping 10,ping-restart 120,ifconfig 10.8.0.2 255.255.255.0,peer-id 0,cipher AES-256-GCM' (status=1)
+2026-04-15 17:06:56 Super Admin/192.168.0.4:58892 Connection reset, restarting [0]
+2026-04-15 17:06:56 Super Admin/192.168.0.4:58892 SIGUSR1[soft,connection-reset] received, client-instance restarting
+2026-04-15 17:11:01 --cipher is not set. Previous OpenVPN version defaulted to BF-CBC as fallback when cipher negotiation failed in this case. If you need this fallback please add '--data-ciphers-fallback BF-CBC' to your configuration and/or add BF-CBC to --data-ciphers.
+2026-04-15 17:11:01 WARNING: Using --management on a TCP port WITHOUT passwords is STRONGLY discouraged and considered insecure
+2026-04-15 17:11:01 WARNING: file '/etc/openvpn/server/server.key' is group or others accessible
+2026-04-15 17:11:01 OpenVPN 2.5.11 x86_64-pc-linux-gnu [SSL (OpenSSL)] [LZO] [LZ4] [EPOLL] [PKCS11] [MH/PKTINFO] [AEAD] built on Sep 17 2024
+2026-04-15 17:11:01 library versions: OpenSSL 3.0.2 15 Mar 2022, LZO 2.10
+2026-04-15 17:11:01 MANAGEMENT: TCP Socket listening on [AF_INET]127.0.0.1:7505
+2026-04-15 17:11:01 net_route_v4_best_gw query: dst 0.0.0.0
+2026-04-15 17:11:01 net_route_v4_best_gw result: via 192.168.0.1 dev eth0
+2026-04-15 17:11:01 NOTE: your local LAN uses the extremely common subnet address 192.168.0.x or 192.168.1.x.  Be aware that this might create routing conflicts if you connect to the VPN server from public locations such as internet cafes that use the same subnet.
+2026-04-15 17:11:01 NOTE: the current --script-security setting may allow this configuration to call user-defined scripts
+2026-04-15 17:11:01 Diffie-Hellman initialized with 2048 bit key
+2026-04-15 17:11:01 Outgoing Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 17:11:01 Incoming Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 17:11:01 TUN/TAP device tun0 opened
+2026-04-15 17:11:01 net_iface_mtu_set: mtu 1500 for tun0
+2026-04-15 17:11:01 net_iface_up: set tun0 up
+2026-04-15 17:11:01 net_addr_v4_add: 10.8.0.1/24 dev tun0
+2026-04-15 17:11:01 Could not determine IPv4/IPv6 protocol. Using AF_INET
+2026-04-15 17:11:01 Socket Buffers: R=[131072->131072] S=[16384->16384]
+2026-04-15 17:11:01 Listening for incoming TCP connection on [AF_INET][undef]:4500
+2026-04-15 17:11:01 TCPv4_SERVER link local (bound): [AF_INET][undef]:4500
+2026-04-15 17:11:01 TCPv4_SERVER link remote: [AF_UNSPEC]
+2026-04-15 17:11:01 GID set to nogroup
+2026-04-15 17:11:01 UID set to nobody
+2026-04-15 17:11:01 MULTI: multi_init called, r=256 v=256
+2026-04-15 17:11:01 IFCONFIG POOL IPv4: base=10.8.0.2 size=253
+2026-04-15 17:11:01 ifconfig_pool_read(), in='Super Admin,10.8.0.2,'
+2026-04-15 17:11:01 succeeded -> ifconfig_pool_set(hand=0)
+2026-04-15 17:11:01 IFCONFIG POOL LIST
+2026-04-15 17:11:01 Super Admin,10.8.0.2,
+2026-04-15 17:11:01 MULTI: TCP INIT maxclients=1024 maxevents=1028
+2026-04-15 17:11:01 Initialization Sequence Completed
+2026-04-15 17:12:32 --cipher is not set. Previous OpenVPN version defaulted to BF-CBC as fallback when cipher negotiation failed in this case. If you need this fallback please add '--data-ciphers-fallback BF-CBC' to your configuration and/or add BF-CBC to --data-ciphers.
+2026-04-15 17:12:32 WARNING: Using --management on a TCP port WITHOUT passwords is STRONGLY discouraged and considered insecure
+2026-04-15 17:12:32 WARNING: file '/etc/openvpn/server/server.key' is group or others accessible
+2026-04-15 17:12:32 OpenVPN 2.5.11 x86_64-pc-linux-gnu [SSL (OpenSSL)] [LZO] [LZ4] [EPOLL] [PKCS11] [MH/PKTINFO] [AEAD] built on Sep 17 2024
+2026-04-15 17:12:32 library versions: OpenSSL 3.0.2 15 Mar 2022, LZO 2.10
+2026-04-15 17:12:32 MANAGEMENT: TCP Socket listening on [AF_INET]127.0.0.1:7505
+2026-04-15 17:12:32 net_route_v4_best_gw query: dst 0.0.0.0
+2026-04-15 17:12:32 net_route_v4_best_gw result: via 192.168.0.1 dev eth0
+2026-04-15 17:12:32 NOTE: your local LAN uses the extremely common subnet address 192.168.0.x or 192.168.1.x.  Be aware that this might create routing conflicts if you connect to the VPN server from public locations such as internet cafes that use the same subnet.
+2026-04-15 17:12:32 NOTE: the current --script-security setting may allow this configuration to call user-defined scripts
+2026-04-15 17:12:32 Diffie-Hellman initialized with 2048 bit key
+2026-04-15 17:12:32 Outgoing Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 17:12:32 Incoming Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 17:12:32 TUN/TAP device tun0 opened
+2026-04-15 17:12:32 net_iface_mtu_set: mtu 1500 for tun0
+2026-04-15 17:12:32 net_iface_up: set tun0 up
+2026-04-15 17:12:32 net_addr_v4_add: 10.8.0.1/24 dev tun0
+2026-04-15 17:12:32 Could not determine IPv4/IPv6 protocol. Using AF_INET
+2026-04-15 17:12:32 Socket Buffers: R=[131072->131072] S=[16384->16384]
+2026-04-15 17:12:32 Listening for incoming TCP connection on [AF_INET][undef]:4500
+2026-04-15 17:12:32 TCPv4_SERVER link local (bound): [AF_INET][undef]:4500
+2026-04-15 17:12:32 TCPv4_SERVER link remote: [AF_UNSPEC]
+2026-04-15 17:12:32 GID set to nogroup
+2026-04-15 17:12:32 UID set to nobody
+2026-04-15 17:12:32 MULTI: multi_init called, r=256 v=256
+2026-04-15 17:12:32 IFCONFIG POOL IPv4: base=10.8.0.2 size=253
+2026-04-15 17:12:32 ifconfig_pool_read(), in='Super Admin,10.8.0.2,'
+2026-04-15 17:12:32 succeeded -> ifconfig_pool_set(hand=0)
+2026-04-15 17:12:32 IFCONFIG POOL LIST
+2026-04-15 17:12:32 Super Admin,10.8.0.2,
+2026-04-15 17:12:32 MULTI: TCP INIT maxclients=1024 maxevents=1028
+2026-04-15 17:12:32 Initialization Sequence Completed
+2026-04-15 17:39:11 Outgoing Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 17:39:11 Incoming Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 17:39:11 TCP connection established with [AF_INET]192.168.0.4:50870
+2026-04-15 17:39:11 192.168.0.4:50870 TLS: Initial packet from [AF_INET]192.168.0.4:50870, sid=2b1b1055 a1a6eb05
+2026-04-15 17:39:11 192.168.0.4:50870 VERIFY OK: depth=1, CN=OpenVPN-CA
+2026-04-15 17:39:11 192.168.0.4:50870 VERIFY OK: depth=0, CN=test
+2026-04-15 17:39:11 192.168.0.4:50870 peer info: IV_VER=2.5.11
+2026-04-15 17:39:11 192.168.0.4:50870 peer info: IV_PLAT=linux
+2026-04-15 17:39:11 192.168.0.4:50870 peer info: IV_PROTO=6
+2026-04-15 17:39:11 192.168.0.4:50870 peer info: IV_NCP=2
+2026-04-15 17:39:11 192.168.0.4:50870 peer info: IV_CIPHERS=AES-256-GCM:AES-128-GCM:CHACHA20-POLY1305:AES-256-CBC
+2026-04-15 17:39:11 192.168.0.4:50870 peer info: IV_LZ4=1
+2026-04-15 17:39:11 192.168.0.4:50870 peer info: IV_LZ4v2=1
+2026-04-15 17:39:11 192.168.0.4:50870 peer info: IV_LZO=1
+2026-04-15 17:39:11 192.168.0.4:50870 peer info: IV_COMP_STUB=1
+2026-04-15 17:39:11 192.168.0.4:50870 peer info: IV_COMP_STUBv2=1
+2026-04-15 17:39:11 192.168.0.4:50870 peer info: IV_TCPNL=1
+grep: /etc/openvpn/server/blacklist.txt: Permission denied
+2026-04-15 17:39:11 192.168.0.4:50870 TLS: Username/Password authentication succeeded for username 'test' 
+2026-04-15 17:39:11 192.168.0.4:50870 Control Channel: TLSv1.3, cipher TLSv1.3 TLS_AES_256_GCM_SHA384, peer certificate: 2048 bit RSA, signature: RSA-SHA256
+2026-04-15 17:39:11 192.168.0.4:50870 [test] Peer Connection Initiated with [AF_INET]192.168.0.4:50870
+2026-04-15 17:39:11 test/192.168.0.4:50870 MULTI_sva: pool returned IPv4=10.8.0.3, IPv6=(Not enabled)
+2026-04-15 17:39:11 test/192.168.0.4:50870 MULTI: Learn: 10.8.0.3 -> test/192.168.0.4:50870
+2026-04-15 17:39:11 test/192.168.0.4:50870 MULTI: primary virtual IP for test/192.168.0.4:50870: 10.8.0.3
+2026-04-15 17:39:11 test/192.168.0.4:50870 Data Channel: using negotiated cipher 'AES-256-GCM'
+2026-04-15 17:39:11 test/192.168.0.4:50870 Outgoing Data Channel: Cipher 'AES-256-GCM' initialized with 256 bit key
+2026-04-15 17:39:11 test/192.168.0.4:50870 Incoming Data Channel: Cipher 'AES-256-GCM' initialized with 256 bit key
+2026-04-15 17:39:11 test/192.168.0.4:50870 SENT CONTROL [test]: 'PUSH_REPLY,route 10.10.100.0 255.255.255.0,route 10.10.98.0 255.255.255.0,route-gateway 10.8.0.1,topology subnet,ping 10,ping-restart 120,ifconfig 10.8.0.3 255.255.255.0,peer-id 0,cipher AES-256-GCM' (status=1)
+2026-04-15 17:53:00 Closing TUN/TAP interface
+2026-04-15 17:53:00 net_addr_v4_del: 10.8.0.1 dev tun0
+2026-04-15 17:53:00 sitnl_send: rtnl: generic error (-1): Operation not permitted
+2026-04-15 17:53:00 Linux can't del IP from iface tun0
+2026-04-15 17:53:01 --cipher is not set. Previous OpenVPN version defaulted to BF-CBC as fallback when cipher negotiation failed in this case. If you need this fallback please add '--data-ciphers-fallback BF-CBC' to your configuration and/or add BF-CBC to --data-ciphers.
+2026-04-15 17:53:01 WARNING: Using --management on a TCP port WITHOUT passwords is STRONGLY discouraged and considered insecure
+2026-04-15 17:53:01 WARNING: file '/etc/openvpn/server/server.key' is group or others accessible
+2026-04-15 17:53:01 OpenVPN 2.5.11 x86_64-pc-linux-gnu [SSL (OpenSSL)] [LZO] [LZ4] [EPOLL] [PKCS11] [MH/PKTINFO] [AEAD] built on Sep 17 2024
+2026-04-15 17:53:01 library versions: OpenSSL 3.0.2 15 Mar 2022, LZO 2.10
+2026-04-15 17:53:01 MANAGEMENT: TCP Socket listening on [AF_INET]127.0.0.1:7505
+2026-04-15 17:53:01 net_route_v4_best_gw query: dst 0.0.0.0
+2026-04-15 17:53:01 net_route_v4_best_gw result: via 192.168.0.1 dev eth0
+2026-04-15 17:53:01 NOTE: your local LAN uses the extremely common subnet address 192.168.0.x or 192.168.1.x.  Be aware that this might create routing conflicts if you connect to the VPN server from public locations such as internet cafes that use the same subnet.
+2026-04-15 17:53:01 NOTE: the current --script-security setting may allow this configuration to call user-defined scripts
+2026-04-15 17:53:01 Diffie-Hellman initialized with 2048 bit key
+2026-04-15 17:53:01 Outgoing Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 17:53:01 Incoming Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 17:53:01 TUN/TAP device tun0 opened
+2026-04-15 17:53:01 net_iface_mtu_set: mtu 1500 for tun0
+2026-04-15 17:53:01 net_iface_up: set tun0 up
+2026-04-15 17:53:01 net_addr_v4_add: 10.8.0.1/24 dev tun0
+2026-04-15 17:53:01 Could not determine IPv4/IPv6 protocol. Using AF_INET
+2026-04-15 17:53:01 Socket Buffers: R=[131072->131072] S=[16384->16384]
+2026-04-15 17:53:01 Listening for incoming TCP connection on [AF_INET][undef]:4500
+2026-04-15 17:53:01 TCPv4_SERVER link local (bound): [AF_INET][undef]:4500
+2026-04-15 17:53:01 TCPv4_SERVER link remote: [AF_UNSPEC]
+2026-04-15 17:53:01 GID set to nogroup
+2026-04-15 17:53:01 UID set to nobody
+2026-04-15 17:53:01 MULTI: multi_init called, r=256 v=256
+2026-04-15 17:53:01 IFCONFIG POOL IPv4: base=10.8.0.2 size=253
+2026-04-15 17:53:01 ifconfig_pool_read(), in='Super Admin,10.8.0.2,'
+2026-04-15 17:53:01 succeeded -> ifconfig_pool_set(hand=0)
+2026-04-15 17:53:01 ifconfig_pool_read(), in='test,10.8.0.3,'
+2026-04-15 17:53:01 succeeded -> ifconfig_pool_set(hand=1)
+2026-04-15 17:53:01 IFCONFIG POOL LIST
+2026-04-15 17:53:01 Super Admin,10.8.0.2,
+2026-04-15 17:53:01 test,10.8.0.3,
+2026-04-15 17:53:01 MULTI: TCP INIT maxclients=1024 maxevents=1028
+2026-04-15 17:53:01 Initialization Sequence Completed
+2026-04-15 17:53:05 Outgoing Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 17:53:05 Incoming Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 17:53:05 TCP connection established with [AF_INET]192.168.0.4:50732
+2026-04-15 17:53:05 192.168.0.4:50732 TLS: Initial packet from [AF_INET]192.168.0.4:50732, sid=0c3c18eb eb600e1a
+2026-04-15 17:53:05 192.168.0.4:50732 VERIFY OK: depth=1, CN=OpenVPN-CA
+2026-04-15 17:53:05 192.168.0.4:50732 VERIFY OK: depth=0, CN=test
+2026-04-15 17:53:05 192.168.0.4:50732 peer info: IV_VER=2.5.11
+2026-04-15 17:53:05 192.168.0.4:50732 peer info: IV_PLAT=linux
+2026-04-15 17:53:05 192.168.0.4:50732 peer info: IV_PROTO=6
+2026-04-15 17:53:05 192.168.0.4:50732 peer info: IV_NCP=2
+2026-04-15 17:53:05 192.168.0.4:50732 peer info: IV_CIPHERS=AES-256-GCM:AES-128-GCM:CHACHA20-POLY1305:AES-256-CBC
+2026-04-15 17:53:05 192.168.0.4:50732 peer info: IV_LZ4=1
+2026-04-15 17:53:05 192.168.0.4:50732 peer info: IV_LZ4v2=1
+2026-04-15 17:53:05 192.168.0.4:50732 peer info: IV_LZO=1
+2026-04-15 17:53:05 192.168.0.4:50732 peer info: IV_COMP_STUB=1
+2026-04-15 17:53:05 192.168.0.4:50732 peer info: IV_COMP_STUBv2=1
+2026-04-15 17:53:05 192.168.0.4:50732 peer info: IV_TCPNL=1
+2026-04-15 17:53:05 192.168.0.4:50732 Control Channel: TLSv1.3, cipher TLSv1.3 TLS_AES_256_GCM_SHA384, peer certificate: 2048 bit RSA, signature: RSA-SHA256
+2026-04-15 17:53:05 192.168.0.4:50732 [test] Peer Connection Initiated with [AF_INET]192.168.0.4:50732
+2026-04-15 17:53:05 test/192.168.0.4:50732 MULTI_sva: pool returned IPv4=10.8.0.3, IPv6=(Not enabled)
+grep: /etc/openvpn/server/blacklist.txt: Permission denied
+2026-04-15 17:53:05 test/192.168.0.4:50732 OPTIONS IMPORT: reading client specific options from: /tmp/openvpn_cc_1a1c8064f7b73eea2c15f0927d2d5a30.tmp
+2026-04-15 17:53:05 test/192.168.0.4:50732 MULTI: Learn: 10.8.0.3 -> test/192.168.0.4:50732
+2026-04-15 17:53:05 test/192.168.0.4:50732 MULTI: primary virtual IP for test/192.168.0.4:50732: 10.8.0.3
+2026-04-15 17:53:05 test/192.168.0.4:50732 Data Channel: using negotiated cipher 'AES-256-GCM'
+2026-04-15 17:53:05 test/192.168.0.4:50732 Outgoing Data Channel: Cipher 'AES-256-GCM' initialized with 256 bit key
+2026-04-15 17:53:05 test/192.168.0.4:50732 Incoming Data Channel: Cipher 'AES-256-GCM' initialized with 256 bit key
+2026-04-15 17:53:05 test/192.168.0.4:50732 SENT CONTROL [test]: 'PUSH_REPLY,route 10.10.100.0 255.255.255.0,route 10.10.98.0 255.255.255.0,route-gateway 10.8.0.1,topology subnet,ping 10,ping-restart 120,ifconfig 10.8.0.3 255.255.255.0,peer-id 0,cipher AES-256-GCM' (status=1)
+2026-04-15 17:53:54 test/192.168.0.4:50732 Connection reset, restarting [0]
+2026-04-15 17:53:54 test/192.168.0.4:50732 SIGUSR1[soft,connection-reset] received, client-instance restarting
+2026-04-15 17:54:14 Outgoing Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 17:54:14 Incoming Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 17:54:14 TCP connection established with [AF_INET]192.168.0.4:48548
+2026-04-15 17:54:14 192.168.0.4:48548 TLS: Initial packet from [AF_INET]192.168.0.4:48548, sid=b8b7c158 ccc62680
+2026-04-15 17:54:14 192.168.0.4:48548 VERIFY OK: depth=1, CN=OpenVPN-CA
+2026-04-15 17:54:14 192.168.0.4:48548 VERIFY OK: depth=0, CN=test
+2026-04-15 17:54:14 192.168.0.4:48548 peer info: IV_VER=2.5.11
+2026-04-15 17:54:14 192.168.0.4:48548 peer info: IV_PLAT=linux
+2026-04-15 17:54:14 192.168.0.4:48548 peer info: IV_PROTO=6
+2026-04-15 17:54:14 192.168.0.4:48548 peer info: IV_NCP=2
+2026-04-15 17:54:14 192.168.0.4:48548 peer info: IV_CIPHERS=AES-256-GCM:AES-128-GCM:CHACHA20-POLY1305:AES-256-CBC
+2026-04-15 17:54:14 192.168.0.4:48548 peer info: IV_LZ4=1
+2026-04-15 17:54:14 192.168.0.4:48548 peer info: IV_LZ4v2=1
+2026-04-15 17:54:14 192.168.0.4:48548 peer info: IV_LZO=1
+2026-04-15 17:54:14 192.168.0.4:48548 peer info: IV_COMP_STUB=1
+2026-04-15 17:54:14 192.168.0.4:48548 peer info: IV_COMP_STUBv2=1
+2026-04-15 17:54:14 192.168.0.4:48548 peer info: IV_TCPNL=1
+2026-04-15 17:54:14 192.168.0.4:48548 Control Channel: TLSv1.3, cipher TLSv1.3 TLS_AES_256_GCM_SHA384, peer certificate: 2048 bit RSA, signature: RSA-SHA256
+2026-04-15 17:54:14 192.168.0.4:48548 [test] Peer Connection Initiated with [AF_INET]192.168.0.4:48548
+2026-04-15 17:54:14 test/192.168.0.4:48548 MULTI_sva: pool returned IPv4=10.8.0.3, IPv6=(Not enabled)
+grep: /etc/openvpn/server/blacklist.txt: Permission denied
+2026-04-15 17:54:14 test/192.168.0.4:48548 OPTIONS IMPORT: reading client specific options from: /tmp/openvpn_cc_6cd00c9add0226d27d78310003460ea.tmp
+2026-04-15 17:54:14 test/192.168.0.4:48548 MULTI: Learn: 10.8.0.3 -> test/192.168.0.4:48548
+2026-04-15 17:54:14 test/192.168.0.4:48548 MULTI: primary virtual IP for test/192.168.0.4:48548: 10.8.0.3
+2026-04-15 17:54:14 test/192.168.0.4:48548 Data Channel: using negotiated cipher 'AES-256-GCM'
+2026-04-15 17:54:14 test/192.168.0.4:48548 Outgoing Data Channel: Cipher 'AES-256-GCM' initialized with 256 bit key
+2026-04-15 17:54:14 test/192.168.0.4:48548 Incoming Data Channel: Cipher 'AES-256-GCM' initialized with 256 bit key
+2026-04-15 17:54:14 test/192.168.0.4:48548 SENT CONTROL [test]: 'PUSH_REPLY,route 10.10.100.0 255.255.255.0,route 10.10.98.0 255.255.255.0,route-gateway 10.8.0.1,topology subnet,ping 10,ping-restart 120,ifconfig 10.8.0.3 255.255.255.0,peer-id 0,cipher AES-256-GCM' (status=1)
+2026-04-15 18:22:13 --cipher is not set. Previous OpenVPN version defaulted to BF-CBC as fallback when cipher negotiation failed in this case. If you need this fallback please add '--data-ciphers-fallback BF-CBC' to your configuration and/or add BF-CBC to --data-ciphers.
+2026-04-15 18:22:13 WARNING: Using --management on a TCP port WITHOUT passwords is STRONGLY discouraged and considered insecure
+2026-04-15 18:22:13 WARNING: file '/etc/openvpn/server/server.key' is group or others accessible
+2026-04-15 18:22:13 OpenVPN 2.5.11 x86_64-pc-linux-gnu [SSL (OpenSSL)] [LZO] [LZ4] [EPOLL] [PKCS11] [MH/PKTINFO] [AEAD] built on Sep 17 2024
+2026-04-15 18:22:13 library versions: OpenSSL 3.0.2 15 Mar 2022, LZO 2.10
+2026-04-15 18:22:13 MANAGEMENT: TCP Socket listening on [AF_INET]127.0.0.1:7505
+2026-04-15 18:22:13 net_route_v4_best_gw query: dst 0.0.0.0
+2026-04-15 18:22:13 net_route_v4_best_gw result: via 192.168.0.1 dev eth0
+2026-04-15 18:22:13 NOTE: your local LAN uses the extremely common subnet address 192.168.0.x or 192.168.1.x.  Be aware that this might create routing conflicts if you connect to the VPN server from public locations such as internet cafes that use the same subnet.
+2026-04-15 18:22:13 NOTE: the current --script-security setting may allow this configuration to call user-defined scripts
+2026-04-15 18:22:13 Diffie-Hellman initialized with 2048 bit key
+2026-04-15 18:22:13 Outgoing Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 18:22:13 Incoming Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 18:22:13 TUN/TAP device tun0 opened
+2026-04-15 18:22:13 net_iface_mtu_set: mtu 1500 for tun0
+2026-04-15 18:22:13 net_iface_up: set tun0 up
+2026-04-15 18:22:13 net_addr_v4_add: 10.8.0.1/24 dev tun0
+2026-04-15 18:22:13 Could not determine IPv4/IPv6 protocol. Using AF_INET
+2026-04-15 18:22:13 Socket Buffers: R=[131072->131072] S=[16384->16384]
+2026-04-15 18:22:13 Listening for incoming TCP connection on [AF_INET][undef]:4500
+2026-04-15 18:22:13 TCPv4_SERVER link local (bound): [AF_INET][undef]:4500
+2026-04-15 18:22:13 TCPv4_SERVER link remote: [AF_UNSPEC]
+2026-04-15 18:22:13 GID set to nogroup
+2026-04-15 18:22:13 UID set to nobody
+2026-04-15 18:22:13 MULTI: multi_init called, r=256 v=256
+2026-04-15 18:22:13 IFCONFIG POOL IPv4: base=10.8.0.2 size=253
+2026-04-15 18:22:13 ifconfig_pool_read(), in='Super Admin,10.8.0.2,'
+2026-04-15 18:22:13 succeeded -> ifconfig_pool_set(hand=0)
+2026-04-15 18:22:13 ifconfig_pool_read(), in='test,10.8.0.3,'
+2026-04-15 18:22:13 succeeded -> ifconfig_pool_set(hand=1)
+2026-04-15 18:22:13 IFCONFIG POOL LIST
+2026-04-15 18:22:13 Super Admin,10.8.0.2,
+2026-04-15 18:22:13 test,10.8.0.3,
+2026-04-15 18:22:13 MULTI: TCP INIT maxclients=1024 maxevents=1028
+2026-04-15 18:22:13 Initialization Sequence Completed
+2026-04-15 18:22:17 Outgoing Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 18:22:17 Incoming Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 18:22:17 TCP connection established with [AF_INET]192.168.0.4:49624
+2026-04-15 18:22:17 192.168.0.4:49624 TLS: Initial packet from [AF_INET]192.168.0.4:49624, sid=5a078842 43c4837c
+2026-04-15 18:22:17 192.168.0.4:49624 VERIFY OK: depth=1, CN=OpenVPN-CA
+2026-04-15 18:22:17 192.168.0.4:49624 VERIFY OK: depth=0, CN=test
+2026-04-15 18:22:17 192.168.0.4:49624 peer info: IV_VER=2.5.11
+2026-04-15 18:22:17 192.168.0.4:49624 peer info: IV_PLAT=linux
+2026-04-15 18:22:17 192.168.0.4:49624 peer info: IV_PROTO=6
+2026-04-15 18:22:17 192.168.0.4:49624 peer info: IV_NCP=2
+2026-04-15 18:22:17 192.168.0.4:49624 peer info: IV_CIPHERS=AES-256-GCM:AES-128-GCM:CHACHA20-POLY1305:AES-256-CBC
+2026-04-15 18:22:17 192.168.0.4:49624 peer info: IV_LZ4=1
+2026-04-15 18:22:17 192.168.0.4:49624 peer info: IV_LZ4v2=1
+2026-04-15 18:22:17 192.168.0.4:49624 peer info: IV_LZO=1
+2026-04-15 18:22:17 192.168.0.4:49624 peer info: IV_COMP_STUB=1
+2026-04-15 18:22:17 192.168.0.4:49624 peer info: IV_COMP_STUBv2=1
+2026-04-15 18:22:17 192.168.0.4:49624 peer info: IV_TCPNL=1
+2026-04-15 18:22:17 192.168.0.4:49624 Control Channel: TLSv1.3, cipher TLSv1.3 TLS_AES_256_GCM_SHA384, peer certificate: 2048 bit RSA, signature: RSA-SHA256
+2026-04-15 18:22:17 192.168.0.4:49624 [test] Peer Connection Initiated with [AF_INET]192.168.0.4:49624
+2026-04-15 18:22:17 test/192.168.0.4:49624 MULTI_sva: pool returned IPv4=10.8.0.3, IPv6=(Not enabled)
+2026-04-15 18:22:17 test/192.168.0.4:49624 OPTIONS IMPORT: reading client specific options from: /tmp/openvpn_cc_787093c80b16cb98357d9841e7f52fe8.tmp
+2026-04-15 18:22:17 test/192.168.0.4:49624 MULTI: Learn: 10.8.0.3 -> test/192.168.0.4:49624
+2026-04-15 18:22:17 test/192.168.0.4:49624 MULTI: primary virtual IP for test/192.168.0.4:49624: 10.8.0.3
+2026-04-15 18:22:17 test/192.168.0.4:49624 Data Channel: using negotiated cipher 'AES-256-GCM'
+2026-04-15 18:22:17 test/192.168.0.4:49624 Outgoing Data Channel: Cipher 'AES-256-GCM' initialized with 256 bit key
+2026-04-15 18:22:17 test/192.168.0.4:49624 Incoming Data Channel: Cipher 'AES-256-GCM' initialized with 256 bit key
+2026-04-15 18:22:17 test/192.168.0.4:49624 SENT CONTROL [test]: 'PUSH_REPLY,route 10.10.100.0 255.255.255.0,route 10.10.98.0 255.255.255.0,route-gateway 10.8.0.1,topology subnet,ping 10,ping-restart 120,ifconfig 10.8.0.3 255.255.255.0,peer-id 0,cipher AES-256-GCM' (status=1)
+2026-04-15 18:22:32 --cipher is not set. Previous OpenVPN version defaulted to BF-CBC as fallback when cipher negotiation failed in this case. If you need this fallback please add '--data-ciphers-fallback BF-CBC' to your configuration and/or add BF-CBC to --data-ciphers.
+2026-04-15 18:22:32 WARNING: Using --management on a TCP port WITHOUT passwords is STRONGLY discouraged and considered insecure
+2026-04-15 18:22:32 WARNING: file '/etc/openvpn/server/server.key' is group or others accessible
+2026-04-15 18:22:32 OpenVPN 2.5.11 x86_64-pc-linux-gnu [SSL (OpenSSL)] [LZO] [LZ4] [EPOLL] [PKCS11] [MH/PKTINFO] [AEAD] built on Sep 17 2024
+2026-04-15 18:22:32 library versions: OpenSSL 3.0.2 15 Mar 2022, LZO 2.10
+2026-04-15 18:22:32 MANAGEMENT: TCP Socket listening on [AF_INET]127.0.0.1:7505
+2026-04-15 18:22:32 net_route_v4_best_gw query: dst 0.0.0.0
+2026-04-15 18:22:32 net_route_v4_best_gw result: via 192.168.0.1 dev eth0
+2026-04-15 18:22:32 NOTE: your local LAN uses the extremely common subnet address 192.168.0.x or 192.168.1.x.  Be aware that this might create routing conflicts if you connect to the VPN server from public locations such as internet cafes that use the same subnet.
+2026-04-15 18:22:32 NOTE: the current --script-security setting may allow this configuration to call user-defined scripts
+2026-04-15 18:22:32 Diffie-Hellman initialized with 2048 bit key
+2026-04-15 18:22:32 Outgoing Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 18:22:32 Incoming Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 18:22:32 TUN/TAP device tun0 opened
+2026-04-15 18:22:32 net_iface_mtu_set: mtu 1500 for tun0
+2026-04-15 18:22:32 net_iface_up: set tun0 up
+2026-04-15 18:22:32 net_addr_v4_add: 10.8.0.1/24 dev tun0
+2026-04-15 18:22:32 Could not determine IPv4/IPv6 protocol. Using AF_INET
+2026-04-15 18:22:32 Socket Buffers: R=[131072->131072] S=[16384->16384]
+2026-04-15 18:22:32 Listening for incoming TCP connection on [AF_INET][undef]:4500
+2026-04-15 18:22:32 TCPv4_SERVER link local (bound): [AF_INET][undef]:4500
+2026-04-15 18:22:32 TCPv4_SERVER link remote: [AF_UNSPEC]
+2026-04-15 18:22:32 GID set to nogroup
+2026-04-15 18:22:32 UID set to nobody
+2026-04-15 18:22:32 MULTI: multi_init called, r=256 v=256
+2026-04-15 18:22:32 IFCONFIG POOL IPv4: base=10.8.0.2 size=253
+2026-04-15 18:22:32 ifconfig_pool_read(), in='Super Admin,10.8.0.2,'
+2026-04-15 18:22:32 succeeded -> ifconfig_pool_set(hand=0)
+2026-04-15 18:22:32 ifconfig_pool_read(), in='test,10.8.0.3,'
+2026-04-15 18:22:32 succeeded -> ifconfig_pool_set(hand=1)
+2026-04-15 18:22:32 IFCONFIG POOL LIST
+2026-04-15 18:22:32 Super Admin,10.8.0.2,
+2026-04-15 18:22:32 test,10.8.0.3,
+2026-04-15 18:22:32 MULTI: TCP INIT maxclients=1024 maxevents=1028
+2026-04-15 18:22:32 Initialization Sequence Completed
+2026-04-15 18:22:35 Outgoing Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 18:22:35 Incoming Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 18:22:35 TCP connection established with [AF_INET]192.168.0.4:41196
+2026-04-15 18:22:35 192.168.0.4:41196 TLS: Initial packet from [AF_INET]192.168.0.4:41196, sid=c39df7d4 e3e2bdfe
+2026-04-15 18:22:35 192.168.0.4:41196 VERIFY OK: depth=1, CN=OpenVPN-CA
+2026-04-15 18:22:35 192.168.0.4:41196 VERIFY OK: depth=0, CN=test
+2026-04-15 18:22:35 192.168.0.4:41196 peer info: IV_VER=2.5.11
+2026-04-15 18:22:35 192.168.0.4:41196 peer info: IV_PLAT=linux
+2026-04-15 18:22:35 192.168.0.4:41196 peer info: IV_PROTO=6
+2026-04-15 18:22:35 192.168.0.4:41196 peer info: IV_NCP=2
+2026-04-15 18:22:35 192.168.0.4:41196 peer info: IV_CIPHERS=AES-256-GCM:AES-128-GCM:CHACHA20-POLY1305:AES-256-CBC
+2026-04-15 18:22:35 192.168.0.4:41196 peer info: IV_LZ4=1
+2026-04-15 18:22:35 192.168.0.4:41196 peer info: IV_LZ4v2=1
+2026-04-15 18:22:35 192.168.0.4:41196 peer info: IV_LZO=1
+2026-04-15 18:22:35 192.168.0.4:41196 peer info: IV_COMP_STUB=1
+2026-04-15 18:22:35 192.168.0.4:41196 peer info: IV_COMP_STUBv2=1
+2026-04-15 18:22:35 192.168.0.4:41196 peer info: IV_TCPNL=1
+2026-04-15 18:22:35 192.168.0.4:41196 Control Channel: TLSv1.3, cipher TLSv1.3 TLS_AES_256_GCM_SHA384, peer certificate: 2048 bit RSA, signature: RSA-SHA256
+2026-04-15 18:22:35 192.168.0.4:41196 [test] Peer Connection Initiated with [AF_INET]192.168.0.4:41196
+2026-04-15 18:22:35 test/192.168.0.4:41196 MULTI_sva: pool returned IPv4=10.8.0.3, IPv6=(Not enabled)
+2026-04-15 18:22:35 test/192.168.0.4:41196 OPTIONS IMPORT: reading client specific options from: /tmp/openvpn_cc_10a389cf8deb5f79613bc66110f2fbc4.tmp
+2026-04-15 18:22:35 test/192.168.0.4:41196 MULTI: Learn: 10.8.0.3 -> test/192.168.0.4:41196
+2026-04-15 18:22:35 test/192.168.0.4:41196 MULTI: primary virtual IP for test/192.168.0.4:41196: 10.8.0.3
+2026-04-15 18:22:35 test/192.168.0.4:41196 Data Channel: using negotiated cipher 'AES-256-GCM'
+2026-04-15 18:22:35 test/192.168.0.4:41196 Outgoing Data Channel: Cipher 'AES-256-GCM' initialized with 256 bit key
+2026-04-15 18:22:35 test/192.168.0.4:41196 Incoming Data Channel: Cipher 'AES-256-GCM' initialized with 256 bit key
+2026-04-15 18:22:35 test/192.168.0.4:41196 SENT CONTROL [test]: 'PUSH_REPLY,route 10.10.100.0 255.255.255.0,route 10.10.98.0 255.255.255.0,route-gateway 10.8.0.1,topology subnet,ping 10,ping-restart 120,ifconfig 10.8.0.3 255.255.255.0,peer-id 0,cipher AES-256-GCM' (status=1)
+2026-04-15 18:29:48 --cipher is not set. Previous OpenVPN version defaulted to BF-CBC as fallback when cipher negotiation failed in this case. If you need this fallback please add '--data-ciphers-fallback BF-CBC' to your configuration and/or add BF-CBC to --data-ciphers.
+2026-04-15 18:29:48 WARNING: Using --management on a TCP port WITHOUT passwords is STRONGLY discouraged and considered insecure
+2026-04-15 18:29:48 WARNING: file '/etc/openvpn/server/server.key' is group or others accessible
+2026-04-15 18:29:48 OpenVPN 2.5.11 x86_64-pc-linux-gnu [SSL (OpenSSL)] [LZO] [LZ4] [EPOLL] [PKCS11] [MH/PKTINFO] [AEAD] built on Sep 17 2024
+2026-04-15 18:29:48 library versions: OpenSSL 3.0.2 15 Mar 2022, LZO 2.10
+2026-04-15 18:29:48 MANAGEMENT: TCP Socket listening on [AF_INET]127.0.0.1:7505
+2026-04-15 18:29:48 net_route_v4_best_gw query: dst 0.0.0.0
+2026-04-15 18:29:48 net_route_v4_best_gw result: via 192.168.0.1 dev eth0
+2026-04-15 18:29:48 NOTE: your local LAN uses the extremely common subnet address 192.168.0.x or 192.168.1.x.  Be aware that this might create routing conflicts if you connect to the VPN server from public locations such as internet cafes that use the same subnet.
+2026-04-15 18:29:48 NOTE: the current --script-security setting may allow this configuration to call user-defined scripts
+2026-04-15 18:29:48 Diffie-Hellman initialized with 2048 bit key
+2026-04-15 18:29:48 Outgoing Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 18:29:48 Incoming Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 18:29:48 TUN/TAP device tun0 opened
+2026-04-15 18:29:48 net_iface_mtu_set: mtu 1500 for tun0
+2026-04-15 18:29:48 net_iface_up: set tun0 up
+2026-04-15 18:29:48 net_addr_v4_add: 10.8.0.1/24 dev tun0
+2026-04-15 18:29:48 Could not determine IPv4/IPv6 protocol. Using AF_INET
+2026-04-15 18:29:48 Socket Buffers: R=[131072->131072] S=[16384->16384]
+2026-04-15 18:29:48 Listening for incoming TCP connection on [AF_INET][undef]:4500
+2026-04-15 18:29:48 TCPv4_SERVER link local (bound): [AF_INET][undef]:4500
+2026-04-15 18:29:48 TCPv4_SERVER link remote: [AF_UNSPEC]
+2026-04-15 18:29:48 GID set to nogroup
+2026-04-15 18:29:48 UID set to nobody
+2026-04-15 18:29:48 MULTI: multi_init called, r=256 v=256
+2026-04-15 18:29:48 IFCONFIG POOL IPv4: base=10.8.0.2 size=253
+2026-04-15 18:29:48 ifconfig_pool_read(), in='Super Admin,10.8.0.2,'
+2026-04-15 18:29:48 succeeded -> ifconfig_pool_set(hand=0)
+2026-04-15 18:29:48 ifconfig_pool_read(), in='test,10.8.0.3,'
+2026-04-15 18:29:48 succeeded -> ifconfig_pool_set(hand=1)
+2026-04-15 18:29:48 IFCONFIG POOL LIST
+2026-04-15 18:29:48 Super Admin,10.8.0.2,
+2026-04-15 18:29:48 test,10.8.0.3,
+2026-04-15 18:29:48 MULTI: TCP INIT maxclients=1024 maxevents=1028
+2026-04-15 18:29:48 Initialization Sequence Completed
+2026-04-15 18:29:51 Outgoing Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 18:29:51 Incoming Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 18:29:51 TCP connection established with [AF_INET]192.168.0.4:43568
+2026-04-15 18:29:51 192.168.0.4:43568 TLS: Initial packet from [AF_INET]192.168.0.4:43568, sid=4cdfd773 bb28bdca
+2026-04-15 18:29:51 192.168.0.4:43568 VERIFY OK: depth=1, CN=OpenVPN-CA
+2026-04-15 18:29:51 192.168.0.4:43568 VERIFY OK: depth=0, CN=test
+2026-04-15 18:29:51 192.168.0.4:43568 peer info: IV_VER=2.5.11
+2026-04-15 18:29:51 192.168.0.4:43568 peer info: IV_PLAT=linux
+2026-04-15 18:29:51 192.168.0.4:43568 peer info: IV_PROTO=6
+2026-04-15 18:29:51 192.168.0.4:43568 peer info: IV_NCP=2
+2026-04-15 18:29:51 192.168.0.4:43568 peer info: IV_CIPHERS=AES-256-GCM:AES-128-GCM:CHACHA20-POLY1305:AES-256-CBC
+2026-04-15 18:29:51 192.168.0.4:43568 peer info: IV_LZ4=1
+2026-04-15 18:29:51 192.168.0.4:43568 peer info: IV_LZ4v2=1
+2026-04-15 18:29:51 192.168.0.4:43568 peer info: IV_LZO=1
+2026-04-15 18:29:51 192.168.0.4:43568 peer info: IV_COMP_STUB=1
+2026-04-15 18:29:51 192.168.0.4:43568 peer info: IV_COMP_STUBv2=1
+2026-04-15 18:29:51 192.168.0.4:43568 peer info: IV_TCPNL=1
+2026-04-15 18:29:51 192.168.0.4:43568 Control Channel: TLSv1.3, cipher TLSv1.3 TLS_AES_256_GCM_SHA384, peer certificate: 2048 bit RSA, signature: RSA-SHA256
+2026-04-15 18:29:51 192.168.0.4:43568 [test] Peer Connection Initiated with [AF_INET]192.168.0.4:43568
+2026-04-15 18:29:51 test/192.168.0.4:43568 MULTI_sva: pool returned IPv4=10.8.0.3, IPv6=(Not enabled)
+2026-04-15 18:29:51 test/192.168.0.4:43568 OPTIONS IMPORT: reading client specific options from: /tmp/openvpn_cc_62eafe745b4a82793b7791261d7261f7.tmp
+2026-04-15 18:29:51 test/192.168.0.4:43568 MULTI: Learn: 10.8.0.3 -> test/192.168.0.4:43568
+2026-04-15 18:29:51 test/192.168.0.4:43568 MULTI: primary virtual IP for test/192.168.0.4:43568: 10.8.0.3
+2026-04-15 18:29:51 test/192.168.0.4:43568 Data Channel: using negotiated cipher 'AES-256-GCM'
+2026-04-15 18:29:51 test/192.168.0.4:43568 Outgoing Data Channel: Cipher 'AES-256-GCM' initialized with 256 bit key
+2026-04-15 18:29:51 test/192.168.0.4:43568 Incoming Data Channel: Cipher 'AES-256-GCM' initialized with 256 bit key
+2026-04-15 18:29:51 test/192.168.0.4:43568 SENT CONTROL [test]: 'PUSH_REPLY,route 10.10.100.0 255.255.255.0,route 10.10.98.0 255.255.255.0,route-gateway 10.8.0.1,topology subnet,ping 10,ping-restart 120,ifconfig 10.8.0.3 255.255.255.0,peer-id 0,cipher AES-256-GCM' (status=1)
+2026-04-15 18:34:07 --cipher is not set. Previous OpenVPN version defaulted to BF-CBC as fallback when cipher negotiation failed in this case. If you need this fallback please add '--data-ciphers-fallback BF-CBC' to your configuration and/or add BF-CBC to --data-ciphers.
+2026-04-15 18:34:07 WARNING: Using --management on a TCP port WITHOUT passwords is STRONGLY discouraged and considered insecure
+2026-04-15 18:34:07 WARNING: file '/etc/openvpn/server/server.key' is group or others accessible
+2026-04-15 18:34:07 OpenVPN 2.5.11 x86_64-pc-linux-gnu [SSL (OpenSSL)] [LZO] [LZ4] [EPOLL] [PKCS11] [MH/PKTINFO] [AEAD] built on Sep 17 2024
+2026-04-15 18:34:07 library versions: OpenSSL 3.0.2 15 Mar 2022, LZO 2.10
+2026-04-15 18:34:07 MANAGEMENT: TCP Socket listening on [AF_INET]127.0.0.1:7505
+2026-04-15 18:34:07 net_route_v4_best_gw query: dst 0.0.0.0
+2026-04-15 18:34:07 net_route_v4_best_gw result: via 192.168.0.1 dev eth0
+2026-04-15 18:34:07 NOTE: your local LAN uses the extremely common subnet address 192.168.0.x or 192.168.1.x.  Be aware that this might create routing conflicts if you connect to the VPN server from public locations such as internet cafes that use the same subnet.
+2026-04-15 18:34:07 NOTE: the current --script-security setting may allow this configuration to call user-defined scripts
+2026-04-15 18:34:07 Diffie-Hellman initialized with 2048 bit key
+2026-04-15 18:34:07 Outgoing Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 18:34:07 Incoming Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 18:34:07 TUN/TAP device tun0 opened
+2026-04-15 18:34:07 net_iface_mtu_set: mtu 1500 for tun0
+2026-04-15 18:34:07 net_iface_up: set tun0 up
+2026-04-15 18:34:07 net_addr_v4_add: 10.8.0.1/24 dev tun0
+2026-04-15 18:34:07 Could not determine IPv4/IPv6 protocol. Using AF_INET
+2026-04-15 18:34:07 Socket Buffers: R=[131072->131072] S=[16384->16384]
+2026-04-15 18:34:07 Listening for incoming TCP connection on [AF_INET][undef]:4500
+2026-04-15 18:34:07 TCPv4_SERVER link local (bound): [AF_INET][undef]:4500
+2026-04-15 18:34:07 TCPv4_SERVER link remote: [AF_UNSPEC]
+2026-04-15 18:34:07 GID set to nogroup
+2026-04-15 18:34:07 UID set to nobody
+2026-04-15 18:34:07 MULTI: multi_init called, r=256 v=256
+2026-04-15 18:34:07 IFCONFIG POOL IPv4: base=10.8.0.2 size=253
+2026-04-15 18:34:07 ifconfig_pool_read(), in='Super Admin,10.8.0.2,'
+2026-04-15 18:34:07 succeeded -> ifconfig_pool_set(hand=0)
+2026-04-15 18:34:07 ifconfig_pool_read(), in='test,10.8.0.3,'
+2026-04-15 18:34:07 succeeded -> ifconfig_pool_set(hand=1)
+2026-04-15 18:34:07 IFCONFIG POOL LIST
+2026-04-15 18:34:07 Super Admin,10.8.0.2,
+2026-04-15 18:34:07 test,10.8.0.3,
+2026-04-15 18:34:07 MULTI: TCP INIT maxclients=1024 maxevents=1028
+2026-04-15 18:34:07 Initialization Sequence Completed
+2026-04-15 18:34:09 Outgoing Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 18:34:09 Incoming Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 18:34:09 TCP connection established with [AF_INET]192.168.0.4:56486
+2026-04-15 18:34:09 192.168.0.4:56486 TLS: Initial packet from [AF_INET]192.168.0.4:56486, sid=4381e6d9 4ad91d03
+2026-04-15 18:34:09 192.168.0.4:56486 VERIFY OK: depth=1, CN=OpenVPN-CA
+2026-04-15 18:34:09 192.168.0.4:56486 VERIFY OK: depth=0, CN=test
+2026-04-15 18:34:09 192.168.0.4:56486 peer info: IV_VER=2.5.11
+2026-04-15 18:34:09 192.168.0.4:56486 peer info: IV_PLAT=linux
+2026-04-15 18:34:09 192.168.0.4:56486 peer info: IV_PROTO=6
+2026-04-15 18:34:09 192.168.0.4:56486 peer info: IV_NCP=2
+2026-04-15 18:34:09 192.168.0.4:56486 peer info: IV_CIPHERS=AES-256-GCM:AES-128-GCM:CHACHA20-POLY1305:AES-256-CBC
+2026-04-15 18:34:09 192.168.0.4:56486 peer info: IV_LZ4=1
+2026-04-15 18:34:09 192.168.0.4:56486 peer info: IV_LZ4v2=1
+2026-04-15 18:34:09 192.168.0.4:56486 peer info: IV_LZO=1
+2026-04-15 18:34:09 192.168.0.4:56486 peer info: IV_COMP_STUB=1
+2026-04-15 18:34:09 192.168.0.4:56486 peer info: IV_COMP_STUBv2=1
+2026-04-15 18:34:09 192.168.0.4:56486 peer info: IV_TCPNL=1
+2026-04-15 18:34:09 192.168.0.4:56486 Control Channel: TLSv1.3, cipher TLSv1.3 TLS_AES_256_GCM_SHA384, peer certificate: 2048 bit RSA, signature: RSA-SHA256
+2026-04-15 18:34:09 192.168.0.4:56486 [test] Peer Connection Initiated with [AF_INET]192.168.0.4:56486
+2026-04-15 18:34:09 test/192.168.0.4:56486 MULTI_sva: pool returned IPv4=10.8.0.3, IPv6=(Not enabled)
+2026-04-15 18:34:09 test/192.168.0.4:56486 OPTIONS IMPORT: reading client specific options from: /tmp/openvpn_cc_13ef2c17847d6e1e49eaf83c20a490b9.tmp
+2026-04-15 18:34:09 test/192.168.0.4:56486 MULTI: Learn: 10.8.0.3 -> test/192.168.0.4:56486
+2026-04-15 18:34:09 test/192.168.0.4:56486 MULTI: primary virtual IP for test/192.168.0.4:56486: 10.8.0.3
+2026-04-15 18:34:09 test/192.168.0.4:56486 Data Channel: using negotiated cipher 'AES-256-GCM'
+2026-04-15 18:34:09 test/192.168.0.4:56486 Outgoing Data Channel: Cipher 'AES-256-GCM' initialized with 256 bit key
+2026-04-15 18:34:09 test/192.168.0.4:56486 Incoming Data Channel: Cipher 'AES-256-GCM' initialized with 256 bit key
+2026-04-15 18:34:09 test/192.168.0.4:56486 SENT CONTROL [test]: 'PUSH_REPLY,route 10.10.100.0 255.255.255.0,route 10.10.98.0 255.255.255.0,route-gateway 10.8.0.1,topology subnet,ping 10,ping-restart 120,ifconfig 10.8.0.3 255.255.255.0,peer-id 0,cipher AES-256-GCM' (status=1)
+2026-04-15 18:39:10 --cipher is not set. Previous OpenVPN version defaulted to BF-CBC as fallback when cipher negotiation failed in this case. If you need this fallback please add '--data-ciphers-fallback BF-CBC' to your configuration and/or add BF-CBC to --data-ciphers.
+2026-04-15 18:39:10 WARNING: Using --management on a TCP port WITHOUT passwords is STRONGLY discouraged and considered insecure
+2026-04-15 18:39:10 WARNING: file '/etc/openvpn/server/server.key' is group or others accessible
+2026-04-15 18:39:10 OpenVPN 2.5.11 x86_64-pc-linux-gnu [SSL (OpenSSL)] [LZO] [LZ4] [EPOLL] [PKCS11] [MH/PKTINFO] [AEAD] built on Sep 17 2024
+2026-04-15 18:39:10 library versions: OpenSSL 3.0.2 15 Mar 2022, LZO 2.10
+2026-04-15 18:39:10 MANAGEMENT: TCP Socket listening on [AF_INET]127.0.0.1:7505
+2026-04-15 18:39:10 net_route_v4_best_gw query: dst 0.0.0.0
+2026-04-15 18:39:10 net_route_v4_best_gw result: via 192.168.0.1 dev eth0
+2026-04-15 18:39:10 NOTE: your local LAN uses the extremely common subnet address 192.168.0.x or 192.168.1.x.  Be aware that this might create routing conflicts if you connect to the VPN server from public locations such as internet cafes that use the same subnet.
+2026-04-15 18:39:10 NOTE: the current --script-security setting may allow this configuration to call user-defined scripts
+2026-04-15 18:39:10 Diffie-Hellman initialized with 2048 bit key
+2026-04-15 18:39:10 Outgoing Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 18:39:10 Incoming Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 18:39:10 TUN/TAP device tun0 opened
+2026-04-15 18:39:10 net_iface_mtu_set: mtu 1500 for tun0
+2026-04-15 18:39:10 net_iface_up: set tun0 up
+2026-04-15 18:39:10 net_addr_v4_add: 10.8.0.1/24 dev tun0
+2026-04-15 18:39:10 Could not determine IPv4/IPv6 protocol. Using AF_INET
+2026-04-15 18:39:10 Socket Buffers: R=[131072->131072] S=[16384->16384]
+2026-04-15 18:39:10 Listening for incoming TCP connection on [AF_INET][undef]:4500
+2026-04-15 18:39:10 TCPv4_SERVER link local (bound): [AF_INET][undef]:4500
+2026-04-15 18:39:10 TCPv4_SERVER link remote: [AF_UNSPEC]
+2026-04-15 18:39:10 GID set to nogroup
+2026-04-15 18:39:10 UID set to nobody
+2026-04-15 18:39:10 MULTI: multi_init called, r=256 v=256
+2026-04-15 18:39:10 IFCONFIG POOL IPv4: base=10.8.0.2 size=253
+2026-04-15 18:39:10 ifconfig_pool_read(), in='Super Admin,10.8.0.2,'
+2026-04-15 18:39:10 succeeded -> ifconfig_pool_set(hand=0)
+2026-04-15 18:39:10 ifconfig_pool_read(), in='test,10.8.0.3,'
+2026-04-15 18:39:10 succeeded -> ifconfig_pool_set(hand=1)
+2026-04-15 18:39:10 IFCONFIG POOL LIST
+2026-04-15 18:39:10 Super Admin,10.8.0.2,
+2026-04-15 18:39:10 test,10.8.0.3,
+2026-04-15 18:39:10 MULTI: TCP INIT maxclients=1024 maxevents=1028
+2026-04-15 18:39:10 Initialization Sequence Completed
+2026-04-15 18:39:12 Outgoing Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 18:39:12 Incoming Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 18:39:12 TCP connection established with [AF_INET]192.168.0.4:37040
+2026-04-15 18:39:12 192.168.0.4:37040 TLS: Initial packet from [AF_INET]192.168.0.4:37040, sid=cbe59c6b e7e40708
+2026-04-15 18:39:12 192.168.0.4:37040 VERIFY OK: depth=1, CN=OpenVPN-CA
+2026-04-15 18:39:12 192.168.0.4:37040 VERIFY OK: depth=0, CN=test
+2026-04-15 18:39:12 192.168.0.4:37040 peer info: IV_VER=2.5.11
+2026-04-15 18:39:12 192.168.0.4:37040 peer info: IV_PLAT=linux
+2026-04-15 18:39:12 192.168.0.4:37040 peer info: IV_PROTO=6
+2026-04-15 18:39:12 192.168.0.4:37040 peer info: IV_NCP=2
+2026-04-15 18:39:12 192.168.0.4:37040 peer info: IV_CIPHERS=AES-256-GCM:AES-128-GCM:CHACHA20-POLY1305:AES-256-CBC
+2026-04-15 18:39:12 192.168.0.4:37040 peer info: IV_LZ4=1
+2026-04-15 18:39:12 192.168.0.4:37040 peer info: IV_LZ4v2=1
+2026-04-15 18:39:12 192.168.0.4:37040 peer info: IV_LZO=1
+2026-04-15 18:39:12 192.168.0.4:37040 peer info: IV_COMP_STUB=1
+2026-04-15 18:39:12 192.168.0.4:37040 peer info: IV_COMP_STUBv2=1
+2026-04-15 18:39:12 192.168.0.4:37040 peer info: IV_TCPNL=1
+2026-04-15 18:39:12 192.168.0.4:37040 Control Channel: TLSv1.3, cipher TLSv1.3 TLS_AES_256_GCM_SHA384, peer certificate: 2048 bit RSA, signature: RSA-SHA256
+2026-04-15 18:39:12 192.168.0.4:37040 [test] Peer Connection Initiated with [AF_INET]192.168.0.4:37040
+2026-04-15 18:39:12 test/192.168.0.4:37040 MULTI_sva: pool returned IPv4=10.8.0.3, IPv6=(Not enabled)
+2026-04-15 18:39:12 test/192.168.0.4:37040 OPTIONS IMPORT: reading client specific options from: /tmp/openvpn_cc_6da0845981112a656313eb52b89867e2.tmp
+2026-04-15 18:39:12 test/192.168.0.4:37040 MULTI: Learn: 10.8.0.3 -> test/192.168.0.4:37040
+2026-04-15 18:39:12 test/192.168.0.4:37040 MULTI: primary virtual IP for test/192.168.0.4:37040: 10.8.0.3
+2026-04-15 18:39:12 test/192.168.0.4:37040 Data Channel: using negotiated cipher 'AES-256-GCM'
+2026-04-15 18:39:12 test/192.168.0.4:37040 Outgoing Data Channel: Cipher 'AES-256-GCM' initialized with 256 bit key
+2026-04-15 18:39:12 test/192.168.0.4:37040 Incoming Data Channel: Cipher 'AES-256-GCM' initialized with 256 bit key
+2026-04-15 18:39:12 test/192.168.0.4:37040 SENT CONTROL [test]: 'PUSH_REPLY,route 10.10.100.0 255.255.255.0,route 10.10.98.0 255.255.255.0,route-gateway 10.8.0.1,topology subnet,ping 10,ping-restart 120,ifconfig 10.8.0.3 255.255.255.0,peer-id 0,cipher AES-256-GCM' (status=1)
+2026-04-15 21:11:57 --cipher is not set. Previous OpenVPN version defaulted to BF-CBC as fallback when cipher negotiation failed in this case. If you need this fallback please add '--data-ciphers-fallback BF-CBC' to your configuration and/or add BF-CBC to --data-ciphers.
+2026-04-15 21:11:58 WARNING: Using --management on a TCP port WITHOUT passwords is STRONGLY discouraged and considered insecure
+2026-04-15 21:11:58 WARNING: file '/etc/openvpn/server/server.key' is group or others accessible
+2026-04-15 21:11:58 OpenVPN 2.5.11 x86_64-pc-linux-gnu [SSL (OpenSSL)] [LZO] [LZ4] [EPOLL] [PKCS11] [MH/PKTINFO] [AEAD] built on Sep 17 2024
+2026-04-15 21:11:58 library versions: OpenSSL 3.0.2 15 Mar 2022, LZO 2.10
+2026-04-15 21:11:58 MANAGEMENT: TCP Socket listening on [AF_INET]127.0.0.1:7505
+2026-04-15 21:11:58 net_route_v4_best_gw query: dst 0.0.0.0
+2026-04-15 21:11:58 net_route_v4_best_gw result: via 192.168.0.1 dev eth0
+2026-04-15 21:11:58 NOTE: your local LAN uses the extremely common subnet address 192.168.0.x or 192.168.1.x.  Be aware that this might create routing conflicts if you connect to the VPN server from public locations such as internet cafes that use the same subnet.
+2026-04-15 21:11:58 NOTE: the current --script-security setting may allow this configuration to call user-defined scripts
+2026-04-15 21:11:58 Diffie-Hellman initialized with 2048 bit key
+2026-04-15 21:11:59 Outgoing Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 21:11:59 Incoming Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 21:11:59 TUN/TAP device tun0 opened
+2026-04-15 21:11:59 net_iface_mtu_set: mtu 1500 for tun0
+2026-04-15 21:11:59 net_iface_up: set tun0 up
+2026-04-15 21:11:59 net_addr_v4_add: 10.8.0.1/24 dev tun0
+2026-04-15 21:11:59 Could not determine IPv4/IPv6 protocol. Using AF_INET
+2026-04-15 21:11:59 Socket Buffers: R=[131072->131072] S=[16384->16384]
+2026-04-15 21:11:59 Listening for incoming TCP connection on [AF_INET][undef]:4500
+2026-04-15 21:11:59 TCPv4_SERVER link local (bound): [AF_INET][undef]:4500
+2026-04-15 21:11:59 TCPv4_SERVER link remote: [AF_UNSPEC]
+2026-04-15 21:11:59 GID set to nogroup
+2026-04-15 21:11:59 UID set to nobody
+2026-04-15 21:11:59 MULTI: multi_init called, r=256 v=256
+2026-04-15 21:11:59 IFCONFIG POOL IPv4: base=10.8.0.2 size=253
+2026-04-15 21:11:59 ifconfig_pool_read(), in='Super Admin,10.8.0.2,'
+2026-04-15 21:11:59 succeeded -> ifconfig_pool_set(hand=0)
+2026-04-15 21:11:59 ifconfig_pool_read(), in='test,10.8.0.3,'
+2026-04-15 21:11:59 succeeded -> ifconfig_pool_set(hand=1)
+2026-04-15 21:11:59 IFCONFIG POOL LIST
+2026-04-15 21:11:59 Super Admin,10.8.0.2,
+2026-04-15 21:11:59 test,10.8.0.3,
+2026-04-15 21:11:59 MULTI: TCP INIT maxclients=1024 maxevents=1028
+2026-04-15 21:11:59 Initialization Sequence Completed
+2026-04-15 21:12:09 --cipher is not set. Previous OpenVPN version defaulted to BF-CBC as fallback when cipher negotiation failed in this case. If you need this fallback please add '--data-ciphers-fallback BF-CBC' to your configuration and/or add BF-CBC to --data-ciphers.
+2026-04-15 21:12:09 WARNING: Using --management on a TCP port WITHOUT passwords is STRONGLY discouraged and considered insecure
+2026-04-15 21:12:09 WARNING: file '/etc/openvpn/server/server.key' is group or others accessible
+2026-04-15 21:12:09 OpenVPN 2.5.11 x86_64-pc-linux-gnu [SSL (OpenSSL)] [LZO] [LZ4] [EPOLL] [PKCS11] [MH/PKTINFO] [AEAD] built on Sep 17 2024
+2026-04-15 21:12:09 library versions: OpenSSL 3.0.2 15 Mar 2022, LZO 2.10
+2026-04-15 21:12:09 MANAGEMENT: TCP Socket listening on [AF_INET]127.0.0.1:7505
+2026-04-15 21:12:09 net_route_v4_best_gw query: dst 0.0.0.0
+2026-04-15 21:12:09 net_route_v4_best_gw result: via 192.168.0.1 dev eth0
+2026-04-15 21:12:09 NOTE: your local LAN uses the extremely common subnet address 192.168.0.x or 192.168.1.x.  Be aware that this might create routing conflicts if you connect to the VPN server from public locations such as internet cafes that use the same subnet.
+2026-04-15 21:12:09 NOTE: the current --script-security setting may allow this configuration to call user-defined scripts
+2026-04-15 21:12:09 Diffie-Hellman initialized with 2048 bit key
+2026-04-15 21:12:09 Outgoing Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 21:12:09 Incoming Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 21:12:09 TUN/TAP device tun0 opened
+2026-04-15 21:12:09 net_iface_mtu_set: mtu 1500 for tun0
+2026-04-15 21:12:09 net_iface_up: set tun0 up
+2026-04-15 21:12:09 net_addr_v4_add: 10.8.0.1/24 dev tun0
+2026-04-15 21:12:09 Could not determine IPv4/IPv6 protocol. Using AF_INET
+2026-04-15 21:12:09 Socket Buffers: R=[131072->131072] S=[16384->16384]
+2026-04-15 21:12:09 Listening for incoming TCP connection on [AF_INET][undef]:4500
+2026-04-15 21:12:09 TCPv4_SERVER link local (bound): [AF_INET][undef]:4500
+2026-04-15 21:12:09 TCPv4_SERVER link remote: [AF_UNSPEC]
+2026-04-15 21:12:09 GID set to nogroup
+2026-04-15 21:12:09 UID set to nobody
+2026-04-15 21:12:09 MULTI: multi_init called, r=256 v=256
+2026-04-15 21:12:09 IFCONFIG POOL IPv4: base=10.8.0.2 size=253
+2026-04-15 21:12:09 ifconfig_pool_read(), in='Super Admin,10.8.0.2,'
+2026-04-15 21:12:09 succeeded -> ifconfig_pool_set(hand=0)
+2026-04-15 21:12:09 ifconfig_pool_read(), in='test,10.8.0.3,'
+2026-04-15 21:12:09 succeeded -> ifconfig_pool_set(hand=1)
+2026-04-15 21:12:09 IFCONFIG POOL LIST
+2026-04-15 21:12:09 Super Admin,10.8.0.2,
+2026-04-15 21:12:09 test,10.8.0.3,
+2026-04-15 21:12:09 MULTI: TCP INIT maxclients=1024 maxevents=1028
+2026-04-15 21:12:09 Initialization Sequence Completed
+2026-04-15 21:15:46 --cipher is not set. Previous OpenVPN version defaulted to BF-CBC as fallback when cipher negotiation failed in this case. If you need this fallback please add '--data-ciphers-fallback BF-CBC' to your configuration and/or add BF-CBC to --data-ciphers.
+2026-04-15 21:15:46 WARNING: Using --management on a TCP port WITHOUT passwords is STRONGLY discouraged and considered insecure
+2026-04-15 21:15:46 WARNING: file '/etc/openvpn/server/server.key' is group or others accessible
+2026-04-15 21:15:46 OpenVPN 2.5.11 x86_64-pc-linux-gnu [SSL (OpenSSL)] [LZO] [LZ4] [EPOLL] [PKCS11] [MH/PKTINFO] [AEAD] built on Sep 17 2024
+2026-04-15 21:15:46 library versions: OpenSSL 3.0.2 15 Mar 2022, LZO 2.10
+2026-04-15 21:15:46 MANAGEMENT: TCP Socket listening on [AF_INET]127.0.0.1:7505
+2026-04-15 21:15:46 net_route_v4_best_gw query: dst 0.0.0.0
+2026-04-15 21:15:46 net_route_v4_best_gw result: via 192.168.0.1 dev eth0
+2026-04-15 21:15:46 NOTE: your local LAN uses the extremely common subnet address 192.168.0.x or 192.168.1.x.  Be aware that this might create routing conflicts if you connect to the VPN server from public locations such as internet cafes that use the same subnet.
+2026-04-15 21:15:46 NOTE: the current --script-security setting may allow this configuration to call user-defined scripts
+2026-04-15 21:15:46 Diffie-Hellman initialized with 2048 bit key
+2026-04-15 21:15:46 Outgoing Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 21:15:46 Incoming Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 21:15:46 TUN/TAP device tun0 opened
+2026-04-15 21:15:46 net_iface_mtu_set: mtu 1500 for tun0
+2026-04-15 21:15:46 net_iface_up: set tun0 up
+2026-04-15 21:15:46 net_addr_v4_add: 10.8.0.1/24 dev tun0
+2026-04-15 21:15:46 Could not determine IPv4/IPv6 protocol. Using AF_INET
+2026-04-15 21:15:46 Socket Buffers: R=[131072->131072] S=[16384->16384]
+2026-04-15 21:15:46 Listening for incoming TCP connection on [AF_INET][undef]:4500
+2026-04-15 21:15:46 TCPv4_SERVER link local (bound): [AF_INET][undef]:4500
+2026-04-15 21:15:46 TCPv4_SERVER link remote: [AF_UNSPEC]
+2026-04-15 21:15:46 GID set to nogroup
+2026-04-15 21:15:46 UID set to nobody
+2026-04-15 21:15:46 MULTI: multi_init called, r=256 v=256
+2026-04-15 21:15:46 IFCONFIG POOL IPv4: base=10.8.0.2 size=253
+2026-04-15 21:15:46 ifconfig_pool_read(), in='Super Admin,10.8.0.2,'
+2026-04-15 21:15:46 succeeded -> ifconfig_pool_set(hand=0)
+2026-04-15 21:15:46 ifconfig_pool_read(), in='test,10.8.0.3,'
+2026-04-15 21:15:46 succeeded -> ifconfig_pool_set(hand=1)
+2026-04-15 21:15:46 IFCONFIG POOL LIST
+2026-04-15 21:15:46 Super Admin,10.8.0.2,
+2026-04-15 21:15:46 test,10.8.0.3,
+2026-04-15 21:15:46 MULTI: TCP INIT maxclients=1024 maxevents=1028
+2026-04-15 21:15:46 Initialization Sequence Completed
+2026-04-15 21:53:22 --cipher is not set. Previous OpenVPN version defaulted to BF-CBC as fallback when cipher negotiation failed in this case. If you need this fallback please add '--data-ciphers-fallback BF-CBC' to your configuration and/or add BF-CBC to --data-ciphers.
+2026-04-15 21:53:22 WARNING: Using --management on a TCP port WITHOUT passwords is STRONGLY discouraged and considered insecure
+2026-04-15 21:53:22 WARNING: file '/etc/openvpn/server/server.key' is group or others accessible
+2026-04-15 21:53:22 OpenVPN 2.5.11 x86_64-pc-linux-gnu [SSL (OpenSSL)] [LZO] [LZ4] [EPOLL] [PKCS11] [MH/PKTINFO] [AEAD] built on Sep 17 2024
+2026-04-15 21:53:22 library versions: OpenSSL 3.0.2 15 Mar 2022, LZO 2.10
+2026-04-15 21:53:22 MANAGEMENT: TCP Socket listening on [AF_INET]127.0.0.1:7505
+2026-04-15 21:53:22 net_route_v4_best_gw query: dst 0.0.0.0
+2026-04-15 21:53:22 net_route_v4_best_gw result: via 192.168.0.1 dev eth0
+2026-04-15 21:53:22 NOTE: your local LAN uses the extremely common subnet address 192.168.0.x or 192.168.1.x.  Be aware that this might create routing conflicts if you connect to the VPN server from public locations such as internet cafes that use the same subnet.
+2026-04-15 21:53:22 NOTE: the current --script-security setting may allow this configuration to call user-defined scripts
+2026-04-15 21:53:22 Diffie-Hellman initialized with 2048 bit key
+2026-04-15 21:53:22 Outgoing Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 21:53:22 Incoming Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 21:53:22 TUN/TAP device tun0 opened
+2026-04-15 21:53:22 net_iface_mtu_set: mtu 1500 for tun0
+2026-04-15 21:53:22 net_iface_up: set tun0 up
+2026-04-15 21:53:22 net_addr_v4_add: 10.8.0.1/24 dev tun0
+2026-04-15 21:53:22 Could not determine IPv4/IPv6 protocol. Using AF_INET
+2026-04-15 21:53:22 Socket Buffers: R=[131072->131072] S=[16384->16384]
+2026-04-15 21:53:22 Listening for incoming TCP connection on [AF_INET][undef]:4500
+2026-04-15 21:53:22 TCPv4_SERVER link local (bound): [AF_INET][undef]:4500
+2026-04-15 21:53:22 TCPv4_SERVER link remote: [AF_UNSPEC]
+2026-04-15 21:53:22 GID set to nogroup
+2026-04-15 21:53:22 UID set to nobody
+2026-04-15 21:53:22 MULTI: multi_init called, r=256 v=256
+2026-04-15 21:53:22 IFCONFIG POOL IPv4: base=10.8.0.2 size=253
+2026-04-15 21:53:22 ifconfig_pool_read(), in='Super Admin,10.8.0.2,'
+2026-04-15 21:53:22 succeeded -> ifconfig_pool_set(hand=0)
+2026-04-15 21:53:22 ifconfig_pool_read(), in='test,10.8.0.3,'
+2026-04-15 21:53:22 succeeded -> ifconfig_pool_set(hand=1)
+2026-04-15 21:53:22 IFCONFIG POOL LIST
+2026-04-15 21:53:22 Super Admin,10.8.0.2,
+2026-04-15 21:53:22 test,10.8.0.3,
+2026-04-15 21:53:22 MULTI: TCP INIT maxclients=1024 maxevents=1028
+2026-04-15 21:53:22 Initialization Sequence Completed
+2026-04-15 22:16:11 --cipher is not set. Previous OpenVPN version defaulted to BF-CBC as fallback when cipher negotiation failed in this case. If you need this fallback please add '--data-ciphers-fallback BF-CBC' to your configuration and/or add BF-CBC to --data-ciphers.
+2026-04-15 22:16:11 WARNING: Using --management on a TCP port WITHOUT passwords is STRONGLY discouraged and considered insecure
+2026-04-15 22:16:11 WARNING: file '/etc/openvpn/server/server.key' is group or others accessible
+2026-04-15 22:16:11 OpenVPN 2.5.11 x86_64-pc-linux-gnu [SSL (OpenSSL)] [LZO] [LZ4] [EPOLL] [PKCS11] [MH/PKTINFO] [AEAD] built on Sep 17 2024
+2026-04-15 22:16:11 library versions: OpenSSL 3.0.2 15 Mar 2022, LZO 2.10
+2026-04-15 22:16:11 MANAGEMENT: TCP Socket listening on [AF_INET]127.0.0.1:7505
+2026-04-15 22:16:11 net_route_v4_best_gw query: dst 0.0.0.0
+2026-04-15 22:16:11 net_route_v4_best_gw result: via 192.168.0.1 dev eth0
+2026-04-15 22:16:11 NOTE: your local LAN uses the extremely common subnet address 192.168.0.x or 192.168.1.x.  Be aware that this might create routing conflicts if you connect to the VPN server from public locations such as internet cafes that use the same subnet.
+2026-04-15 22:16:11 NOTE: the current --script-security setting may allow this configuration to call user-defined scripts
+2026-04-15 22:16:11 Diffie-Hellman initialized with 2048 bit key
+2026-04-15 22:16:11 Outgoing Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 22:16:11 Incoming Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 22:16:11 TUN/TAP device tun0 opened
+2026-04-15 22:16:11 net_iface_mtu_set: mtu 1500 for tun0
+2026-04-15 22:16:11 net_iface_up: set tun0 up
+2026-04-15 22:16:11 net_addr_v4_add: 10.8.0.1/24 dev tun0
+2026-04-15 22:16:11 Could not determine IPv4/IPv6 protocol. Using AF_INET
+2026-04-15 22:16:11 Socket Buffers: R=[131072->131072] S=[16384->16384]
+2026-04-15 22:16:11 Listening for incoming TCP connection on [AF_INET][undef]:4500
+2026-04-15 22:16:11 TCPv4_SERVER link local (bound): [AF_INET][undef]:4500
+2026-04-15 22:16:11 TCPv4_SERVER link remote: [AF_UNSPEC]
+2026-04-15 22:16:11 GID set to nogroup
+2026-04-15 22:16:11 UID set to nobody
+2026-04-15 22:16:11 MULTI: multi_init called, r=256 v=256
+2026-04-15 22:16:11 IFCONFIG POOL IPv4: base=10.8.0.2 size=253
+2026-04-15 22:16:11 ifconfig_pool_read(), in='Super Admin,10.8.0.2,'
+2026-04-15 22:16:11 succeeded -> ifconfig_pool_set(hand=0)
+2026-04-15 22:16:11 ifconfig_pool_read(), in='test,10.8.0.3,'
+2026-04-15 22:16:11 succeeded -> ifconfig_pool_set(hand=1)
+2026-04-15 22:16:11 IFCONFIG POOL LIST
+2026-04-15 22:16:11 Super Admin,10.8.0.2,
+2026-04-15 22:16:11 test,10.8.0.3,
+2026-04-15 22:16:11 MULTI: TCP INIT maxclients=1024 maxevents=1028
+2026-04-15 22:16:11 Initialization Sequence Completed
+2026-04-15 23:15:37 --cipher is not set. Previous OpenVPN version defaulted to BF-CBC as fallback when cipher negotiation failed in this case. If you need this fallback please add '--data-ciphers-fallback BF-CBC' to your configuration and/or add BF-CBC to --data-ciphers.
+2026-04-15 23:15:37 WARNING: Using --management on a TCP port WITHOUT passwords is STRONGLY discouraged and considered insecure
+2026-04-15 23:15:37 WARNING: file '/etc/openvpn/server/server.key' is group or others accessible
+2026-04-15 23:15:37 OpenVPN 2.5.11 x86_64-pc-linux-gnu [SSL (OpenSSL)] [LZO] [LZ4] [EPOLL] [PKCS11] [MH/PKTINFO] [AEAD] built on Sep 17 2024
+2026-04-15 23:15:37 library versions: OpenSSL 3.0.2 15 Mar 2022, LZO 2.10
+2026-04-15 23:15:37 MANAGEMENT: TCP Socket listening on [AF_INET]127.0.0.1:7505
+2026-04-15 23:15:37 net_route_v4_best_gw query: dst 0.0.0.0
+2026-04-15 23:15:37 net_route_v4_best_gw result: via 192.168.0.1 dev eth0
+2026-04-15 23:15:37 NOTE: your local LAN uses the extremely common subnet address 192.168.0.x or 192.168.1.x.  Be aware that this might create routing conflicts if you connect to the VPN server from public locations such as internet cafes that use the same subnet.
+2026-04-15 23:15:37 NOTE: the current --script-security setting may allow this configuration to call user-defined scripts
+2026-04-15 23:15:37 Diffie-Hellman initialized with 2048 bit key
+2026-04-15 23:15:37 Outgoing Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 23:15:37 Incoming Control Channel Authentication: Using 256 bit message hash 'SHA256' for HMAC authentication
+2026-04-15 23:15:37 TUN/TAP device tun0 opened
+2026-04-15 23:15:37 net_iface_mtu_set: mtu 1500 for tun0
+2026-04-15 23:15:37 net_iface_up: set tun0 up
+2026-04-15 23:15:37 net_addr_v4_add: 10.8.0.1/24 dev tun0
+2026-04-15 23:15:37 Could not determine IPv4/IPv6 protocol. Using AF_INET
+2026-04-15 23:15:37 Socket Buffers: R=[131072->131072] S=[16384->16384]
+2026-04-15 23:15:37 Listening for incoming TCP connection on [AF_INET][undef]:4500
+2026-04-15 23:15:37 TCPv4_SERVER link local (bound): [AF_INET][undef]:4500
+2026-04-15 23:15:37 TCPv4_SERVER link remote: [AF_UNSPEC]
+2026-04-15 23:15:37 GID set to nogroup
+2026-04-15 23:15:37 UID set to nobody
+2026-04-15 23:15:37 MULTI: multi_init called, r=256 v=256
+2026-04-15 23:15:37 IFCONFIG POOL IPv4: base=10.8.0.2 size=253
+2026-04-15 23:15:37 ifconfig_pool_read(), in='Super Admin,10.8.0.2,'
+2026-04-15 23:15:37 succeeded -> ifconfig_pool_set(hand=0)
+2026-04-15 23:15:37 ifconfig_pool_read(), in='test,10.8.0.3,'
+2026-04-15 23:15:37 succeeded -> ifconfig_pool_set(hand=1)
+2026-04-15 23:15:37 IFCONFIG POOL LIST
+2026-04-15 23:15:37 Super Admin,10.8.0.2,
+2026-04-15 23:15:37 test,10.8.0.3,
+2026-04-15 23:15:37 MULTI: TCP INIT maxclients=1024 maxevents=1028
+2026-04-15 23:15:37 Initialization Sequence Completed

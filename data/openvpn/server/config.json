@@ -1,0 +1,24 @@
+{
+  "openvpn_port": 4500,
+  "openvpn_proto": "tcp",
+  "openvpn_sync_certs": true,
+  "openvpn_use_crl": true,
+  "openvpn_server_hostname": "openvpn-admin",
+  "openvpn_server_network": "10.8.0.0",
+  "openvpn_server_netmask": "255.255.255.0",
+  "openvpn_routes": [
+    "10.10.100.0 255.255.255.0",
+    "10.10.98.0 255.255.255.0"
+  ],
+  "openvpn_client_config_dir": "/etc/openvpn/client",
+  "openvpn_tls_version": "1.2",
+  "openvpn_tls_key": "ta.key",
+  "openvpn_tls_key_path": "/etc/openvpn/server/tls-auth.key",
+  "openvpn_client_to_client": false,
+  "dns_server_ip": "",
+  "dns_server_domain": "",
+  "openvpn_status_log_path": "/etc/openvpn/status.log",
+  "openvpn_log_path": "/etc/openvpn/openvpn.log",
+  "openvpn_management_port": 7505,
+  "openvpn_blacklist_file": "/etc/openvpn/server/blacklist.txt"
+}

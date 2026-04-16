@@ -1,6 +1,8 @@
 package main
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"os"
@@ -20,11 +22,21 @@ import (
 	"gorm.io/gorm"
 )
 
+// generateRandomPassword 生成 n 字节随机十六进制密码
+func generateRandomPassword(n int) (string, error) {
+	b := make([]byte, n)
+	if _, err := rand.Read(b); err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(b), nil
+}
+
 // InitCore initializes core application services.
 func InitCore() error {
 	// 不再需要加载环境变量，配置将从 JSON 文件或常量中加载
 
-	// 设置Ctrl+C信号处理
+	// 信号处理由 cmd/web.go 的 runWebServer 统一管理（支持 goroutine 优雅退出）
+	// CLI 模式下仍保留简单退出处理
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 	go func() {
@@ -94,16 +106,25 @@ func InitCore() error {
 	if err := database.Init(); err != nil {
 		return fmt.Errorf("数据库初始化失败: %v", err)
 	}
-	if err := database.Migrate(&model.User{}, &model.Department{}); err != nil {
+	if err := database.Migrate(&model.User{}, &model.Department{}, &model.Notification{}); err != nil {
 		return fmt.Errorf("数据库迁移失败: %v", err)
 	}
 	// Seed default superadmin user if not exists
 	func() {
 		var existing model.User
 		if err := database.DB.Where("email = ?", "superadmin@gmail.com").First(&existing).Error; err != nil {
-			hash, errHash := common.HashPassword("superadmin")
+			initPassword := os.Getenv("SUPERADMIN_PASSWORD")
+			if initPassword == "" {
+				var errPwd error
+				initPassword, errPwd = generateRandomPassword(8) // 16-char hex
+				if errPwd != nil {
+					logging.Error("生成超级管理员随机密码失败: %v", errPwd)
+					return
+				}
+			}
+			hash, errHash := common.HashPassword(initPassword)
 			if errHash != nil {
-				logging.Error("默认超级管理员密码哈希失败: %v", errHash) // Log and continue
+				logging.Error("默认超级管理员密码哈希失败: %v", errHash)
 				return
 			}
 			super := model.User{
@@ -113,9 +134,15 @@ func InitCore() error {
 				Role:         model.RoleSuperAdmin,
 			}
 			if errCreate := database.DB.Create(&super).Error; errCreate != nil {
-				logging.Error("创建默认超级管理员失败: %v", errCreate) // Log and continue
+				logging.Error("创建默认超级管理员失败: %v", errCreate)
 			} else {
-				logging.Info("已创建默认超级管理员: superadmin@gmail.com / superadmin")
+				fmt.Printf("\n========================================\n")
+				fmt.Printf("  超级管理员账号已创建（首次启动）\n")
+				fmt.Printf("  邮箱:   superadmin@gmail.com\n")
+				fmt.Printf("  密码:   %s\n", initPassword)
+				fmt.Printf("  请登录后立即修改密码！\n")
+				fmt.Printf("========================================\n\n")
+				logging.Info("已创建默认超级管理员: superadmin@gmail.com（密码见控制台输出）")
 			}
 		}
 	}()
@@ -159,12 +186,18 @@ func InitCore() error {
 				var existingUser model.User
 				if err := database.DB.Where("name = ?", userName).First(&existingUser).Error; err != nil {
 					if err == gorm.ErrRecordNotFound {
-						// 用户不存在，创建新用户
-						hash, errHash := common.HashPassword("changeme123") // 默认密码
+						// 用户不存在，创建新用户（使用随机密码）
+						syncPassword, errPwd := generateRandomPassword(8)
+						if errPwd != nil {
+							logging.Error("为 OpenVPN 客户端 %s 生成随机密码失败: %v", userName, errPwd)
+							continue
+						}
+						hash, errHash := common.HashPassword(syncPassword)
 						if errHash != nil {
 							logging.Error("为 OpenVPN 客户端 %s 生成默认密码哈希失败: %v", userName, errHash)
 							continue
 						}
+						logging.Info("为 OpenVPN 客户端 %s 生成随机密码（请管理员重置）", userName)
 
 						// 检查是否有固定IP配置
 						fixedIP, errFixedIP := openvpn.GetClientFixedIP(userName)
@@ -190,7 +223,7 @@ func InitCore() error {
 						if errCreate := database.DB.Create(&newUser).Error; errCreate != nil {
 							logging.Error("为 OpenVPN 客户端 %s 创建数据库用户失败: %v", userName, errCreate)
 						} else {
-							logging.Info("为 OpenVPN 客户端 %s 创建了数据库用户，默认密码: changeme123", userName)
+							logging.Info("为 OpenVPN 客户端 %s 创建了数据库用户（随机密码，请管理员重置）", userName)
 
 							// 如果有固定IP配置，确保CCD配置正确
 							if fixedIP != "" {

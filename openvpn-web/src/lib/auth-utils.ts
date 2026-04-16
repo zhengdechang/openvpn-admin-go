@@ -6,7 +6,7 @@ import { cookies } from 'next/headers';
  */
 export async function getAuthToken(): Promise<string | null> {
   const cookieStore = await cookies();
-  const token = cookieStore.get('auth_token');
+  const token = cookieStore.get('token');
   return token ? token.value : null;
 }
 
@@ -18,6 +18,6 @@ export function getClientAuthToken(): string | null {
   if (typeof window === 'undefined') return null;
   return document.cookie
     .split('; ')
-    .find(row => row.startsWith('auth_token='))
+    .find(row => row.startsWith('token='))
     ?.split('=')[1] || null;
 } 

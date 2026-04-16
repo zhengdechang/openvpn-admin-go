@@ -29,7 +29,7 @@ Key routing rules:
 
 - `cmd/` contains CLI entry points and the interactive menu commands.
 - `controller/`, `router/`, `middleware/` implement the HTTP API.
-- `model/`, `database/`, `data/` hold persistence logic (SQLite + GORM).
+- `model/`, `database/`, `data/` hold persistence logic (PostgreSQL + GORM).
 - `openvpn/` contains OpenVPN integration and configuration handling.
 - `openvpn-web/` is the Next.js 14 frontend (TypeScript + Tailwind CSS).
 - `docker/` contains Dockerfiles, compose files, and deployment docs.
