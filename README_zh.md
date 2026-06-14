@@ -31,17 +31,19 @@
 ### 后端 (openvpn-admin-go)
 
 - **开发语言：** Go 1.21+
-- **Web 框架：** Gin (HTTP 路由器)
-- **数据库：** SQLite 配合 GORM ORM
-- **身份验证：** JWT 令牌
+- **Web 框架：** Gin v1.10 (HTTP 路由器)
+- **数据库：** PostgreSQL 16 配合 GORM ORM + Goose 数据库迁移
+- **身份验证：** JWT 令牌 (golang-jwt/jwt v4)
+- **CLI：** Cobra + promptui 交互式菜单
 - **OpenVPN 集成：** 直接与 OpenVPN 服务系统集成
 
 ### 前端 (openvpn-web)
 
-- **开发框架：** Next.js 14 配合 TypeScript
-- **UI 库：** Tailwind CSS + Radix UI 组件
-- **状态管理：** Zustand
-- **国际化：** i18next
+- **开发框架：** Next.js 16 配合 React 19 + TypeScript
+- **UI 库：** Tailwind CSS + Radix UI + MUI v5 组件
+- **状态管理：** Zustand v5
+- **国际化：** i18next v25 + react-i18next
+- **表单：** React Hook Form + Zod 验证
 - **API 客户端：** Axios
 
 ## 🖥️ 管理界面
@@ -97,7 +99,8 @@ go build -o bin/openvpn-go .
 ### 系统要求
 
 - **Go 1.21+** - 后端开发
-- **Node.js 18+** - 前端开发
+- **Node.js 20+** - 前端开发
+- **PostgreSQL 16** - 数据库
 - **OpenVPN** - VPN 服务器软件
 - **Linux 系统** - Ubuntu/Debian/CentOS（需要 systemd）
 - **Root/Sudo 权限** - 用于 OpenVPN 服务管理
@@ -148,7 +151,7 @@ go build -o bin/openvpn-go .
 
 ```env
 # 数据库配置
-DB_PATH=data/db.sqlite3
+DATABASE_URL=postgres://openvpn:openvpn_secret@localhost:5432/openvpn?sslmode=disable
 
 # JWT 配置
 JWT_SECRET=your-super-secret-jwt-key

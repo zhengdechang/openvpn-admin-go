@@ -12,7 +12,6 @@ auth SHA256
 key-direction 1
 tls-client
 tls-version-min {{ .openvpn_tls_version }}
-auth-nocache
 {{range .openvpn_routes}}
 push "route {{ . }}"
 {{end}}

@@ -1,8 +1,12 @@
 package middleware
 
 import (
+   "crypto/rand"
+   "encoding/hex"
+   "fmt"
    "net/http"
    "os"
+   "path/filepath"
    "strings"
    "time"
 
@@ -12,12 +16,32 @@ import (
 
 var jwtSecret []byte
 
+const jwtSecretFile = "data/.jwt_secret"
+
 func init() {
    secret := os.Getenv("JWT_SECRET")
-   if secret == "" {
-       secret = "secret"
+   if secret != "" {
+       jwtSecret = []byte(secret)
+       return
    }
+
+   // 尝试从持久化文件读取
+   if data, err := os.ReadFile(jwtSecretFile); err == nil && len(data) >= 32 {
+       jwtSecret = data
+       return
+   }
+
+   // 生成 32 字节随机密钥并持久化
+   raw := make([]byte, 32)
+   if _, err := rand.Read(raw); err != nil {
+       panic(fmt.Sprintf("无法生成 JWT 密钥: %v", err))
+   }
+   secret = hex.EncodeToString(raw)
    jwtSecret = []byte(secret)
+
+   if err := os.MkdirAll(filepath.Dir(jwtSecretFile), 0700); err == nil {
+       _ = os.WriteFile(jwtSecretFile, jwtSecret, 0600)
+   }
 }
 
 // Claims 自定义 JWT 声明

@@ -27,29 +27,30 @@ export default async function RootLayout({
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="description" content="OpenVPN Management System" />
-        <title>OpenVPN Management System</title>
+        <title>VPN Admin</title>
+        <link rel="icon" type="image/svg+xml" href="/logo.svg" />
       </head>
       <body suppressHydrationWarning>
-        <I18nProvider locale={locale}>
-          <LoadingScreen />
-          <AuthProvider>
-            <div>{children}</div>
-            <Toaster
-              position="top-right"
-              expand={true}
-              visibleToasts={6}
-              closeButton={true}
-              richColors={true}
-              toastOptions={{
-                duration: 5000,
-                className: "toast-message",
-                style: {
-                  marginBottom: "0.5rem",
-                },
-              }}
-            />
-          </AuthProvider>
-        </I18nProvider>
+          <I18nProvider locale={locale}>
+            <LoadingScreen />
+            <AuthProvider>
+              <div>{children}</div>
+              <Toaster
+                position="top-right"
+                expand={true}
+                visibleToasts={6}
+                closeButton={true}
+                richColors={true}
+                toastOptions={{
+                  duration: 5000,
+                  className: "toast-message",
+                  style: {
+                    marginBottom: "0.5rem",
+                  },
+                }}
+              />
+            </AuthProvider>
+          </I18nProvider>
       </body>
     </html>
   );

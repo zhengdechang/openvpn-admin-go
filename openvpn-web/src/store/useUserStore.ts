@@ -10,7 +10,7 @@ import Cookies from "js-cookie";
 
 // Zustand Store 的类型
 interface UserState {
-  user: User;
+  user: User | null;
   isLogin: boolean;
   accessToken: string;
   updateAccessToken: (accessToken: string) => void;
@@ -24,7 +24,7 @@ export const USER_KEY = "user-info";
 export const useUserStore = create<UserState>()(
   persist(
     (set) => ({
-      user: {} as User, // 确保 user 符合 User 类型
+      user: null,
       isLogin: false,
       accessToken: "",
 
@@ -38,9 +38,9 @@ export const useUserStore = create<UserState>()(
         set({
           isLogin: false,
           accessToken: "",
-          user: {} as User, // 避免类型错误
-        }),
-          Cookies.remove("token");
+          user: null,
+        });
+        Cookies.remove("token");
       },
     }),
     {

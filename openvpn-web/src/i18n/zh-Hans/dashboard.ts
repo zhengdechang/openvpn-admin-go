@@ -266,6 +266,28 @@ const translation = {
     newPasswordPlaceholder: "新密码",
     updatePasswordButton: "更新密码",
   },
+  notifications: {
+    title: "通知",
+    navLabel: "通知记录",
+    pageTitle: "通知记录",
+    markAllRead: "全部标为已读",
+    markRead: "标为已读",
+    noEvents: "暂无未读通知",
+    loading: "加载中...",
+    connected: "已连接",
+    disconnected: "已断开",
+    allTab: "全部",
+    unreadTab: "未读",
+    readTab: "已读",
+    columnType: "事件",
+    columnUser: "用户",
+    columnIPs: "IP 地址",
+    columnTime: "时间",
+    columnStatus: "状态",
+    statusRead: "已读",
+    statusUnread: "未读",
+    viewAll: "查看全部通知",
+  },
 };
 
 export default translation;

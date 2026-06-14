@@ -3,6 +3,19 @@
  * @Author: Devin
  * @Date: 2025-03-17 10:05:46
  */
+// Notification types
+export type NotificationType = "user_connected" | "user_disconnected";
+
+export interface Notification {
+  id: string;
+  type: NotificationType;
+  userName: string;
+  realIP: string;
+  virtualIP: string;
+  isRead: boolean;
+  createdAt: string;
+}
+
 // User role enum
 export enum UserRole {
   ADMIN = "admin",

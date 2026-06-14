@@ -265,6 +265,28 @@ const translation = {
     newPasswordPlaceholder: "New Password",
     updatePasswordButton: "Update Password",
   },
+  notifications: {
+    title: "Notifications",
+    navLabel: "Notifications",
+    pageTitle: "Notification History",
+    markAllRead: "Mark all read",
+    markRead: "Mark as read",
+    noEvents: "No unread notifications",
+    loading: "Loading...",
+    connected: "connected",
+    disconnected: "disconnected",
+    allTab: "All",
+    unreadTab: "Unread",
+    readTab: "Read",
+    columnType: "Event",
+    columnUser: "User",
+    columnIPs: "IPs",
+    columnTime: "Time",
+    columnStatus: "Status",
+    statusRead: "Read",
+    statusUnread: "Unread",
+    viewAll: "View all notifications",
+  },
 };
 
 export default translation;

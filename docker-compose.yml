@@ -1,0 +1,96 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: openvpn-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: openvpn
+      POSTGRES_PASSWORD: openvpn_secret
+      POSTGRES_DB: openvpn
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - vpn-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U openvpn -d openvpn"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  openvpn-admin:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.combined
+    container_name: openvpn-admin
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: ["openvpn-go", "web", "--port", "8085"]
+
+    networks:
+      - vpn-net
+
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+
+    devices:
+      - /dev/net/tun:/dev/net/tun
+
+    privileged: true
+
+    ports:
+      - "8088:80"       # nginx frontend
+      - "4501:4500"     # OpenVPN (host 4501 → container 4500)
+
+    environment:
+      - GIN_MODE=release
+      - TZ=Asia/Shanghai
+      - DATABASE_URL=postgres://openvpn:openvpn_secret@postgres:5432/openvpn?sslmode=disable
+      - JWT_SECRET=${JWT_SECRET:-change-me-in-production-32chars!!}
+      - ENABLE_WEB=true
+      - WEB_PORT=8085
+      # Docker-specific: set server hostname so generated .ovpn files use the container name
+      - OPENVPN_SERVER_HOSTNAME=openvpn-admin
+      # Use tcp (not tcp6) inside Docker bridge network
+      - OPENVPN_PROTO=tcp
+
+    volumes:
+      - ./data/openvpn:/etc/openvpn
+      - ./data/logs:/var/log/openvpn
+      - /lib/modules:/lib/modules:ro
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8085/api/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # VPN client test container — stays running for manual testing
+  vpn-client-test:
+    image: ubuntu:22.04
+    container_name: vpn-client-test
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    networks:
+      - vpn-net
+    command: ["sleep", "infinity"]
+
+networks:
+  vpn-net:
+    driver: bridge
+
+volumes:
+  postgres_data:

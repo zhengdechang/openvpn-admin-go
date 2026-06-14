@@ -61,7 +61,7 @@ func CreateClient(username string) error {
 	// 生成客户端私钥
 	fmt.Printf("正在为客户端 %s 生成私钥...\n", username)
 	keyPath := filepath.Join(constants.ClientConfigDir, username+".key")
-	if err := utils.ExecCommand(fmt.Sprintf("openssl genrsa -out %s 2048", keyPath)); err != nil {
+	if err := utils.ExecCommand(fmt.Sprintf("openssl genrsa -out %q 2048", keyPath)); err != nil {
 		return fmt.Errorf("生成私钥失败: %v", err)
 	}
 	fmt.Println("私钥生成成功")
@@ -69,7 +69,7 @@ func CreateClient(username string) error {
 	// 生成证书签名请求
 	fmt.Printf("正在为客户端 %s 生成证书签名请求...\n", username)
 	csrPath := filepath.Join(constants.ClientConfigDir, username+".csr")
-	if err := utils.ExecCommand(fmt.Sprintf("openssl req -new -key %s -out %s -subj '/CN=%s'", keyPath, csrPath, username)); err != nil {
+	if err := utils.ExecCommand(fmt.Sprintf("openssl req -new -key %q -out %q -subj '/CN=%s'", keyPath, csrPath, username)); err != nil {
 		return fmt.Errorf("生成证书签名请求失败: %v", err)
 	}
 	fmt.Println("证书签名请求生成成功")
@@ -77,7 +77,7 @@ func CreateClient(username string) error {
 	// 使用CA证书签名
 	fmt.Printf("正在为客户端 %s 签名证书...\n", username)
 	crtPath := filepath.Join(constants.ClientConfigDir, username+".crt")
-	if err := utils.ExecCommand(fmt.Sprintf("openssl x509 -req -in %s -CA %s -CAkey %s -CAcreateserial -out %s -days 3650 -extfile %s", csrPath, constants.ServerCACertPath, constants.ServerCAKeyPath, crtPath, clientExtFile)); err != nil {
+	if err := utils.ExecCommand(fmt.Sprintf("openssl x509 -req -in %q -CA %q -CAkey %q -CAcreateserial -out %q -days 3650 -extfile %q", csrPath, constants.ServerCACertPath, constants.ServerCAKeyPath, crtPath, clientExtFile)); err != nil {
 		return fmt.Errorf("签名证书失败: %v", err)
 	}
 	fmt.Println("证书签名成功")
@@ -85,14 +85,14 @@ func CreateClient(username string) error {
 	// 复制CA证书到客户端目录
 	clientCaPath := filepath.Join(constants.ClientConfigDir, "ca.crt")
 	fmt.Printf("正在复制CA证书到: %s\n", clientCaPath)
-	if err := utils.ExecCommand(fmt.Sprintf("cp %s %s", constants.ServerCACertPath, clientCaPath)); err != nil {
+	if err := utils.ExecCommand(fmt.Sprintf("cp %q %q", constants.ServerCACertPath, clientCaPath)); err != nil {
 		return fmt.Errorf("复制CA证书失败: %v", err)
 	}
 	fmt.Println("CA证书复制成功")
 
 	// 清理临时文件
 	fmt.Printf("清理临时文件: %s\n", csrPath)
-	utils.ExecCommand(fmt.Sprintf("rm %s", csrPath)) // 忽略错误，因为文件可能不存在
+	utils.ExecCommand(fmt.Sprintf("rm %q", csrPath)) // 忽略错误，因为文件可能不存在
 
 	// 生成.ovpn配置文件
 	fmt.Printf("正在为客户端 %s 生成配置文件...\n", username)
@@ -118,13 +118,13 @@ func CreateClient(username string) error {
 	}
 
 	fmt.Printf("移动配置文件到: %s\n", ovpnPath)
-	if err := utils.ExecCommand(fmt.Sprintf("mv %s %s", tempFile, ovpnPath)); err != nil {
+	if err := utils.ExecCommand(fmt.Sprintf("mv %q %q", tempFile, ovpnPath)); err != nil {
 		return fmt.Errorf("移动配置文件失败: %v", err)
 	}
 
 	// 设置文件权限
 	fmt.Printf("设置文件权限: %s\n", ovpnPath)
-	if err := utils.ExecCommand(fmt.Sprintf("chmod 644 %s", ovpnPath)); err != nil {
+	if err := utils.ExecCommand(fmt.Sprintf("chmod 644 %q", ovpnPath)); err != nil {
 		return fmt.Errorf("设置文件权限失败: %v", err)
 	}
 

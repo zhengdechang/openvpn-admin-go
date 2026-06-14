@@ -35,16 +35,16 @@ persist-key
 persist-tun
 
 {{if ne .OpenVPNManagementPort 0}}
-# Management Interface for blacklist script
+# Management Interface for kill-on-pause
 management 127.0.0.1 {{ .OpenVPNManagementPort }}
 script-security 2
-# Pass necessary environment variables to the auth script
+# Check blacklist at connect time using cert CN — no password required from client
 setenv OPENVPN_BLACKLIST_FILE {{ .OpenVPNBlacklistFile }}
-setenv OPENVPN_MANAGEMENT_PORT {{ .OpenVPNManagementPort }}
-auth-user-pass-verify /etc/openvpn/server/auth-blacklist.sh via-file
+client-connect /etc/openvpn/server/auth-client-connect.sh
 {{end}}
 
 status {{ .OpenVPNStatusLogPath }}
+status-version 2
 log-append {{ .OpenVPNLogPath }}
 verb 3
 {{if or (eq .openvpn_proto "udp") (eq .openvpn_proto "udp6")}}

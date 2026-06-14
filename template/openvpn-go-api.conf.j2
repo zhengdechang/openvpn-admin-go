@@ -6,7 +6,7 @@ autorestart=true
 startsecs=3
 startretries=3
 user=nobody
-environment=GIN_MODE="release",DB_PATH="{{ .DBPath }}",OPENVPN_CONFIG_DIR="{{ .OpenVPNConfigDir }}"
+environment=GIN_MODE="release",DATABASE_URL="{{ .DatabaseURL }}",OPENVPN_CONFIG_DIR="{{ .OpenVPNConfigDir }}"
 redirect_stderr=true
 stdout_logfile=/var/log/supervisor/openvpn-go-api.log
 stdout_logfile_maxbytes=10MB

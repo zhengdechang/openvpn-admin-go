@@ -1,7 +1,15 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
+	"os"
+	"os/signal"
+	"strconv"
+	"strings"
+	"sync"
+	"syscall"
+
 	"openvpn-admin-go/constants"
 	"openvpn-admin-go/database"
 	"openvpn-admin-go/logging"
@@ -9,9 +17,6 @@ import (
 	"openvpn-admin-go/router"
 	"openvpn-admin-go/services"
 	"openvpn-admin-go/utils"
-	"os"
-	"strconv"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/cobra"
@@ -109,7 +114,7 @@ func installAPIService(port int) error {
 		BinaryPath:       binaryPath,
 		WorkingDirectory: wd,
 		Port:             port,
-		DBPath:           "/app/data/db.sqlite3",
+		DatabaseURL:      os.Getenv("DATABASE_URL"),
 		OpenVPNConfigDir: "/etc/openvpn",
 		AutoStart:        false, // 默认不自动启动
 	}
@@ -301,7 +306,22 @@ func runWebServer(port int) error {
 	statusLogPath := cfg.OpenVPNStatusLogPath
 	syncInterval := utils.GetOpenVPNSyncInterval()
 	logging.Info("Starting OpenVPN Sync Service: LogPath='%s', Interval=%s", statusLogPath, syncInterval)
-	go services.StartOpenVPNSyncService(database.DB, statusLogPath, syncInterval)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	var wg sync.WaitGroup
+	services.StartOpenVPNSyncService(ctx, &wg, database.DB, statusLogPath, syncInterval)
+
+	// 监听系统信号，优雅退出
+	go func() {
+		sigChan := make(chan os.Signal, 1)
+		signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+		<-sigChan
+		logging.Info("接收到退出信号，正在停止服务...")
+		cancel()
+		wg.Wait()
+		logging.Info("所有服务已停止")
+		os.Exit(0)
+	}()
 
 	// Setup Gin router
 	r := gin.Default()
@@ -317,6 +337,7 @@ func runWebServer(port int) error {
 		router.SetupServerRoutes(api)
 		router.SetupClientRoutes(api)
 		router.SetupLogRoutes(api)
+		router.SetupNotificationRoutes(api)
 	}
 
 	serverAddr := fmt.Sprintf(":%d", port)

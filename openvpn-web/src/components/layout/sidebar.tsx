@@ -6,9 +6,8 @@ import { usePathname } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { UserRole } from "@/types/types";
 import { useTranslation } from "react-i18next";
-import { setLocaleOnClient, getLocaleOnClient } from "@/i18n";
-import { LanguagesSupported } from "@/i18n/language";
-import type { Locale } from "@/i18n";
+import VPNLogo from "@/components/ui/vpn-logo";
+import { Button } from "@/components/ui/button";
 
 interface NavItem {
   href: string;
@@ -78,10 +77,11 @@ function SettingsIcon() {
   );
 }
 
-function ChevronRightIcon() {
+function BellIcon() {
   return (
-    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-      <polyline points="9 18 15 12 9 6" />
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+      <path d="M13.73 21a2 2 0 0 1-3.46 0" />
     </svg>
   );
 }
@@ -96,16 +96,6 @@ function LogoutIcon() {
   );
 }
 
-function GlobeIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="10" />
-      <line x1="2" y1="12" x2="22" y2="12" />
-      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-    </svg>
-  );
-}
-
 function getInitials(name?: string): string {
   if (!name) return "U";
   const parts = name.split(" ");
@@ -114,8 +104,8 @@ function getInitials(name?: string): string {
 }
 
 const AVATAR_COLORS = [
-  "#7c3aed", "#2563eb", "#0891b2", "#059669",
-  "#d97706", "#dc2626", "#7c3aed", "#0284c7",
+  "#0369a1", "#0ea5e9", "#0284c7", "#0891b2",
+  "#22c55e", "#16a34a", "#0c4a6e", "#075985",
 ];
 
 function getAvatarColor(name?: string): string {
@@ -124,43 +114,25 @@ function getAvatarColor(name?: string): string {
   return AVATAR_COLORS[idx];
 }
 
-export default function Sidebar() {
+export default function Sidebar({ onClose }: { onClose?: () => void } = {}) {
   const { user, logout } = useAuth();
   const pathname = usePathname();
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const [langMenuOpen, setLangMenuOpen] = useState(false);
-  const [currentLocale, setCurrentLocale] = useState<Locale>(getLocaleOnClient());
   const menuRef = useRef<HTMLDivElement>(null);
 
   const isActive = (href: string) =>
     pathname === href || pathname?.startsWith(`${href}/`);
 
-  const handleLanguageChange = (locale: Locale) => {
-    setLocaleOnClient(locale, true);
-    setCurrentLocale(locale);
-    setLangMenuOpen(false);
-    setUserMenuOpen(false);
-    document.documentElement.lang = locale;
-    i18n.changeLanguage(locale);
-  };
-
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
         setUserMenuOpen(false);
-        setLangMenuOpen(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-
-  useEffect(() => {
-    const handler = () => setCurrentLocale(i18n.language as Locale);
-    i18n.on("languageChanged", handler);
-    return () => i18n.off("languageChanged", handler);
-  }, [i18n]);
 
   const navItems: NavItem[] = [
     {
@@ -186,6 +158,12 @@ export default function Sidebar() {
       icon: <LogsIcon />,
       roles: [UserRole.SUPERADMIN],
     },
+    {
+      href: "/dashboard/notifications",
+      label: t("dashboard.notifications.navLabel"),
+      icon: <BellIcon />,
+      roles: [UserRole.SUPERADMIN],
+    },
   ];
 
   const visibleItems = navItems.filter(
@@ -204,64 +182,38 @@ export default function Sidebar() {
   };
 
   return (
-    <aside
-      style={{
-        width: "220px",
-        minWidth: "220px",
-        background: "hsl(var(--sidebar-bg))",
-        display: "flex",
-        flexDirection: "column",
-        height: "100vh",
-        overflow: "hidden",
-      }}
-    >
+    <aside className="w-[220px] min-w-[220px] bg-[hsl(var(--sidebar-bg))] flex flex-col h-screen overflow-hidden">
       {/* Logo */}
-      <div
-        style={{
-          padding: "20px 20px 16px",
-          borderBottom: "1px solid rgba(255,255,255,0.07)",
-          display: "flex",
-          alignItems: "center",
-          gap: "10px",
-          flexShrink: 0,
-        }}
-      >
-        <div
-          style={{
-            width: "32px",
-            height: "32px",
-            background: "hsl(var(--primary))",
-            borderRadius: "8px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            flexShrink: 0,
-          }}
-        >
-          <LockIcon />
-        </div>
-        <div>
-          <div style={{ fontSize: "14px", fontWeight: 700, color: "#ffffff", lineHeight: 1.2 }}>
+      <div className="px-4 pt-4 pb-[14px] border-b border-white/[0.07] flex items-center gap-[10px] shrink-0">
+        <VPNLogo size={32} />
+        <div className="flex-1 min-w-0">
+          <div className="text-[14px] font-bold text-white leading-tight">
             VPN Admin
           </div>
-          <div style={{ fontSize: "10px", color: "hsl(var(--sidebar-text))", fontWeight: 400, letterSpacing: "0.5px", textTransform: "uppercase" }}>
+          <div className="text-[10px] text-[hsl(var(--sidebar-text))] font-normal tracking-[0.5px] uppercase">
             管理控制台
           </div>
         </div>
+        {/* 关闭/折叠按钮 */}
+        {onClose && (
+          <Button
+            onClick={onClose}
+            aria-label="Close menu"
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7 rounded-md flex-shrink-0 text-white/60 hover:text-white hover:bg-white/14"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </Button>
+        )}
       </div>
 
       {/* Nav */}
-      <nav style={{ flex: 1, padding: "12px 8px", overflowY: "auto" }}>
-        <div
-          style={{
-            fontSize: "10px",
-            fontWeight: 600,
-            color: "rgba(255,255,255,0.3)",
-            letterSpacing: "0.8px",
-            textTransform: "uppercase",
-            padding: "8px 12px 6px",
-          }}
-        >
+      <nav className="flex-1 px-2 py-3 overflow-y-auto">
+        <div className="text-[10px] font-semibold text-white/30 tracking-[0.8px] uppercase px-3 pt-2 pb-1.5">
           主菜单
         </div>
 
@@ -269,40 +221,16 @@ export default function Sidebar() {
           <Link
             key={item.href}
             href={item.href}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "10px",
-              padding: "9px 12px",
-              borderRadius: "8px",
-              cursor: "pointer",
-              color: isActive(item.href)
-                ? "hsl(var(--sidebar-text-active))"
-                : "hsl(var(--sidebar-text))",
-              fontSize: "13.5px",
-              fontWeight: 500,
-              transition: "background 0.15s, color 0.15s",
-              marginBottom: "2px",
-              textDecoration: "none",
-              position: "relative",
-              background: isActive(item.href)
-                ? "hsl(var(--sidebar-active))"
-                : "transparent",
-            }}
+            className={[
+              "flex items-center gap-[10px] px-3 py-[9px] rounded-lg cursor-pointer",
+              "text-[13.5px] font-medium transition-colors mb-0.5 relative no-underline",
+              isActive(item.href)
+                ? "text-[hsl(var(--sidebar-text-active))] bg-[hsl(var(--sidebar-active))]"
+                : "text-[hsl(var(--sidebar-text))] bg-transparent hover:bg-white/[0.06]",
+            ].join(" ")}
           >
             {isActive(item.href) && (
-              <span
-                style={{
-                  position: "absolute",
-                  left: 0,
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                  width: "3px",
-                  height: "20px",
-                  background: "hsl(var(--primary))",
-                  borderRadius: "0 3px 3px 0",
-                }}
-              />
+              <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-primary rounded-r-[3px]" />
             )}
             {item.icon}
             {item.label}
@@ -311,178 +239,47 @@ export default function Sidebar() {
       </nav>
 
       {/* User footer */}
-      <div
-        ref={menuRef}
-        style={{
-          padding: "12px 8px",
-          borderTop: "1px solid rgba(255,255,255,0.07)",
-          flexShrink: 0,
-          position: "relative",
-        }}
-      >
+      <div ref={menuRef} className="px-2 py-3 border-t border-white/[0.07] shrink-0 relative">
         <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "10px",
-            padding: "10px 12px",
-            borderRadius: "8px",
-            cursor: "pointer",
-            transition: "background 0.15s",
-          }}
+          className="flex items-center gap-[10px] px-3 py-[10px] rounded-lg cursor-pointer transition-colors hover:bg-white/[0.06]"
           onClick={() => setUserMenuOpen(!userMenuOpen)}
         >
           <div
-            style={{
-              width: "30px",
-              height: "30px",
-              borderRadius: "50%",
-              background: user ? getAvatarColor(user.name) : "#3b82f6",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "12px",
-              fontWeight: 700,
-              color: "white",
-              flexShrink: 0,
-            }}
+            className="w-[30px] h-[30px] rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0"
+            style={{ background: user ? getAvatarColor(user.name) : "#3b82f6" }}
           >
             {getInitials(user?.name)}
           </div>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: "12.5px", fontWeight: 600, color: "#e5e7eb", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+          <div className="flex-1 min-w-0">
+            <div className="text-[12.5px] font-semibold text-[#e5e7eb] truncate">
               {user?.name || "用户"}
             </div>
-            <div style={{ fontSize: "10.5px", color: "hsl(var(--sidebar-text))" }}>
+            <div className="text-[10.5px] text-[hsl(var(--sidebar-text))]">
               {roleLabel()}
             </div>
           </div>
-          <div style={{ color: "rgba(255,255,255,0.3)", flexShrink: 0 }}>
+          <div className="text-white/30 shrink-0">
             <SettingsIcon />
           </div>
         </div>
 
         {/* User dropdown menu */}
         {userMenuOpen && (
-          <div
-            style={{
-              position: "absolute",
-              bottom: "calc(100% - 8px)",
-              left: "8px",
-              right: "8px",
-              background: "#1f2937",
-              borderRadius: "10px",
-              border: "1px solid rgba(255,255,255,0.1)",
-              boxShadow: "0 -8px 24px rgba(0,0,0,0.3)",
-              padding: "6px",
-              zIndex: 50,
-            }}
-          >
+          <div className="absolute bottom-[calc(100%-8px)] left-2 right-2 bg-[#012a4a] rounded-[10px] border border-white/10 shadow-[0_-8px_24px_rgba(0,0,0,0.3)] p-1.5 z-50">
             <Link
               href="/dashboard/profile"
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                padding: "8px 10px",
-                borderRadius: "6px",
-                fontSize: "13px",
-                color: "#d1d5db",
-                textDecoration: "none",
-                transition: "background 0.15s",
-              }}
+              className="flex items-center gap-2 px-[10px] py-2 rounded-md text-[13px] text-[#d1d5db] no-underline transition-colors hover:bg-white/10"
               onClick={() => setUserMenuOpen(false)}
             >
               <SettingsIcon />
               {t("layout.profile")}
             </Link>
 
-            {/* Language toggle */}
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                padding: "8px 10px",
-                borderRadius: "6px",
-                fontSize: "13px",
-                color: "#d1d5db",
-                cursor: "pointer",
-                transition: "background 0.15s",
-                position: "relative",
-              }}
-              onClick={() => setLangMenuOpen(!langMenuOpen)}
-            >
-              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <GlobeIcon />
-                {t("layout.language")}
-              </div>
-              <ChevronRightIcon />
-
-              {langMenuOpen && (
-                <div
-                  style={{
-                    position: "absolute",
-                    right: "calc(100% + 4px)",
-                    top: 0,
-                    background: "#1f2937",
-                    borderRadius: "8px",
-                    border: "1px solid rgba(255,255,255,0.1)",
-                    padding: "4px",
-                    minWidth: "140px",
-                    boxShadow: "0 4px 16px rgba(0,0,0,0.3)",
-                  }}
-                >
-                  {LanguagesSupported.map((locale) => (
-                    <button
-                      key={locale}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleLanguageChange(locale);
-                      }}
-                      style={{
-                        display: "block",
-                        width: "100%",
-                        textAlign: "left",
-                        padding: "7px 10px",
-                        borderRadius: "6px",
-                        fontSize: "12.5px",
-                        border: "none",
-                        background: currentLocale === locale ? "rgba(59,130,246,0.2)" : "transparent",
-                        color: currentLocale === locale ? "#60a5fa" : "#d1d5db",
-                        cursor: "pointer",
-                        fontFamily: "inherit",
-                        fontWeight: currentLocale === locale ? 600 : 400,
-                      }}
-                    >
-                      {locale === "en-US"
-                        ? t("layout.navbar.langEnglish")
-                        : t("layout.navbar.langSimplifiedChinese")}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <div style={{ borderTop: "1px solid rgba(255,255,255,0.07)", margin: "4px 0" }} />
+            <div className="border-t border-white/[0.07] my-1" />
 
             <button
               onClick={() => { logout(); setUserMenuOpen(false); }}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                padding: "8px 10px",
-                borderRadius: "6px",
-                fontSize: "13px",
-                color: "#f87171",
-                border: "none",
-                background: "transparent",
-                cursor: "pointer",
-                width: "100%",
-                fontFamily: "inherit",
-                transition: "background 0.15s",
-              }}
+              className="flex items-center gap-2 px-[10px] py-2 rounded-md text-[13px] text-[#f87171] border-none bg-transparent cursor-pointer w-full font-semibold transition-colors hover:bg-white/10"
             >
               <LogoutIcon />
               {t("layout.logout")}

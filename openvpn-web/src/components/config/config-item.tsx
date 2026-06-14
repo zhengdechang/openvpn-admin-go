@@ -2,19 +2,20 @@
 
 import React, { useState, useEffect } from "react";
 import { ConfigItem } from "@/types/types";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
 import { X, Plus, Edit2, Check, X as Cancel } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
 
 interface ConfigItemComponentProps {
   item: ConfigItem;
@@ -85,7 +86,7 @@ export default function ConfigItemComponent({
             value={localValue || ""}
             onChange={(e) => setLocalValue(e.target.value)}
             placeholder={item.description}
-            className="w-full text-sm"
+            className="w-full h-8 text-sm"
           />
         );
       case "number":
@@ -95,20 +96,27 @@ export default function ConfigItemComponent({
             value={localValue || ""}
             onChange={(e) => setLocalValue(parseInt(e.target.value) || 0)}
             placeholder={item.description}
-            className="w-full text-sm"
+            className="w-full h-8 text-sm"
           />
         );
       case "boolean":
         return (
-          <Switch
-            checked={localValue || false}
-            onCheckedChange={setLocalValue}
-          />
+          <div className="flex items-center gap-2">
+            <Switch
+              checked={localValue || false}
+              onCheckedChange={(checked) => setLocalValue(checked)}
+              id={`switch-${item.key}`}
+            />
+            <Label htmlFor={`switch-${item.key}`}>{localValue ? "启用" : "禁用"}</Label>
+          </div>
         );
       case "select":
         return (
-          <Select value={localValue || ""} onValueChange={setLocalValue}>
-            <SelectTrigger className="w-full text-sm">
+          <Select
+            value={localValue || ""}
+            onValueChange={(val) => setLocalValue(val)}
+          >
+            <SelectTrigger className="w-full h-8 text-sm">
               <SelectValue placeholder={item.description} />
             </SelectTrigger>
             <SelectContent>
@@ -125,18 +133,18 @@ export default function ConfigItemComponent({
           <div className="w-full h-full flex flex-col">
             <div className="flex-1 overflow-y-auto space-y-1 max-h-16">
               {arrayItems.map((arrayItem, index) => (
-                <div key={index} className="flex items-center space-x-1">
+                <div key={index} className="flex items-center gap-1">
                   <Input
                     value={arrayItem}
                     onChange={(e) => updateArrayItem(index, e.target.value)}
                     placeholder="输入路由"
-                    className="flex-1 text-xs h-7"
+                    className="flex-1 h-7 text-xs py-0.5"
                   />
                   <Button
                     variant="outline"
-                    size="sm"
+                    size="icon"
+                    className="h-7 w-7"
                     onClick={() => removeArrayItem(index)}
-                    className="h-7 w-7 p-0"
                   >
                     <X className="h-3 w-3" />
                   </Button>
@@ -147,7 +155,7 @@ export default function ConfigItemComponent({
               variant="outline"
               size="sm"
               onClick={addArrayItem}
-              className="w-full text-xs h-7 mt-1"
+              className="mt-1 h-7 text-xs w-full"
             >
               <Plus className="h-3 w-3 mr-1" />
               {t("dashboard.server.config.addButton")}
@@ -163,7 +171,7 @@ export default function ConfigItemComponent({
     switch (item.type) {
       case "boolean":
         return (
-          <Badge variant={item.value ? "default" : "secondary"}>
+          <Badge variant={item.value ? "success" : "secondary"}>
             {item.value ? "启用" : "禁用"}
           </Badge>
         );
@@ -172,9 +180,7 @@ export default function ConfigItemComponent({
           <div className="flex flex-wrap gap-1 max-h-16 overflow-y-auto">
             {Array.isArray(item.value) && item.value.length > 0 ? (
               item.value.map((arrayItem, index) => (
-                <Badge key={index} variant="outline" className="text-xs">
-                  {arrayItem}
-                </Badge>
+                <Badge key={index} variant="outline">{arrayItem}</Badge>
               ))
             ) : (
               <span className="text-gray-500 text-sm">无</span>
@@ -195,25 +201,24 @@ export default function ConfigItemComponent({
             {item.description}
           </p>
           {item.required && (
-            <Badge variant="destructive" className="text-xs mt-1">
-              必填
-            </Badge>
+            <Badge variant="destructive" className="mt-0.5 text-xs">必填</Badge>
           )}
         </div>
-        <div className="flex items-center space-x-1 ml-2 flex-shrink-0">
+        <div className="flex items-center gap-1 ml-2 flex-shrink-0">
           {isEditing ? (
             <>
-              <Button variant="outline" size="sm" onClick={handleCancel}>
+              <Button variant="outline" size="icon" className="h-7 w-7" onClick={handleCancel}>
                 <Cancel className="h-3 w-3" />
               </Button>
-              <Button size="sm" onClick={handleSave}>
+              <Button size="icon" className="h-7 w-7" onClick={handleSave}>
                 <Check className="h-3 w-3" />
               </Button>
             </>
           ) : (
             <Button
               variant="outline"
-              size="sm"
+              size="icon"
+              className="h-7 w-7"
               onClick={() => onEditToggle(item.key)}
             >
               <Edit2 className="h-3 w-3" />

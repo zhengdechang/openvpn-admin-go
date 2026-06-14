@@ -1,17 +1,13 @@
-/*
- * @Description:
- * @Author: Devin
- * @Date: 2025-06-05 13:07:03
- */
 "use client";
 
 import React, { useState } from "react";
 import MainLayout from "@/components/layout/main-layout";
 import { useAuth } from "@/lib/auth-context";
 import { useTranslation } from "react-i18next";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export default function ProfilePage() {
   const { user, updateUserInfo } = useAuth();
@@ -67,27 +63,25 @@ export default function ProfilePage() {
                   {t("dashboard.profile.basicInfoTitle")}
                 </h2>
                 <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      {t("dashboard.profile.namePlaceholder")}
-                    </label>
+                  <div className="space-y-1">
+                    <Label htmlFor="profile-name">{t("dashboard.profile.namePlaceholder")}</Label>
                     <Input
-                      placeholder={t("dashboard.profile.namePlaceholder")}
+                      id="profile-name"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      disabled={true}
+                      disabled
+                      placeholder={t("dashboard.profile.namePlaceholder")}
                       className="bg-gray-50"
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      {t("dashboard.profile.emailPlaceholder")}
-                    </label>
+                  <div className="space-y-1">
+                    <Label htmlFor="profile-email">{t("dashboard.profile.emailPlaceholder")}</Label>
                     <Input
-                      placeholder={t("dashboard.profile.emailPlaceholder")}
+                      id="profile-email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      disabled={true}
+                      disabled
+                      placeholder={t("dashboard.profile.emailPlaceholder")}
                       className="bg-gray-50"
                     />
                   </div>
@@ -103,27 +97,18 @@ export default function ProfilePage() {
                   {t("dashboard.profile.changePasswordTitle")}
                 </h2>
                 <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      {t("dashboard.profile.newPasswordPlaceholder")}
-                    </label>
+                  <div className="space-y-1">
+                    <Label htmlFor="profile-password">{t("dashboard.profile.newPasswordPlaceholder")}</Label>
                     <Input
+                      id="profile-password"
                       type="password"
-                      placeholder={t(
-                        "dashboard.profile.newPasswordPlaceholder"
-                      )}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
+                      placeholder={t("dashboard.profile.newPasswordPlaceholder")}
                     />
                   </div>
-                  <Button
-                    onClick={handleChangePassword}
-                    disabled={loading}
-                    className="w-full"
-                  >
-                    {loading
-                      ? t("common.loading")
-                      : t("dashboard.profile.updatePasswordButton")}
+                  <Button className="w-full" onClick={handleChangePassword} disabled={loading}>
+                    {loading ? t("common.loading") : t("dashboard.profile.updatePasswordButton")}
                   </Button>
                 </div>
               </div>

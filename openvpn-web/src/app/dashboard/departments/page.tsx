@@ -7,16 +7,6 @@ import { useTranslation } from "react-i18next";
 import MainLayout from "@/components/layout/main-layout";
 import { departmentAPI, userManagementAPI } from "@/services/api";
 import type { Department, AdminUser } from "@/types/types";
-import {
-  Dialog,
-  DialogTrigger,
-  DialogContent,
-  DialogHeader,
-  DialogFooter,
-  DialogTitle,
-  DialogClose,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import {
   Table,
@@ -26,8 +16,34 @@ import {
   TableBody,
   TableCell,
 } from "@/components/ui/table";
-import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { Button, buttonVariants } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
 
 type DepartmentTree = Department & { children: DepartmentTree[] };
 
@@ -38,12 +54,13 @@ export default function DepartmentsPage() {
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
-  // 控制树形展开的部门ID集合
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const [form, setForm] = useState({ name: "", headId: "", parentId: "" });
-  // 编辑模式状态
+  const [deptPage, setDeptPage] = useState(0);
+  const deptPageSize = 20;
   const [editOpen, setEditOpen] = useState(false);
   const [editingDept, setEditingDept] = useState<Department | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<{ open: boolean; id: string }>({ open: false, id: "" });
 
   const fetchData = async () => {
     setLoading(true);
@@ -57,12 +74,8 @@ export default function DepartmentsPage() {
         ...dept,
         head: dept.headId ? userMap.get(dept.headId) : undefined,
       }));
-      console.log("dList:", dList);
-      console.log("deptsWithHead:", deptsWithHead);
       setDepts(deptsWithHead);
       setUsers(uList);
-      console.log("depts after setDepts:", deptsWithHead);
-      console.log("tree after setDepts:", buildTree(deptsWithHead));
     } catch {
       toast.error(t("dashboard.departments.loadError"));
     } finally {
@@ -73,30 +86,24 @@ export default function DepartmentsPage() {
   useEffect(() => {
     fetchData();
   }, []);
-  // 构建部门树
+
   const buildTree = (list: Department[]): DepartmentTree[] => {
-    console.log("buildTree list:", list);
     const map = new Map<string, DepartmentTree>();
     list.forEach((item) => {
       map.set(item.id, { ...item, children: [] });
     });
-    console.log("map:", map);
     const roots: DepartmentTree[] = [];
     map.forEach((item) => {
-      if (
-        item.parentId &&
-        item.parentId !== item.id &&
-        map.has(item.parentId)
-      ) {
+      if (item.parentId && item.parentId !== item.id && map.has(item.parentId)) {
         const parent = map.get(item.parentId);
         parent?.children.push(item);
       } else {
         roots.push(item);
       }
     });
-    console.log("roots:", roots);
     return roots;
   };
+
   const tree: DepartmentTree[] = buildTree(depts);
 
   const handleCreate = async () => {
@@ -114,7 +121,7 @@ export default function DepartmentsPage() {
       toast.error(t("dashboard.departments.createError"));
     }
   };
-  // 编辑部门
+
   const handleEdit = async () => {
     if (!editingDept) return;
     if (!form.name) {
@@ -133,10 +140,13 @@ export default function DepartmentsPage() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm(t("dashboard.departments.deleteConfirm"))) return;
+  const handleDelete = (id: string) => {
+    setConfirmDelete({ open: true, id });
+  };
+
+  const doDelete = async () => {
     try {
-      await departmentAPI.delete(id);
+      await departmentAPI.delete(confirmDelete.id);
       toast.success(t("dashboard.departments.deleteSuccess"));
       fetchData();
     } catch {
@@ -144,24 +154,19 @@ export default function DepartmentsPage() {
     }
   };
 
-  // 切换部门展开/收起
   const toggleExpand = (id: string) => {
     setExpandedIds((prev) => {
-      const next = new Set(prev); // Create a new Set based on the previous state
+      const next = new Set(prev);
       if (next.has(id)) {
-        next.delete(id); // If the id is already in the Set, remove it (collapse)
+        next.delete(id);
       } else {
-        next.add(id); // Otherwise, add it to the Set (expand)
+        next.add(id);
       }
       return next;
     });
   };
-  // 递归渲染树形列表，支持多节点展开
-  const renderRows = (
-    nodes: DepartmentTree[],
-    level: number = 0
-  ): React.ReactNode[] => {
-    console.log("renderRows nodes:", nodes);
+
+  const renderRows = (nodes: DepartmentTree[], level: number = 0): React.ReactNode[] => {
     return nodes.flatMap((node) => {
       const hasChildren = node.children && node.children.length > 0;
       const isExpanded = expandedIds.has(node.id);
@@ -170,47 +175,22 @@ export default function DepartmentsPage() {
           <TableCell
             style={{
               paddingLeft: level === 0 ? undefined : level * 20,
-              position:"relative"
+              position: "relative",
             }}
           >
             {hasChildren && (
               <span
-                className="cursor-pointer select-none mr-1 flex items-center "
+                className="cursor-pointer select-none mr-1 flex items-center"
                 onClick={() => toggleExpand(node.id)}
-                style={{
-                  width: 20,
-                  position:"absolute"
-                }}
+                style={{ width: 20, position: "absolute" }}
               >
                 {isExpanded ? (
-                  <svg
-                    width="16"
-                    height="16"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M19 9l-7 7-7-7"
-                    />
+                  <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 ) : (
-                  <svg
-                    width="16"
-                    height="16"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 5l7 7-7 7"
-                    />
+                  <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
                 )}
               </span>
@@ -221,8 +201,7 @@ export default function DepartmentsPage() {
             {node.head?.name || t("dashboard.departments.emptyData")}
           </TableCell>
           <TableCell className="space-x-2">
-            {(currentUser?.role === UserRole.ADMIN ||
-              currentUser?.role === UserRole.SUPERADMIN) && (
+            {(currentUser?.role === UserRole.ADMIN || currentUser?.role === UserRole.SUPERADMIN) && (
               <>
                 <Button
                   size="sm"
@@ -250,168 +229,168 @@ export default function DepartmentsPage() {
             )}
           </TableCell>
         </TableRow>,
-        // 如果展开，则渲染子节点
-        ...(hasChildren && isExpanded
-          ? renderRows(node.children, level + 1)
-          : []),
+        ...(hasChildren && isExpanded ? renderRows(node.children, level + 1) : []),
       ];
     });
   };
+
   return (
     <MainLayout className="p-4">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold">
           {t("dashboard.departments.pageTitle")}
         </h2>
-        {(currentUser?.role === UserRole.ADMIN ||
-          currentUser?.role === UserRole.SUPERADMIN) && (
-          <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-              <Button>{t("dashboard.departments.addDepartment")}</Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>
-                  {t("dashboard.departments.addDepartmentDialogTitle")}
-                </DialogTitle>
-              </DialogHeader>
-              <div className="space-y-2 pt-2">
+        {(currentUser?.role === UserRole.ADMIN || currentUser?.role === UserRole.SUPERADMIN) && (
+          <Button onClick={() => setOpen(true)}>
+            {t("dashboard.departments.addDepartment")}
+          </Button>
+        )}
+      </div>
+
+      {/* Add Department Dialog */}
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("dashboard.departments.addDepartmentDialogTitle")}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 pt-2">
+            <div className="space-y-1">
+              <Label htmlFor="add-dept-name">{t("dashboard.departments.departmentNamePlaceholder")}</Label>
+              <Input
+                id="add-dept-name"
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                placeholder={t("dashboard.departments.departmentNamePlaceholder")}
+              />
+            </div>
+            <div className="space-y-1">
+              <Label>{t("dashboard.departments.selectParentDepartment")}</Label>
+              <Select
+                value={form.parentId || "__none__"}
+                onValueChange={(val) => setForm({ ...form, parentId: val === "__none__" ? "" : val })}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder={t("dashboard.departments.selectParentDepartment")} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">{t("dashboard.departments.selectParentDepartment")}</SelectItem>
+                  {depts.map((d) => (
+                    <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1">
+              <Label>{t("dashboard.departments.selectHead")}</Label>
+              <Select
+                value={form.headId || "__none__"}
+                onValueChange={(val) => setForm({ ...form, headId: val === "__none__" ? "" : val })}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder={t("dashboard.departments.selectHead")} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">{t("dashboard.departments.selectHead")}</SelectItem>
+                  {users.map((u) => (
+                    <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setOpen(false)}>
+              {t("dashboard.departments.cancel")}
+            </Button>
+            <Button onClick={handleCreate}>
+              {t("dashboard.departments.create")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Department Dialog */}
+      {(currentUser?.role === UserRole.ADMIN || currentUser?.role === UserRole.SUPERADMIN) && (
+        <Dialog
+          open={editOpen}
+          onOpenChange={(open) => {
+            if (!open) {
+              setEditOpen(false);
+              setEditingDept(null);
+              setForm({ name: "", headId: "", parentId: "" });
+            } else {
+              setEditOpen(true);
+            }
+          }}
+        >
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{t("dashboard.departments.editDepartmentDialogTitle")}</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-2">
+              <div className="space-y-1">
+                <Label htmlFor="edit-dept-name">{t("dashboard.departments.departmentNamePlaceholder")}</Label>
                 <Input
-                  placeholder={t(
-                    "dashboard.departments.departmentNamePlaceholder"
-                  )}
+                  id="edit-dept-name"
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  placeholder={t("dashboard.departments.departmentNamePlaceholder")}
                 />
-                <select
-                  className="border px-2 w-full py-1"
-                  value={form.parentId}
-                  onChange={(e) =>
-                    setForm({ ...form, parentId: e.target.value })
-                  }
-                >
-                  <option value="">
-                    {t("dashboard.departments.selectParentDepartment")}
-                  </option>
-                  {depts.map((d) => (
-                    <option key={d.id} value={d.id}>
-                      {d.name}
-                    </option>
-                  ))}
-                </select>
-                <select
-                  className="border px-2 w-full py-1"
-                  value={form.headId}
-                  onChange={(e) => setForm({ ...form, headId: e.target.value })}
-                >
-                  <option value="">
-                    {t("dashboard.departments.selectHead")}
-                  </option>
-                  {users.map((u) => (
-                    <option key={u.id} value={u.id}>
-                      {u.name}
-                    </option>
-                  ))}
-                </select>
               </div>
-              <DialogFooter>
-                <DialogClose asChild>
-                  <Button variant="outline">
-                    {t("dashboard.departments.cancel")}
-                  </Button>
-                </DialogClose>
-                <Button onClick={handleCreate}>
-                  {t("dashboard.departments.create")}
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        )}
-        {/* Edit Department Dialog */}
-        {(currentUser?.role === UserRole.ADMIN ||
-          currentUser?.role === UserRole.SUPERADMIN) &&
-          editingDept && ( // Ensure editingDept is not null to render
-            <Dialog
-              open={editOpen}
-              onOpenChange={(isOpen) => {
-                setEditOpen(isOpen);
-                if (!isOpen) {
-                  setEditingDept(null);
-                  setForm({ name: "", headId: "", parentId: "" }); // Reset form on close
-                }
-              }}
-            >
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>
-                    {t("dashboard.departments.editDepartmentDialogTitle")}
-                  </DialogTitle>
-                </DialogHeader>
-                <div className="space-y-2 pt-2">
-                  <Input
-                    placeholder={t(
-                      "dashboard.departments.departmentNamePlaceholder"
-                    )}
-                    value={form.name}
-                    onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  />
-                  <select
-                    className="border px-2 w-full py-1"
-                    value={form.parentId}
-                    onChange={(e) =>
-                      setForm({ ...form, parentId: e.target.value })
-                    }
-                  >
-                    <option value="">
-                      {t("dashboard.departments.selectParentDepartment")}
-                    </option>
-                    {/* Filter out the current department being edited from the parent list */}
-                    {depts
-                      .filter((d) => d.id !== editingDept?.id)
-                      .map((d) => (
-                        <option key={d.id} value={d.id}>
-                          {d.name}
-                        </option>
-                      ))}
-                  </select>
-                  <select
-                    className="border px-2 w-full py-1"
-                    value={form.headId}
-                    onChange={(e) =>
-                      setForm({ ...form, headId: e.target.value })
-                    }
-                  >
-                    <option value="">
-                      {t("dashboard.departments.selectHead")}
-                    </option>
-                    {users.map((u) => (
-                      <option key={u.id} value={u.id}>
-                        {u.name}
-                      </option>
+              <div className="space-y-1">
+                <Label>{t("dashboard.departments.selectParentDepartment")}</Label>
+                <Select
+                  value={form.parentId || "__none__"}
+                  onValueChange={(val) => setForm({ ...form, parentId: val === "__none__" ? "" : val })}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder={t("dashboard.departments.selectParentDepartment")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">{t("dashboard.departments.selectParentDepartment")}</SelectItem>
+                    {depts.filter((d) => d.id !== editingDept?.id).map((d) => (
+                      <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>
                     ))}
-                  </select>
-                </div>
-                <DialogFooter>
-                  <DialogClose asChild>
-                    <Button
-                      variant="outline"
-                      onClick={() => {
-                        setEditOpen(false);
-                        setEditingDept(null);
-                        setForm({ name: "", headId: "", parentId: "" }); // Reset form on cancel
-                      }}
-                    >
-                      {t("dashboard.departments.cancel")}
-                    </Button>
-                  </DialogClose>
-                  <Button onClick={handleEdit}>
-                    {t("dashboard.departments.saveChangesButton")}
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          )}
-      </div>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1">
+                <Label>{t("dashboard.departments.selectHead")}</Label>
+                <Select
+                  value={form.headId || "__none__"}
+                  onValueChange={(val) => setForm({ ...form, headId: val === "__none__" ? "" : val })}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder={t("dashboard.departments.selectHead")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">{t("dashboard.departments.selectHead")}</SelectItem>
+                    {users.map((u) => (
+                      <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setEditOpen(false);
+                  setEditingDept(null);
+                  setForm({ name: "", headId: "", parentId: "" });
+                }}
+              >
+                {t("dashboard.departments.cancel")}
+              </Button>
+              <Button onClick={handleEdit}>
+                {t("dashboard.departments.saveChangesButton")}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
+
       <Card>
         <CardHeader>
           <CardTitle>{t("dashboard.departments.listTitle")}</CardTitle>
@@ -420,21 +399,67 @@ export default function DepartmentsPage() {
           {loading ? (
             <p>{t("dashboard.departments.loading")}</p>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{t("dashboard.departments.columnName")}</TableHead>
-                  <TableHead>{t("dashboard.departments.columnHead")}</TableHead>
-                  <TableHead>
-                    {t("dashboard.departments.columnActions")}
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>{renderRows(tree)}</TableBody>
-            </Table>
+            <>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>{t("dashboard.departments.columnName")}</TableHead>
+                    <TableHead>{t("dashboard.departments.columnHead")}</TableHead>
+                    <TableHead>{t("dashboard.departments.columnActions")}</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {tree.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={3} className="py-10 text-center text-muted-foreground">
+                        {t("dashboard.departments.emptyData")}
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    renderRows(tree.slice(deptPage * deptPageSize, (deptPage + 1) * deptPageSize))
+                  )}
+                </TableBody>
+              </Table>
+              {/* Pagination */}
+              {tree.length > deptPageSize && (
+                <div className="flex items-center justify-between pt-4 border-t mt-2">
+                  <span className="text-sm text-muted-foreground">
+                    {deptPage * deptPageSize + 1}–{Math.min((deptPage + 1) * deptPageSize, tree.length)} / {tree.length}
+                  </span>
+                  <div className="flex items-center gap-1">
+                    <Button size="sm" variant="outline" disabled={deptPage === 0} onClick={() => setDeptPage(0)} className="min-w-8 px-2">«</Button>
+                    <Button size="sm" variant="outline" disabled={deptPage === 0} onClick={() => setDeptPage((p) => p - 1)} className="min-w-8 px-2">‹</Button>
+                    <span className="px-3 text-sm">{deptPage + 1} / {Math.max(1, Math.ceil(tree.length / deptPageSize))}</span>
+                    <Button size="sm" variant="outline" disabled={(deptPage + 1) * deptPageSize >= tree.length} onClick={() => setDeptPage((p) => p + 1)} className="min-w-8 px-2">›</Button>
+                    <Button size="sm" variant="outline" disabled={(deptPage + 1) * deptPageSize >= tree.length} onClick={() => setDeptPage(Math.ceil(tree.length / deptPageSize) - 1)} className="min-w-8 px-2">»</Button>
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </CardContent>
       </Card>
+
+      <AlertDialog
+        open={confirmDelete.open}
+        onOpenChange={(o) => setConfirmDelete((prev) => ({ ...prev, open: o }))}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("dashboard.departments.deleteConfirmTitle", "Delete Department")}</AlertDialogTitle>
+            <AlertDialogDescription>{t("dashboard.departments.deleteConfirm")}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("dashboard.departments.cancel")}</AlertDialogCancel>
+            <AlertDialogAction
+              className={buttonVariants({ variant: "destructive" })}
+              onClick={doDelete}
+            >
+              {t("dashboard.departments.delete")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </MainLayout>
   );
 }
