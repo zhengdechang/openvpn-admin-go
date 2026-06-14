@@ -41,6 +41,15 @@ const api = axios.create({
   },
 });
 
+// 后端 GET 接口统一返回 { success, data }。返回「内层数据」的服务方法用这个
+// 拆掉信封；若后端某天直接返回裸数据也能兜底（非信封时原样返回）。
+const unwrapData = <T>(body: any): T => {
+  if (body && typeof body === "object" && "success" in body && "data" in body) {
+    return body.data as T;
+  }
+  return body as T;
+};
+
 // 请求拦截器添加token
 api.interceptors.request.use(
   async (config) => {
@@ -290,10 +299,8 @@ export const userAPI = {
   async getLiveClientConnections(): Promise<LiveClientConnection[]> {
     // The actual backend endpoint is /api/client/status/live
     // The `/api` prefix is handled by the baseURL of the axios instance `api`
-    const response = await api.get<LiveClientConnection[]>(
-      "/api/client/status/live"
-    );
-    return response.data; // Assuming the backend directly returns the array
+    const response = await api.get("/api/client/status/live");
+    return unwrapData<LiveClientConnection[]>(response.data) ?? [];
   },
 };
 
@@ -301,8 +308,8 @@ export const userAPI = {
 export const openvpnAPI = {
   // 获取客户端列表
   getClientList: async (): Promise<OpenVPNClient[]> => {
-    const response = await api.get<OpenVPNClient[]>("/api/client/list");
-    return response.data;
+    const response = await api.get("/api/client/list");
+    return unwrapData<OpenVPNClient[]>(response.data) ?? [];
   },
   // 添加客户端，支持指定部门
   addClient: async (username: string, departmentId?: string): Promise<any> => {
@@ -326,11 +333,10 @@ export const openvpnAPI = {
     username: string,
     os?: string
   ): Promise<{ config: string }> => {
-    const response = await api.get<{ config: string }>(
-      `/api/client/config/${username}`,
-      { params: { os } }
-    );
-    return response.data;
+    const response = await api.get(`/api/client/config/${username}`, {
+      params: { os },
+    });
+    return unwrapData<{ config: string }>(response.data);
   },
   // 吊销客户端证书
   revokeClient: async (username: string): Promise<any> => {
@@ -344,13 +350,13 @@ export const openvpnAPI = {
   },
   // 获取服务器状态
   getServerStatus: async (): Promise<ServerStatus> => {
-    const response = await api.get<ServerStatus>("/api/server/status");
-    return response.data;
+    const response = await api.get("/api/server/status");
+    return unwrapData<ServerStatus>(response.data);
   },
   // 获取服务器日志
   getServerLogs: async (): Promise<string> => {
-    const response = await api.get<{ logs: string }>("/api/logs/server");
-    return response.data.logs;
+    const response = await api.get("/api/logs/server");
+    return unwrapData<{ logs: string }>(response.data)?.logs ?? "";
   },
   // 获取客户端日志
   getClientLogs: async (
@@ -367,33 +373,33 @@ export const openvpnAPI = {
     if (offset !== undefined) params.append("offset", offset.toString());
     if (limit !== undefined) params.append("limit", limit.toString());
 
-    const response = await api.get<{
+    const response = await api.get(
+      `/api/logs/client?${params.toString()}`
+    );
+    return unwrapData<{
       logs: string;
       totalLines: number;
       offset: number;
       limit: number;
       hasMore: boolean;
-    }>(`/api/logs/client?${params.toString()}`);
-    return response.data;
+    }>(response.data);
   },
   // 获取实时客户端连接
   getLiveClientConnections: async (): Promise<LiveClientConnection[]> => {
-    const response = await api.get<LiveClientConnection[]>(
-      "/api/client/status/live"
-    );
-    return response.data;
+    const response = await api.get("/api/client/status/live");
+    return unwrapData<LiveClientConnection[]>(response.data) ?? [];
   },
 };
 
 // 服务器管理 API
 export const serverAPI = {
   getStatus: async (): Promise<ServerStatus> => {
-    const response = await api.get<ServerStatus>("/api/server/status");
-    return response.data;
+    const response = await api.get("/api/server/status");
+    return unwrapData<ServerStatus>(response.data);
   },
   getSystemInfo: async (): Promise<SystemInfo> => {
-    const response = await api.get<SystemInfo>("/api/server/system");
-    return response.data;
+    const response = await api.get("/api/server/system");
+    return unwrapData<SystemInfo>(response.data);
   },
   start: async (): Promise<any> => {
     const response = await api.post("/api/server/start");
@@ -408,10 +414,8 @@ export const serverAPI = {
     return response.data;
   },
   getConfigTemplate: async (): Promise<{ template: string }> => {
-    const response = await api.get<{ template: string }>(
-      "/api/server/config/template"
-    );
-    return response.data;
+    const response = await api.get("/api/server/config/template");
+    return unwrapData<{ template: string }>(response.data);
   },
   updateConfig: async (config: string): Promise<any> => {
     const response = await api.put("/api/server/config", { config });
@@ -426,10 +430,10 @@ export const serverAPI = {
     const params = new URLSearchParams();
     if (lang) params.append("lang", lang);
 
-    const response = await api.get<{ items: ConfigItem[] }>(
+    const response = await api.get(
       `/api/server/config/items?${params.toString()}`
     );
-    return response.data;
+    return unwrapData<{ items: ConfigItem[] }>(response.data);
   },
   updateConfigItem: async (key: string, value: any): Promise<any> => {
     const response = await api.put(`/api/server/config/item/${key}`, { value });
@@ -444,8 +448,9 @@ export const serverAPI = {
 // 部门管理 API
 export const departmentAPI = {
   list: async (): Promise<Department[]> => {
-    const response = await api.get<Department[]>("/api/departments");
-    return response.data;
+    const response = await api.get("/api/departments");
+    const body = response.data as any;
+    return Array.isArray(body) ? body : body?.data ?? [];
   },
   create: async (data: {
     name: string;
@@ -471,8 +476,9 @@ export const departmentAPI = {
 // 用户管理 API
 export const userManagementAPI = {
   list: async (): Promise<AdminUser[]> => {
-    const response = await api.get<AdminUser[]>("/api/client");
-    return response.data;
+    const response = await api.get("/api/client");
+    const body = response.data as any;
+    return Array.isArray(body) ? body : body?.data ?? [];
   },
   create: async (
     user: Partial<AdminUser> & { password: string }

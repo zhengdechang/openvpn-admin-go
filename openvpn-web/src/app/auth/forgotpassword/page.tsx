@@ -31,7 +31,7 @@ export default function ResetPasswordPage() {
   // 处理重置密码请求
   const handleResetPassword = async () => {
     if (!email) {
-      showToast.error(t("auth.forgotpassword.emailRequired"));
+      showToast.error(t("common.auth.forgotpassword.emailRequired"));
       return;
     }
 
@@ -44,16 +44,16 @@ export default function ResetPasswordPage() {
       if (response.success) {
         setSuccess(true);
         showToast.success(
-          response.message || t("auth.forgotpassword.resetEmailSent")
+          response.message || t("common.auth.forgotpassword.resetEmailSent")
         );
       } else {
         setSuccess(false);
         console.log(response, "response");
-        setError(response.error || t("auth.forgotpassword.resetFailed"));
+        setError(response.error || t("common.auth.forgotpassword.resetFailed"));
       }
     } catch (err) {
       setSuccess(false);
-      setError(t("auth.forgotpassword.requestFailed"));
+      setError(t("common.auth.forgotpassword.requestFailed"));
     } finally {
       setLoading(false);
     }
@@ -63,15 +63,15 @@ export default function ResetPasswordPage() {
     <AuthLayout>
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-primary">{t("auth.forgotpassword.pageTitle")}</h1>
+            <h1 className="text-3xl font-bold text-primary">{t("common.auth.forgotpassword.pageTitle")}</h1>
             <div className="h-1 w-16 bg-primary mx-auto my-4"></div>
-            <p className="text-gray-600">{t("auth.forgotpassword.pageSubtitle")}</p>
+            <p className="text-gray-600">{t("common.auth.forgotpassword.pageSubtitle")}</p>
           </div>
           <Card className="shadow-lg border-t-4 border-t-primary">
             <CardContent className="p-6 text-center">
-              <h2 className="text-2xl font-bold text-primary">{t("auth.forgotpassword.cardTitle")}</h2>
+              <h2 className="text-2xl font-bold text-primary">{t("common.auth.forgotpassword.cardTitle")}</h2>
               <p className="text-gray-600 mt-2">
-                {t("auth.forgotpassword.cardDescription")}
+                {t("common.auth.forgotpassword.cardDescription")}
               </p>
 
               {/* 邮箱输入框 */}
@@ -79,7 +79,7 @@ export default function ResetPasswordPage() {
                 type="email"
                 value={email}
                 onChange={handleInputChange}
-                placeholder={t("auth.forgotpassword.emailPlaceholder")}
+                placeholder={t("common.auth.forgotpassword.emailPlaceholder")}
                 className="mt-4 text-center"
               />
 
@@ -89,16 +89,16 @@ export default function ResetPasswordPage() {
                 onClick={handleResetPassword}
                 disabled={loading}
               >
-                {loading ? t("auth.forgotpassword.sending") : t("auth.forgotpassword.sendResetEmail")}
+                {loading ? t("common.auth.forgotpassword.sending") : t("common.auth.forgotpassword.sendResetEmail")}
               </Button>
 
               {/* 结果显示 */}
               {success && (
                 <p className="text-green-600 mt-3">
-                  {t("auth.forgotpassword.emailSentSuccess")}
+                  {t("common.auth.forgotpassword.emailSentSuccess")}
                 </p>
               )}
-              {error && <p className="text-red-500 mt-3">{t("auth.forgotpassword.errorPrefix")}{error}</p>}
+              {error && <p className="text-red-500 mt-3">{t("common.auth.forgotpassword.errorPrefix")}{error}</p>}
 
               {/* 返回登录页 */}
               <Button
@@ -106,7 +106,7 @@ export default function ResetPasswordPage() {
                 variant="outline"
                 onClick={() => router.push("/auth/login")}
               >
-                {t("auth.forgotpassword.backToLogin")}
+                {t("common.auth.forgotpassword.backToLogin")}
               </Button>
             </CardContent>
           </Card>

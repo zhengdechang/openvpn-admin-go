@@ -27,7 +27,7 @@ export default function VerifyEmailClient() {
   // 处理邮箱验证
   const handleVerify = async () => {
     if (!code) {
-      showToast.error(t("auth.verifyemail.codeRequired"));
+      showToast.error(t("common.auth.verifyemail.codeRequired"));
       return;
     }
 
@@ -39,17 +39,17 @@ export default function VerifyEmailClient() {
       const response = await userAPI.verifyEmail(code as string);
       if (response.success) {
         setSuccess(true);
-        showToast.success(t("auth.verifyemail.successToast"));
+        showToast.success(t("common.auth.verifyemail.successToast"));
         setTimeout(() => {
           router.push(`/auth/login`);
         }, 1000);
       } else {
         setSuccess(false);
-        setError(response.error || t("auth.verifyemail.failToast"));
+        setError(response.error || t("common.auth.verifyemail.failToast"));
       }
     } catch (err) {
       setSuccess(false);
-      setError(t("auth.verifyemail.requestFailedToast"));
+      setError(t("common.auth.verifyemail.requestFailedToast"));
     } finally {
       setLoading(false);
     }
@@ -62,10 +62,10 @@ export default function VerifyEmailClient() {
             <CardContent className="p-6">
               <div className="text-center">
                 <h2 className="text-2xl font-bold mb-4">
-                  {t("auth.verifyemail.title")}
+                  {t("common.auth.verifyemail.cardTitle")}
                 </h2>
                 <p className="text-gray-600 mb-6">
-                  {t("auth.verifyemail.description")}
+                  {t("common.auth.verifyemail.cardDescription")}
                 </p>
               </div>
 
@@ -74,7 +74,7 @@ export default function VerifyEmailClient() {
                 type="text"
                 value={code}
                 onChange={handleInputChange}
-                placeholder={t("auth.verifyemail.codePlaceholder")}
+                placeholder={t("common.auth.verifyemail.codePlaceholder")}
                 className="mt-4 text-center"
               />
 
@@ -84,14 +84,14 @@ export default function VerifyEmailClient() {
                 onClick={handleVerify}
                 disabled={loading}
               >
-                {loading ? t("auth.verifyemail.verifying") : t("auth.verifyemail.verifyButton")}
+                {loading ? t("common.auth.verifyemail.verifying") : t("common.auth.verifyemail.verifyButton")}
               </Button>
 
               {/* 结果显示 */}
               {success && (
-                <p className="text-green-600 mt-3">{t("auth.verifyemail.successMessage")}</p>
+                <p className="text-green-600 mt-3">{t("common.auth.verifyemail.successMessage")}</p>
               )}
-              {error && <p className="text-red-500 mt-3">{t("auth.verifyemail.errorPrefix")}{error}</p>}
+              {error && <p className="text-red-500 mt-3">{t("common.auth.verifyemail.errorPrefix")}{error}</p>}
 
               {/* 失败时提供重新注册选项 */}
               {!success && (
@@ -100,7 +100,7 @@ export default function VerifyEmailClient() {
                   variant="outline"
                   onClick={() => router.push("/auth/register")}
                 >
-                  {t("auth.verifyemail.registerAgain")}
+                  {t("common.auth.verifyemail.registerAgain")}
                 </Button>
               )}
             </CardContent>
