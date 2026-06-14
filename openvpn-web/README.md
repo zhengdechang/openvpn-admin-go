@@ -1,4 +1,4 @@
-# OpenVPN Web Admin Interface
+# Aegis — Web Console
 
 [![GitHub Repository](https://img.shields.io/badge/GitHub-openvpn--admin--go-blue?style=for-the-badge&logo=github)](https://github.com/zhengdechang/openvpn-admin-go)
 [![Next.js](https://img.shields.io/badge/Next.js-14-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)

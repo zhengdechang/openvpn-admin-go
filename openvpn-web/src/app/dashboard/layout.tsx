@@ -20,8 +20,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const { t } = useTranslation(); // Explicitly use common namespace
 
   useEffect(() => {
+    // loading 初始为 true（鉴权校验中），AuthProvider 校验完成后才置 false。
+    // 因此 loading=false && !user 一定是“确实未登录”，可安全跳转。
     if (!loading && !user) {
-      // router.replace("/auth/login");
+      router.replace("/auth/login");
     }
   }, [loading, user, router]);
   if (loading || !user) {

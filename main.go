@@ -90,35 +90,27 @@ func InitCore() error {
 		fmt.Println("环境未就绪，请根据提示完成依赖安装后重试。")
 	}
 
+	// 冷启动防锁死：持久卷里的 server.conf 可能已带 tls-verify / crl-verify，
+	// 确保被引用的 tls-verify.sh / crl.pem 在卷里就位（否则 OpenVPN 拒绝启动）。
+	// 失败只告警，不阻断 API 启动。
+	if err := openvpn.EnsureServerHelperFiles(); err != nil {
+		logging.Warn("同步 OpenVPN 辅助文件失败: %v", err)
+	}
+	if err := openvpn.EnsureCRLSetup(); err != nil {
+		logging.Warn("初始化 CRL 失败: %v", err)
+	}
+
 	// 初始化数据库
 	if err := database.Init(); err != nil {
 		return fmt.Errorf("数据库初始化失败: %v", err)
 	}
-	if err := database.Migrate(&model.User{}, &model.Department{}); err != nil {
+	if err := database.RunMigrations(); err != nil {
 		return fmt.Errorf("数据库迁移失败: %v", err)
 	}
-	// Seed default superadmin user if not exists
-	func() {
-		var existing model.User
-		if err := database.DB.Where("email = ?", "superadmin@gmail.com").First(&existing).Error; err != nil {
-			hash, errHash := common.HashPassword("superadmin")
-			if errHash != nil {
-				logging.Error("默认超级管理员密码哈希失败: %v", errHash) // Log and continue
-				return
-			}
-			super := model.User{
-				Name:         "Super Admin",
-				Email:        "superadmin@gmail.com",
-				PasswordHash: hash,
-				Role:         model.RoleSuperAdmin,
-			}
-			if errCreate := database.DB.Create(&super).Error; errCreate != nil {
-				logging.Error("创建默认超级管理员失败: %v", errCreate) // Log and continue
-			} else {
-				logging.Info("已创建默认超级管理员: superadmin@gmail.com / superadmin")
-			}
-		}
-	}()
+	// 数据库为空（无超级管理员）时，从环境变量创建超级管理员
+	if err := seedSuperAdmin(); err != nil {
+		return err
+	}
 	// 双向同步：确保数据库用户和 OpenVPN 客户端配置保持一致
 	func() {
 		// 第一步：确保数据库用户在 OpenVPN 客户端存在，不存在则自动创建
@@ -179,12 +171,13 @@ func InitCore() error {
 						}
 
 						newUser := model.User{
-							Name:         userName,
-							Email:        userName + "@openvpn.local", // 生成默认邮箱
-							PasswordHash: hash,
-							Role:         model.RoleUser, // 默认角色为普通用户
-							FixedIP:      fixedIP,        // 设置固定IP（如果有）
-							Subnet:       subnet,         // 设置子网（如果有）
+							Name:           userName,
+							Email:          userName + "@openvpn.local", // 生成默认邮箱
+							PasswordHash:   hash,
+							Role:           model.RoleUser,         // 默认角色为普通用户
+							ApprovalStatus: model.ApprovalApproved, // 已存在的 OpenVPN 客户端默认已批准
+							FixedIP:        fixedIP,                // 设置固定IP（如果有）
+							Subnet:         subnet,                 // 设置子网（如果有）
 						}
 
 						if errCreate := database.DB.Create(&newUser).Error; errCreate != nil {
@@ -242,6 +235,50 @@ func InitCore() error {
 	// OpenVPN 同步服务将在 web 服务启动时启动，避免数据库锁定问题
 	logging.Info("核心初始化完成，OpenVPN 同步服务将在 web 服务启动时启动")
 
+	return nil
+}
+
+// seedSuperAdmin 在数据库中不存在任何超级管理员时，从环境变量创建一个。
+// 当数据库为空（无超管）时，SUPERADMIN_EMAIL 和 SUPERADMIN_PASSWORD 为必填，
+// 未设置则启动失败并给出明确提示，避免内置弱默认账号。
+func seedSuperAdmin() error {
+	var count int64
+	if err := database.DB.Model(&model.User{}).
+		Where("role = ?", model.RoleSuperAdmin).Count(&count).Error; err != nil {
+		return fmt.Errorf("查询超级管理员失败: %v", err)
+	}
+	if count > 0 {
+		// 已存在超级管理员，跳过（幂等，不覆盖已有密码）
+		return nil
+	}
+
+	email := strings.TrimSpace(os.Getenv("SUPERADMIN_EMAIL"))
+	password := os.Getenv("SUPERADMIN_PASSWORD")
+	if email == "" || password == "" {
+		return fmt.Errorf("数据库中尚无超级管理员，请在 .env 中设置 SUPERADMIN_EMAIL 和 SUPERADMIN_PASSWORD 后重新启动")
+	}
+
+	name := strings.TrimSpace(os.Getenv("SUPERADMIN_NAME"))
+	if name == "" {
+		name = "Super Admin"
+	}
+
+	hash, err := common.HashPassword(password)
+	if err != nil {
+		return fmt.Errorf("超级管理员密码哈希失败: %v", err)
+	}
+
+	super := model.User{
+		Name:           name,
+		Email:          email,
+		PasswordHash:   hash,
+		Role:           model.RoleSuperAdmin,
+		ApprovalStatus: model.ApprovalApproved,
+	}
+	if err := database.DB.Create(&super).Error; err != nil {
+		return fmt.Errorf("创建超级管理员失败: %v", err)
+	}
+	logging.Info("已创建超级管理员: %s", email)
 	return nil
 }
 

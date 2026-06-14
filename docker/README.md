@@ -4,17 +4,27 @@ This directory contains all Docker-related files for OpenVPN Admin Go deployment
 
 ## 📁 Files Overview
 
-- `Dockerfile.combined` - Multi-stage Dockerfile that builds both frontend and backend into a single image
-- `docker-compose.production.yml` - Production-ready Docker Compose configuration
+- `Dockerfile.backend` - Backend image (Go API + OpenVPN), connects to external MySQL
+- `../openvpn-web/Dockerfile` - Frontend image (independent Next.js `next start` service)
+- `docker-compose.yml` - Production compose: MySQL + backend + frontend (fully separated)
 - `.env.docker.example` - Environment variables template for Docker deployment
 
 ## 🚀 Quick Start
 
-### CLI-first walkthrough (with optional web toggle)
+### Recommended: Docker Compose (MySQL + backend + frontend)
 
 ```bash
-# 1) Build the image locally (optional if you pull from a registry)
-docker build -f docker/Dockerfile.combined -t openvpn-admin-go:local .
+cd docker
+cp .env.docker.example .env   # edit DB_PASSWORD / JWT_SECRET / ports
+docker compose up -d --build
+# Frontend: http://localhost:3043   Backend API: http://localhost:8085/api/health
+```
+
+### Build a single image manually (advanced)
+
+```bash
+# Backend image
+docker build -f docker/Dockerfile.backend -t openvpn-admin-backend:local .
 
 # 2) Start in menu mode only (default)
 docker run -it --rm \
@@ -145,13 +155,18 @@ Nginx configuration is located at `docker/nginx/nginx.conf`.
 | `OPENVPN_PROTO` | Protocol (udp/tcp) | `udp` | No |
 | `OPENVPN_NETWORK` | VPN network | `10.8.0.0` | No |
 | `OPENVPN_NETMASK` | VPN netmask | `255.255.255.0` | No |
-| `DB_PATH` | Database file path | `/app/data/db.sqlite3` | No |
+| `DB_HOST` | MySQL host | `mysql` | Yes |
+| `DB_PORT` | MySQL port | `3306` | No |
+| `DB_USER` | MySQL user | `openvpn` | Yes |
+| `DB_PASSWORD` | MySQL password | - | Yes |
+| `DB_NAME` | MySQL database | `openvpn` | No |
 | `TZ` | Timezone | `UTC` | No |
 
 ## 🌐 Ports
 
-- **Port 80** - Frontend web interface (nginx)
-- **Port 8085** - Backend API (direct access, optional)
+- **Port 3043** - Frontend web interface (Next.js, separate container)
+- **Port 8085** - Backend API
+- **Port 1194/udp** - OpenVPN (configurable via `OPENVPN_PORT`)
 - **Port 1194/udp** - OpenVPN server
 
 ## 🔒 Security Considerations
@@ -216,11 +231,9 @@ curl http://localhost:3000
 ## 🔄 Building from Source
 
 ```bash
-# Build the image locally
-docker build -f Dockerfile.combined -t openvpn-admin-go:local ..
-
-# Run the locally built image
-docker run -d --name openvpn-admin-local openvpn-admin-go:local
+# From the repo root, build & run the full stack
+cd docker
+docker compose up -d --build
 ```
 
 ## 📈 Monitoring

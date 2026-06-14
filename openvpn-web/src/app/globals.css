@@ -1,43 +1,69 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+/* 继续使用现有的 tailwind.config.js（content/theme.extend/插件） */
+@config "../../tailwind.config.js";
 
 @layer base {
   :root {
-    --background: 220 13% 96%;
-    --foreground: 222.2 84% 4.9%;
+    /* ===== LuCI Argon 主题 —— 与 luci-theme-argon 取色一致 ===== */
+    /* 背景 #f4f5f7 / 主文字 #172b4d(default) */
+    --background: 228 18% 96%;
+    --foreground: 218 54% 20%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 218 54% 20%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 218 54% 20%;
 
-    --primary: 217 91% 60%;
+    /* Argon primary #5e72e4 */
+    --primary: 227 70% 63%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 215 60% 92%;
-    --secondary-foreground: 215 100% 25%;
+    --secondary: 226 60% 96%;
+    --secondary-foreground: 227 50% 35%;
 
-    --muted: 220 13% 92%;
-    --muted-foreground: 215 25% 45%;
+    /* gray #8898aa */
+    --muted: 220 16% 95%;
+    --muted-foreground: 212 17% 60%;
 
-    --accent: 217 91% 60%;
+    --accent: 227 70% 63%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    /* danger #f5365c */
+    --destructive: 346 90% 59%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 220 13% 90%;
-    --input: 220 13% 90%;
-    --ring: 217 91% 60%;
+    /* lighter #e9ecef */
+    --border: 210 17% 92%;
+    --input: 210 17% 90%;
+    --ring: 227 70% 63%;
 
-    --radius: 0.625rem;
+    --radius: 0.5rem;
 
-    --sidebar-bg: 220 14% 11%;
-    --sidebar-active: 213 67% 23%;
-    --sidebar-text: 215 20% 65%;
-    --sidebar-text-active: 213 93% 68%;
+    /* 侧边栏：白底，菜单文字 #5f6368(menu-color)，选中 primary */
+    --sidebar-bg: 0 0% 100%;
+    --sidebar-active: 227 70% 63%;
+    --sidebar-text: 213 5% 39%;
+    --sidebar-text-active: 0 0% 100%;
+    --sidebar-hover: 227 70% 96%;
+
+    /* ===== 原生 Argon 变量（供组件直接引用，非 hsl 包装） ===== */
+    --argon-primary: #5e72e4;
+    --argon-dark-primary: #483d8b;
+    --argon-default: #172b4d;
+    --argon-gray: #8898aa;
+    --argon-gray-dark: #32325d;
+    --argon-menu: #5f6368;
+    --argon-bg: #f4f5f7;
+    --argon-warning: #fb6340;
+    --argon-danger: #f5365c;
+    --argon-success: #2dce89;
+    --argon-info: #11cdef;
+    --argon-border: #e9ecef;
+    --argon-login-bg: rgba(244, 245, 247, 0.8);
+    --argon-blur: 10px;
+    --argon-gradient: linear-gradient(87deg, #5e72e4 0%, #825ee4 100%);
   }
  
   .dark {
@@ -75,15 +101,24 @@
   * {
     @apply border-border;
   }
-  html, body {
+  html {
     @apply h-full overflow-hidden;
   }
   body {
-    @apply bg-background text-foreground;
-    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    @apply bg-background text-foreground overflow-hidden;
+    /* 与 Argon 字体栈对齐 */
+    font-family: "Google Sans", -apple-system, BlinkMacSystemFont, "Segoe UI",
+      Roboto, "Microsoft Yahei", "WenQuanYi Micro Hei", "Helvetica Neue",
+      Helvetica, sans-serif;
+    /* 整体界面缩放到 80%（用户偏好更紧凑的布局）。zoom 参与布局但不会缩放视口单位(vh/vw)，
+       所以把 body 自身放大到 125%(=100/0.8)、缩放后正好铺满视口；
+       全屏子容器统一用 125vh/125vw 配合（见 .argon-login-* / 布局壳 / 侧栏）。 */
+    zoom: 0.8;
+    width: 125vw;
+    height: 125vh;
   }
   h1, h2, h3, h4, h5, h6 {
-    @apply font-medium tracking-tight text-primary;
+    @apply font-medium tracking-tight text-foreground;
   }
   #__next {
     @apply h-full;
@@ -129,6 +164,432 @@
     background: transparent;
   }
   
+  /* ===== Argon 登录页（移植自 luci-theme-argon sysauth.less） ===== */
+  .argon-login-page {
+    position: relative;
+    /* 125vh/125vw = 100/0.8，配合 body 的 zoom:0.8 缩放后正好铺满视口。 */
+    height: 125vh;
+    width: 125vw;
+    overflow: hidden;
+  }
+  .argon-login-bg {
+    position: absolute;
+    inset: 0;
+    height: 100%;
+    width: 100%;
+  }
+  /* 登录/注册页右上角语言切换（分段药丸 + 磨砂） */
+  .auth-lang-switch {
+    position: absolute;
+    top: 20px;
+    right: 24px;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding: 4px 6px;
+    border-radius: 999px;
+    background-color: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(var(--argon-blur));
+    -webkit-backdrop-filter: blur(var(--argon-blur));
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.18);
+  }
+  .auth-lang-switch-globe {
+    display: flex;
+    align-items: center;
+    padding-left: 4px;
+    color: var(--argon-gray);
+  }
+  .auth-lang-switch-btn {
+    border: none;
+    background: transparent;
+    padding: 5px 12px;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    line-height: 1;
+    color: var(--argon-gray-dark);
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+  .auth-lang-switch-btn:hover {
+    color: var(--argon-primary);
+  }
+  .auth-lang-switch-btn.is-active {
+    background: var(--argon-primary);
+    color: #fff;
+  }
+  .auth-lang-switch-btn.is-active:hover {
+    color: #fff;
+  }
+  .argon-login-container {
+    position: relative;
+    z-index: 10;
+    margin-left: 5%;
+    display: flex;
+    height: 125vh;
+    width: 26rem;
+    max-width: 92vw;
+    flex-direction: column;
+    align-items: center;
+    background-color: var(--argon-login-bg);
+    backdrop-filter: blur(var(--argon-blur));
+    -webkit-backdrop-filter: blur(var(--argon-blur));
+    box-shadow: rgba(0, 0, 0, 0.75) 0 0 35px -5px;
+  }
+  .argon-brand {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin: 60px auto 90px;
+    color: var(--argon-default);
+    text-decoration: none;
+  }
+  .argon-brand .argon-brand-text {
+    font-size: 1.35rem;
+    font-weight: 700;
+    word-break: break-word;
+  }
+  .argon-form {
+    width: 100%;
+    padding: 0 50px;
+    box-sizing: border-box;
+  }
+  .argon-input-group {
+    position: relative;
+    margin-bottom: 1.5rem;
+  }
+  .argon-input-icon {
+    position: absolute;
+    top: 50%;
+    left: 8px;
+    transform: translateY(-50%);
+    z-index: 2;
+    color: var(--argon-default);
+    pointer-events: none;
+  }
+  .argon-input {
+    display: block;
+    width: 100%;
+    margin: 0.5rem 0;
+    padding: 0.6rem 0.75rem 0.6rem 3rem;
+    font-size: 1rem;
+    line-height: 1.5em;
+    color: var(--argon-default);
+    background-color: transparent;
+    border: 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.8);
+    border-radius: 0;
+    outline: none;
+    box-sizing: border-box;
+  }
+  .argon-input::placeholder {
+    color: var(--argon-gray);
+  }
+  .argon-input-underline {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: var(--argon-primary);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+  }
+  .argon-input:focus ~ .argon-input-underline,
+  .argon-input-underline.is-open {
+    transform: scaleX(1);
+  }
+  .argon-submit {
+    width: 100%;
+    min-height: 50px;
+    margin-top: 28px;
+    padding: 10px 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+    text-align: center;
+    letter-spacing: 0.5rem;
+    background-color: var(--argon-primary);
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    box-shadow: rgba(0, 0, 0, 0.1) 0 0 50px 0;
+    transition: opacity 0.3s ease;
+  }
+  .argon-submit:hover,
+  .argon-submit:focus {
+    opacity: 0.9;
+  }
+  .argon-submit:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  .argon-login-footer {
+    margin-top: auto;
+    padding: 0 0 30px;
+    color: var(--argon-gray);
+    text-align: center;
+    line-height: 1.6rem;
+    font-size: 0.75rem;
+  }
+  .argon-login-error {
+    padding-bottom: 1rem;
+    text-align: center;
+    color: var(--argon-warning);
+    font-size: 0.85rem;
+  }
+
+  /* ===== Argon 表单控件（浅底变体，供后台白卡/弹窗复用，风格对齐登录页下划线输入） ===== */
+  .argon-field {
+    position: relative;
+    margin-bottom: 0.25rem;
+  }
+  .argon-field-label {
+    display: block;
+    margin-bottom: 0.15rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--argon-gray);
+  }
+  .argon-field-control {
+    position: relative;
+  }
+  .argon-field-icon {
+    position: absolute;
+    top: 50%;
+    left: 0.7rem;
+    transform: translateY(-50%);
+    z-index: 2;
+    color: var(--argon-gray);
+    pointer-events: none;
+    display: flex;
+  }
+  .argon-field-input {
+    display: block;
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: var(--argon-default);
+    background-color: #fff;
+    border: 1px solid #d4dae3;
+    border-radius: 0.375rem;
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  .argon-field-input.has-icon {
+    padding-left: 2.25rem;
+  }
+  .argon-field-input::placeholder {
+    color: var(--argon-gray);
+    font-size: 0.8rem;
+  }
+  .argon-field-input:disabled {
+    color: var(--argon-gray);
+    cursor: not-allowed;
+    opacity: 0.7;
+  }
+  select.argon-field-input {
+    appearance: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+    padding-right: 1.75rem;
+  }
+  /* 自定义下拉触发器（按钮代替原生 select，弹层在 DOM 内绝对定位，规避 zoom 错位） */
+  .argon-select-trigger {
+    display: flex;
+    align-items: center;
+    text-align: left;
+    cursor: pointer;
+    padding-right: 1.75rem;
+  }
+  .argon-select-trigger:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+  }
+  .argon-select-trigger.is-placeholder .argon-select-value {
+    color: var(--argon-gray);
+    font-size: 0.8rem;
+  }
+  .argon-select-value {
+    display: block;
+    width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .argon-field-caret {
+    position: absolute;
+    top: 50%;
+    right: 0.7rem;
+    transform: translateY(-50%);
+    color: var(--argon-gray);
+    pointer-events: none;
+    display: flex;
+    transition: transform 0.2s ease;
+  }
+  .argon-field-caret.is-open {
+    transform: translateY(-50%) rotate(180deg);
+  }
+  /* 浅底变体改为 LuCI 风格描边框：聚焦/展开时主色描边 + 柔光，不再用下划线 */
+  .argon-field-input:focus,
+  .argon-field-input.argon-select-trigger[aria-expanded="true"] {
+    border-color: var(--argon-primary);
+    box-shadow: 0 0 0 3px rgba(94, 114, 228, 0.12);
+  }
+  .argon-field-underline {
+    display: none;
+  }
+  /* 下拉弹层：在 .argon-field-control 内绝对定位，默认正下方，空间不足翻转正上方 */
+  .argon-select-menu {
+    position: absolute;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    margin: 0;
+    padding: 0.25rem 0;
+    list-style: none;
+    background-color: #fff;
+    border: 1px solid var(--argon-border);
+    border-radius: 0.5rem;
+    box-shadow: 0 0.5rem 1.5rem rgba(136, 152, 170, 0.3);
+    max-height: 16rem;
+    overflow-y: auto;
+  }
+  .argon-select-menu.is-down {
+    top: calc(100% + 4px);
+  }
+  .argon-select-menu.is-up {
+    bottom: calc(100% + 4px);
+  }
+  .argon-select-option {
+    padding: 0.5rem 0.85rem;
+    font-size: 0.9rem;
+    color: var(--argon-default);
+    cursor: pointer;
+  }
+  .argon-select-option:hover {
+    background-color: var(--argon-bg);
+  }
+  .argon-select-option.is-selected {
+    background-color: rgba(94, 114, 228, 0.12);
+    color: var(--argon-primary);
+    font-weight: 600;
+  }
+  .argon-select-option.is-disabled {
+    color: var(--argon-gray);
+    cursor: not-allowed;
+    opacity: 0.7;
+  }
+  .argon-field-error {
+    margin-top: 0.25rem;
+    color: var(--argon-warning);
+    font-size: 0.78rem;
+  }
+
+  /* ===== Argon CBI 表单（移植自 luci-theme-argon cascade.less） ===== */
+  /* 面板：白底、圆角、柔和阴影；标题带下边框 */
+  .cbi-panel {
+    background-color: hsl(var(--card));
+    border-radius: var(--radius);
+    box-shadow: 0 0 1rem 0 rgba(136, 152, 170, 0.15);
+  }
+  .cbi-panel-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.9rem 1.25rem;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--argon-gray-dark);
+    border-bottom: 1px solid var(--argon-border);
+  }
+  .cbi-panel-body {
+    padding: 1rem 1.25rem;
+  }
+  /* 表单行：左标签（右对齐）+ 右控件 */
+  .cbi-value {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.5rem 0;
+    min-height: 2.6rem;
+  }
+  .cbi-value-title {
+    flex: 0 0 13rem;
+    max-width: 13rem;
+    padding-right: 1rem;
+    text-align: left;
+    color: var(--argon-gray-dark);
+    font-size: 0.875rem;
+    word-wrap: break-word;
+  }
+  .cbi-value-field {
+    color: var(--argon-default);
+    font-size: 0.875rem;
+    word-break: break-all;
+  }
+  /* LuCI 进度条：浅灰药丸轨道 + 渐变填充 + 居中叠加文字（对齐 luci-theme-argon 概览页） */
+  .luci-progress {
+    position: relative;
+    width: 100%;
+    height: 1.5rem;
+    background-color: var(--argon-bg);
+    border: 1px solid var(--argon-border);
+    border-radius: 1rem;
+    overflow: hidden;
+  }
+  .luci-progress-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    background: var(--argon-gradient);
+    border-radius: 1rem;
+    transition: width 0.4s ease;
+  }
+  .luci-progress-text {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--argon-gray-dark);
+    text-shadow: 0 0 2px rgba(255, 255, 255, 0.6);
+  }
+  .cbi-value-field {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  /* 行内分隔线（多行表单） */
+  .cbi-value + .cbi-value {
+    border-top: 1px solid var(--argon-border);
+  }
+  @media (max-width: 768px) {
+    .cbi-value {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.35rem;
+    }
+    .cbi-value-title {
+      flex: none;
+      max-width: none;
+      padding-right: 0;
+      text-align: left;
+    }
+  }
+
+  /* LuCI 数据表斑马纹：偶数行浅蓝底（对齐 luci-theme-argon cbi 表格）；
+     悬停高亮仍由 TableRow 的 hover:bg-muted/40（utilities 层）接管。 */
+  .argon-table tbody tr:nth-child(even) {
+    background-color: #f6f9fc;
+  }
+
   .gov-card {
     @apply bg-white rounded-lg shadow-md border border-secondary hover:shadow-lg transition-shadow duration-300;
   }

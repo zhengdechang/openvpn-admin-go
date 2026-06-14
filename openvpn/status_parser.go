@@ -90,13 +90,15 @@ func ParseStatusLog(logPath string) ([]OpenVPNClientStatus, time.Time, error) {
 			continue
 		}
 
-		if line == clientListHeader {
+		// 用前缀匹配而非全等：不同 OpenVPN 版本(2.4/2.5/2.6)在表头尾部
+		// 增删列(如 Data Channel Cipher)，全等会直接漏掉整段而解析出 0 客户端。
+		if strings.HasPrefix(line, "HEADER,CLIENT_LIST") {
 			parsingClientList = true
 			parsingRoutingTable = false
 			continue // Skip header line
 		}
 
-		if line == routingTableHeader {
+		if strings.HasPrefix(line, "HEADER,ROUTING_TABLE") {
 			parsingClientList = false
 			parsingRoutingTable = true
 			continue // Skip header line
@@ -110,7 +112,7 @@ func ParseStatusLog(logPath string) ([]OpenVPNClientStatus, time.Time, error) {
 
 		if parsingClientList && strings.HasPrefix(line, "CLIENT_LIST,") {
 			parts := strings.Split(line, ",")
-			if len(parts) == clientListFieldsCount {
+			if len(parts) >= clientListFieldsCount {
 				// CLIENT_LIST line: CLIENT_LIST,Common Name,Real Address,Virtual Address,Virtual IPv6 Address,Bytes Received,Bytes Sent,Connected Since,Connected Since (time_t),Username,Client ID,Peer ID,Data Channel Cipher
 				// parts index:       0            1            2             3                4                   5               6            7                 8                       9         10         11       12
 				commonName := strings.TrimSpace(parts[1])
@@ -146,7 +148,7 @@ func ParseStatusLog(logPath string) ([]OpenVPNClientStatus, time.Time, error) {
 			}
 		} else if parsingRoutingTable && strings.HasPrefix(line, "ROUTING_TABLE,") {
 			parts := strings.Split(line, ",")
-			if len(parts) == routingTableFieldsCount {
+			if len(parts) >= routingTableFieldsCount {
 				// ROUTING_TABLE line: ROUTING_TABLE,Virtual Address,Common Name,Real Address,Last Ref,Last Ref (time_t)
 				// parts index:        0              1                2            3             4         5
 				virtualAddressRoute := strings.TrimSpace(parts[1])

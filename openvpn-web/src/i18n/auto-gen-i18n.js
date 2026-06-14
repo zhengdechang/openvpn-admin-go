@@ -1,8 +1,15 @@
-/* eslint-disable no-eval */
 const fs = require('node:fs')
 const path = require('node:path')
-const transpile = require('typescript').transpile
+const ts = require('typescript')
 const magicast = require('magicast')
+
+// 把 .ts 翻译文件转译为 CommonJS 后执行，取其 default 导出（兼容 TypeScript 6）。
+function loadTranslation(content) {
+  const js = ts.transpile(content, { module: ts.ModuleKind.CommonJS })
+  const mod = { exports: {} }
+  new Function('module', 'exports', 'require', js)(mod, mod.exports, require)
+  return mod.exports.default || mod.exports
+}
 const { parseModule, generateCode, loadFile } = magicast
 const bingTranslate = require('bing-translate-api')
 const { translate } = bingTranslate
@@ -44,7 +51,7 @@ async function translateMissingKeyDeeply(sourceObj, targetObject, toLanguage) {
 async function autoGenTrans(fileName, toGenLanguage) {
   const fullKeyFilePath = path.join(__dirname, targetLanguage, `${fileName}.ts`)
   const toGenLanguageFilePath = path.join(__dirname, toGenLanguage, `${fileName}.ts`)
-  const fullKeyContent = eval(transpile(fs.readFileSync(fullKeyFilePath, 'utf8')))
+  const fullKeyContent = loadTranslation(fs.readFileSync(fullKeyFilePath, 'utf8'))
   // To keep object format and format it for magicast to work: const translation = { ... } => export default {...}
   const readContent = await loadFile(toGenLanguageFilePath)
   const { code: toGenContent } = generateCode(readContent)

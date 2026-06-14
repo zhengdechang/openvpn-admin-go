@@ -34,8 +34,7 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label"; // Added Label
+import { ArgonField, ArgonSelect } from "@/components/ui/argon-field";
 import { toast } from "sonner";
 
 // Helper function to format bytes into a readable string
@@ -140,6 +139,39 @@ export default function UsersPage() {
       toast.error(
         error?.response?.data?.error ||
           t("dashboard.users.resumeError", `Failed to resume user ${username}.`)
+      );
+    }
+  };
+
+  // 批准 / 拒绝 待审核用户
+  const handleApproveUser = async (username: string) => {
+    try {
+      await userManagementAPI.approveUser(username);
+      toast.success(t("dashboard.users.approveSuccess", `User ${username} approved.`));
+      fetchAll();
+    } catch (error: any) {
+      toast.error(
+        error?.response?.data?.error ||
+          t("dashboard.users.approveError", `Failed to approve user ${username}.`)
+      );
+    }
+  };
+
+  const handleRejectUser = async (username: string) => {
+    if (
+      !confirm(
+        t("dashboard.users.rejectConfirm", `Reject registration of ${username}?`)
+      )
+    )
+      return;
+    try {
+      await userManagementAPI.rejectUser(username);
+      toast.success(t("dashboard.users.rejectSuccess", `User ${username} rejected.`));
+      fetchAll();
+    } catch (error: any) {
+      toast.error(
+        error?.response?.data?.error ||
+          t("dashboard.users.rejectError", `Failed to reject user ${username}.`)
       );
     }
   };
@@ -376,7 +408,7 @@ export default function UsersPage() {
               <Button
                 onClick={() => {
                   let initialDeptId = "";
-                  let initialRole = UserRole.USER;
+                  const initialRole = UserRole.USER;
                   if (currentUser?.role === UserRole.MANAGER) {
                     initialDeptId = currentUser.departmentId || "";
                     // Managers can only create users
@@ -402,169 +434,125 @@ export default function UsersPage() {
                   {t("dashboard.users.addUserDialogTitle")}
                 </DialogTitle>
               </DialogHeader>
-              <div className="space-y-3 py-3">
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="add-name" className="text-right">
-                    {t("dashboard.users.namePlaceholder")}
-                  </Label>
-                  <Input
-                    id="add-name"
-                    value={addUserForm.name}
-                    onChange={(e) =>
-                      setAddUserForm({ ...addUserForm, name: e.target.value })
-                    }
-                    className="col-span-3"
-                  />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="add-email" className="text-right">
-                    {t("dashboard.users.emailPlaceholder")}
-                  </Label>
-                  <Input
-                    id="add-email"
-                    type="email"
-                    value={addUserForm.email}
-                    onChange={(e) =>
-                      setAddUserForm({ ...addUserForm, email: e.target.value })
-                    }
-                    className="col-span-3"
-                  />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="add-password" className="text-right">
-                    {t("dashboard.users.passwordPlaceholder")}
-                  </Label>
-                  <Input
-                    id="add-password"
-                    type="password"
-                    value={addUserForm.password}
-                    onChange={(e) =>
-                      setAddUserForm({
-                        ...addUserForm,
-                        password: e.target.value,
-                      })
-                    }
-                    className="col-span-3"
-                  />
-                </div>
+              <div className="space-y-4 py-3">
+                <ArgonField
+                  label={t("dashboard.users.namePlaceholder")}
+                  value={addUserForm.name}
+                  onChange={(e) =>
+                    setAddUserForm({ ...addUserForm, name: e.target.value })
+                  }
+                />
+                <ArgonField
+                  type="email"
+                  label={t("dashboard.users.emailPlaceholder")}
+                  value={addUserForm.email}
+                  onChange={(e) =>
+                    setAddUserForm({ ...addUserForm, email: e.target.value })
+                  }
+                />
+                <ArgonField
+                  type="password"
+                  label={t("dashboard.users.passwordPlaceholder")}
+                  value={addUserForm.password}
+                  onChange={(e) =>
+                    setAddUserForm({
+                      ...addUserForm,
+                      password: e.target.value,
+                    })
+                  }
+                />
 
                 {canEditFixedIp && (
                   <>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="add-fixedIp" className="text-right">
-                        {t(
-                          "dashboard.users.fixedIpLabel",
-                          "Fixed VPN IP (Optional)"
-                        )}
-                      </Label>
-                      <Input
-                        id="add-fixedIp"
-                        value={addUserForm.fixedIp || ""}
-                        onChange={(e) =>
-                          setAddUserForm({
-                            ...addUserForm,
-                            fixedIp: e.target.value,
-                          })
-                        }
-                        placeholder={t(
-                          "dashboard.users.fixedIpPlaceholder",
-                          "e.g., 10.8.0.100 or empty"
-                        )}
-                        className="col-span-3"
-                      />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="add-subnet" className="text-right">
-                        {t("dashboard.users.subnetLabel", "Subnet (Optional)")}
-                      </Label>
-                      <Input
-                        id="add-subnet"
-                        value={addUserForm.subnet || ""}
-                        onChange={(e) =>
-                          setAddUserForm({
-                            ...addUserForm,
-                            subnet: e.target.value,
-                          })
-                        }
-                        placeholder={t(
-                          "dashboard.users.subnetPlaceholder",
-                          "e.g., 10.10.120.0/23 or empty"
-                        )}
-                        className="col-span-3"
-                      />
-                    </div>
+                    <ArgonField
+                      label={t(
+                        "dashboard.users.fixedIpLabel",
+                        "Fixed VPN IP (Optional)"
+                      )}
+                      value={addUserForm.fixedIp || ""}
+                      onChange={(e) =>
+                        setAddUserForm({
+                          ...addUserForm,
+                          fixedIp: e.target.value,
+                        })
+                      }
+                      placeholder={t(
+                        "dashboard.users.fixedIpPlaceholder",
+                        "e.g., 10.8.0.100 or empty"
+                      )}
+                    />
+                    <ArgonField
+                      label={t("dashboard.users.subnetLabel", "Subnet (Optional)")}
+                      value={addUserForm.subnet || ""}
+                      onChange={(e) =>
+                        setAddUserForm({
+                          ...addUserForm,
+                          subnet: e.target.value,
+                        })
+                      }
+                      placeholder={t(
+                        "dashboard.users.subnetPlaceholder",
+                        "e.g., 10.10.120.0/23 or empty"
+                      )}
+                    />
                   </>
                 )}
 
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="add-role" className="text-right">
-                    {t("dashboard.users.roleLabel", "Role")}
-                  </Label>
-                  <select
-                    id="add-role"
-                    value={addUserForm.role}
-                    onChange={(e) =>
-                      setAddUserForm({
-                        ...addUserForm,
-                        role: e.target.value as UserRole,
-                      })
-                    }
-                    className="col-span-3 border px-2 py-2 rounded-md"
-                    disabled={
-                      currentUser?.role === UserRole.MANAGER
-                    } /* Managers can only create 'user' role */
-                  >
-                    {Object.values(UserRole)
-                      .filter(
-                        (role) =>
-                          currentUser?.role === UserRole.SUPERADMIN || // Superadmin can assign any role
-                          (currentUser?.role === UserRole.ADMIN &&
-                            role !== UserRole.SUPERADMIN) || // Admin can assign any role except Superadmin
-                          (currentUser?.role === UserRole.MANAGER &&
-                            role === UserRole.USER) // Manager can only assign User
-                      )
-                      .map((role) => (
-                        <option key={role} value={role}>
-                          {t(
-                            `dashboard.users.role${
-                              role.charAt(0).toUpperCase() + role.slice(1)
-                            }`,
-                            role
-                          )}
-                        </option>
-                      ))}
-                  </select>
-                </div>
-
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="add-department" className="text-right">
-                    {t("dashboard.users.departmentLabel")}
-                  </Label>
-                  <select
-                    id="add-department"
-                    value={addUserForm.departmentId || ""}
-                    onChange={(e) =>
-                      setAddUserForm({
-                        ...addUserForm,
-                        departmentId: e.target.value,
-                      })
-                    }
-                    className="col-span-3 border px-2 py-2 rounded-md"
-                    disabled={
-                      currentUser?.role === UserRole.MANAGER &&
-                      !!currentUser.departmentId
-                    } /* Manager cannot change their own department selection */
-                  >
-                    <option value="">
-                      {t("dashboard.users.selectDepartmentPlaceholder")}
-                    </option>
-                    {depts.map((d) => (
-                      <option key={d.id} value={d.id}>
-                        {d.name}
+                <ArgonSelect
+                  label={t("dashboard.users.roleLabel", "Role")}
+                  value={addUserForm.role}
+                  onChange={(e) =>
+                    setAddUserForm({
+                      ...addUserForm,
+                      role: e.target.value as UserRole,
+                    })
+                  }
+                  disabled={currentUser?.role === UserRole.MANAGER}
+                >
+                  {Object.values(UserRole)
+                    .filter(
+                      (role) =>
+                        currentUser?.role === UserRole.SUPERADMIN ||
+                        (currentUser?.role === UserRole.ADMIN &&
+                          role !== UserRole.SUPERADMIN) ||
+                        (currentUser?.role === UserRole.MANAGER &&
+                          role === UserRole.USER)
+                    )
+                    .map((role) => (
+                      <option key={role} value={role}>
+                        {t(
+                          `dashboard.users.role${
+                            role.charAt(0).toUpperCase() + role.slice(1)
+                          }`,
+                          role
+                        )}
                       </option>
                     ))}
-                  </select>
-                </div>
+                </ArgonSelect>
+
+                <ArgonSelect
+                  label={t("dashboard.users.departmentLabel")}
+                  value={addUserForm.departmentId || ""}
+                  onChange={(e) =>
+                    setAddUserForm({
+                      ...addUserForm,
+                      departmentId: e.target.value,
+                    })
+                  }
+                  disabled={
+                    currentUser?.role === UserRole.MANAGER &&
+                    !!currentUser.departmentId
+                  }
+                >
+                  <option value="">
+                    {t("dashboard.users.selectDepartmentPlaceholder")}
+                  </option>
+                  {depts.map((d) => (
+                    <option key={d.id} value={d.id}>
+                      {d.name}
+                    </option>
+                  ))}
+                </ArgonSelect>
               </div>
               <DialogFooter>
                 <DialogClose asChild>
@@ -642,67 +630,50 @@ export default function UsersPage() {
 
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div className="grid w-full gap-3 md:grid-cols-2 xl:grid-cols-4 xl:max-w-4xl">
-          <div className="flex flex-col gap-1">
-            <Label htmlFor="user-search">
-              {t("dashboard.users.searchLabel", "Search")}
-            </Label>
-            <Input
-              id="user-search"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder={t(
-                "dashboard.users.searchPlaceholder",
-                "Search by name or email"
-              )}
-            />
-          </div>
-          <div className="flex flex-col gap-1">
-            <Label htmlFor="user-department-filter">
-              {t("dashboard.users.departmentFilterLabel")}
-            </Label>
-            <select
-              id="user-department-filter"
-              value={departmentFilter}
-              onChange={(e) => setDepartmentFilter(e.target.value)}
-              className="border px-2 py-2 rounded-md"
-            >
-              <option value="all">
-                {t("dashboard.users.filterDepartmentAll")}
+          <ArgonField
+            label={t("dashboard.users.searchLabel", "Search")}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder={t(
+              "dashboard.users.searchPlaceholder",
+              "Search by name or email"
+            )}
+          />
+          <ArgonSelect
+            label={t("dashboard.users.departmentFilterLabel")}
+            value={departmentFilter}
+            onChange={(e) => setDepartmentFilter(e.target.value)}
+          >
+            <option value="all">
+              {t("dashboard.users.filterDepartmentAll")}
+            </option>
+            <option value="none">
+              {t("dashboard.users.filterDepartmentNone")}
+            </option>
+            {depts.map((d) => (
+              <option key={d.id} value={d.id}>
+                {d.name}
               </option>
-              <option value="none">
-                {t("dashboard.users.filterDepartmentNone")}
-              </option>
-              {depts.map((d) => (
-                <option key={d.id} value={d.id}>
-                  {d.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="flex flex-col gap-1">
-            <Label htmlFor="user-status-filter">
-              {t("dashboard.users.statusFilterLabel")}
-            </Label>
-            <select
-              id="user-status-filter"
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="border px-2 py-2 rounded-md"
-            >
-              <option value="all">
-                {t("dashboard.users.filterStatusAll")}
-              </option>
-              <option value="online">
-                {t("dashboard.users.filterStatusOnline")}
-              </option>
-              <option value="offline">
-                {t("dashboard.users.filterStatusOffline")}
-              </option>
-              <option value="paused">
-                {t("dashboard.users.filterStatusPaused")}
-              </option>
-            </select>
-          </div>
+            ))}
+          </ArgonSelect>
+          <ArgonSelect
+            label={t("dashboard.users.statusFilterLabel")}
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+          >
+            <option value="all">
+              {t("dashboard.users.filterStatusAll")}
+            </option>
+            <option value="online">
+              {t("dashboard.users.filterStatusOnline")}
+            </option>
+            <option value="offline">
+              {t("dashboard.users.filterStatusOffline")}
+            </option>
+            <option value="paused">
+              {t("dashboard.users.filterStatusPaused")}
+            </option>
+          </ArgonSelect>
         </div>
         {hasFilters && (
           <Button
@@ -725,7 +696,7 @@ export default function UsersPage() {
       </div>
 
       <Dialog open={editUserDialogOpen} onOpenChange={setEditUserDialogOpen}>
-        <DialogContent className="sm:max-w-[525px]">
+        <DialogContent>
           <DialogHeader>
             <DialogTitle>
               {t("dashboard.users.editUserDialogTitle", "Edit User")}
@@ -738,168 +709,126 @@ export default function UsersPage() {
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="edit-name" className="text-right">
-                {t("dashboard.users.namePlaceholder")}
-              </Label>
-              <Input
-                id="edit-name"
-                value={editForm.name || ""}
-                onChange={(e) =>
-                  setEditForm({ ...editForm, name: e.target.value })
-                }
-                className="col-span-3"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="edit-email" className="text-right">
-                {t("dashboard.users.emailPlaceholder")}
-              </Label>
-              <Input
-                id="edit-email"
-                type="email"
-                value={editForm.email || ""}
-                onChange={(e) =>
-                  setEditForm({ ...editForm, email: e.target.value })
-                }
-                className="col-span-3"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="edit-password" className="text-right">
-                {t(
-                  "dashboard.users.passwordOptionalPlaceholder",
-                  "Password (optional)"
-                )}
-              </Label>
-              <Input
-                id="edit-password"
-                type="password"
-                value={editForm.password || ""}
-                onChange={(e) =>
-                  setEditForm({ ...editForm, password: e.target.value })
-                }
-                className="col-span-3"
-                placeholder={t(
-                  "dashboard.users.passwordLeaveBlankPlaceholder",
-                  "Leave blank to keep current"
-                )}
-              />
-            </div>
+            <ArgonField
+              label={t("dashboard.users.namePlaceholder")}
+              value={editForm.name || ""}
+              onChange={(e) =>
+                setEditForm({ ...editForm, name: e.target.value })
+              }
+            />
+            <ArgonField
+              type="email"
+              label={t("dashboard.users.emailPlaceholder")}
+              value={editForm.email || ""}
+              onChange={(e) =>
+                setEditForm({ ...editForm, email: e.target.value })
+              }
+            />
+            <ArgonField
+              type="password"
+              label={t(
+                "dashboard.users.passwordOptionalPlaceholder",
+                "Password (optional)"
+              )}
+              value={editForm.password || ""}
+              onChange={(e) =>
+                setEditForm({ ...editForm, password: e.target.value })
+              }
+              placeholder={t(
+                "dashboard.users.passwordLeaveBlankPlaceholder",
+                "Leave blank to keep current"
+              )}
+            />
 
             {canEditFixedIp && (
               <>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="edit-fixedIp" className="text-right">
-                    {t(
-                      "dashboard.users.fixedIpLabel",
-                      "Fixed VPN IP (Optional)"
-                    )}
-                  </Label>
-                  <Input
-                    id="edit-fixedIp"
-                    value={editForm.fixedIp || ""}
-                    onChange={(e) =>
-                      setEditForm({
-                        ...editForm,
-                        fixedIp: e.target.value,
-                      })
-                    }
-                    placeholder={t(
-                      "dashboard.users.fixedIpPlaceholder",
-                      "e.g., 10.8.0.100 or empty"
-                    )}
-                    className="col-span-3"
-                  />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="edit-subnet" className="text-right">
-                    {t("dashboard.users.subnetLabel", "Subnet (Optional)")}
-                  </Label>
-                  <Input
-                    id="edit-subnet"
-                    value={editForm.subnet || ""}
-                    onChange={(e) =>
-                      setEditForm({
-                        ...editForm,
-                        subnet: e.target.value,
-                      })
-                    }
-                    placeholder={t(
-                      "dashboard.users.subnetPlaceholder",
-                      "e.g., 10.10.120.0/23 or empty"
-                    )}
-                    className="col-span-3"
-                  />
-                </div>
+                <ArgonField
+                  label={t(
+                    "dashboard.users.fixedIpLabel",
+                    "Fixed VPN IP (Optional)"
+                  )}
+                  value={editForm.fixedIp || ""}
+                  onChange={(e) =>
+                    setEditForm({
+                      ...editForm,
+                      fixedIp: e.target.value,
+                    })
+                  }
+                  placeholder={t(
+                    "dashboard.users.fixedIpPlaceholder",
+                    "e.g., 10.8.0.100 or empty"
+                  )}
+                />
+                <ArgonField
+                  label={t("dashboard.users.subnetLabel", "Subnet (Optional)")}
+                  value={editForm.subnet || ""}
+                  onChange={(e) =>
+                    setEditForm({
+                      ...editForm,
+                      subnet: e.target.value,
+                    })
+                  }
+                  placeholder={t(
+                    "dashboard.users.subnetPlaceholder",
+                    "e.g., 10.10.120.0/23 or empty"
+                  )}
+                />
               </>
             )}
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="edit-department" className="text-right">
-                {t("dashboard.users.departmentLabel")}
-              </Label>
-              <select
-                id="edit-department"
-                value={editForm.departmentId || ""}
-                onChange={(e) =>
-                  setEditForm({ ...editForm, departmentId: e.target.value })
-                }
-                className="col-span-3 border px-2 py-2 rounded-md"
-                disabled={
-                  currentUser?.role === UserRole.MANAGER &&
-                  editingUser?.departmentId !== currentUser.departmentId &&
-                  editingUser?.id !== currentUser.id
-                }
-              >
-                <option value="">
-                  {t("dashboard.users.selectDepartmentPlaceholder")}
+            <ArgonSelect
+              label={t("dashboard.users.departmentLabel")}
+              value={editForm.departmentId || ""}
+              onChange={(e) =>
+                setEditForm({ ...editForm, departmentId: e.target.value })
+              }
+              disabled={
+                currentUser?.role === UserRole.MANAGER &&
+                editingUser?.departmentId !== currentUser.departmentId &&
+                editingUser?.id !== currentUser.id
+              }
+            >
+              <option value="">
+                {t("dashboard.users.selectDepartmentPlaceholder")}
+              </option>
+              {depts.map((d) => (
+                <option key={d.id} value={d.id}>
+                  {d.name}
                 </option>
-                {depts.map((d) => (
-                  <option key={d.id} value={d.id}>
-                    {d.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+              ))}
+            </ArgonSelect>
             {(currentUser?.role === UserRole.SUPERADMIN ||
               (currentUser?.role === UserRole.ADMIN &&
                 editingUser?.role !== UserRole.SUPERADMIN)) &&
               (editingUser?.id !== currentUser?.id ||
                 currentUser?.role ===
                   UserRole.SUPERADMIN) /* Can't change own role unless superadmin */ && (
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="edit-role" className="text-right">
-                    {t("dashboard.users.roleLabel", "Role")}
-                  </Label>
-                  <select
-                    id="edit-role"
-                    value={editForm.role || ""}
-                    onChange={(e) =>
-                      setEditForm({
-                        ...editForm,
-                        role: e.target.value as UserRole,
-                      })
-                    }
-                    className="col-span-3 border px-2 py-2 rounded-md"
-                  >
-                    {Object.values(UserRole)
-                      .filter(
-                        (role) =>
-                          currentUser?.role === UserRole.SUPERADMIN ||
-                          role !== UserRole.SUPERADMIN
-                      )
-                      .map((role) => (
-                        <option key={role} value={role}>
-                          {t(
-                            `dashboard.users.role${
-                              role.charAt(0).toUpperCase() + role.slice(1)
-                            }`,
-                            role
-                          )}
-                        </option>
-                      ))}
-                  </select>
-                </div>
+                <ArgonSelect
+                  label={t("dashboard.users.roleLabel", "Role")}
+                  value={editForm.role || ""}
+                  onChange={(e) =>
+                    setEditForm({
+                      ...editForm,
+                      role: e.target.value as UserRole,
+                    })
+                  }
+                >
+                  {Object.values(UserRole)
+                    .filter(
+                      (role) =>
+                        currentUser?.role === UserRole.SUPERADMIN ||
+                        role !== UserRole.SUPERADMIN
+                    )
+                    .map((role) => (
+                      <option key={role} value={role}>
+                        {t(
+                          `dashboard.users.role${
+                            role.charAt(0).toUpperCase() + role.slice(1)
+                          }`,
+                          role
+                        )}
+                      </option>
+                    ))}
+                </ArgonSelect>
               )}
           </div>
           <DialogFooter>
@@ -934,6 +863,9 @@ export default function UsersPage() {
                       </TableHead>
                       <TableHead className="min-w-[120px]">
                         {t("dashboard.users.columnRole")}
+                      </TableHead>
+                      <TableHead className="min-w-[200px]">
+                        {t("dashboard.users.columnApproval", "Approval")}
                       </TableHead>
                       <TableHead className="min-w-[160px]">
                         {t("dashboard.users.columnDepartment")}
@@ -975,7 +907,7 @@ export default function UsersPage() {
                         {t("dashboard.users.columnBytesSent", "Bytes Sent")}
                       </TableHead>
                       <TableHead
-                        className="sticky right-0 min-w-[280px]"
+                        className="sticky right-0 min-w-[360px] whitespace-nowrap"
                         style={{
                           backgroundColor: "#ffffff",
                           boxShadow: "inset 10px 0 0px -9px #0505050f",
@@ -989,7 +921,7 @@ export default function UsersPage() {
                     {filteredUsers.length === 0 ? (
                       <TableRow>
                         <TableCell
-                          colSpan={15}
+                          colSpan={16}
                           className="py-10 text-center text-muted-foreground"
                         >
                           {t("dashboard.users.noResults")}
@@ -1011,6 +943,52 @@ export default function UsersPage() {
                                 u.role
                               )}
                             </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex flex-col items-start gap-1.5">
+                              <Badge
+                                variant={
+                                  u.approvalStatus === "approved"
+                                    ? "default"
+                                    : u.approvalStatus === "rejected"
+                                    ? "destructive"
+                                    : "secondary"
+                                }
+                              >
+                                {u.approvalStatus === "approved"
+                                  ? t("dashboard.users.approvalApproved", "Approved")
+                                  : u.approvalStatus === "rejected"
+                                  ? t("dashboard.users.approvalRejected", "Rejected")
+                                  : t("dashboard.users.approvalPending", "Pending")}
+                              </Badge>
+                              {(currentUser?.role === UserRole.ADMIN ||
+                                currentUser?.role === UserRole.SUPERADMIN ||
+                                (currentUser?.role === UserRole.MANAGER &&
+                                  currentUser.departmentId === u.departmentId)) &&
+                                u.approvalStatus !== "approved" &&
+                                u.id !== currentUser?.id && (
+                                  <div className="flex gap-1">
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      className="h-7 px-2 text-xs"
+                                      onClick={() => handleApproveUser(u.name)}
+                                    >
+                                      {t("dashboard.users.approveButton", "Approve")}
+                                    </Button>
+                                    {u.approvalStatus !== "rejected" && (
+                                      <Button
+                                        size="sm"
+                                        variant="destructive"
+                                        className="h-7 px-2 text-xs"
+                                        onClick={() => handleRejectUser(u.name)}
+                                      >
+                                        {t("dashboard.users.rejectButton", "Reject")}
+                                      </Button>
+                                    )}
+                                  </div>
+                                )}
+                            </div>
                           </TableCell>
                           <TableCell>
                             {u.departmentId
@@ -1064,14 +1042,14 @@ export default function UsersPage() {
                               boxShadow: "inset 10px 0 0px -9px #0505050f",
                             }}
                           >
-                            <div className="flex flex-wrap items-center justify-center gap-1">
+                            <div className="flex flex-nowrap items-center justify-center gap-1 whitespace-nowrap">
                               {canManageUsers && (
                                 <>
                                   {u.isPaused ? (
                                     <Button
                                       size="sm"
                                       variant="outline"
-                                      className="h-8 px-2"
+                                      className="h-8 px-2 shrink-0"
                                       onClick={() => handleResumeUser(u.name)}
                                     >
                                       {t(
@@ -1083,7 +1061,7 @@ export default function UsersPage() {
                                     <Button
                                       size="sm"
                                       variant="outline"
-                                      className="h-8 px-2"
+                                      className="h-8 px-2 shrink-0"
                                       onClick={() => handlePauseUser(u.name)}
                                     >
                                       {t(
@@ -1126,11 +1104,12 @@ export default function UsersPage() {
                                   </Button>
                                 )}
                               <select
-                                className="border px-1 py-1 rounded-md text-sm h-8"
-                                defaultValue=""
+                                value=""
                                 onChange={(e) =>
                                   handleDownload(u.name, e.target.value)
                                 }
+                                className="h-8 shrink-0 rounded-md border border-[#d4dae3] bg-white px-2 text-sm text-[#172b4d] outline-none transition-colors focus:border-[#5e72e4] focus:shadow-[0_0_0_3px_rgba(94,114,228,0.12)]"
+                                style={{ minWidth: 72 }}
                               >
                                 <option value="" disabled>
                                   {t(

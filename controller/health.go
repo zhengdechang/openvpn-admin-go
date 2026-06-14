@@ -22,7 +22,7 @@ func (c *HealthController) HealthCheck(ctx *gin.Context) {
 	response := HealthResponse{
 		Status:    "healthy",
 		Timestamp: time.Now().Format(time.RFC3339),
-		Version:   "1.0.0", // 可以从环境变量或构建时注入
+		Version:   AppVersion(), // 来自环境变量 APP_VERSION，缺省 "1.0.0"
 		Services:  make(map[string]string),
 	}
 

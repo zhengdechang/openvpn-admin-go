@@ -1,67 +1,130 @@
+# 生产环境编排：MySQL + 后端(Go API + OpenVPN) + 前端(Next.js)，三者完全分离。
+# 在本目录(docker/)下启动：docker compose up -d --build
+#
+# 端口（host:container）：
+#   前端  ${FRONTEND_PORT:-3043}:3000
+#   后端  ${BACKEND_PORT:-8085}:8085
+#   OpenVPN ${OPENVPN_PORT:-1194}:1194/udp
+#   MySQL 仅容器内部访问（不对外暴露）
 services:
-  # OpenVPN Admin service with supervisor
-  openvpn-admin:
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile.combined
-    container_name: openvpn-admin
-    image: ${DOCKERHUB_USERNAME}/openvpn-admin:latest
+  mysql:
+    image: mysql:8.0
+    container_name: openvpn-mysql
     restart: unless-stopped
-    # 默认启动交互式 CLI 菜单，设置 ENABLE_WEB=true 会同时在后台启动 Web 服务
-    command: []
-    stdin_open: true
-    tty: true
-
-    # Network configuration
-    network_mode: host
-
-    # Capabilities for OpenVPN
-    cap_add:
-      - NET_ADMIN
-      - SYS_MODULE
-
-    # Device access
-    devices:
-      - /dev/net/tun:/dev/net/tun
-
-    # Privileged mode for OpenVPN operations
-    privileged: true
-
-    # Environment variables
     environment:
-      - GIN_MODE=release
-      - TZ=Asia/Shanghai
-      - DB_PATH=/app/data/db.sqlite3
-      - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key}
-      - OPENVPN_STATUS_LOG_PATH=/var/log/openvpn/status.log
-      - ENABLE_WEB=${ENABLE_WEB:-false}
-      - WEB_PORT=${WEB_PORT:-8085}
-
-    # Volume mounts
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-please-change-root-pass}
+      - MYSQL_DATABASE=${DB_NAME:-openvpn}
+      - MYSQL_USER=${DB_USER:-openvpn}
+      - MYSQL_PASSWORD=${DB_PASSWORD:-please-change-pass}
+      - TZ=${TZ:-Asia/Shanghai}
     volumes:
-      # Application data
-      - ./data:/app/data
-      - ./logs:/app/logs
-      - ./config:/app/config
-
-      # OpenVPN configuration
-      - ./openvpn:/etc/openvpn
-
-      # System access for OpenVPN
-      - /lib/modules:/lib/modules:ro
-
-    # Health check
+      - ./mysql-data:/var/lib/mysql
     healthcheck:
-      test: ["CMD-SHELL", "if [ \"$ENABLE_WEB\" = \"true\" ] || [ \"$ENABLE_WEB\" = \"1\" ]; then curl -f http://localhost:${WEB_PORT:-8085}/api/health; else exit 0; fi"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
-
-    # Logging
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p\"$$MYSQL_ROOT_PASSWORD\" --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - openvpn-net
     logging:
       driver: "json-file"
       options:
         max-size: "10m"
         max-file: "3"
 
+  backend:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.backend
+    image: ${DOCKERHUB_USERNAME:-codedevin}/openvpn-admin-backend:latest
+    container_name: openvpn-backend
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      - GIN_MODE=release
+      - TZ=${TZ:-Asia/Shanghai}
+      - APP_VERSION=${APP_VERSION:-1.0.0}
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_USER=${DB_USER:-openvpn}
+      - DB_PASSWORD=${DB_PASSWORD:-please-change-pass}
+      - DB_NAME=${DB_NAME:-openvpn}
+      - JWT_SECRET=${JWT_SECRET:-please-change-jwt-secret}
+      - OPENVPN_STATUS_LOG_PATH=/var/log/openvpn/status.log
+      - WEB_PORT=8085
+      # 超级管理员：仅在数据库无超管时用于创建
+      - SUPERADMIN_EMAIL=${SUPERADMIN_EMAIL}
+      - SUPERADMIN_PASSWORD=${SUPERADMIN_PASSWORD}
+      - SUPERADMIN_NAME=${SUPERADMIN_NAME:-Super Admin}
+
+    # OpenVPN 所需能力与设备
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    privileged: true
+
+    ports:
+      - "${BACKEND_PORT:-8085}:8085"
+      - "${OPENVPN_PORT:-1194}:1194/udp"
+
+    volumes:
+      - ./logs:/app/logs
+      - ./config:/app/config
+      - ./openvpn:/etc/openvpn
+      - /lib/modules:/lib/modules:ro
+
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8085/api/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - openvpn-net
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # 前端改用 host 上的 `npm run dev`（端口 3043，支持热刷新），暂不在 docker 中运行。
+  # 如需恢复 docker 内前端（生产构建），取消下方注释即可。
+  # frontend:
+  #   build:
+  #     context: ../openvpn-web
+  #     args:
+  #       # Next.js 构建期固化 /api 反代目标；指向 compose 网络内的 backend 服务
+  #       BACKEND_URL: http://backend:8085
+  #   image: ${DOCKERHUB_USERNAME:-codedevin}/openvpn-admin-frontend:latest
+  #   container_name: openvpn-frontend
+  #   restart: unless-stopped
+  #   depends_on:
+  #     - backend
+  #   environment:
+  #     - NODE_ENV=production
+  #     - PORT=3000
+  #     - HOSTNAME=0.0.0.0
+  #     # 前端服务端把 /api 反代到后端（容器内服务名）
+  #     - BACKEND_URL=http://backend:8085
+  #   ports:
+  #     - "${FRONTEND_PORT:-3043}:3000"
+  #   networks:
+  #     - openvpn-net
+  #   logging:
+  #     driver: "json-file"
+  #     options:
+  #       max-size: "10m"
+  #       max-file: "3"
+
+networks:
+  openvpn-net:
+    driver: bridge
+
+# 说明：本配置使用 bridge 网络 + 端口映射，便于按需指定对外端口。
+# 若生产环境的 VPN 需要直连宿主网络路由，可将 backend 改为 network_mode: host
+# 并把 DB_HOST 指向 127.0.0.1（此时 mysql/frontend 亦需相应调整）。

@@ -1,0 +1,100 @@
+# OpenVPN Admin Go —— 后端容器（Go API + OpenVPN，连接外部 MySQL）
+# 前端已拆分为独立容器，本镜像不再构建/服务任何前端资源。
+
+# ---------- Go 后端构建阶段 ----------
+FROM golang:1.26 AS backend-builder
+
+WORKDIR /app
+
+# 先拷贝 go mod 文件并下载依赖（利用构建缓存）
+COPY go.mod go.sum ./
+RUN go mod download
+
+# 拷贝源码（包含 database/migrations 下内嵌的 goose .sql）
+COPY . .
+
+# 构建 Go 二进制。去掉 SQLite 后不再需要 CGO，编译为静态二进制。
+RUN CGO_ENABLED=0 go build -ldflags="-s -w" -o openvpn-go main.go && \
+    ls -la openvpn-go
+
+# ---------- 运行时阶段 ----------
+FROM ubuntu:22.04
+
+RUN sed -i 's|http://deb.debian.org/debian|https://mirrors.tuna.tsinghua.edu.cn/debian|g' /etc/apt/sources.list \
+ && sed -i 's|http://security.debian.org|https://mirrors.tuna.tsinghua.edu.cn/debian-security|g' /etc/apt/sources.list
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+ARG SYSTEMCTL_URL="https://raw.githubusercontent.com/gdraheim/docker-systemctl-replacement/master/files/docker/systemctl.py"
+
+# 运行时依赖（OpenVPN 相关 + supervisor），不再安装 sqlite3 / nginx
+RUN apt-get update && apt-get install -y \
+    openvpn \
+    openssl \
+    ca-certificates \
+    iptables \
+    bash \
+    curl \
+    tzdata \
+    python3 \
+    sudo \
+    supervisor \
+    && rm -rf /var/lib/apt/lists/*
+
+# systemctl 替换（容器内）
+RUN touch /.dockerenv && \
+    curl -L "${SYSTEMCTL_URL}" -o /usr/bin/systemctl && \
+    sed -i '1s|.*|#!/usr/bin/python3|' /usr/bin/systemctl && \
+    chmod +x /usr/bin/systemctl
+
+# 应用目录
+RUN mkdir -p /app/logs \
+             /app/config \
+             /app/template \
+             /app/file \
+             /etc/openvpn \
+             /etc/openvpn/server \
+             /etc/openvpn/client \
+             /var/log/openvpn \
+             /var/lib/openvpn \
+             /etc/supervisor/conf.d \
+             /var/log/supervisor \
+             /var/run
+
+# 拷贝后端二进制
+COPY --from=backend-builder /app/openvpn-go /app/openvpn-go
+RUN chmod +x /app/openvpn-go && ls -la /app/openvpn-go
+
+# 配置文件与模板
+COPY template/ /app/template/
+COPY file/ /app/file/
+COPY docker/docker-entrypoint.sh /usr/local/bin/openvpn-entrypoint.sh
+COPY config/ /app/config/
+
+# supervisord 主配置与程序定义（托管 openvpn-server + openvpn-go-api）
+COPY docker/supervisor/supervisord.conf /etc/supervisor/supervisord.conf
+COPY docker/supervisor/conf.d/ /etc/supervisor/conf.d/
+
+RUN chmod +x /usr/local/bin/openvpn-entrypoint.sh && \
+    ln -sf /app/openvpn-go /usr/local/bin/openvpn-go && \
+    ln -sf /app/openvpn-go /usr/local/bin/openvpn-admin
+
+WORKDIR /app
+
+# 暴露 API 端口与 OpenVPN 端口（前端端口不再属于本容器）
+EXPOSE 8085 1194/udp
+
+# 健康检查：后端只跑 API，恒定检查 /api/health
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD ["/bin/sh", "-c", "curl -f http://localhost:${WEB_PORT:-8085}/api/health || exit 1"]
+
+VOLUME ["/app/logs", "/app/config", "/etc/openvpn"]
+
+# 运行时环境变量。数据库连接信息由 compose / .env 注入（DB_HOST/DB_PORT/DB_USER/DB_PASSWORD/DB_NAME）
+ENV GIN_MODE=release \
+    TZ=UTC \
+    OPENVPN_CONFIG_DIR=/etc/openvpn \
+    WEB_PORT=8085
+
+ENTRYPOINT ["/usr/local/bin/openvpn-entrypoint.sh"]
+CMD []

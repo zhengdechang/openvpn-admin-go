@@ -1,6 +1,8 @@
 package openvpn
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -9,6 +11,25 @@ import (
 	"openvpn-admin-go/constants"
 	"openvpn-admin-go/utils"
 )
+
+// EnsureMgmtPassword 确保 management 接口的密码文件存在。
+// server.conf 的 `management 127.0.0.1 7505 <file>` 在 OpenVPN 启动(降权前)时读取该文件首行做口令，
+// 缺失会导致服务起不来；这里幂等生成一次随机口令(0600)，重启复用同一口令，PauseClient/auth 脚本读同一文件。
+func EnsureMgmtPassword() error {
+	if info, err := os.Stat(constants.ServerMgmtPasswordPath); err == nil && info.Size() > 0 {
+		return nil
+	}
+	buf := make([]byte, 24)
+	if _, err := rand.Read(buf); err != nil {
+		return fmt.Errorf("生成 management 口令失败: %v", err)
+	}
+	// 仅十六进制字符，避免 OpenVPN 管理协议里发送口令时的转义/截断问题
+	pw := hex.EncodeToString(buf) + "\n"
+	if err := os.WriteFile(constants.ServerMgmtPasswordPath, []byte(pw), 0600); err != nil {
+		return fmt.Errorf("写入 management 口令文件失败: %v", err)
+	}
+	return nil
+}
 
 // GetServerConfigTemplate 获取服务端配置模板
 func GetServerConfigTemplate() (string, error) {
@@ -32,6 +53,21 @@ func UpdateServerConfig() error {
 	config, err := cfg.GenerateServerConfig()
 	if err != nil {
 		return fmt.Errorf("生成服务器配置失败: %v", err)
+	}
+
+	// server.conf 会引用 management 口令文件，必须保证它先存在，否则 OpenVPN 起不来
+	if err := EnsureMgmtPassword(); err != nil {
+		return err
+	}
+
+	// server.conf 无条件引用 tls-verify.sh（按 CN 拉黑），开启 CRL 时还引用 crl.pem。
+	// 这些文件必须在写配置/重启之前就位，否则 OpenVPN 拒绝启动 = 全员锁死。
+	// EnsureServerHelperFiles 把脚本/配置刷进持久卷；EnsureCRLSetup 在有 CA 时生成初始空 CRL。
+	if err := EnsureServerHelperFiles(); err != nil {
+		return err
+	}
+	if err := EnsureCRLSetup(); err != nil {
+		return err
 	}
 
 	// 写入配置文件

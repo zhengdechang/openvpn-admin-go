@@ -1,8 +1,17 @@
-/* eslint-disable no-eval */
 const fs = require('node:fs')
 const path = require('node:path')
-const transpile = require('typescript').transpile
+const ts = require('typescript')
 const { defaultLocale, locales } = require('./config')
+
+// 把 .ts 翻译文件转译为 CommonJS 后执行，取其 default 导出。
+// TypeScript 6 起 transpile 默认不再把 `export default` 降级为 CommonJS，
+// 因此显式指定 module=CommonJS 并通过模块包装求值（替代裸 eval）。
+function loadTranslation(content) {
+  const js = ts.transpile(content, { module: ts.ModuleKind.CommonJS })
+  const mod = { exports: {} }
+  new Function('module', 'exports', 'require', js)(mod, mod.exports, require)
+  return mod.exports.default || mod.exports
+}
 
 async function getKeysFromLanuage(language) {
   return new Promise((resolve, reject) => {
@@ -22,7 +31,7 @@ async function getKeysFromLanuage(language) {
           c.toUpperCase(),
         )
         const content = fs.readFileSync(filePath, 'utf8')
-        const translation = eval(transpile(content))
+        const translation = loadTranslation(content)
         const keys = Object.keys(translation)
         const nestedKeys = []
         const iterateKeys = (obj, prefix = '') => {

@@ -23,6 +23,9 @@ push "dhcp-option DOMAIN {{ .dns_server_domain }}"
 keepalive 10 120
 topology subnet
 data-ciphers AES-256-GCM:AES-128-GCM:CHACHA20-POLY1305:AES-256-CBC
+# 显式声明协商失败时的回退算法（用安全的 AES-256-GCM，而非 OpenVPN 提示里的 BF-CBC）
+# 否则启动日志会刷 "--cipher is not set ... defaulted to BF-CBC" 警告。
+data-ciphers-fallback AES-256-GCM
 auth SHA256
 tls-server
 tls-version-min {{ .openvpn_tls_version }}
@@ -35,16 +38,25 @@ persist-key
 persist-tun
 
 {{if ne .OpenVPNManagementPort 0}}
-# Management Interface for blacklist script
-management 127.0.0.1 {{ .OpenVPNManagementPort }}
-script-security 2
-# Pass necessary environment variables to the auth script
-setenv OPENVPN_BLACKLIST_FILE {{ .OpenVPNBlacklistFile }}
-setenv OPENVPN_MANAGEMENT_PORT {{ .OpenVPNManagementPort }}
-auth-user-pass-verify /etc/openvpn/server/auth-blacklist.sh via-file
+# Management Interface：PauseClient 经此发 kill 即时断开被暂停的客户端
+# 带密码文件：首行即口令，消除 TCP 管理口令缺失的安全警告
+management 127.0.0.1 {{ .OpenVPNManagementPort }} {{ .mgmt_password_path }}
 {{end}}
-
+script-security 2
+# tls-verify 脚本按证书 CN 拉黑：CN 命中 blacklist 即拒绝握手。
+# 纯证书认证（无 auth-user-pass / 假密码）；黑名单文件路径经 setenv 传给脚本。
+setenv OPENVPN_BLACKLIST_FILE {{ .OpenVPNBlacklistFile }}
+tls-verify /etc/openvpn/server/tls-verify.sh
+{{if .openvpn_use_crl}}
+# crl-verify：删除用户=吊销证书(CRL)。crl.pem 缺失/失效会让 OpenVPN 拒绝所有连接，
+# 故 EnsureCRLSetup 保证渲染本行前 crl.pem 已存在（初始为空）。每次新连接重读，吊销即时生效。
+crl-verify {{ .crl_path }}
+{{end}}
 status {{ .OpenVPNStatusLogPath }}
+# 机器可读格式 v2（逗号分隔：HEADER,CLIENT_LIST,...）。默认 v1 是人类可读 CSV。
+# status_parser.go 按逗号 split 解析，只认这种格式。注意 v3 结构相同但用 TAB 分隔，
+# 选 v3 会让解析出 0 个客户端、用户列表全部显示离线——这正是本来的 bug。
+status-version 2
 log-append {{ .OpenVPNLogPath }}
 verb 3
 {{if or (eq .openvpn_proto "udp") (eq .openvpn_proto "udp6")}}

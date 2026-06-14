@@ -1,7 +1,7 @@
 const translation = {
   loading: "Loading...",
   error: "mistake",
-  edit: "edit",
+  edit: "Edit",
   delete: "Delete",
   save: "save",
   cancel: "Cancel",

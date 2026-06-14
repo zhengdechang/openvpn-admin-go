@@ -141,8 +141,47 @@ func readFile(path string) string {
 	return string(content)
 }
 
+// killClientSession 经管理接口即时断开某用户的活动会话（best-effort，连不上/没连着都不算错）。
+func killClientSession(username string) error {
+	conn, err := net.Dial("tcp", fmt.Sprintf("127.0.0.1:%d", constants.DefaultOpenVPNManagementPort))
+	if err != nil {
+		return fmt.Errorf("connect management interface: %w", err)
+	}
+	defer conn.Close()
+
+	// 管理接口带口令：连上后第一行先发口令，否则 kill 会被当错误口令拒绝。
+	if pw, readErr := os.ReadFile(constants.ServerMgmtPasswordPath); readErr == nil {
+		password := strings.TrimRight(string(pw), "\r\n")
+		if password != "" {
+			fmt.Fprintf(conn, "%s\n", password)
+		}
+	}
+	if _, err := fmt.Fprintf(conn, "kill %s\n", username); err != nil {
+		return fmt.Errorf("send kill: %w", err)
+	}
+	if status, readErr := bufio.NewReader(conn).ReadString('\n'); readErr == nil {
+		fmt.Printf("management kill %s: %s\n", username, status)
+	}
+	return nil
+}
+
 // DeleteClient 删除OpenVPN客户端
 func DeleteClient(username string) error {
+	// 删除 = 永久吊销：删文件之前先吊销证书（CRL），即时断开活动会话，并清掉可能残留的暂停黑名单条目。
+	// 吊销/断开/清黑名单都 best-effort——失败只告警，不阻断文件删除。
+	crtPath := filepath.Join(constants.ClientConfigDir, username+".crt")
+	if _, err := os.Stat(crtPath); err == nil {
+		if revokeErr := RevokeClientCert(username); revokeErr != nil {
+			fmt.Printf("警告：吊销用户 %s 证书失败（仍继续删除）: %v\n", username, revokeErr)
+		}
+	}
+	if killErr := killClientSession(username); killErr != nil {
+		fmt.Printf("断开用户 %s 会话失败(可忽略): %v\n", username, killErr)
+	}
+	if resumeErr := ResumeClient(username); resumeErr != nil {
+		fmt.Printf("清理用户 %s 黑名单条目失败(可忽略): %v\n", username, resumeErr)
+	}
+
 	files := []string{
 		username + ".key",
 		username + ".crt",
@@ -167,6 +206,17 @@ func PauseClient(username string) error {
 		return fmt.Errorf("failed to connect to OpenVPN management interface: %w", err)
 	}
 	defer conn.Close()
+
+	// 管理接口现在带口令（server.conf: management ... <pw-file>）：连接后第一行必须先发口令，
+	// 否则后续 kill 命令会被当成错误口令拒绝。口令与 OpenVPN 读的是同一个文件。
+	if pw, readErr := os.ReadFile(constants.ServerMgmtPasswordPath); readErr == nil {
+		password := strings.TrimRight(string(pw), "\r\n")
+		if password != "" {
+			if _, err = fmt.Fprintf(conn, "%s\n", password); err != nil {
+				fmt.Printf("Failed to send management password for %s: %v\n", username, err)
+			}
+		}
+	}
 
 	// Send kill command
 	_, err = fmt.Fprintf(conn, "kill %s\n", username)

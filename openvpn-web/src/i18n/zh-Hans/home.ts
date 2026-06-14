@@ -1,5 +1,5 @@
 const translation = {
-  title: "OpenVPN 管理系统",
+  title: "Aegis",
   subtitle: "专业的OpenVPN管理平台，具备企业级安全性、实时监控和直观的Web界面。通过强大的用户管理、证书管理和全面日志记录工具，简化您的VPN基础设施管理。",
   getStarted: "开始使用",
   signUp: "注册账号",
@@ -17,7 +17,7 @@ const translation = {
       description: "自动生成客户端证书和配置文件下载",
       title: "证书管理",
     },
-    subtitle: "专业的OpenVPN管理系统核心功能",
+    subtitle: "Aegis OpenVPN 控制台核心功能",
     viewDocsButton: "查看文档",
     title: "系统特点",
   },
@@ -28,7 +28,7 @@ const translation = {
     downloadButton: "下载发布版本",
     frontend: {
       title: "前端技术栈",
-      description: "Next.js 14 + TypeScript + Tailwind CSS + Radix UI"
+      description: "Next.js + TypeScript + Tailwind CSS + MUI"
     },
     backend: {
       title: "后端技术栈",
@@ -37,7 +37,7 @@ const translation = {
   },
   githubSection: {
     title: "开源项目 & 社区驱动",
-    subtitle: "加入我们不断壮大的开发者和贡献者社区。OpenVPN Admin Go 是完全开源的项目，欢迎全世界的开发者贡献代码。",
+    subtitle: "加入我们不断壮大的开发者和贡献者社区。Aegis 是完全开源的项目，欢迎全世界的开发者贡献代码。",
     openSource: {
       title: "开源项目",
       description: "采用MIT许可证的完全开源项目。可自由分叉、修改和贡献代码。"

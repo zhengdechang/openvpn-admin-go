@@ -57,7 +57,7 @@ jobs:
           
       - name: Build Go binary for Linux
         run: |
-          CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o openvpn-admin-linux-amd64 main.go
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o openvpn-admin-linux-amd64 main.go
           
       - name: Build Go binary for Windows
         run: |
@@ -83,15 +83,28 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build and push Docker image
+      - name: Build and push backend Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: ./docker/Dockerfile.combined
+          file: ./docker/Dockerfile.backend
           push: true
           tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest
-            ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}-backend:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}-backend:${{ steps.version.outputs.version }}
+          platforms: linux/amd64,linux/arm64
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push frontend Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./openvpn-web
+          file: ./openvpn-web/Dockerfile
+          push: true
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}-frontend:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}-frontend:${{ steps.version.outputs.version }}
           platforms: linux/amd64,linux/arm64
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -104,9 +117,10 @@ jobs:
           body: |
             ## 🚀 Release ${{ steps.version.outputs.version }}
             
-            ### 📦 Docker Image
+            ### 📦 Docker Images (backend + frontend, fully separated)
             ```bash
-            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}-backend:${{ steps.version.outputs.version }}
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}-frontend:${{ steps.version.outputs.version }}
             ```
             
             ### 📥 Binary Downloads
@@ -119,12 +133,9 @@ jobs:
             2. Extract the archive
             3. Run the binary: `./openvpn-admin-linux-amd64` (Linux/macOS) or `openvpn-admin-windows-amd64.exe` (Windows)
             
-            Or use Docker:
+            Or use Docker Compose (MySQL + backend + frontend):
             ```bash
-            docker run -d -p 8085:8085 -p 3000:3000 \
-              -v /path/to/config:/app/config \
-              -v /path/to/data:/app/data \
-              ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}
+            cd docker && cp .env.docker.example .env && docker compose up -d --build
             ```
             
             **Commit**: ${{ github.sha }}

@@ -15,7 +15,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen overflow-y-auto bg-background">
+    <div className="h-[125vh] overflow-y-auto custom-scrollbar bg-background">
       {/* Hero Section */}
       <div className="hero-pattern py-24">
         <div className="container mx-auto px-4">

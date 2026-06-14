@@ -1,0 +1,34 @@
+# openssl CA 配置：仅供「删除用户=吊销证书」用（openssl ca -revoke / -gencrl）。
+# 证书本体仍由 client.go 用 `openssl x509 -req` 直接签发；这里只补一套最小 CA
+# 数据库（ca-db/index.txt、crlnumber、newcerts/）让 openssl ca 能记账、出 CRL。
+# 路径全部固定在 /etc/openvpn/server 下，与 constants.ServerCRL* 对应。
+
+[ ca ]
+default_ca = CA_default
+
+[ CA_default ]
+dir              = /etc/openvpn/server
+database         = $dir/ca-db/index.txt
+new_certs_dir    = $dir/ca-db/newcerts
+certificate      = $dir/ca.crt
+private_key      = $dir/ca.key
+serial           = $dir/ca-db/serial
+crlnumber        = $dir/ca-db/crlnumber
+crl              = $dir/crl.pem
+default_md       = sha256
+default_crl_days = 3650
+default_days     = 3650
+preserve         = no
+email_in_dn      = no
+rand_serial      = no
+policy           = policy_anything
+
+# 我们的客户端证书 subject 只有 /CN=username，故除 CN 外全部 optional。
+[ policy_anything ]
+countryName            = optional
+stateOrProvinceName    = optional
+localityName           = optional
+organizationName       = optional
+organizationalUnitName = optional
+commonName             = supplied
+emailAddress           = optional

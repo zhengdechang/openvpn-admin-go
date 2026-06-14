@@ -26,7 +26,7 @@ import {
   TableBody,
   TableCell,
 } from "@/components/ui/table";
-import { Input } from "@/components/ui/input";
+import { ArgonField, ArgonSelect } from "@/components/ui/argon-field";
 import { toast } from "sonner";
 
 type DepartmentTree = Department & { children: DepartmentTree[] };
@@ -275,16 +275,15 @@ export default function DepartmentsPage() {
                   {t("dashboard.departments.addDepartmentDialogTitle")}
                 </DialogTitle>
               </DialogHeader>
-              <div className="space-y-2 pt-2">
-                <Input
+              <div className="space-y-3 pt-2">
+                <ArgonField
                   placeholder={t(
                     "dashboard.departments.departmentNamePlaceholder"
                   )}
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                 />
-                <select
-                  className="border px-2 w-full py-1"
+                <ArgonSelect
                   value={form.parentId}
                   onChange={(e) =>
                     setForm({ ...form, parentId: e.target.value })
@@ -298,9 +297,8 @@ export default function DepartmentsPage() {
                       {d.name}
                     </option>
                   ))}
-                </select>
-                <select
-                  className="border px-2 w-full py-1"
+                </ArgonSelect>
+                <ArgonSelect
                   value={form.headId}
                   onChange={(e) => setForm({ ...form, headId: e.target.value })}
                 >
@@ -312,7 +310,7 @@ export default function DepartmentsPage() {
                       {u.name}
                     </option>
                   ))}
-                </select>
+                </ArgonSelect>
               </div>
               <DialogFooter>
                 <DialogClose asChild>
@@ -347,16 +345,15 @@ export default function DepartmentsPage() {
                     {t("dashboard.departments.editDepartmentDialogTitle")}
                   </DialogTitle>
                 </DialogHeader>
-                <div className="space-y-2 pt-2">
-                  <Input
+                <div className="space-y-3 pt-2">
+                  <ArgonField
                     placeholder={t(
                       "dashboard.departments.departmentNamePlaceholder"
                     )}
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
                   />
-                  <select
-                    className="border px-2 w-full py-1"
+                  <ArgonSelect
                     value={form.parentId}
                     onChange={(e) =>
                       setForm({ ...form, parentId: e.target.value })
@@ -373,9 +370,8 @@ export default function DepartmentsPage() {
                           {d.name}
                         </option>
                       ))}
-                  </select>
-                  <select
-                    className="border px-2 w-full py-1"
+                  </ArgonSelect>
+                  <ArgonSelect
                     value={form.headId}
                     onChange={(e) =>
                       setForm({ ...form, headId: e.target.value })
@@ -389,7 +385,7 @@ export default function DepartmentsPage() {
                         {u.name}
                       </option>
                     ))}
-                  </select>
+                  </ArgonSelect>
                 </div>
                 <DialogFooter>
                   <DialogClose asChild>

@@ -1,0 +1,99 @@
+# 开发环境编排：MySQL + 后端(Go API + OpenVPN) + 前端(Next.js)
+# 三者完全分离。使用 bridge 网络，服务名直接互通。
+# 启动：docker compose -f docker-compose-dev.yaml up --build
+#
+# 端口（host:container）：前端 3043:3000 / 后端 8085:8085 / OpenVPN ${OPENVPN_PORT}:1194
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: openvpn-mysql-dev
+    restart: unless-stopped
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-rootpass}
+      - MYSQL_DATABASE=${DB_NAME:-openvpn}
+      - MYSQL_USER=${DB_USER:-openvpn}
+      - MYSQL_PASSWORD=${DB_PASSWORD:-openvpn}
+      - TZ=Asia/Shanghai
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data-dev:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p\"$$MYSQL_ROOT_PASSWORD\" --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - openvpn-net
+
+  backend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.backend
+    container_name: openvpn-backend-dev
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      - GIN_MODE=debug
+      - TZ=Asia/Shanghai
+      - APP_VERSION=${APP_VERSION:-dev}
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_USER=${DB_USER:-openvpn}
+      - DB_PASSWORD=${DB_PASSWORD:-openvpn}
+      - DB_NAME=${DB_NAME:-openvpn}
+      - JWT_SECRET=${JWT_SECRET:-dev-secret-change-me}
+      - OPENVPN_STATUS_LOG_PATH=/var/log/openvpn/status.log
+      - WEB_PORT=8085
+      # 超级管理员：仅在数据库无超管时用于创建
+      - SUPERADMIN_EMAIL=${SUPERADMIN_EMAIL:-superadmin@gmail.com}
+      - SUPERADMIN_PASSWORD=${SUPERADMIN_PASSWORD:-superadmin}
+      - SUPERADMIN_NAME=${SUPERADMIN_NAME:-Super Admin}
+    ports:
+      - "8085:8085"
+      - "${OPENVPN_PORT:-1194}:1194/udp"
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    privileged: true
+    volumes:
+      - ./docker/data/logs:/app/logs
+      - ./docker/data/config:/app/config
+      - ./docker/data/openvpn:/etc/openvpn
+      - /lib/modules:/lib/modules:ro
+    networks:
+      - openvpn-net
+
+  # 前端改用 host 上的 `npm run dev`（端口 3043，支持热刷新），不再在 docker 中运行。
+  # 如需恢复 docker 内前端，取消下方注释即可。
+  # frontend:
+  #   image: node:20-alpine
+  #   container_name: openvpn-frontend-dev
+  #   restart: unless-stopped
+  #   working_dir: /app
+  #   depends_on:
+  #     - backend
+  #   environment:
+  #     - NODE_ENV=development
+  #     - BACKEND_URL=http://backend:8085
+  #   command: sh -c "npm install --legacy-peer-deps && npm run dev -- -p 3000 -H 0.0.0.0"
+  #   ports:
+  #     - "3043:3000"
+  #   volumes:
+  #     - ./openvpn-web:/app
+  #     - frontend-node-modules:/app/node_modules
+  #   networks:
+  #     - openvpn-net
+
+networks:
+  openvpn-net:
+    driver: bridge
+
+volumes:
+  mysql-data-dev:
+  frontend-node-modules:

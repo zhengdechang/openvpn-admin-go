@@ -29,13 +29,9 @@ func WebMenu() {
 		fmt.Println("2.停止 API 服务")
 		fmt.Println("3.查看 API 服务状态")
 		fmt.Println("4.查看 API 服务日志")
-		fmt.Println("5.启动前端 (Nginx)")
-		fmt.Println("6.停止前端 (Nginx)")
-		fmt.Println("7.查看前端状态")
-		fmt.Println("8.查看前端日志")
-		fmt.Println("9.查看所有服务状态")
+		fmt.Println("5.查看所有服务状态")
 		fmt.Println("0.返回主菜单")
-		fmt.Print("请选择操作 (0-9): ")
+		fmt.Print("请选择操作 (0-5): ")
 
 		var choice string
 		fmt.Scanln(&choice)
@@ -63,14 +59,6 @@ func WebMenu() {
 		case "4":
 			showAPIServiceLogs()
 		case "5":
-			startFrontendService()
-		case "6":
-			stopFrontendService()
-		case "7":
-			checkFrontendStatus()
-		case "8":
-			showFrontendLogs()
-		case "9":
 			printAllServiceStatus()
 		default:
 			fmt.Println("无效选择，请重试")
@@ -109,7 +97,6 @@ func installAPIService(port int) error {
 		BinaryPath:       binaryPath,
 		WorkingDirectory: wd,
 		Port:             port,
-		DBPath:           "/app/data/db.sqlite3",
 		OpenVPNConfigDir: "/etc/openvpn",
 		AutoStart:        false, // 默认不自动启动
 	}
@@ -199,69 +186,6 @@ func showAPIServiceLogs() {
 	// 使用 supervisor 查看服务日志
 	fmt.Println("\n=== API 服务日志 (最近50行) ===")
 	output, err := utils.GetServiceLogs(constants.SupervisorWebServiceName, 50)
-	if err != nil {
-		fmt.Printf("获取服务日志失败: %v\n", err)
-		promptReturn()
-		return
-	}
-
-	if output == "" {
-		fmt.Println("日志为空")
-	} else {
-		fmt.Println(output)
-	}
-
-	promptReturn()
-}
-
-func startFrontendService() {
-	if !utils.IsSupervisorConfigExists() {
-		if err := utils.InstallSupervisorMainConfig(); err != nil {
-			fmt.Printf("安装 supervisor 主配置失败: %v\n", err)
-			return
-		}
-	}
-
-	if !utils.IsFrontendServiceConfigExists() {
-		fmt.Println("前端服务配置未安装，正在安装...")
-		if err := utils.InstallFrontendServiceConfig(false); err != nil {
-			fmt.Printf("安装前端服务配置失败: %v\n", err)
-			return
-		}
-	}
-
-	if !utils.IsSupervisordRunning() {
-		fmt.Println("启动 supervisord...")
-		if err := utils.StartSupervisord(""); err != nil {
-			fmt.Printf("启动 supervisord 失败: %v\n", err)
-			return
-		}
-	}
-
-	fmt.Println("正在启动前端 (Nginx)...")
-	utils.SupervisorctlStart(constants.SupervisorFrontendServiceName)
-}
-
-func stopFrontendService() {
-	fmt.Println("正在停止前端 (Nginx)...")
-	utils.SupervisorctlStop(constants.SupervisorFrontendServiceName)
-}
-
-func checkFrontendStatus() {
-	fmt.Println("=== 前端服务状态 ===")
-	statusOutput := utils.SupervisorctlStatus(constants.SupervisorFrontendServiceName)
-	if statusOutput != "" {
-		fmt.Printf("%s\n", statusOutput)
-	} else {
-		fmt.Println("无法获取服务状态")
-	}
-
-	promptReturn()
-}
-
-func showFrontendLogs() {
-	fmt.Println("\n=== 前端服务日志 (最近50行) ===")
-	output, err := utils.GetServiceLogs(constants.SupervisorFrontendServiceName, 50)
 	if err != nil {
 		fmt.Printf("获取服务日志失败: %v\n", err)
 		promptReturn()

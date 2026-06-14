@@ -17,25 +17,36 @@ type registerRequest struct {
 	Email           string `json:"email" binding:"required,email"`
 	Password        string `json:"password" binding:"required,min=6"`
 	ConfirmPassword string `json:"confirmPassword" binding:"required,eqfield=Password"`
+	DepartmentID    string `json:"departmentId" binding:"required"`
 }
 
-// Register 用户注册
+// Register 用户注册：必须选择部门；新用户默认待批准，需管理员审批后方可登录。
 func Register(c *gin.Context) {
 	var req registerRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"success": false, "error": err.Error()})
 		return
 	}
+
+	// 校验部门存在
+	var dept model.Department
+	if err := database.DB.First(&dept, "id = ?", req.DepartmentID).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"success": false, "error": "invalid department"})
+		return
+	}
+
 	hash, err := common.HashPassword(req.Password)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "error": "hash password failed"})
 		return
 	}
 	user := model.User{
-		Name:         req.Name,
-		Email:        req.Email,
-		PasswordHash: hash,
-		Role:         model.RoleUser,
+		Name:           req.Name,
+		Email:          req.Email,
+		PasswordHash:   hash,
+		Role:           model.RoleUser,
+		DepartmentID:   req.DepartmentID,
+		ApprovalStatus: model.ApprovalPending, // 待批准
 	}
 	if err := database.DB.Create(&user).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "error": err.Error()})
@@ -45,11 +56,13 @@ func Register(c *gin.Context) {
 	// Set CreatorID to the user's own ID after creation
 	if err := database.DB.Model(&user).Update("CreatorID", user.ID).Error; err != nil {
 		// Log this error, but don't fail the registration because of it
-		// Or handle it more gracefully depending on requirements
-		// For now, we'll just proceed
 	}
 
-	c.JSON(http.StatusOK, gin.H{"success": true, "message": "register success"})
+	c.JSON(http.StatusOK, gin.H{
+		"success":        true,
+		"message":        "register success, pending approval",
+		"approvalStatus": string(model.ApprovalPending),
+	})
 }
 
 // 登录请求结构
@@ -72,6 +85,19 @@ func Login(c *gin.Context) {
 	}
 	if !common.CheckPasswordHash(req.Password, user.PasswordHash) {
 		c.JSON(http.StatusUnauthorized, gin.H{"success": false, "error": "invalid credentials"})
+		return
+	}
+	// 审批门控：未批准的用户不能登录
+	if user.ApprovalStatus != model.ApprovalApproved {
+		msg := "account pending approval"
+		if user.ApprovalStatus == model.ApprovalRejected {
+			msg = "account registration rejected"
+		}
+		c.JSON(http.StatusForbidden, gin.H{
+			"success":        false,
+			"error":          msg,
+			"approvalStatus": string(user.ApprovalStatus),
+		})
 		return
 	}
 	token, err := middleware.GenerateToken(user.ID, string(user.Role), user.DepartmentID)
@@ -210,13 +236,13 @@ func GetUserInfo(c *gin.Context) {
 		return
 	}
 	responseData := gin.H{
-		"id":           user.ID,
-		"name":         user.Name,
-		"email":        user.Email,
-		"role":         user.Role,
-		"dept":         user.DepartmentID,
-		"isOnline":     user.IsOnline,
-		"creatorId":    user.CreatorID,
+		"id":        user.ID,
+		"name":      user.Name,
+		"email":     user.Email,
+		"role":      user.Role,
+		"dept":      user.DepartmentID,
+		"isOnline":  user.IsOnline,
+		"creatorId": user.CreatorID,
 	}
 	if user.LastConnectionTime != nil {
 		responseData["lastConnectionTime"] = *user.LastConnectionTime

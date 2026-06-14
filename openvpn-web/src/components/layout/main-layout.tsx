@@ -15,6 +15,11 @@ function getPageInfo(
   pathname: string,
   t: (key: string) => string
 ): { title: string; breadcrumb: string } {
+  if (pathname.startsWith("/dashboard/overview"))
+    return {
+      title: t("dashboard.overview.title"),
+      breadcrumb: t("dashboard.overview.title"),
+    };
   if (pathname.startsWith("/dashboard/users"))
     return {
       title: t("dashboard.users.title"),
@@ -52,7 +57,7 @@ export default function MainLayout({
   const { title, breadcrumb } = getPageInfo(pathname || "", t);
 
   return (
-    <div style={{ display: "flex", height: "100vh", overflow: "hidden" }}>
+    <div style={{ display: "flex", height: "125vh", overflow: "hidden" }}>
       <Sidebar />
 
       {/* 右侧主区域 */}
@@ -66,13 +71,12 @@ export default function MainLayout({
           minWidth: 0,
         }}
       >
-        {/* Topbar */}
+        {/* Topbar — Argon 紫蓝渐变 */}
         <header
           style={{
-            height: "56px",
-            minHeight: "56px",
-            background: "#ffffff",
-            borderBottom: "1px solid hsl(var(--border))",
+            height: "60px",
+            minHeight: "60px",
+            background: "linear-gradient(87deg, #5e72e4 0%, #825ee4 100%)",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
@@ -85,23 +89,25 @@ export default function MainLayout({
               style={{
                 fontSize: "15px",
                 fontWeight: 600,
-                color: "#111827",
+                color: "#ffffff",
                 lineHeight: 1.2,
               }}
             >
               {title}
             </div>
-            <div style={{ fontSize: "11px", color: "#9ca3af", marginTop: "2px" }}>
-              Dashboard / {breadcrumb}
+            <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.7)", marginTop: "2px" }}>
+              {t("layout.dashboard")} / {breadcrumb}
             </div>
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
             {/* 搜索 */}
             <button
+              onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.15)"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
               style={{
-                width: "32px",
-                height: "32px",
+                width: "34px",
+                height: "34px",
                 borderRadius: "8px",
                 border: "none",
                 background: "transparent",
@@ -109,12 +115,13 @@ export default function MainLayout({
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                color: "#9ca3af",
+                color: "#ffffff",
+                transition: "background 0.15s",
               }}
             >
               <svg
-                width="15"
-                height="15"
+                width="16"
+                height="16"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -129,9 +136,11 @@ export default function MainLayout({
 
             {/* 通知铃 */}
             <button
+              onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.15)"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
               style={{
-                width: "32px",
-                height: "32px",
+                width: "34px",
+                height: "34px",
                 borderRadius: "8px",
                 border: "none",
                 background: "transparent",
@@ -139,12 +148,13 @@ export default function MainLayout({
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                color: "#9ca3af",
+                color: "#ffffff",
+                transition: "background 0.15s",
               }}
             >
               <svg
-                width="15"
-                height="15"
+                width="16"
+                height="16"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"

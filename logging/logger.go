@@ -193,9 +193,9 @@ func LogAPIRequest(c *gin.Context, statusCode int, duration time.Duration, error
 	}
 
 	if statusCode >= 400 {
-		Error(logMessage)
+		Error("%s", logMessage)
 	} else {
-		Info(logMessage)
+		Info("%s", logMessage)
 	}
 }
 
@@ -207,7 +207,7 @@ func LogUserAction(username, action, resource, details string) {
 
 	message := fmt.Sprintf("User Action - User: %s, Action: %s, Resource: %s, Details: %s",
 		username, action, resource, details)
-	Info(message)
+	Info("%s", message)
 }
 
 // LogSystemEvent 记录系统事件日志
@@ -217,7 +217,7 @@ func LogSystemEvent(event, details string) {
 	}
 
 	message := fmt.Sprintf("System Event - Event: %s, Details: %s", event, details)
-	Info(message)
+	Info("%s", message)
 }
 
 // LogSecurityEvent 记录安全事件日志
@@ -228,7 +228,7 @@ func LogSecurityEvent(event, username, ip, details string) {
 
 	message := fmt.Sprintf("Security Event - Event: %s, User: %s, IP: %s, Details: %s",
 		event, username, ip, details)
-	Warn(message)
+	Warn("%s", message)
 }
 
 // GetLogLevel 获取当前日志级别

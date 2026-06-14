@@ -1,12 +1,12 @@
 const translation = {
-  title: "OpenVPN Admin Dashboard",
+  title: "Aegis",
   subtitle: "Professional OpenVPN management platform with enterprise-grade security, real-time monitoring, and intuitive web interface. Streamline your VPN infrastructure management with powerful tools for user administration, certificate management, and comprehensive logging.",
   getStarted: "Get Started",
   signUp: "Sign Up",
   goDashboard: "Go to Dashboard",
   featuresSection: {
     title: "System Features",
-    subtitle: "Professional OpenVPN management system core capabilities",
+    subtitle: "Core capabilities of the Aegis OpenVPN console",
     auth: {
       title: "User Management",
       description: "Multi-role user system with department management and access control"
@@ -28,7 +28,7 @@ const translation = {
     downloadButton: "Download Release",
     frontend: {
       title: "Frontend Stack",
-      description: "Next.js 14 + TypeScript + Tailwind CSS + Radix UI"
+      description: "Next.js + TypeScript + Tailwind CSS + MUI"
     },
     backend: {
       title: "Backend Stack",
@@ -37,7 +37,7 @@ const translation = {
   },
   githubSection: {
     title: "Open Source & Community Driven",
-    subtitle: "Join our growing community of developers and contributors. OpenVPN Admin Go is completely open source and welcomes contributions from developers worldwide.",
+    subtitle: "Join our growing community of developers and contributors. Aegis is completely open source and welcomes contributions from developers worldwide.",
     openSource: {
       title: "Open Source",
       description: "Fully open source project with MIT license. Fork, modify, and contribute freely."

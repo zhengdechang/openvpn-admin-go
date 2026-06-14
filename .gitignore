@@ -14,7 +14,13 @@ logs/*.log
 docker/config/
 docker/data/
 docker/openvpn/
+docker/mysql-data/
 openvpn-admin
 .gstack/
+
+# 已弃用：SQLite（项目改用 MySQL）
+/data/
+*.sqlite3
+*.sqlite
 
 node_modules/

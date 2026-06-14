@@ -9,8 +9,9 @@ import React, { useState } from "react";
 import MainLayout from "@/components/layout/main-layout";
 import { useAuth } from "@/lib/auth-context";
 import { useTranslation } from "react-i18next";
-import { Input } from "@/components/ui/input";
+import { ArgonField } from "@/components/ui/argon-field";
 import { Button } from "@/components/ui/button";
+import { CbiSection, CbiValue } from "@/components/ui/cbi-form";
 import { toast } from "sonner";
 
 export default function ProfilePage() {
@@ -46,90 +47,58 @@ export default function ProfilePage() {
   };
 
   return (
-    <MainLayout className="flex justify-center items-center bg-gradient-to-br from-secondary/30 to-secondary/10 h-full">
-      <div className="flex-grow flex h-full items-center justify-center p-4">
-        <div className="w-full max-w-lg my-4">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-primary">
-              {t("dashboard.profile.pageTitle")}
-            </h1>
-            <div className="h-1 w-16 bg-primary mx-auto my-4"></div>
-            <p className="text-gray-600">
-              {t("dashboard.profile.basicInfoTitle")}
-            </p>
-          </div>
+    <MainLayout className="p-6 space-y-6">
+      <div className="mx-auto w-full max-w-3xl space-y-6">
+        {/* 基本信息 */}
+        <CbiSection title={t("dashboard.profile.basicInfoTitle")}>
+          <CbiValue title={t("dashboard.profile.namePlaceholder")} htmlFor="profile-name">
+            <div className="max-w-md">
+              <ArgonField
+                id="profile-name"
+                placeholder={t("dashboard.profile.namePlaceholder")}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                disabled
+              />
+            </div>
+          </CbiValue>
+          <CbiValue title={t("dashboard.profile.emailPlaceholder")} htmlFor="profile-email">
+            <div className="max-w-md">
+              <ArgonField
+                id="profile-email"
+                placeholder={t("dashboard.profile.emailPlaceholder")}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled
+              />
+            </div>
+          </CbiValue>
+        </CbiSection>
 
-          <div className="bg-white rounded-lg shadow-lg border-t-4 border-t-primary p-6">
-            <div className="space-y-6">
-              {/* 基本信息部分 */}
-              <div>
-                <h2 className="text-lg font-medium mb-4 text-primary">
-                  {t("dashboard.profile.basicInfoTitle")}
-                </h2>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      {t("dashboard.profile.namePlaceholder")}
-                    </label>
-                    <Input
-                      placeholder={t("dashboard.profile.namePlaceholder")}
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      disabled={true}
-                      className="bg-gray-50"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      {t("dashboard.profile.emailPlaceholder")}
-                    </label>
-                    <Input
-                      placeholder={t("dashboard.profile.emailPlaceholder")}
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      disabled={true}
-                      className="bg-gray-50"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* 分隔线 */}
-              <div className="border-t border-gray-200"></div>
-
-              {/* 修改密码部分 */}
-              <div>
-                <h2 className="text-lg font-medium mb-4 text-primary">
-                  {t("dashboard.profile.changePasswordTitle")}
-                </h2>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      {t("dashboard.profile.newPasswordPlaceholder")}
-                    </label>
-                    <Input
-                      type="password"
-                      placeholder={t(
-                        "dashboard.profile.newPasswordPlaceholder"
-                      )}
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                    />
-                  </div>
-                  <Button
-                    onClick={handleChangePassword}
-                    disabled={loading}
-                    className="w-full"
-                  >
-                    {loading
-                      ? t("common.loading")
-                      : t("dashboard.profile.updatePasswordButton")}
-                  </Button>
-                </div>
-              </div>
+        {/* 修改密码 */}
+        <CbiSection title={t("dashboard.profile.changePasswordTitle")}>
+          <CbiValue title={t("dashboard.profile.newPasswordPlaceholder")} htmlFor="profile-password">
+            <div className="max-w-md">
+              <ArgonField
+                id="profile-password"
+                type="password"
+                placeholder={t("dashboard.profile.newPasswordPlaceholder")}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
+          </CbiValue>
+          <div className="cbi-value">
+            <div className="cbi-value-title" />
+            <div className="cbi-value-field">
+              <Button onClick={handleChangePassword} disabled={loading}>
+                {loading
+                  ? t("common.loading")
+                  : t("dashboard.profile.updatePasswordButton")}
+              </Button>
             </div>
           </div>
-        </div>
+        </CbiSection>
       </div>
     </MainLayout>
   );

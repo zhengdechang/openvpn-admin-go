@@ -16,10 +16,9 @@ const (
 	WebServiceName = "openvpn-go-api.service"
 
 	// Supervisor 服务名称
-	SupervisorOpenVPNServiceName  = "openvpn-server"
-	SupervisorWebServiceName      = "openvpn-go-api"
-	SupervisorFrontendServiceName = "openvpn-frontend"
-	SupervisorServiceGroup        = "openvpn-services"
+	SupervisorOpenVPNServiceName = "openvpn-server"
+	SupervisorWebServiceName     = "openvpn-go-api"
+	SupervisorServiceGroup       = "openvpn-services"
 
 	// 服务器配置路径
 	ServerConfigPath = "/etc/openvpn/server/server.conf"
@@ -32,12 +31,24 @@ const (
 	ServerDHPath     = "/etc/openvpn/server/dh.pem"
 	ServerTLSKeyPath = "/etc/openvpn/server/tls-auth.key"
 
+	// management 接口的密码文件：让 `management 127.0.0.1 7505 <file>` 带口令，
+	// 消除 "Using --management on a TCP port WITHOUT passwords" 警告。
+	// 文件首行即口令，OpenVPN 启动时(降权前,root)读取；PauseClient/auth 脚本连接后先发同一口令。
+	ServerMgmtPasswordPath = "/etc/openvpn/server/mgmt-pw.txt"
+
 	// Default log paths
 	DefaultOpenVPNStatusLogPath = "/etc/openvpn/status.log"
 	DefaultOpenVPNLogPath       = "/etc/openvpn/openvpn.log"
 
 	// 服务器 IP 分配文件路径
 	ServerIPPPath = "/etc/openvpn/server/ipp.txt"
+
+	// CRL（证书吊销列表）路径：删除用户时吊销其证书并重生成此文件，
+	// server.conf 通过 crl-verify 引用它。crl.cnf 是配套的 openssl CA 配置，
+	// ca-db/ 是 openssl ca 所需的最小数据库目录（index.txt / crlnumber / newcerts）。
+	ServerCRLPath    = "/etc/openvpn/server/crl.pem"
+	ServerCRLConfig  = "/etc/openvpn/server/crl.cnf"
+	ServerCRLDBDir   = "/etc/openvpn/server/ca-db"
 
 	// 客户端配置目录
 	ClientConfigDir = "/etc/openvpn/client"
@@ -46,14 +57,13 @@ const (
 	ConfigJSONPath = "/etc/openvpn/server/config.json"
 
 	// Supervisor 配置路径
-	SupervisorConfigPath         = "/etc/supervisor/supervisord.conf"
-	SupervisorConfDir            = "/etc/supervisor/conf.d"
-	SupervisorLogDir             = "/var/log/supervisor"
-	SupervisorSocketPath         = "/var/run/supervisor.sock"
-	SupervisorPidPath            = "/var/run/supervisord.pid"
-	SupervisorOpenVPNConfigPath  = "/etc/supervisor/conf.d/openvpn-server.conf"
-	SupervisorWebConfigPath      = "/etc/supervisor/conf.d/openvpn-go-api.conf"
-	SupervisorFrontendConfigPath = "/etc/supervisor/conf.d/openvpn-frontend.conf"
+	SupervisorConfigPath        = "/etc/supervisor/supervisord.conf"
+	SupervisorConfDir           = "/etc/supervisor/conf.d"
+	SupervisorLogDir            = "/var/log/supervisor"
+	SupervisorSocketPath        = "/var/run/supervisor.sock"
+	SupervisorPidPath           = "/var/run/supervisord.pid"
+	SupervisorOpenVPNConfigPath = "/etc/supervisor/conf.d/openvpn-server.conf"
+	SupervisorWebConfigPath     = "/etc/supervisor/conf.d/openvpn-go-api.conf"
 
 	// OpenVPN 默认配置值
 	DefaultOpenVPNPort             = 4500
@@ -85,8 +95,13 @@ var OpenSSLExtFiles = []string{
 	"openssl-client.ext",
 }
 
+// 这些文件在初始化时从 <cwd>/file/ 复制到 /etc/openvpn/server/ 并 chmod 755
+// （见 cmd/environment.go generateCertificates）。
+// tls-verify.sh：按 CN 拉黑的脚本（替代旧的 auth-blacklist.sh）。
+// crl.cnf：证书吊销用的 openssl CA 配置。
 var BlacklistFile = []string{
-	"auth-blacklist.sh",
+	"tls-verify.sh",
+	"crl.cnf",
 	"blacklist.txt",
 }
 

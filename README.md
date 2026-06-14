@@ -1,8 +1,8 @@
 [中文文档](./README_zh.md)
 
-# OpenVPN Admin Go
+# Aegis
 
-A comprehensive OpenVPN management system built with Go backend and Next.js frontend. This project provides a complete solution for managing OpenVPN servers, users, certificates, and monitoring connections through an intuitive web interface.
+🛡️ **Aegis** is a comprehensive OpenVPN management console built with a Go backend and Next.js frontend. It provides a complete solution for managing OpenVPN servers, users, certificates, and monitoring connections through an intuitive web interface.
 
 ## 🚀 Features
 
@@ -32,7 +32,7 @@ This project consists of two main components:
 
 - **Language:** Go 1.21+
 - **Framework:** Gin (HTTP router)
-- **Database:** SQLite with GORM ORM
+- **Database:** MySQL with GORM ORM (schema migrations via goose)
 - **Authentication:** JWT tokens
 - **OpenVPN Integration:** Direct system integration with OpenVPN service
 
@@ -147,8 +147,14 @@ Modern web interface accessible at `http://localhost:8085` (default):
 Create a `.env` file in the project root:
 
 ```env
-# Database Configuration
-DB_PATH=data/db.sqlite3
+# Database Configuration (MySQL)
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_USER=openvpn
+DB_PASSWORD=openvpn
+DB_NAME=openvpn
+# Optional: full DSN override
+# DB_DSN=user:pass@tcp(127.0.0.1:3306)/openvpn?charset=utf8mb4&parseTime=True&loc=Local
 
 # JWT Configuration
 JWT_SECRET=your-super-secret-jwt-key
@@ -197,8 +203,8 @@ openvpn-admin-go/
 │   ├── status_parser.go  # Status log parsing
 │   └── ccd.go            # Client-specific configurations
 ├── docker/               # Docker deployment files
-│   ├── Dockerfile.combined   # Multi-service Docker image
-│   ├── docker-compose.production.yml
+│   ├── Dockerfile.backend    # Backend image (Go API + OpenVPN)
+│   ├── docker-compose.yml    # MySQL + backend + frontend (separated)
 │   ├── .env.docker.example   # Environment template
 │   └── README.md            # Docker deployment guide
 ├── .github/workflows/    # CI/CD pipeline configuration
@@ -389,94 +395,41 @@ docker exec -it openvpn-admin openvpn-go
 >
 > 后端与前端均可按需启动，满足“新机器 → 拉取镜像 → 进入容器执行菜单 → 选择性启动组件”的部署流程。
 
-#### Ubuntu 22.04 Docker Deployment
+#### Docker Compose Deployment (recommended)
 
-For Ubuntu-based deployment with manual service control:
-
-**Build Ubuntu Image:**
-```bash
-docker build -f docker/Dockerfile.combined -t openvpn-admin:ubuntu .
-```
-
-**Interactive Run (Recommended):**
-```bash
-docker run -it --privileged \
-  -p 8085:8085 \
-  -p 3000:3000 \
-  -p 80:80 \
-  -p 1194:1194/udp \
-  -v ./data:/app/data \
-  -v ./logs:/app/logs \
-  -v ./config:/app/config \
-  -v ./openvpn:/etc/openvpn \
-  openvpn-admin:ubuntu
-```
-
-**Background Run:**
-```bash
-docker run -d --privileged \
-  --name openvpn-admin \
-  -p 8085:8085 \
-  -p 3000:3000 \
-  -p 80:80 \
-  -p 1194:1194/udp \
-  -v ./data:/app/data \
-  -v ./logs:/app/logs \
-  -v ./config:/app/config \
-  -v ./openvpn:/etc/openvpn \
-  openvpn-admin:ubuntu
-
-# Enter container
-docker exec -it openvpn-admin /bin/bash
-```
-
-**Service Management with Supervisor:**
-
-The container now uses supervisor for service management instead of systemd. Services are automatically started via the docker-entrypoint.sh script.
-
-Manual service management:
-```bash
-# Check service status
-supervisorctl status
-
-# Start/stop/restart services
-supervisorctl start openvpn-go-api
-supervisorctl stop openvpn-go-api
-supervisorctl restart openvpn-go-api
-
-supervisorctl start openvpn-server
-supervisorctl stop openvpn-server
-supervisorctl restart openvpn-server
-
-# View service logs
-supervisorctl tail openvpn-go-api
-supervisorctl tail openvpn-server
-
-# Follow logs in real-time
-supervisorctl tail -f openvpn-go-api
-```
-
-#### Docker Compose Deployment
+The stack is fully separated into three containers: **MySQL**, **backend** (Go API +
+OpenVPN), and **frontend** (independent Next.js service). The frontend starts directly
+and is no longer controlled by the Go program.
 
 ```bash
 # Navigate to docker directory
 cd docker
 
-# Copy environment configuration
+# Copy environment configuration and edit DB_PASSWORD / JWT_SECRET / ports
 cp .env.docker.example .env
-# Edit .env with your settings
 
-# Start services
-docker-compose -f docker-compose.production.yml up -d
+# Build and start all services
+docker compose up -d --build
 ```
 
-#### Service Modes
+Default ports (override in `.env`): frontend `3043`, backend API `8085`,
+OpenVPN `OPENVPN_PORT` (default `1194/udp`). MySQL is internal to the compose
+network and not published.
 
-The Docker image supports different deployment modes:
+Database migrations run automatically on backend startup (goose). To run them
+manually:
 
-- **Full Stack** (`SERVICE_MODE=all`): Both frontend and backend (default)
-- **Backend Only** (`SERVICE_MODE=backend`): API server only
-- **Frontend Only** (`SERVICE_MODE=frontend`): Web interface only
+```bash
+docker compose exec backend openvpn-go migrate status
+docker compose exec backend openvpn-go migrate up
+```
+
+#### Local development
+
+```bash
+# From the repo root — bring up MySQL + backend + hot-reload frontend
+docker compose -f docker-compose-dev.yaml up --build
+```
 
 #### Build from Source
 
@@ -490,18 +443,17 @@ docker-compose up -d
 Container pre-configured environment variables:
 
 - `GIN_MODE=release`
-- `NODE_ENV=production`
 - `TZ=UTC`
-- `DB_PATH=/app/data/db.sqlite3`
 - `OPENVPN_CONFIG_DIR=/etc/openvpn`
+- `WEB_PORT=8085` - API service port
 
-**Supervisor Service Control Variables:**
+**Database connection (MySQL, injected by compose / .env):**
 
-- `SERVICE_MODE=all|api|backend|frontend` - Controls which services to start (default: all)
-- `WEB_PORT=8085` - API service port (default: 8085)
-- `WEB_AUTOSTART=true|false` - Auto-start API service (default: true)
-- `FRONTEND_AUTOSTART=true|false` - Auto-start Nginx frontend (default: false)
-- `OPENVPN_AUTOSTART=true|false` - Auto-start OpenVPN service (default: false)
+- `DB_HOST` / `DB_PORT` / `DB_USER` / `DB_PASSWORD` / `DB_NAME` — or `DB_DSN` to override
+
+> Backend and frontend are now **separate containers**. The frontend is an independent
+> Next.js service (`next start`) started directly — it is no longer controlled by the Go
+> program or supervisor. See `docker/docker-compose.yml`.
 
 #### Docker Troubleshooting
 

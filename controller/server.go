@@ -71,23 +71,25 @@ func GetServerStatus() (*ServerStatus, error) {
 		return nil, fmt.Errorf("failed to load OpenVPN config: %w", err)
 	}
 
-	// 检查服务是否运行
-	// 检查服务是否运行，忽略非零退出码，获取服务状态字符串
-	output := utils.ExecCommandWithResult(fmt.Sprintf("systemctl is-active %s", constants.ServiceName))
+	// OpenVPN 由容器内 supervisord 托管（非 systemd），必须用 supervisorctl 查询状态，
+	// 否则 systemctl is-active 永远返回空 → 前端服务状态卡片显示不出来。
+	raw := utils.SupervisorctlStatus(constants.SupervisorOpenVPNServiceName)
+	running := strings.Contains(raw, "RUNNING")
 
 	status := &ServerStatus{
 		Name:        "server",
-		Status:      strings.TrimSpace(output),
+		Status:      "inactive",
 		LastUpdated: time.Now().Format(time.RFC3339),
 	}
 
 	// 如果服务正在运行，获取更多信息
-	if status.Status == "active" {
-		// 获取服务启动时间
-		output := utils.ExecCommandWithResult(fmt.Sprintf("systemctl show %s --property=ActiveEnterTimestamp", constants.ServiceName))
-		if output != "" {
-			if t0, err := time.Parse("Mon 2006-01-02 15:04:05 MST", strings.TrimSpace(strings.TrimPrefix(output, "ActiveEnterTimestamp="))); err == nil {
-				status.Uptime = time.Since(t0).String()
+	if running {
+		status.Status = "active"
+
+		// 从 supervisorctl 状态行解析 uptime，例如 "... RUNNING   pid 8, uptime 0:00:22"
+		if idx := strings.Index(raw, "uptime "); idx >= 0 {
+			if fields := strings.Fields(raw[idx+len("uptime "):]); len(fields) > 0 {
+				status.Uptime = fields[0]
 			}
 		}
 
@@ -155,8 +157,8 @@ func (c *ServerController) StartServer(ctx *gin.Context) {
 
 // StopServer 停止服务器
 func (c *ServerController) StopServer(ctx *gin.Context) {
-	// 停止服务器
-	utils.SystemctlStop(constants.ServiceName)
+	// OpenVPN 由 supervisord 托管，用 supervisorctl 停止（与 start/restart 一致）。
+	utils.SupervisorctlStop(constants.SupervisorOpenVPNServiceName)
 	ctx.JSON(http.StatusOK, gin.H{"message": "Server stopped successfully"})
 }
 

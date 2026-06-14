@@ -13,10 +13,10 @@ const translation = {
   profile: "个人资料",
   language: "语言",
   settings: "设置",
-  metadataTitle: "OpenVPN 管理系统",
-  metadataDescription: "基于 OpenVPN 的集中式管理平台，支持权限控制和日志查询",
+  metadataTitle: "Aegis",
+  metadataDescription: "Aegis —— 基于 OpenVPN 的集中式管理平台，支持权限控制和日志查询",
   footer: {
-    copyrightText: "OpenVPN 管理系统 © {{year}} 保留所有权利",
+    copyrightText: "Aegis © {{year}} 保留所有权利",
     builtWithText:
       "基于 OpenVPN 的集中式管理平台，支持用户管理、证书管理和实时监控",
   },
@@ -26,7 +26,13 @@ const translation = {
     langSimplifiedChinese: "简体中文",
     langEnglish: "English",
     userDefaultName: "用户",
-    logoText: "OpenVPN管理系统",
+    logoText: "Aegis",
+  },
+  nav: {
+    status: "状态",
+    overview: "概览",
+    vpn: "VPN 管理",
+    system: "系统",
   },
 }
 

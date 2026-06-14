@@ -12,19 +12,23 @@ const translation = {
     invalidEmail: "Please enter a valid email address",
     confirmPasswordMinLength: "Confirm that the password needs to be at least 6 characters",
     passwordMinLength: "The password needs to be at least 6 characters long",
-    passwordsNotMatch: "The password entered twice is inconsistent"
+    passwordsNotMatch: "The password entered twice is inconsistent",
+    departmentRequired: "Please select a department"
   },
-  title: "enroll",
+  title: "register",
   name: "Username",
   namePlaceholder: "Please enter a username",
-  register: "enroll",
+  register: "register",
   passwordPlaceholder: "Please enter your password",
   login: "login",
   password: "password",
-  email: "mailbox",
+  email: "Email",
   confirmPassword: "Confirm your password",
   emailPlaceholder: "Please enter your email address",
-  confirmPasswordPlaceholder: "Please enter your password again"
+  confirmPasswordPlaceholder: "Please enter your password again",
+  department: "Department",
+  departmentPlaceholder: "Select a department",
+  pendingApproval: "Registered successfully. Your account is pending administrator approval before you can log in."
 }
 
 export default translation

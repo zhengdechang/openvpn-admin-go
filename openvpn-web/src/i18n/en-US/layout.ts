@@ -13,21 +13,27 @@ const translation = {
   messages: "News",
   home: "Home",
   light: "Light",
-  metadataTitle: "OpenVPN Management System",
+  metadataTitle: "Aegis",
   metadataDescription:
-    "Centralized management platform based on OpenVPN, supporting permission control and log query",
+    "Aegis — centralized management platform based on OpenVPN, supporting permission control and log query",
   footer: {
-    copyrightText: "OpenVPN Management System © {{year}} All rights reserved",
+    copyrightText: "Aegis © {{year}} All rights reserved",
     builtWithText:
       "A centralized management platform for OpenVPN, supporting user management, certificate management, and real-time monitoring",
   },
   navbar: {
-    logoText: "OpenVPN Management System",
+    logoText: "Aegis",
     langEnglish: "English",
     langSimplifiedChinese: "中文",
     userDefaultName: "User",
     adminSuffix: " (Admin)",
     departmentsFallback: "Department Management",
+  },
+  nav: {
+    status: "Status",
+    overview: "Overview",
+    vpn: "VPN Management",
+    system: "System",
   },
 }
 

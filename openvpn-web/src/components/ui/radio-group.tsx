@@ -1,44 +1,52 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import * as RadioGroupPrimitive from "@radix-ui/react-radio-group"
-import { Circle } from "lucide-react"
+import * as React from "react";
+import MuiRadioGroup from "@mui/material/RadioGroup";
+import Radio from "@mui/material/Radio";
+import FormControlLabel from "@mui/material/FormControlLabel";
 
-import { cn } from "@/lib/utils"
+/**
+ * 兼容旧 Radix API（value / onValueChange）的 MUI RadioGroup。
+ */
+interface RadioGroupProps {
+  value?: string;
+  defaultValue?: string;
+  onValueChange?: (value: string) => void;
+  className?: string;
+  children?: React.ReactNode;
+}
 
-const RadioGroup = React.forwardRef<
-  React.ElementRef<typeof RadioGroupPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof RadioGroupPrimitive.Root>
->(({ className, ...props }, ref) => {
-  return (
-    <RadioGroupPrimitive.Root
-      className={cn("grid gap-2", className)}
-      {...props}
+const RadioGroup = React.forwardRef<HTMLDivElement, RadioGroupProps>(
+  ({ value, defaultValue, onValueChange, className, children }, ref) => (
+    <MuiRadioGroup
       ref={ref}
-    />
-  )
-})
-RadioGroup.displayName = RadioGroupPrimitive.Root.displayName
-
-const RadioGroupItem = React.forwardRef<
-  React.ElementRef<typeof RadioGroupPrimitive.Item>,
-  React.ComponentPropsWithoutRef<typeof RadioGroupPrimitive.Item>
->(({ className, ...props }, ref) => {
-  return (
-    <RadioGroupPrimitive.Item
-      ref={ref}
-      className={cn(
-        "aspect-square h-4 w-4 rounded-full border border-primary text-primary ring-offset-background focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
-        className
-      )}
-      {...props}
+      className={className}
+      value={value ?? defaultValue ?? ""}
+      onChange={(_e, v) => onValueChange?.(v)}
     >
-      <RadioGroupPrimitive.Indicator className="flex items-center justify-center">
-        <Circle className="h-2.5 w-2.5 fill-current text-current" />
-      </RadioGroupPrimitive.Indicator>
-    </RadioGroupPrimitive.Item>
+      {children}
+    </MuiRadioGroup>
   )
-})
-RadioGroupItem.displayName = RadioGroupPrimitive.Item.displayName
+);
+RadioGroup.displayName = "RadioGroup";
 
-export { RadioGroup, RadioGroupItem } 
+interface RadioGroupItemProps {
+  value: string;
+  label?: React.ReactNode;
+  disabled?: boolean;
+  id?: string;
+  className?: string;
+}
+
+const RadioGroupItem = ({ value, label, disabled, id, className }: RadioGroupItemProps) => (
+  <FormControlLabel
+    value={value}
+    disabled={disabled}
+    className={className}
+    control={<Radio id={id} size="small" />}
+    label={label ?? ""}
+  />
+);
+RadioGroupItem.displayName = "RadioGroupItem";
+
+export { RadioGroup, RadioGroupItem };

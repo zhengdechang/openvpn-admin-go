@@ -26,7 +26,9 @@ export const AuthContext = createContext<AuthContextType | undefined>(
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(false);
+  // 初始为 true=“鉴权校验中”。持久化登录态(zustand persist)在首帧之后才水合，
+  // 若初始为 false，受保护页面会在水合前误判未登录而提前跳转登录页。
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
@@ -68,23 +70,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         console.log(
           "AuthProvider: User is logged in (from persisted state). Attempting token refresh on load."
         );
-        setLoading(true); // Optionally set loading state
         const refreshedSuccessfully = await refreshToken(); // Call the existing refreshToken method
         if (!refreshedSuccessfully) {
           console.warn(
-            "AuthProvider: Initial token refresh failed. Logging out."
+            "AuthProvider: Initial token refresh failed. Clearing session."
           );
-          // The refreshToken method itself might set errors, but explicit logout might be needed if it doesn't fully clear session
-          logout(); // Call existing logout which clears info and redirects
+          // 仅清理本地登录态；跳转交给受保护布局的路由守卫（统一跳到 /auth/login）。
+          setUser(null);
+          clearLoginInfo();
         } else {
           console.log("AuthProvider: Initial token refresh successful.");
         }
-        setLoading(false); // Reset loading state
       }
+      // 无论登录与否，都结束“校验中”状态，让守卫据此决定渲染或跳转。
+      setLoading(false);
     };
 
     attemptRefreshOnLoad();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
     // This effect should run once on mount to check initial persisted login state.
     // Or, if you want it to re-run if isLogin changes from false to true due to some other async init,
     // you could add isLogin to dependencies, but be careful of loops if refreshToken itself changes isLogin.
@@ -135,7 +138,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         );
         return;
       }
-    } catch (error) {
+    } catch (error: any) {
+      // 审批门控：未批准/被拒绝的用户登录返回 403 + approvalStatus，抛给页面本地化提示
+      const data = error?.response?.data;
+      if (error?.response?.status === 403 && data?.approvalStatus) {
+        const e: any = new Error(data.error || "account not approved");
+        e.approvalStatus = data.approvalStatus;
+        throw e;
+      }
       setError("Login failed. Please check your credentials");
       return;
     } finally {
@@ -155,14 +165,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         showToast.error(response.error || "Registration failed");
         return false;
       }
-      if (response.data && response.message) {
-        showToast.success(
-          response.message ||
-            "Registration successful. Please verify your email"
-        );
-        return true;
-      }
-      return false;
+      return true;
     } catch (error) {
       setError("Registration failed");
       return false;

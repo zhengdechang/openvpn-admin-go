@@ -15,6 +15,7 @@ import {
   LiveClientConnection, // Added import for live connections
   UserUpdateRequest, // Added for user update payload
   ConfigItem, // Added for config item management
+  SystemInfo, // 部署系统状态
 } from "@/types";
 import Cookies from "js-cookie";
 import { useUserStore } from "@/store";
@@ -130,7 +131,7 @@ export const userAPI = {
   // 用户注册
   register: async (
     credentials: RegisterCredentials
-  ): Promise<ApiResponse<Object>> => {
+  ): Promise<ApiResponse<object>> => {
     try {
       const response = await api.post("/api/user/register", credentials);
       return response.data;
@@ -144,7 +145,7 @@ export const userAPI = {
     }
   },
 
-  verifyEmail: async (token: string): Promise<ApiResponse<Object>> => {
+  verifyEmail: async (token: string): Promise<ApiResponse<object>> => {
     try {
       const response = await api.get(`/api/user/verify-email/${token}`);
       return response.data;
@@ -158,7 +159,7 @@ export const userAPI = {
     }
   },
 
-  forgotPassword: async (email: string): Promise<ApiResponse<Object>> => {
+  forgotPassword: async (email: string): Promise<ApiResponse<object>> => {
     try {
       const response = await api.post("/api/user/forgot-password", { email });
       return response.data;
@@ -176,7 +177,7 @@ export const userAPI = {
     resetToken: string,
     password: string,
     confirmPassword: string
-  ): Promise<ApiResponse<Object>> => {
+  ): Promise<ApiResponse<object>> => {
     try {
       const response = await api.patch(
         `/api/user/reset-password/${resetToken}`,
@@ -389,6 +390,10 @@ export const serverAPI = {
     const response = await api.get<ServerStatus>("/api/server/status");
     return response.data;
   },
+  getSystemInfo: async (): Promise<SystemInfo> => {
+    const response = await api.get<SystemInfo>("/api/server/system");
+    return response.data;
+  },
   start: async (): Promise<any> => {
     const response = await api.post("/api/server/start");
     return response.data;
@@ -492,6 +497,14 @@ export const userManagementAPI = {
   },
   async resumeUser(username: string): Promise<ApiResponse<any>> {
     const response = await api.post(`/api/client/${username}/resume`);
+    return response.data;
+  },
+  async approveUser(username: string): Promise<ApiResponse<any>> {
+    const response = await api.post(`/api/client/${username}/approve`);
+    return response.data;
+  },
+  async rejectUser(username: string): Promise<ApiResponse<any>> {
+    const response = await api.post(`/api/client/${username}/reject`);
     return response.data;
   },
 };
@@ -630,7 +643,7 @@ export const industryAPI = {
   getAllPolicies: async (): Promise<ApiResponse<Policy[]>> => {
     try {
       const response = await api.get("/api/policy/all");
-      let policies = response.data.data.map((policy: any) => {
+      const policies = response.data.data.map((policy: any) => {
         return {
           ...policy,
           publishedAt: policy.create_time,
@@ -664,7 +677,7 @@ export const industryAPI = {
   getUserPolicies: async (): Promise<ApiResponse<Policy[]>> => {
     try {
       const response = await api.get("/api/policy/get_user_policies");
-      let policies = response.data.data.map((policy: any) => {
+      const policies = response.data.data.map((policy: any) => {
         return {
           ...policy,
           publishedAt: policy.create_time,
@@ -687,7 +700,7 @@ export const industryAPI = {
   getGovernmentUserPolicies: async (): Promise<ApiResponse<Policy[]>> => {
     try {
       const response = await api.get("/api/policy/government/all");
-      let policies = response.data.data.map((policy: any) => {
+      const policies = response.data.data.map((policy: any) => {
         return {
           ...policy,
           publishedAt: policy.create_time,
@@ -710,7 +723,7 @@ export const industryAPI = {
   getPolicyForId: async (id: string): Promise<ApiResponse<Policy>> => {
     try {
       const response = await api.get(`/api/policy/${id}`);
-      let policy = {
+      const policy = {
         ...response.data.data,
         publishedAt: response.data.data.create_time,
         issuingUnit: response.data.data.issuing_unit,

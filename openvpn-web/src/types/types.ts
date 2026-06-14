@@ -61,6 +61,7 @@ export interface RegisterCredentials {
   email: string;
   password: string;
   confirmPassword: string;
+  departmentId: string;
 }
 
 // Dashboard types
@@ -198,6 +199,7 @@ export interface AdminUser {
   name: string;
   email: string;
   role: UserRole;
+  approvalStatus?: string; // pending | approved | rejected
   departmentId?: string;
   departmentName?: string;
   creatorId?: string;
@@ -223,6 +225,46 @@ export interface ServerStatus {
   connected: number;
   total: number;
   lastUpdated: string;
+}
+
+// 内存信息（字节）
+export interface MemoryInfo {
+  total: number;
+  used: number;
+  free: number;
+  available: number;
+  buffers: number;
+  cached: number;
+  swapTotal: number;
+  swapUsed: number;
+  usedPercent: number;
+}
+
+// 磁盘信息（字节）
+export interface DiskInfo {
+  path: string;
+  total: number;
+  used: number;
+  free: number;
+  usedPercent: number;
+}
+
+// 部署系统 + 服务整体状态
+export interface SystemInfo {
+  version: string;
+  goVersion: string;
+  hostname: string;
+  os: string;
+  arch: string;
+  kernelVersion: string;
+  numCpu: number;
+  cpuUsagePercent: number;
+  loadAvg: number[];
+  uptime: string;
+  uptimeSeconds: number;
+  localTime: string;
+  memory: MemoryInfo;
+  disk: DiskInfo;
 }
 
 export interface LiveClientConnection {

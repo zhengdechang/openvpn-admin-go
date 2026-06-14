@@ -30,6 +30,10 @@ func SetupClientRoutes(r *gin.RouterGroup) {
 		client.POST("/:username/pause", middleware.RoleRequired(string(model.RoleSuperAdmin), string(model.RoleAdmin), string(model.RoleManager)), clientCtrl.PauseClient)
 		client.POST("/:username/resume", middleware.RoleRequired(string(model.RoleSuperAdmin), string(model.RoleAdmin), string(model.RoleManager)), clientCtrl.ResumeClient)
 
+		// 注册审批：批准 / 拒绝（manager 仅本部门）
+		client.POST("/:username/approve", middleware.RoleRequired(string(model.RoleSuperAdmin), string(model.RoleAdmin), string(model.RoleManager)), clientCtrl.ApproveUser)
+		client.POST("/:username/reject", middleware.RoleRequired(string(model.RoleSuperAdmin), string(model.RoleAdmin), string(model.RoleManager)), clientCtrl.RejectUser)
+
 		// Client Config Download (accessible by user for their own config, and admins/managers)
 		// Path changed from /config/:username to /:id/config
 		// Note: The GetClientConfig route uses /:username, matching Pause/Resume. The :id param is used for other user operations.

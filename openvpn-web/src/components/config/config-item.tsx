@@ -2,16 +2,9 @@
 
 import React, { useState, useEffect } from "react";
 import { ConfigItem } from "@/types/types";
-import { Input } from "@/components/ui/input";
+import { ArgonField, ArgonSelect } from "@/components/ui/argon-field";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { X, Plus, Edit2, Check, X as Cancel } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -81,22 +74,24 @@ export default function ConfigItemComponent({
     switch (item.type) {
       case "text":
         return (
-          <Input
-            value={localValue || ""}
-            onChange={(e) => setLocalValue(e.target.value)}
-            placeholder={item.description}
-            className="w-full text-sm"
-          />
+          <div className="w-full">
+            <ArgonField
+              value={localValue || ""}
+              onChange={(e) => setLocalValue(e.target.value)}
+              placeholder={item.description}
+            />
+          </div>
         );
       case "number":
         return (
-          <Input
-            type="number"
-            value={localValue || ""}
-            onChange={(e) => setLocalValue(parseInt(e.target.value) || 0)}
-            placeholder={item.description}
-            className="w-full text-sm"
-          />
+          <div className="w-full">
+            <ArgonField
+              type="number"
+              value={localValue || ""}
+              onChange={(e) => setLocalValue(parseInt(e.target.value) || 0)}
+              placeholder={item.description}
+            />
+          </div>
         );
       case "boolean":
         return (
@@ -107,18 +102,21 @@ export default function ConfigItemComponent({
         );
       case "select":
         return (
-          <Select value={localValue || ""} onValueChange={setLocalValue}>
-            <SelectTrigger className="w-full text-sm">
-              <SelectValue placeholder={item.description} />
-            </SelectTrigger>
-            <SelectContent>
+          <div className="w-full">
+            <ArgonSelect
+              value={localValue || ""}
+              onChange={(e) => setLocalValue(e.target.value)}
+            >
+              <option value="" disabled>
+                {item.description}
+              </option>
               {item.options?.map((option) => (
-                <SelectItem key={option} value={option}>
+                <option key={option} value={option}>
                   {option}
-                </SelectItem>
+                </option>
               ))}
-            </SelectContent>
-          </Select>
+            </ArgonSelect>
+          </div>
         );
       case "array":
         return (
@@ -126,12 +124,13 @@ export default function ConfigItemComponent({
             <div className="flex-1 overflow-y-auto space-y-1 max-h-16">
               {arrayItems.map((arrayItem, index) => (
                 <div key={index} className="flex items-center space-x-1">
-                  <Input
-                    value={arrayItem}
-                    onChange={(e) => updateArrayItem(index, e.target.value)}
-                    placeholder="输入路由"
-                    className="flex-1 text-xs h-7"
-                  />
+                  <div className="flex-1">
+                    <ArgonField
+                      value={arrayItem}
+                      onChange={(e) => updateArrayItem(index, e.target.value)}
+                      placeholder="输入路由"
+                    />
+                  </div>
                   <Button
                     variant="outline"
                     size="sm"

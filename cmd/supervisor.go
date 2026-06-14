@@ -65,13 +65,6 @@ var supervisorConfigCmd = &cobra.Command{
 			if err := reloadIfRunning(); err != nil {
 				return err
 			}
-		case "frontend":
-			if err := utils.InstallFrontendServiceConfig(supervisorAutostart); err != nil {
-				return fmt.Errorf("配置前端服务失败: %w", err)
-			}
-			if err := reloadIfRunning(); err != nil {
-				return err
-			}
 		default:
 			return fmt.Errorf("未知服务类型: %s", supervisorService)
 		}
@@ -82,7 +75,7 @@ var supervisorConfigCmd = &cobra.Command{
 
 func init() {
 	supervisorConfigCmd.Flags().BoolVar(&supervisorMainOnly, "main-only", false, "安装或刷新 supervisor 主配置")
-	supervisorConfigCmd.Flags().StringVar(&supervisorService, "service", "", "配置的服务类型 (web|api|openvpn|backend|frontend)")
+	supervisorConfigCmd.Flags().StringVar(&supervisorService, "service", "", "配置的服务类型 (web|api|openvpn|backend)")
 	supervisorConfigCmd.Flags().IntVar(&supervisorPort, "port", 8085, "API 服务端口")
 	supervisorConfigCmd.Flags().BoolVar(&supervisorAutostart, "autostart", false, "是否在 supervisord 中启用自动启动")
 	rootCmd.AddCommand(supervisorConfigCmd)

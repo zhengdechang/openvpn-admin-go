@@ -8,8 +8,11 @@ const translation =  {
   passwordPlaceholder: '请输入密码',
   confirmPassword: '确认密码',
   confirmPasswordPlaceholder: '请再次输入密码',
+  department: '部门',
+  departmentPlaceholder: '请选择部门',
   register: '注册',
   login: '登录',
+  pendingApproval: '注册成功，账号待管理员批准后方可登录',
   info: {
     createAccount: '创建您的账户',
     haveAccount: '已有账户？'
@@ -23,7 +26,8 @@ const translation =  {
     invalidEmail: '请输入有效的邮箱地址',
     passwordMinLength: '密码至少需要6个字符',
     confirmPasswordMinLength: '确认密码至少需要6个字符',
-    passwordsNotMatch: '两次输入的密码不一致'
+    passwordsNotMatch: '两次输入的密码不一致',
+    departmentRequired: '请选择部门'
   }
 }
 

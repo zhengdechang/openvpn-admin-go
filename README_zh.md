@@ -1,8 +1,8 @@
 [English Documentation](./README.md)
 
-# OpenVPN Admin Go
+# Aegis
 
-一个功能完整的 OpenVPN 管理系统，采用 Go 后端和 Next.js 前端构建。本项目为管理 OpenVPN 服务器、用户、证书和连接监控提供了完整的解决方案，通过直观的 Web 界面进行操作。
+🛡️ **Aegis** 是一个功能完整的 OpenVPN 管理控制台，采用 Go 后端和 Next.js 前端构建。本项目为管理 OpenVPN 服务器、用户、证书和连接监控提供了完整的解决方案，通过直观的 Web 界面进行操作。
 
 ## 🚀 功能特性
 
@@ -32,7 +32,7 @@
 
 - **开发语言：** Go 1.21+
 - **Web 框架：** Gin (HTTP 路由器)
-- **数据库：** SQLite 配合 GORM ORM
+- **数据库：** MySQL 配合 GORM ORM（schema 迁移由 goose 管理）
 - **身份验证：** JWT 令牌
 - **OpenVPN 集成：** 直接与 OpenVPN 服务系统集成
 
@@ -147,8 +147,14 @@ go build -o bin/openvpn-go .
 在项目根目录创建 `.env` 文件：
 
 ```env
-# 数据库配置
-DB_PATH=data/db.sqlite3
+# 数据库配置 (MySQL)
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_USER=openvpn
+DB_PASSWORD=openvpn
+DB_NAME=openvpn
+# 可选：完整 DSN 覆盖
+# DB_DSN=user:pass@tcp(127.0.0.1:3306)/openvpn?charset=utf8mb4&parseTime=True&loc=Local
 
 # JWT 配置
 JWT_SECRET=your-super-secret-jwt-key

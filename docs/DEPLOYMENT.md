@@ -125,7 +125,7 @@ docker-compose -f docker-compose.production.yml down
 | `OPENVPN_SERVER_HOSTNAME` | Server IP/domain | Required |
 | `OPENVPN_PORT` | OpenVPN port | `1194` |
 | `OPENVPN_PROTO` | Protocol (udp/tcp) | `udp` |
-| `DB_PATH` | Database file path | `/app/data/db.sqlite3` |
+| `DB_HOST` / `DB_PORT` / `DB_USER` / `DB_PASSWORD` / `DB_NAME` | MySQL connection | `mysql` / `3306` / `openvpn` / - / `openvpn` |
 
 ## 🔧 Manual Binary Deployment
 

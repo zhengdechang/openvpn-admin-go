@@ -101,8 +101,9 @@ func generateCertificates() error {
 		if err := copyFile(src, dst); err != nil {
 			return fmt.Errorf("复制文件 %s 失败: %v", file, err)
 		}
-		// 设置文件权限为 644 (rw-r--r--)
-		if err := os.Chmod(dst, 777); err != nil {
+		// 设置文件权限为 755 (rwxr-xr-x)：tls-verify.sh 必须可被 OpenVPN 读取并执行。
+		// 注意 Go 字面量需写八进制 0755，写成十进制 777 会变成 -r----x--x（OpenVPN 读不到脚本，认证报 126）。
+		if err := os.Chmod(dst, 0755); err != nil {
 			return fmt.Errorf("设置文件权限失败 %s: %v", dst, err)
 		}
 		fmt.Printf("已复制文件: %s\n", file)
@@ -176,6 +177,11 @@ func generateOpenVPNConfig() error {
 	configContent, err := cfg.GenerateServerConfig()
 	if err != nil {
 		return fmt.Errorf("生成服务器配置失败: %v", err)
+	}
+
+	// server.conf 引用 management 口令文件，写配置前先确保它存在
+	if err := openvpn.EnsureMgmtPassword(); err != nil {
+		return err
 	}
 
 	// 写入配置文件到服务器目录

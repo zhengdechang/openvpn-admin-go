@@ -49,6 +49,11 @@ func RenderServerConfig(cfg *Config) (string, error) {
 		"OpenVPNClientConfigDir":  cfg.OpenVPNClientConfigDir,
 		"OpenVPNManagementPort":   cfg.OpenVPNManagementPort,
 		"OpenVPNBlacklistFile":    cfg.OpenVPNBlacklistFile,
+		"mgmt_password_path":      constants.ServerMgmtPasswordPath,
+		// CRL（删除用户=吊销证书）。crl-verify 行受 openvpn_use_crl 控制；
+		// EnsureCRLSetup 保证渲染出该行前 crl.pem 已存在（初始为空），避免锁死。
+		"openvpn_use_crl":         cfg.OpenVPNUseCRL,
+		"crl_path":                constants.ServerCRLPath,
 	}
 
 	var buf bytes.Buffer

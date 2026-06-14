@@ -1,8 +1,6 @@
 "use client";
 
 import * as React from "react";
-import * as LabelPrimitive from "@radix-ui/react-label";
-import { Slot } from "@radix-ui/react-slot";
 import {
   Controller,
   FormProvider,
@@ -15,6 +13,24 @@ import { useTranslation } from "react-i18next"; // Import useTranslation
 
 import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
+
+/**
+ * 轻量 Slot（替代 @radix-ui/react-slot）：把传入的 props 合并到唯一子元素上。
+ */
+const Slot = React.forwardRef<HTMLElement, React.HTMLAttributes<HTMLElement> & { children?: React.ReactNode }>(
+  ({ children, ...props }, ref) => {
+    if (React.isValidElement(children)) {
+      const child = children as React.ReactElement<Record<string, unknown>>;
+      return React.cloneElement(child, {
+        ...props,
+        ...child.props,
+        ref,
+      });
+    }
+    return null;
+  }
+);
+Slot.displayName = "Slot";
 
 const Form = FormProvider;
 
@@ -89,8 +105,8 @@ const FormItem = React.forwardRef<
 FormItem.displayName = "FormItem";
 
 const FormLabel = React.forwardRef<
-  React.ElementRef<typeof LabelPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof LabelPrimitive.Root>
+  HTMLLabelElement,
+  React.LabelHTMLAttributes<HTMLLabelElement>
 >(({ className, ...props }, ref) => {
   const { error, formItemId } = useFormField();
 
@@ -106,8 +122,8 @@ const FormLabel = React.forwardRef<
 FormLabel.displayName = "FormLabel";
 
 const FormControl = React.forwardRef<
-  React.ElementRef<typeof Slot>,
-  React.ComponentPropsWithoutRef<typeof Slot>
+  HTMLElement,
+  React.HTMLAttributes<HTMLElement>
 >(({ ...props }, ref) => {
   const { error, formItemId, formDescriptionId, formMessageId } =
     useFormField();

@@ -61,12 +61,13 @@ func (c *ClientController) CreateUser(ctx *gin.Context) {
 		return
 	}
 	user := model.User{
-		Name:         req.Name,
-		Email:        req.Email,
-		PasswordHash: hash,
-		Role:         model.Role(req.Role),
-		DepartmentID: req.DepartmentID,
-		CreatorID:    claims.UserID,
+		Name:           req.Name,
+		Email:          req.Email,
+		PasswordHash:   hash,
+		Role:           model.Role(req.Role),
+		DepartmentID:   req.DepartmentID,
+		CreatorID:      claims.UserID,
+		ApprovalStatus: model.ApprovalApproved, // 管理员直接创建的用户默认已批准
 	}
 
 	// Handle FixedIP assignment on creation
@@ -169,6 +170,7 @@ func (c *ClientController) ListUsers(ctx *gin.Context) {
 			"name":               u.Name,
 			"email":              u.Email,
 			"role":               u.Role,
+			"approvalStatus":     u.ApprovalStatus,
 			"departmentId":       u.DepartmentID,
 			"creatorId":          u.CreatorID,
 			"lastConnectionTime": u.LastConnectionTime,
@@ -234,6 +236,7 @@ func (c *ClientController) GetUser(ctx *gin.Context) {
 		"name":               u.Name,
 		"email":              u.Email,
 		"role":               u.Role,
+		"approvalStatus":     u.ApprovalStatus,
 		"departmentId":       u.DepartmentID,
 		"fixedIp":            u.FixedIP,
 		"subnet":             u.Subnet,
@@ -489,6 +492,46 @@ func (c *ClientController) ResumeClient(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{"message": "Client resumed successfully"})
+}
+
+// ApproveUser 批准待审核用户
+func (c *ClientController) ApproveUser(ctx *gin.Context) {
+	c.setApprovalStatus(ctx, model.ApprovalApproved)
+}
+
+// RejectUser 拒绝待审核用户
+func (c *ClientController) RejectUser(ctx *gin.Context) {
+	c.setApprovalStatus(ctx, model.ApprovalRejected)
+}
+
+// setApprovalStatus 设置用户审批状态（按用户名定位，与 pause/resume 一致）。
+// manager 仅能审批本部门用户。
+func (c *ClientController) setApprovalStatus(ctx *gin.Context, status model.ApprovalStatus) {
+	claims := ctx.MustGet("claims").(*middleware.Claims)
+	username := ctx.Param("username")
+	if username == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "username is required"})
+		return
+	}
+
+	var user model.User
+	if err := database.DB.Where("name = ?", username).First(&user).Error; err != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
+		return
+	}
+
+	// manager 仅能审批本部门用户
+	if claims.Role == string(model.RoleManager) && user.DepartmentID != claims.DeptID {
+		ctx.JSON(http.StatusForbidden, gin.H{"error": "manager can only approve users in own department"})
+		return
+	}
+
+	if err := database.DB.Model(&user).Update("approval_status", string(status)).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update approval status: " + err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"message": "ok", "approvalStatus": string(status)})
 }
 
 // GetClientConfig 获取客户端配置

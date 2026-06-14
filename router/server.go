@@ -11,6 +11,7 @@ import (
 // SetupServerRoutes 设置服务器相关路由
 func SetupServerRoutes(r *gin.RouterGroup) {
 	serverCtrl := &controller.ServerController{}
+	systemCtrl := &controller.SystemController{}
 	server := r.Group("/server")
 	server.Use(middleware.JWTAuthMiddleware())
 	{
@@ -18,6 +19,8 @@ func SetupServerRoutes(r *gin.RouterGroup) {
 		server.GET("/list", serverCtrl.ListServers)
 		// 查看服务器状态: 所有认证用户
 		server.GET("/status", serverCtrl.GetServerStatus)
+		// 部署系统状态（服务版本 + 主机 CPU/内存/磁盘/负载）: 所有认证用户
+		server.GET("/system", systemCtrl.GetSystemInfo)
 		// 管理操作: superadmin
 		super := server.Group("")
 		super.Use(middleware.RoleRequired(string(model.RoleSuperAdmin)))

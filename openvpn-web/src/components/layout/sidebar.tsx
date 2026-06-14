@@ -9,62 +9,50 @@ import { useTranslation } from "react-i18next";
 import { setLocaleOnClient, getLocaleOnClient } from "@/i18n";
 import { LanguagesSupported } from "@/i18n/language";
 import type { Locale } from "@/i18n";
+import { BrandIcon } from "@/components/ui/brand-icon";
 
 interface NavItem {
   href: string;
   label: string;
-  icon: React.ReactNode;
   badge?: number;
   roles?: UserRole[];
 }
 
-function LockIcon() {
+interface NavGroup {
+  key: string;
+  label: string;
+  icon: React.ReactNode;
+  iconColor: string;
+  items: NavItem[];
+}
+
+const ARGON_GRADIENT = "linear-gradient(87deg, #5e72e4 0%, #825ee4 100%)";
+
+// LuCI (luci-theme-argon) 风格的一级菜单图标：实心 Font Awesome 图标。
+// 状态=th-large 田字格，VPN=globe 地球，系统=cog 齿轮。颜色见 navGroups.iconColor。
+function StatusGridIcon() {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+      <rect x="3" y="3" width="8" height="8" rx="1.5" />
+      <rect x="13" y="3" width="8" height="8" rx="1.5" />
+      <rect x="3" y="13" width="8" height="8" rx="1.5" />
+      <rect x="13" y="13" width="8" height="8" rx="1.5" />
     </svg>
   );
 }
 
-function UsersIcon() {
+function VpnGlobeIcon() {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-      <circle cx="9" cy="7" r="4" />
-      <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+    <svg width="16" height="16" viewBox="0 0 496 512" fill="currentColor">
+      <path d="M336.5 160C322 70.7 287.8 8 248 8s-74 62.7-88.5 152h177zM152 256c0 22.2 1.2 43.5 3.3 64h185.3c2.1-20.5 3.3-41.8 3.3-64s-1.2-43.5-3.3-64H155.3c-2.1 20.5-3.3 41.8-3.3 64zm324.7-96c-28.6-67.9-86.5-120.4-158-141.6 24.4 33.8 41.2 84.7 50 141.6h108zM177.2 18.4C105.8 39.6 47.8 92.1 19.3 160h108c8.7-56.9 25.5-107.8 49.9-141.6zM487.4 192H372.7c2.1 21 3.3 42.5 3.3 64s-1.2 43-3.3 64h114.6c5.5-20.5 8.6-41.8 8.6-64s-3.1-43.5-8.5-64zM120 256c0-21.5 1.2-43 3.3-64H8.6C3.2 212.5 0 233.8 0 256s3.2 43.5 8.6 64h114.6c-2-21-3.2-42.5-3.2-64zm39.5 96c14.5 89.3 48.7 152 88.5 152s74-62.7 88.5-152h-177zm159.3 141.6c71.4-21.2 129.4-73.7 158-141.6h-108c-8.8 56.9-25.6 107.8-50 141.6zM19.3 352c28.6 67.9 86.5 120.4 158 141.6-24.4-33.8-41.2-84.7-50-141.6h-108z" />
     </svg>
   );
 }
 
-function DepartmentsIcon() {
+function SystemGearIcon() {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-      <polyline points="9 22 9 12 15 12 15 22" />
-    </svg>
-  );
-}
-
-function ServerIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
-      <line x1="8" y1="21" x2="16" y2="21" />
-      <line x1="12" y1="17" x2="12" y2="21" />
-    </svg>
-  );
-}
-
-function LogsIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-      <polyline points="14 2 14 8 20 8" />
-      <line x1="16" y1="13" x2="8" y2="13" />
-      <line x1="16" y1="17" x2="8" y2="17" />
-      <polyline points="10 9 9 9 8 9" />
+    <svg width="16" height="16" viewBox="0 0 512 512" fill="currentColor">
+      <path d="M487.4 315.7l-42.6-24.6c4.3-23.2 4.3-47 0-70.2l42.6-24.6c4.9-2.8 7.1-8.6 5.5-14-11.1-35.6-30-67.8-54.7-94.6-3.8-4.1-10-5.1-14.8-2.3L380.8 110c-17.9-15.4-38.5-27.3-60.8-35.1V25.8c0-5.6-3.9-10.5-9.4-11.7-36.7-8.2-74.3-7.8-109.2 0-5.5 1.2-9.4 6.1-9.4 11.7V75c-22.2 7.9-42.8 19.8-60.8 35.1L88.7 85.5c-4.9-2.8-11-1.9-14.8 2.3-24.7 26.7-43.6 58.9-54.7 94.6-1.7 5.4.6 11.2 5.5 14L67.3 221c-4.3 23.2-4.3 47 0 70.2l-42.6 24.6c-4.9 2.8-7.1 8.6-5.5 14 11.1 35.6 30 67.8 54.7 94.6 3.8 4.1 10 5.1 14.8 2.3l42.6-24.6c17.9 15.4 38.5 27.3 60.8 35.1v49.2c0 5.6 3.9 10.5 9.4 11.7 36.7 8.2 74.3 7.8 109.2 0 5.5-1.2 9.4-6.1 9.4-11.7v-49.2c22.2-7.9 42.8-19.8 60.8-35.1l42.6 24.6c4.9 2.8 11 1.9 14.8-2.3 24.7-26.7 43.6-58.9 54.7-94.6 1.6-5.4-.6-11.2-5.5-14zM256 336c-44.1 0-80-35.9-80-80s35.9-80 80-80 80 35.9 80 80-35.9 80-80 80z" />
     </svg>
   );
 }
@@ -82,6 +70,14 @@ function ChevronRightIcon() {
   return (
     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
       <polyline points="9 18 15 12 9 6" />
+    </svg>
+  );
+}
+
+function ChevronDownIcon() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="6 9 12 15 18 9" />
     </svg>
   );
 }
@@ -131,6 +127,7 @@ export default function Sidebar() {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [langMenuOpen, setLangMenuOpen] = useState(false);
   const [currentLocale, setCurrentLocale] = useState<Locale>(getLocaleOnClient());
+  const [toggledGroups, setToggledGroups] = useState<Record<string, boolean>>({});
   const menuRef = useRef<HTMLDivElement>(null);
 
   const isActive = (href: string) =>
@@ -162,36 +159,78 @@ export default function Sidebar() {
     return () => i18n.off("languageChanged", handler);
   }, [i18n]);
 
-  const navItems: NavItem[] = [
+  const navGroups: NavGroup[] = [
     {
-      href: "/dashboard/users",
-      label: t("dashboard.users.title"),
-      icon: <UsersIcon />,
+      key: "status",
+      label: t("layout.nav.status"),
+      icon: <StatusGridIcon />,
+      iconColor: "#5e72e4",
+      items: [
+        {
+          href: "/dashboard/overview",
+          label: t("layout.nav.overview"),
+        },
+      ],
     },
     {
-      href: "/dashboard/departments",
-      label: t("dashboard.departments.title") || "部门管理",
-      icon: <DepartmentsIcon />,
-      roles: [UserRole.ADMIN, UserRole.SUPERADMIN],
+      key: "vpn",
+      label: t("layout.nav.vpn"),
+      icon: <VpnGlobeIcon />,
+      iconColor: "#11cdef",
+      items: [
+        {
+          href: "/dashboard/users",
+          label: t("dashboard.users.title"),
+        },
+        {
+          href: "/dashboard/departments",
+          label: t("dashboard.departments.title") || "部门管理",
+          roles: [UserRole.ADMIN, UserRole.SUPERADMIN],
+        },
+      ],
     },
     {
-      href: "/dashboard/server",
-      label: t("dashboard.server.title"),
-      icon: <ServerIcon />,
-      roles: [UserRole.SUPERADMIN],
-    },
-    {
-      href: "/dashboard/logs",
-      label: t("dashboard.logs.titleServer"),
-      icon: <LogsIcon />,
-      roles: [UserRole.SUPERADMIN],
+      key: "system",
+      label: t("layout.nav.system"),
+      icon: <SystemGearIcon />,
+      iconColor: "#fb6340",
+      items: [
+        {
+          href: "/dashboard/server",
+          label: t("dashboard.server.title"),
+          roles: [UserRole.SUPERADMIN],
+        },
+        {
+          href: "/dashboard/logs",
+          label: t("dashboard.logs.titleServer"),
+          roles: [UserRole.SUPERADMIN],
+        },
+      ],
     },
   ];
 
-  const visibleItems = navItems.filter(
-    (item) =>
-      !item.roles || (user && item.roles.includes(user.role as UserRole))
-  );
+  // 角色过滤 + 隐藏空组
+  const visibleGroups = navGroups
+    .map((group) => ({
+      ...group,
+      items: group.items.filter(
+        (item) =>
+          !item.roles || (user && item.roles.includes(user.role as UserRole))
+      ),
+    }))
+    .filter((group) => group.items.length > 0);
+
+  const groupHasActive = (group: NavGroup) =>
+    group.items.some((item) => isActive(item.href));
+
+  const isGroupOpen = (group: NavGroup) =>
+    toggledGroups[group.key] ?? groupHasActive(group);
+
+  const toggleGroup = (group: NavGroup) =>
+    setToggledGroups((prev) => ({
+      ...prev,
+      [group.key]: !(prev[group.key] ?? groupHasActive(group)),
+    }));
 
   const roleLabel = () => {
     if (!user) return "";
@@ -209,118 +248,165 @@ export default function Sidebar() {
         width: "220px",
         minWidth: "220px",
         background: "hsl(var(--sidebar-bg))",
+        borderRight: "1px solid hsl(var(--border))",
         display: "flex",
         flexDirection: "column",
-        height: "100vh",
-        overflow: "hidden",
+        height: "125vh",
+        // 不裁剪：语言子菜单向右溢出侧栏边界时需要露出来（nav 自身已有 overflowY 滚动）。
+        overflow: "visible",
+        // 抬升整个侧栏的层叠上下文，让底部用户菜单/语言子菜单向右溢出的部分盖在右侧内容之上，
+        // 否则作为 flex 兄弟的右侧内容会盖住子菜单。
+        position: "relative",
+        zIndex: 50,
       }}
     >
       {/* Logo */}
       <div
         style={{
-          padding: "20px 20px 16px",
-          borderBottom: "1px solid rgba(255,255,255,0.07)",
+          height: "60px",
+          minHeight: "60px",
+          boxSizing: "border-box",
+          padding: "0 20px",
+          borderBottom: "1px solid hsl(var(--border))",
           display: "flex",
           alignItems: "center",
           gap: "10px",
           flexShrink: 0,
         }}
       >
-        <div
-          style={{
-            width: "32px",
-            height: "32px",
-            background: "hsl(var(--primary))",
-            borderRadius: "8px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            flexShrink: 0,
-          }}
-        >
-          <LockIcon />
-        </div>
+        <BrandIcon size={34} />
         <div>
-          <div style={{ fontSize: "14px", fontWeight: 700, color: "#ffffff", lineHeight: 1.2 }}>
-            VPN Admin
+          <div style={{ fontSize: "15px", fontWeight: 700, color: "#1f2937", lineHeight: 1.2, letterSpacing: "0.2px" }}>
+            Aegis
           </div>
-          <div style={{ fontSize: "10px", color: "hsl(var(--sidebar-text))", fontWeight: 400, letterSpacing: "0.5px", textTransform: "uppercase" }}>
-            管理控制台
+          <div style={{ fontSize: "10px", color: "hsl(var(--muted-foreground))", fontWeight: 400, letterSpacing: "0.5px", textTransform: "uppercase" }}>
+            VPN 控制台
           </div>
         </div>
       </div>
 
       {/* Nav */}
-      <nav style={{ flex: 1, padding: "12px 8px", overflowY: "auto" }}>
-        <div
-          style={{
-            fontSize: "10px",
-            fontWeight: 600,
-            color: "rgba(255,255,255,0.3)",
-            letterSpacing: "0.8px",
-            textTransform: "uppercase",
-            padding: "8px 12px 6px",
-          }}
-        >
-          主菜单
-        </div>
-
-        {visibleItems.map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "10px",
-              padding: "9px 12px",
-              borderRadius: "8px",
-              cursor: "pointer",
-              color: isActive(item.href)
-                ? "hsl(var(--sidebar-text-active))"
-                : "hsl(var(--sidebar-text))",
-              fontSize: "13.5px",
-              fontWeight: 500,
-              transition: "background 0.15s, color 0.15s",
-              marginBottom: "2px",
-              textDecoration: "none",
-              position: "relative",
-              background: isActive(item.href)
-                ? "hsl(var(--sidebar-active))"
-                : "transparent",
-            }}
-          >
-            {isActive(item.href) && (
-              <span
-                style={{
-                  position: "absolute",
-                  left: 0,
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                  width: "3px",
-                  height: "20px",
-                  background: "hsl(var(--primary))",
-                  borderRadius: "0 3px 3px 0",
+      <nav className="custom-scrollbar" style={{ flex: 1, padding: "12px 10px", overflowY: "auto" }}>
+        {visibleGroups.map((group) => {
+          const open = isGroupOpen(group);
+          return (
+            <div key={group.key} style={{ marginBottom: "4px" }}>
+              {/* 组标题 */}
+              <button
+                onClick={() => toggleGroup(group)}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "hsl(var(--sidebar-hover))";
                 }}
-              />
-            )}
-            {item.icon}
-            {item.label}
-          </Link>
-        ))}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "transparent";
+                }}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "10px",
+                  width: "100%",
+                  padding: "9px 12px",
+                  borderRadius: "8px",
+                  border: "none",
+                  background: "transparent",
+                  cursor: "pointer",
+                  color: "hsl(var(--sidebar-text))",
+                  fontSize: "13.5px",
+                  fontWeight: 600,
+                  fontFamily: "inherit",
+                  transition: "background 0.15s",
+                }}
+              >
+                <span style={{ display: "flex", color: group.iconColor }}>{group.icon}</span>
+                <span style={{ flex: 1, textAlign: "left" }}>{group.label}</span>
+                <span
+                  style={{
+                    display: "flex",
+                    color: "hsl(var(--muted-foreground))",
+                    transition: "transform 0.2s",
+                    transform: open ? "rotate(0deg)" : "rotate(-90deg)",
+                  }}
+                >
+                  <ChevronDownIcon />
+                </span>
+              </button>
+
+              {/* 子项 */}
+              {open && (
+                <div style={{ marginTop: "2px" }}>
+                  {group.items.map((item) => {
+                    const active = isActive(item.href);
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onMouseEnter={(e) => {
+                          if (!active) e.currentTarget.style.background = "hsl(var(--sidebar-hover))";
+                        }}
+                        onMouseLeave={(e) => {
+                          if (!active) e.currentTarget.style.background = "transparent";
+                        }}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "10px",
+                          padding: "8px 12px 8px 38px",
+                          borderRadius: "8px",
+                          cursor: "pointer",
+                          color: active
+                            ? "hsl(var(--sidebar-text-active))"
+                            : "hsl(var(--sidebar-text))",
+                          fontSize: "13px",
+                          fontWeight: active ? 600 : 500,
+                          transition: "background 0.15s, color 0.15s",
+                          marginBottom: "2px",
+                          textDecoration: "none",
+                          background: active ? ARGON_GRADIENT : "transparent",
+                          boxShadow: active ? "0 4px 10px rgba(94,114,228,0.35)" : "none",
+                        }}
+                      >
+                        <span style={{ flex: 1 }}>{item.label}</span>
+                        {item.badge ? (
+                          <span
+                            style={{
+                              fontSize: "10px",
+                              fontWeight: 700,
+                              padding: "1px 6px",
+                              borderRadius: "9px",
+                              background: active ? "rgba(255,255,255,0.25)" : "hsl(var(--secondary))",
+                              color: active ? "#fff" : "hsl(var(--secondary-foreground))",
+                            }}
+                          >
+                            {item.badge}
+                          </span>
+                        ) : null}
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          );
+        })}
       </nav>
 
       {/* User footer */}
       <div
         ref={menuRef}
         style={{
-          padding: "12px 8px",
-          borderTop: "1px solid rgba(255,255,255,0.07)",
+          padding: "12px 10px",
+          borderTop: "1px solid hsl(var(--border))",
           flexShrink: 0,
           position: "relative",
         }}
       >
         <div
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = "hsl(var(--sidebar-hover))";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = "transparent";
+          }}
           style={{
             display: "flex",
             alignItems: "center",
@@ -334,10 +420,10 @@ export default function Sidebar() {
         >
           <div
             style={{
-              width: "30px",
-              height: "30px",
+              width: "32px",
+              height: "32px",
               borderRadius: "50%",
-              background: user ? getAvatarColor(user.name) : "#3b82f6",
+              background: user ? getAvatarColor(user.name) : "#5e72e4",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -350,14 +436,14 @@ export default function Sidebar() {
             {getInitials(user?.name)}
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: "12.5px", fontWeight: 600, color: "#e5e7eb", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+            <div style={{ fontSize: "12.5px", fontWeight: 600, color: "#1f2937", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
               {user?.name || "用户"}
             </div>
-            <div style={{ fontSize: "10.5px", color: "hsl(var(--sidebar-text))" }}>
+            <div style={{ fontSize: "10.5px", color: "hsl(var(--muted-foreground))" }}>
               {roleLabel()}
             </div>
           </div>
-          <div style={{ color: "rgba(255,255,255,0.3)", flexShrink: 0 }}>
+          <div style={{ color: "hsl(var(--muted-foreground))", flexShrink: 0 }}>
             <SettingsIcon />
           </div>
         </div>
@@ -368,18 +454,20 @@ export default function Sidebar() {
             style={{
               position: "absolute",
               bottom: "calc(100% - 8px)",
-              left: "8px",
-              right: "8px",
-              background: "#1f2937",
+              left: "10px",
+              right: "10px",
+              background: "#ffffff",
               borderRadius: "10px",
-              border: "1px solid rgba(255,255,255,0.1)",
-              boxShadow: "0 -8px 24px rgba(0,0,0,0.3)",
+              border: "1px solid hsl(var(--border))",
+              boxShadow: "0 -8px 24px rgba(15,23,42,0.12)",
               padding: "6px",
               zIndex: 50,
             }}
           >
             <Link
               href="/dashboard/profile"
+              onMouseEnter={(e) => { e.currentTarget.style.background = "hsl(var(--sidebar-hover))"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -387,7 +475,7 @@ export default function Sidebar() {
                 padding: "8px 10px",
                 borderRadius: "6px",
                 fontSize: "13px",
-                color: "#d1d5db",
+                color: "#374151",
                 textDecoration: "none",
                 transition: "background 0.15s",
               }}
@@ -399,6 +487,8 @@ export default function Sidebar() {
 
             {/* Language toggle */}
             <div
+              onMouseEnter={(e) => { e.currentTarget.style.background = "hsl(var(--sidebar-hover))"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -406,7 +496,7 @@ export default function Sidebar() {
                 padding: "8px 10px",
                 borderRadius: "6px",
                 fontSize: "13px",
-                color: "#d1d5db",
+                color: "#374151",
                 cursor: "pointer",
                 transition: "background 0.15s",
                 position: "relative",
@@ -423,14 +513,14 @@ export default function Sidebar() {
                 <div
                   style={{
                     position: "absolute",
-                    right: "calc(100% + 4px)",
+                    left: "calc(100% + 4px)",
                     top: 0,
-                    background: "#1f2937",
+                    background: "#ffffff",
                     borderRadius: "8px",
-                    border: "1px solid rgba(255,255,255,0.1)",
+                    border: "1px solid hsl(var(--border))",
                     padding: "4px",
                     minWidth: "140px",
-                    boxShadow: "0 4px 16px rgba(0,0,0,0.3)",
+                    boxShadow: "0 4px 16px rgba(15,23,42,0.12)",
                   }}
                 >
                   {LanguagesSupported.map((locale) => (
@@ -448,8 +538,8 @@ export default function Sidebar() {
                         borderRadius: "6px",
                         fontSize: "12.5px",
                         border: "none",
-                        background: currentLocale === locale ? "rgba(59,130,246,0.2)" : "transparent",
-                        color: currentLocale === locale ? "#60a5fa" : "#d1d5db",
+                        background: currentLocale === locale ? "hsl(var(--sidebar-hover))" : "transparent",
+                        color: currentLocale === locale ? "hsl(var(--primary))" : "#374151",
                         cursor: "pointer",
                         fontFamily: "inherit",
                         fontWeight: currentLocale === locale ? 600 : 400,
@@ -464,9 +554,11 @@ export default function Sidebar() {
               )}
             </div>
 
-            <div style={{ borderTop: "1px solid rgba(255,255,255,0.07)", margin: "4px 0" }} />
+            <div style={{ borderTop: "1px solid hsl(var(--border))", margin: "4px 0" }} />
 
             <button
+              onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(239,68,68,0.08)"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
               onClick={() => { logout(); setUserMenuOpen(false); }}
               style={{
                 display: "flex",
@@ -475,7 +567,7 @@ export default function Sidebar() {
                 padding: "8px 10px",
                 borderRadius: "6px",
                 fontSize: "13px",
-                color: "#f87171",
+                color: "#dc2626",
                 border: "none",
                 background: "transparent",
                 cursor: "pointer",

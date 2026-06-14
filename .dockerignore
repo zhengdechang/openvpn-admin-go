@@ -1,0 +1,21 @@
+# 后端镜像构建上下文裁剪（context = 仓库根）
+.git
+.github
+.claude
+
+# 前端独立构建，后端镜像不需要
+openvpn-web
+
+# 运行时 / 本地数据
+docker/data
+docker/mysql-data
+docker/logs
+docker/config
+docker/openvpn
+data
+logs
+*.log
+
+# 文档与杂项
+docs
+*.md
