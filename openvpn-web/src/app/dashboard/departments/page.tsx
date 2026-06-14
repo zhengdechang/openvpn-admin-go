@@ -416,18 +416,20 @@ export default function DepartmentsPage() {
           {loading ? (
             <p>{t("dashboard.departments.loading")}</p>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{t("dashboard.departments.columnName")}</TableHead>
-                  <TableHead>{t("dashboard.departments.columnHead")}</TableHead>
-                  <TableHead>
-                    {t("dashboard.departments.columnActions")}
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>{renderRows(tree)}</TableBody>
-            </Table>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>{t("dashboard.departments.columnName")}</TableHead>
+                    <TableHead>{t("dashboard.departments.columnHead")}</TableHead>
+                    <TableHead>
+                      {t("dashboard.departments.columnActions")}
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>{renderRows(tree)}</TableBody>
+              </Table>
+            </div>
           )}
         </CardContent>
       </Card>

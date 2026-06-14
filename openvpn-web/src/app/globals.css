@@ -605,6 +605,55 @@
   .gov-input {
     @apply rounded-md border border-gray-300 focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all;
   }
+
+  /* ===== 控制面板汉堡按钮：默认隐藏，仅 <1024px 显示（见下方媒体查询） ===== */
+  .dash-hamburger {
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ===== 手机/平板（<1024px）：侧栏改 off-canvas 抽屉。
+     Sidebar/MainLayout 用内联 style，必须用 !important 覆盖；
+     桌面 ≥1024px 不触发此媒体查询，内联样式原样渲染，外观零改动。 ===== */
+  @media (max-width: 1023px) {
+    .dash-root {
+      height: 100dvh !important;
+    }
+    .dash-sidebar {
+      position: fixed !important;
+      top: 0;
+      left: 0;
+      height: 100dvh !important;
+      z-index: 60 !important;
+      transform: translateX(-100%) !important;
+      transition: transform 0.25s ease !important;
+      box-shadow: 0 0 40px rgba(0, 0, 0, 0.25) !important;
+    }
+    .dash-sidebar.is-open {
+      transform: translateX(0) !important;
+    }
+    .dash-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.45);
+      z-index: 55;
+    }
+    .dash-hamburger {
+      display: flex !important;
+    }
+    .dash-topbar {
+      padding: 0 12px !important;
+    }
+  }
+  @media (min-width: 1024px) {
+    .dash-hamburger {
+      display: none !important;
+    }
+    .dash-backdrop {
+      display: none !important;
+    }
+  }
 }
 
 /* 自定义Toast消息样式 */

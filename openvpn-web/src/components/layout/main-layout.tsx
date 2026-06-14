@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import Sidebar from "./sidebar";
@@ -55,10 +55,21 @@ export default function MainLayout({
   const { t } = useTranslation();
   const pathname = usePathname();
   const { title, breadcrumb } = getPageInfo(pathname || "", t);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+
+  // 路由变化时自动收起移动端抽屉（点导航项跳转后关闭）。
+  useEffect(() => {
+    setMobileNavOpen(false);
+  }, [pathname]);
 
   return (
-    <div style={{ display: "flex", height: "125vh", overflow: "hidden" }}>
-      <Sidebar />
+    <div className="dash-root" style={{ display: "flex", height: "125vh", overflow: "hidden" }}>
+      <Sidebar mobileOpen={mobileNavOpen} onClose={() => setMobileNavOpen(false)} />
+
+      {/* 移动端抽屉遮罩：点击关闭。桌面 ≥1024px 由 CSS 隐藏。 */}
+      {mobileNavOpen && (
+        <div className="dash-backdrop" onClick={() => setMobileNavOpen(false)} />
+      )}
 
       {/* 右侧主区域 */}
       <div
@@ -73,6 +84,7 @@ export default function MainLayout({
       >
         {/* Topbar — Argon 紫蓝渐变 */}
         <header
+          className="dash-topbar"
           style={{
             height: "60px",
             minHeight: "60px",
@@ -84,19 +96,61 @@ export default function MainLayout({
             flexShrink: 0,
           }}
         >
-          <div>
-            <div
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", minWidth: 0 }}>
+            {/* 汉堡按钮：仅 <1024px 显示，打开移动端侧栏抽屉。 */}
+            <button
+              className="dash-hamburger"
+              onClick={() => setMobileNavOpen(true)}
+              aria-label={t("layout.dashboard")}
+              onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.15)"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
               style={{
-                fontSize: "15px",
-                fontWeight: 600,
+                width: "34px",
+                height: "34px",
+                borderRadius: "8px",
+                border: "none",
+                background: "transparent",
+                cursor: "pointer",
+                alignItems: "center",
+                justifyContent: "center",
                 color: "#ffffff",
-                lineHeight: 1.2,
+                transition: "background 0.15s",
+                flexShrink: 0,
               }}
             >
-              {title}
-            </div>
-            <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.7)", marginTop: "2px" }}>
-              {t("layout.dashboard")} / {breadcrumb}
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <line x1="3" y1="6" x2="21" y2="6" />
+                <line x1="3" y1="12" x2="21" y2="12" />
+                <line x1="3" y1="18" x2="21" y2="18" />
+              </svg>
+            </button>
+
+            <div style={{ minWidth: 0 }}>
+              <div
+                style={{
+                  fontSize: "15px",
+                  fontWeight: 600,
+                  color: "#ffffff",
+                  lineHeight: 1.2,
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
+              >
+                {title}
+              </div>
+              <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.7)", marginTop: "2px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                {t("layout.dashboard")} / {breadcrumb}
+              </div>
             </div>
           </div>
 

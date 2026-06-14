@@ -120,7 +120,12 @@ function getAvatarColor(name?: string): string {
   return AVATAR_COLORS[idx];
 }
 
-export default function Sidebar() {
+interface SidebarProps {
+  mobileOpen?: boolean;
+  onClose?: () => void;
+}
+
+export default function Sidebar({ mobileOpen, onClose }: SidebarProps = {}) {
   const { user, logout } = useAuth();
   const pathname = usePathname();
   const { t, i18n } = useTranslation();
@@ -249,6 +254,7 @@ export default function Sidebar() {
 
   return (
     <aside
+      className={"dash-sidebar" + (mobileOpen ? " is-open" : "")}
       style={{
         width: "220px",
         minWidth: "220px",
@@ -345,6 +351,7 @@ export default function Sidebar() {
                       <Link
                         key={item.href}
                         href={item.href}
+                        onClick={() => onClose?.()}
                         onMouseEnter={(e) => {
                           if (!active) e.currentTarget.style.background = "hsl(var(--sidebar-hover))";
                         }}
