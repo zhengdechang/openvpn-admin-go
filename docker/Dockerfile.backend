@@ -1,4 +1,4 @@
-# OpenVPN Admin Go —— 后端容器（Go API + OpenVPN，连接外部 MySQL）
+# OpenVPN Admin Go —— 后端容器（Go API + OpenVPN，连接 PostgreSQL）
 # 前端已拆分为独立容器，本镜像不再构建/服务任何前端资源。
 
 # ---------- Go 后端构建阶段 ----------

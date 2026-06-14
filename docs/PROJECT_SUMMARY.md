@@ -57,6 +57,6 @@ OpenVPN Admin Go delivers a full-stack, self-hosted control plane for OpenVPN de
 * **Frontend** – `yarn lint` enforces ESLint + Next.js conventions, while `yarn build` exercises production bundling before deployment.
 
 ## Developer Workflow Notes
-* Go modules target Go 1.21+. Run `go test ./...` to compile and execute unit tests. The CLI now uses a pure-Go MySQL driver (no CGO required); schema migrations are managed by goose and embedded under `database/migrations/`.
+* Go modules target Go 1.26. Run `go test ./...` to compile and execute unit tests. The CLI uses a pure-Go PostgreSQL driver (no CGO required); schema migrations are managed by goose and embedded under `database/migrations/`.
 * The frontend uses Yarn with Zero-Install configuration (`.yarn/` directory). Use `yarn install` followed by `yarn dev` for local development or `yarn build` for production bundles.
 * Docker Compose definitions under `docker/` allow spinning up a full stack with a single command once TLS materials and environment variables are in place.

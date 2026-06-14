@@ -8,7 +8,7 @@ openvpn-web
 
 # 运行时 / 本地数据
 docker/data
-docker/mysql-data
+docker/postgres-data
 docker/logs
 docker/config
 docker/openvpn

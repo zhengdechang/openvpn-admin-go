@@ -126,4 +126,4 @@ networks:
 
 # 说明：本配置使用 bridge 网络 + 端口映射，便于按需指定对外端口。
 # 若生产环境的 VPN 需要直连宿主网络路由，可将 backend 改为 network_mode: host
-# 并把 DB_HOST 指向 127.0.0.1（此时 mysql/frontend 亦需相应调整）。
+# 并把 DB_HOST 指向 127.0.0.1（此时 postgres/frontend 亦需相应调整）。

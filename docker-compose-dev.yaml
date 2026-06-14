@@ -1,25 +1,24 @@
-# 开发环境编排：MySQL + 后端(Go API + OpenVPN) + 前端(Next.js)
+# 开发环境编排：PostgreSQL + 后端(Go API + OpenVPN) + 前端(Next.js)
 # 三者完全分离。使用 bridge 网络，服务名直接互通。
 # 启动：docker compose -f docker-compose-dev.yaml up --build
 #
 # 端口（host:container）：前端 3043:3000 / 后端 8085:8085 / OpenVPN ${OPENVPN_PORT}:1194
 services:
-  mysql:
-    image: mysql:8.0
-    container_name: openvpn-mysql-dev
+  postgres:
+    image: postgres:16-alpine
+    container_name: openvpn-postgres-dev
     restart: unless-stopped
     environment:
-      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-rootpass}
-      - MYSQL_DATABASE=${DB_NAME:-openvpn}
-      - MYSQL_USER=${DB_USER:-openvpn}
-      - MYSQL_PASSWORD=${DB_PASSWORD:-openvpn}
+      - POSTGRES_DB=${DB_NAME:-openvpn}
+      - POSTGRES_USER=${DB_USER:-openvpn}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-openvpn}
       - TZ=Asia/Shanghai
     ports:
-      - "3306:3306"
+      - "5432:5432"
     volumes:
-      - mysql-data-dev:/var/lib/mysql
+      - postgres-data-dev:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p\"$$MYSQL_ROOT_PASSWORD\" --silent"]
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -34,14 +33,14 @@ services:
     container_name: openvpn-backend-dev
     restart: unless-stopped
     depends_on:
-      mysql:
+      postgres:
         condition: service_healthy
     environment:
       - GIN_MODE=debug
       - TZ=Asia/Shanghai
       - APP_VERSION=${APP_VERSION:-dev}
-      - DB_HOST=mysql
-      - DB_PORT=3306
+      - DB_HOST=postgres
+      - DB_PORT=5432
       - DB_USER=${DB_USER:-openvpn}
       - DB_PASSWORD=${DB_PASSWORD:-openvpn}
       - DB_NAME=${DB_NAME:-openvpn}
@@ -95,5 +94,5 @@ networks:
     driver: bridge
 
 volumes:
-  mysql-data-dev:
+  postgres-data-dev:
   frontend-node-modules:

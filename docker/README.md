@@ -4,14 +4,14 @@ This directory contains all Docker-related files for OpenVPN Admin Go deployment
 
 ## 📁 Files Overview
 
-- `Dockerfile.backend` - Backend image (Go API + OpenVPN), connects to external MySQL
+- `Dockerfile.backend` - Backend image (Go API + OpenVPN), connects to PostgreSQL
 - `../openvpn-web/Dockerfile` - Frontend image (independent Next.js `next start` service)
-- `docker-compose.yml` - Production compose: MySQL + backend + frontend (fully separated)
+- `docker-compose.yml` - Production compose: PostgreSQL + backend + frontend (fully separated)
 - `.env.docker.example` - Environment variables template for Docker deployment
 
 ## 🚀 Quick Start
 
-### Recommended: Docker Compose (MySQL + backend + frontend)
+### Recommended: Docker Compose (PostgreSQL + backend + frontend)
 
 ```bash
 cd docker
@@ -155,11 +155,11 @@ Nginx configuration is located at `docker/nginx/nginx.conf`.
 | `OPENVPN_PROTO` | Protocol (udp/tcp) | `udp` | No |
 | `OPENVPN_NETWORK` | VPN network | `10.8.0.0` | No |
 | `OPENVPN_NETMASK` | VPN netmask | `255.255.255.0` | No |
-| `DB_HOST` | MySQL host | `mysql` | Yes |
-| `DB_PORT` | MySQL port | `3306` | No |
-| `DB_USER` | MySQL user | `openvpn` | Yes |
-| `DB_PASSWORD` | MySQL password | - | Yes |
-| `DB_NAME` | MySQL database | `openvpn` | No |
+| `DB_HOST` | PostgreSQL host | `postgres` | Yes |
+| `DB_PORT` | PostgreSQL port | `5432` | No |
+| `DB_USER` | PostgreSQL user | `openvpn` | Yes |
+| `DB_PASSWORD` | PostgreSQL password | - | Yes |
+| `DB_NAME` | PostgreSQL database | `openvpn` | No |
 | `TZ` | Timezone | `UTC` | No |
 
 ## 🌐 Ports

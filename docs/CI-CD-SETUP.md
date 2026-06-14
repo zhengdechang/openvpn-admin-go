@@ -107,7 +107,7 @@ openvpn-admin-go/
 │   └── build-and-release.yml    # CI/CD pipeline
 ├── docker/
 │   ├── Dockerfile.backend       # Backend image (Go API + OpenVPN)
-│   ├── docker-compose.yml       # MySQL + backend + frontend (separated)
+│   ├── docker-compose.yml       # PostgreSQL + backend + frontend (separated)
 │   ├── .env.docker.example      # Environment template
 │   └── README.md               # Docker deployment guide
 ├── openvpn-web/

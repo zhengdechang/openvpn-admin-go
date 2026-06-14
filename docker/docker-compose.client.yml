@@ -13,7 +13,7 @@
 # 想测公网链路：把 client/vpntest01.ovpn 的 remote 改回 61.169.28.178 1194 即可。
 
 # 独立 project 名：避免与主编排(project=docker)共用名字，否则会误报 orphan，
-# 且 --remove-orphans 会误删 backend/mysql。
+# 且 --remove-orphans 会误删 backend/postgres。
 name: openvpn-client
 
 services:

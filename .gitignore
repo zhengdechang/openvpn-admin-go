@@ -14,7 +14,6 @@ logs/*.log
 docker/config/
 docker/data/
 docker/openvpn/
-docker/mysql-data/
 docker/postgres-data/
 openvpn-admin
 .gstack/
@@ -23,7 +22,7 @@ openvpn-admin
 .claude/settings.json
 **/.claude/skills/
 
-# 已弃用：SQLite（项目改用 MySQL）
+# 已弃用：SQLite（项目改用 PostgreSQL）
 /data/
 *.sqlite3
 *.sqlite

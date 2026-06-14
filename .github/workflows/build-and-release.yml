@@ -133,7 +133,7 @@ jobs:
             2. Extract the archive
             3. Run the binary: `./openvpn-admin-linux-amd64` (Linux/macOS) or `openvpn-admin-windows-amd64.exe` (Windows)
             
-            Or use Docker Compose (MySQL + backend + frontend):
+            Or use Docker Compose (PostgreSQL + backend + frontend):
             ```bash
             cd docker && cp .env.docker.example .env && docker compose up -d --build
             ```

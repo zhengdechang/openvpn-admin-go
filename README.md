@@ -32,7 +32,7 @@ This project consists of two main components:
 
 - **Language:** Go 1.21+
 - **Framework:** Gin (HTTP router)
-- **Database:** MySQL with GORM ORM (schema migrations via goose)
+- **Database:** PostgreSQL with GORM ORM (schema migrations via goose)
 - **Authentication:** JWT tokens
 - **OpenVPN Integration:** Direct system integration with OpenVPN service
 
@@ -147,14 +147,14 @@ Modern web interface accessible at `http://localhost:8085` (default):
 Create a `.env` file in the project root:
 
 ```env
-# Database Configuration (MySQL)
+# Database Configuration (PostgreSQL)
 DB_HOST=127.0.0.1
-DB_PORT=3306
+DB_PORT=5432
 DB_USER=openvpn
 DB_PASSWORD=openvpn
 DB_NAME=openvpn
 # Optional: full DSN override
-# DB_DSN=user:pass@tcp(127.0.0.1:3306)/openvpn?charset=utf8mb4&parseTime=True&loc=Local
+# DATABASE_URL=postgres://user:pass@127.0.0.1:5432/openvpn?sslmode=disable
 
 # JWT Configuration
 JWT_SECRET=your-super-secret-jwt-key
@@ -204,7 +204,7 @@ openvpn-admin-go/
 │   └── ccd.go            # Client-specific configurations
 ├── docker/               # Docker deployment files
 │   ├── Dockerfile.backend    # Backend image (Go API + OpenVPN)
-│   ├── docker-compose.yml    # MySQL + backend + frontend (separated)
+│   ├── docker-compose.yml    # PostgreSQL + backend + frontend (separated)
 │   ├── .env.docker.example   # Environment template
 │   └── README.md            # Docker deployment guide
 ├── .github/workflows/    # CI/CD pipeline configuration
@@ -397,7 +397,7 @@ docker exec -it openvpn-admin openvpn-go
 
 #### Docker Compose Deployment (recommended)
 
-The stack is fully separated into three containers: **MySQL**, **backend** (Go API +
+The stack is fully separated into three containers: **PostgreSQL**, **backend** (Go API +
 OpenVPN), and **frontend** (independent Next.js service). The frontend starts directly
 and is no longer controlled by the Go program.
 
@@ -413,7 +413,7 @@ docker compose up -d --build
 ```
 
 Default ports (override in `.env`): frontend `3043`, backend API `8085`,
-OpenVPN `OPENVPN_PORT` (default `1194/udp`). MySQL is internal to the compose
+OpenVPN `OPENVPN_PORT` (default `1194/udp`). PostgreSQL is internal to the compose
 network and not published.
 
 Database migrations run automatically on backend startup (goose). To run them
@@ -427,7 +427,7 @@ docker compose exec backend openvpn-go migrate up
 #### Local development
 
 ```bash
-# From the repo root — bring up MySQL + backend + hot-reload frontend
+# From the repo root — bring up PostgreSQL + backend + hot-reload frontend
 docker compose -f docker-compose-dev.yaml up --build
 ```
 
@@ -447,9 +447,9 @@ Container pre-configured environment variables:
 - `OPENVPN_CONFIG_DIR=/etc/openvpn`
 - `WEB_PORT=8085` - API service port
 
-**Database connection (MySQL, injected by compose / .env):**
+**Database connection (PostgreSQL, injected by compose / .env):**
 
-- `DB_HOST` / `DB_PORT` / `DB_USER` / `DB_PASSWORD` / `DB_NAME` — or `DB_DSN` to override
+- `DB_HOST` / `DB_PORT` / `DB_USER` / `DB_PASSWORD` / `DB_NAME` — or `DATABASE_URL` to override
 
 > Backend and frontend are now **separate containers**. The frontend is an independent
 > Next.js service (`next start`) started directly — it is no longer controlled by the Go
