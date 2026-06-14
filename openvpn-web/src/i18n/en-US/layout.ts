@@ -34,6 +34,7 @@ const translation = {
     overview: "Overview",
     vpn: "VPN Management",
     system: "System",
+    notifications: "Notifications",
   },
 }
 

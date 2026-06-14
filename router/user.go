@@ -1,6 +1,8 @@
 package router
 
 import (
+   "time"
+
    "openvpn-admin-go/controller"
    "openvpn-admin-go/middleware"
    "openvpn-admin-go/model"
@@ -13,7 +15,7 @@ func SetupUserRoutes(r *gin.RouterGroup) {
    user := r.Group("/user")
    {
        user.POST("/register", controller.Register)
-       user.POST("/login", controller.Login)
+       user.POST("/login", middleware.RateLimit(10, time.Minute), controller.Login)
        user.GET("/verify-email/:token", controller.VerifyEmail)
        user.POST("/forgot-password", controller.ForgotPassword)
        user.PATCH("/reset-password/:token", controller.ResetPassword)

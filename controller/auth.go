@@ -9,6 +9,7 @@ import (
 	"openvpn-admin-go/model"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 // 注册请求结构
@@ -24,7 +25,7 @@ type registerRequest struct {
 func Register(c *gin.Context) {
 	var req registerRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"success": false, "error": err.Error()})
+		common.BadRequest(c, err.Error())
 		return
 	}
 
@@ -37,7 +38,7 @@ func Register(c *gin.Context) {
 
 	hash, err := common.HashPassword(req.Password)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "error": "hash password failed"})
+		common.InternalError(c, "hash password failed")
 		return
 	}
 	user := model.User{
@@ -48,8 +49,14 @@ func Register(c *gin.Context) {
 		DepartmentID:   req.DepartmentID,
 		ApprovalStatus: model.ApprovalPending, // 待批准
 	}
-	if err := database.DB.Create(&user).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "error": err.Error()})
+
+	if err := database.DB.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Create(&user).Error; err != nil {
+			return err
+		}
+		return tx.Model(&user).Update("CreatorID", user.ID).Error
+	}); err != nil {
+		common.InternalError(c, err.Error())
 		return
 	}
 
@@ -75,16 +82,16 @@ type loginRequest struct {
 func Login(c *gin.Context) {
 	var req loginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"success": false, "error": err.Error()})
+		common.BadRequest(c, err.Error())
 		return
 	}
 	var user model.User
 	if err := database.DB.Where("email = ?", req.Email).First(&user).Error; err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"success": false, "error": "invalid credentials"})
+		common.Unauthorized(c, "invalid credentials")
 		return
 	}
 	if !common.CheckPasswordHash(req.Password, user.PasswordHash) {
-		c.JSON(http.StatusUnauthorized, gin.H{"success": false, "error": "invalid credentials"})
+		common.Unauthorized(c, "invalid credentials")
 		return
 	}
 	// 审批门控：未批准的用户不能登录
@@ -102,40 +109,38 @@ func Login(c *gin.Context) {
 	}
 	token, err := middleware.GenerateToken(user.ID, string(user.Role), user.DepartmentID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "error": "generate token failed"})
+		common.InternalError(c, "generate token failed")
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"success": true, "data": gin.H{"user": gin.H{
+	common.OK(c, gin.H{"user": gin.H{
 		"id":    user.ID,
 		"name":  user.Name,
 		"email": user.Email,
 		"role":  user.Role,
-	}, "token": token}})
+	}, "token": token})
 }
 
 // VerifyEmail 邮箱验证 (暂未实现)
 func VerifyEmail(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"success": true, "message": "email verified"})
+	common.OKMsg(c, "email verified")
 }
 
 // ForgotPassword 忘记密码 (暂未实现)
 func ForgotPassword(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"success": true, "message": "reset link sent"})
+	common.OKMsg(c, "reset link sent")
 }
 
 // ResetPassword 重置密码 (暂未实现)
 func ResetPassword(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"success": true, "message": "password reset"})
+	common.OKMsg(c, "password reset")
 }
 
 // GetMe 获取当前用户信息
 func GetMe(c *gin.Context) {
 	claims := c.MustGet("claims").(*middleware.Claims)
 	var user model.User
-	// 确保查询用户时也能加载部门信息，如果需要的话。
-	// 这里假设 model.User 结构体中直接包含了 DepartmentID 字段或者关联了 Department 模型
 	if err := database.DB.First(&user, "id = ?", claims.UserID).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "error": "user not found"})
+		common.InternalError(c, "user not found")
 		return
 	}
 
@@ -155,7 +160,7 @@ func GetMe(c *gin.Context) {
 		responseData["lastConnectionTime"] = nil
 	}
 
-	c.JSON(http.StatusOK, gin.H{"success": true, "data": responseData})
+	common.OK(c, responseData)
 }
 
 // UpdateMe 更新当前用户信息
@@ -169,7 +174,7 @@ func UpdateMe(c *gin.Context) {
 	claims := c.MustGet("claims").(*middleware.Claims)
 	var req updateMeRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"success": false, "error": err.Error()})
+		common.BadRequest(c, err.Error())
 		return
 	}
 	updates := map[string]interface{}{}
@@ -179,30 +184,28 @@ func UpdateMe(c *gin.Context) {
 	if req.Email != nil {
 		updates["email"] = *req.Email
 	}
-	// 处理密码更新
 	if req.Password != nil {
-		// 使用新密码进行更新
 		hashed, err := common.HashPassword(*req.Password)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"success": false, "error": "hash password failed"})
+			common.InternalError(c, "hash password failed")
 			return
 		}
 		updates["password_hash"] = hashed
 	}
 	if len(updates) == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"success": false, "error": "no data to update"})
+		common.BadRequest(c, "no data to update")
 		return
 	}
 	if err := database.DB.Model(&model.User{}).Where("id = ?", claims.UserID).Updates(updates).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "error": err.Error()})
+		common.InternalError(c, err.Error())
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"success": true, "message": "update success"})
+	common.OKMsg(c, "update success")
 }
 
 // Logout 用户登出
 func Logout(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"success": true})
+	common.OK(c, nil)
 }
 
 // RefreshToken 刷新 JWT
@@ -210,10 +213,10 @@ func RefreshToken(c *gin.Context) {
 	claims := c.MustGet("claims").(*middleware.Claims)
 	token, err := middleware.GenerateToken(claims.UserID, claims.Role, claims.DeptID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "error": "generate token failed"})
+		common.InternalError(c, "generate token failed")
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"success": true, "data": gin.H{"token": token}})
+	common.OK(c, gin.H{"token": token})
 }
 
 // GetRoles 获取角色列表
@@ -224,7 +227,7 @@ func GetRoles(c *gin.Context) {
 		string(model.RoleManager),
 		string(model.RoleUser),
 	}
-	c.JSON(http.StatusOK, gin.H{"success": true, "data": roles})
+	common.OK(c, roles)
 }
 
 // GetUserInfo 查询指定用户
@@ -232,7 +235,7 @@ func GetUserInfo(c *gin.Context) {
 	id := c.Param("id")
 	var user model.User
 	if err := database.DB.First(&user, "id = ?", id).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"success": false, "error": "user not found"})
+		common.NotFound(c, "user not found")
 		return
 	}
 	responseData := gin.H{
@@ -249,5 +252,5 @@ func GetUserInfo(c *gin.Context) {
 	} else {
 		responseData["lastConnectionTime"] = nil
 	}
-	c.JSON(http.StatusOK, gin.H{"success": true, "data": responseData})
+	common.OK(c, responseData)
 }

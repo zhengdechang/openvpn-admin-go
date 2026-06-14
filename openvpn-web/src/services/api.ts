@@ -16,6 +16,7 @@ import {
   UserUpdateRequest, // Added for user update payload
   ConfigItem, // Added for config item management
   SystemInfo, // 部署系统状态
+  Notification, // VPN 连接事件通知（superadmin）
 } from "@/types";
 import Cookies from "js-cookie";
 import { useUserStore } from "@/store";
@@ -752,5 +753,23 @@ export const industryAPI = {
         error: "获取企业失败",
       };
     }
+  },
+};
+
+// 通知 API（仅 superadmin）：VPN 连接/断开事件
+export const notificationAPI = {
+  list: async (): Promise<Notification[]> => {
+    const response = await api.get("/api/notifications");
+    return response.data.data ?? [];
+  },
+  getUnreadCount: async (): Promise<number> => {
+    const response = await api.get("/api/notifications/unread-count");
+    return response.data.data?.count ?? 0;
+  },
+  markRead: async (id: string): Promise<void> => {
+    await api.patch(`/api/notifications/${id}/read`);
+  },
+  markAllRead: async (): Promise<void> => {
+    await api.patch("/api/notifications/read-all");
   },
 };

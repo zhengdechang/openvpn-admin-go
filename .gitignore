@@ -15,8 +15,13 @@ docker/config/
 docker/data/
 docker/openvpn/
 docker/mysql-data/
+docker/postgres-data/
 openvpn-admin
 .gstack/
+
+# 本地 agent/editor 设置与技能缓存，不入库
+.claude/settings.json
+**/.claude/skills/
 
 # 已弃用：SQLite（项目改用 MySQL）
 /data/

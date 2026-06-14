@@ -33,6 +33,7 @@ const translation = {
     overview: "概览",
     vpn: "VPN 管理",
     system: "系统",
+    notifications: "通知",
   },
 }
 

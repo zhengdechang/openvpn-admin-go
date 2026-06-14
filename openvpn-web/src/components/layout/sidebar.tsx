@@ -205,6 +205,11 @@ export default function Sidebar() {
           label: t("dashboard.logs.titleServer"),
           roles: [UserRole.SUPERADMIN],
         },
+        {
+          href: "/dashboard/notifications",
+          label: t("layout.nav.notifications"),
+          roles: [UserRole.SUPERADMIN],
+        },
       ],
     },
   ];
